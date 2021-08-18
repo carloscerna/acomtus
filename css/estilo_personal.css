@@ -1,0 +1,139 @@
+/* mensajes de error para el validate de los form de input*/
+input.error {
+    border-color: #f00 !important;
+}
+small.required {
+    color:#f00;
+}
+/* when not active use specificity to override the !important on border-(color) */
+.nav-tabs .nav-link:not(.active) {
+    border-color: transparent !important;
+}
+fieldset {
+	/*background-color: rgba(111, 66, 193, 0.3);*/
+	  border-radius: 6px;
+    border: 1px solid #0080FF;
+    padding: 10px 10px 10px 10px;
+}
+legend {
+	background-color: #E1FFD8;
+	border: 1.5px solid #0080FF;
+	border-radius: 4px;
+	color: var(--green);
+	font-size: 17px;
+	font-weight: bold;
+	padding: 5px 5px 3px 7px;
+	width: auto;
+}
+/*just bg and body style*/
+/* OPCIONES UTIIZADAS PARA EL ESTILO DE LA SUBIDA DE LA IMAGEN */
+.container-1{
+    background-color:#fff;
+    padding-bottom:0px;
+    margin-top:0px;
+    border-radius:5px;
+    }
+.center{
+    text-align:center;  
+}
+#top{
+    margin-top:20px;  
+}
+.btn-container{
+    background:#fff;
+    border-radius:5px;
+    padding-bottom:20px;
+    margin-bottom:20px;
+}
+.white{
+color:white;
+}
+.imgupload{
+    color:#1E2832;
+    padding-top:40px;
+    font-size:2em;
+}
+#namefile{
+    color:black;
+}
+h4>strong{
+    color:#ff3f3f
+}
+.btn-primary-1{
+    border-color: #ff3f3f !important;
+    color: #ffffff;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+    background-color: #ff3f3f !important;
+    border-color: #ff3f3f !important;
+}
+/*these two are set to not display at start*/
+.imgupload.ok{
+    display:none;
+    color:green;
+}
+.imgupload.stop{
+    display:none;
+    color:red;
+}
+.imguploadPortafolio.ok{
+    display:none;
+    color:green;
+}
+.imguploadPortafolio.stop{
+    display:none;
+    color:red;
+}
+/*this sets the actual file input to overlay our button*/ 
+#fileup{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+}
+#estilo_foto{
+    padding: 5px;
+    background: red;
+    width: 100%;
+    position: relative;
+}
+#AgregarFoto{
+    color: white;
+    text-align: center;
+    font-size: 18px;
+}
+#fileupPortafolio{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+}
+/*switch between input and not active input*/
+#submitbtn{
+  padding:5px 50px;
+  display:none;
+}
+#fakebtn{
+  padding:5px 40px;
+}
+/*www.emilianocostanzo.com*/
+#sign{
+	color:#1E2832;
+	position:fixed;
+	right:10px;
+	bottom:10px;
+	text-shadow:0px 0px 0px #1E2832;
+	transition:all.3s;
+}
+#sign:hover{
+	color:#1E2832;
+	text-shadow:0px 0px 5px #1E2832;
+}
+/* ESTILOS PARA LAS CARD DEL PORTAFOLIO. */
