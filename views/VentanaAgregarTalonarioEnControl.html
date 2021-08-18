@@ -1,0 +1,98 @@
+<!-- VENTANA MODAL - MODIFICAR LA FECHA DE LA FACTURA -->
+<div class="row mt-3">
+<div class="col">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="VentanaAgregarPorTalonario" tabindex="-1" role="dialog" aria-labelledby="VentanaAgregarPorTalonario" aria-hidden="true">
+<div class="modal-dialog modal-md">
+	<div class="modal-content">
+		<div class="modal-header modal-header-info">
+			<h6 class="modal-title" id="">
+        <span class="fad fa-layer-group"></span>
+          <label>Producción | Control de Ingresos Tiquete</label>
+      </h6>
+			<button class="close" data-dismiss="modal" aria-label="Cerrar" id="VentanaAgregarPorTalonario">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<!-- FORMULARIO PRINCIPAL. -->
+		<form  action="" method="post" name="form" id="formAgregarTalonario" role="form">
+			<div class="modal-body">
+				<div class="container">
+					<div class="row">
+						<div class="col-12 col-md-12 col-lg-12 col-xl-12">
+                            <fieldset id="FieldsetAgregarTalonario">
+                                <legend> Producción | Agregar Talonario en #Control</legend>
+                                    <div class="row">
+                                        <div class="col col-md-12 col-lg-12 col-xl-12">
+											<div class="input-group">
+												<div class="input-group mb-1">
+													<div class="input-group-prepend">
+													  <span class="input-group-text text-bold bg-gradient-gray-dark" id="basic-addon1">N.º Control</span>
+													</div>
+													<input type="text" class="form-control text-bold text-secondary" id="AgregarNumeroControl" name="AgregarNumeroControl" placeholder="Número Control" aria-label="AgregarNumeroControl" aria-describedby="basic-addon1" readonly style="padding: 0px; font-size: x-large; color:green; text-align: right;">
+												</div>
+											</div>
+											<div class="input-group">
+												<div class="input-group mb-1">
+													<div class="input-group-prepend">
+													  <span class="input-group-text bg-gradient-gray-dark" id="basic-addon1">Fecha</span>
+													</div>
+													<input type="text" class="form-control text-bold text-blue" id="AgregarFechaControl" name="AgregarFechaControl" placeholder="Fecha" aria-label="AgregarFechaControl" aria-describedby="basic-addon1" readonly>
+												  </div>
+											</div>
+										<!-- TIQUETE SERIE Y PRECIO--->
+											<div class="input-group">
+                                                <span class="input-group-text">Serie</span>
+                                                <select class="form-control" name="lstSerieAgregarTiquete" id="lstSerieAgregarTiquete"></select>
+                                              </div>
+											  <div class="input-group mb-1">
+												<div class="input-group-prepend">
+												  <span class="input-group-text text-bold bg-gradient-gray-dark" id="basic-addon1">Precio $</span>
+												</div>
+												<input type="text" class="form-control text-bold text-secondary" id="AgregarPrecioSerie" name="AgregarPrecioSerie" aria-label="AgregarPrecioSerie" aria-describedby="basic-addon1" readonly style="padding: 0px; font-size: x-large; color:green; text-align: right;">
+											</div>
+										<!-- TIQUETE DESDE Y HASTA--->
+											<div class="input-group mb-1">
+												<div class="input-group-prepend">
+												  <span class="input-group-text text-bold bg-gradient-gray-dark" id="basic-addon1">Tiquete Desde</span>
+												</div>
+												<input type="text" class="form-control font-weight-bold input-lg" name="AgregarTiqueteDesde" id="AgregarTiqueteDesde" value="" data-inputmask="'alias': 'numeric'" style="font-size: x-large;" autocomplete="off">
+												<!-- <input type="text" class="form-control text-bold text-secondary" id="AgregarTiqueteDesde" name="AgregarTiqueteDesde" autocomplete="off" aria-label="AgregarTiqueteDesde" aria-describedby="basic-addon1" style="padding: 0px; font-size: x-large; color:green; text-align: right;"> -->
+											</div>
+											<div class="input-group mb-1">
+												<div class="input-group-prepend">
+												  <span class="input-group-text text-bold bg-gradient-gray-dark" id="basic-addon1">Tiquete Hasta</span>
+												</div>
+												<input type="text" class="form-control text-bold text-secondary" id="AgregarTiqueteHasta" name="AgregarTiqueteHasta" autocomplete="off" aria-label="AgregarTiqueteHasta" aria-describedby="basic-addon1" style="padding: 0px; font-size: x-large; color:green; text-align: left;">
+											</div>
+										<!-- CANITDAD Y VALOR--->
+										<div class="input-group mb-1">
+											<div class="input-group-prepend">
+											  <span class="input-group-text text-bold bg-gradient-gray-dark" id="basic-addon1">Cantidad</span>
+											</div>
+											<input type="text" class="form-control text-bold text-secondary" id="AgregarCantidadTiquete" name="AgregarCantidadTiquete" aria-label="AgregarCantidadTiquete" aria-describedby="basic-addon1" readonly style="padding: 0px; font-size: x-large; color:green; text-align: right;">
+										</div>
+										<div class="input-group mb-1">
+											<div class="input-group-prepend">
+											  <span class="input-group-text text-bold bg-gradient-gray-dark" id="basic-addon1">Valor</span>
+											</div>
+											<input type="text" class="form-control text-bold text-secondary" id="AgregarValorTalonario" name="AgregarValorTalonario" aria-label="AgregarValorTalonario" readonly aria-describedby="basic-addon1" readonly style="padding: 0px; font-size: x-large; color:green; text-align: right;">
+										</div>
+										<!-- --->
+                                    	</div>
+                                    </div>
+                                </fieldset>
+					</div> <!-- ROW -->
+				</div> <!-- CONTAINER -->
+			</div> <!-- MODAL BODY -->
+				<!-- footer modal -->
+				<div class="modal-footer">
+					<button class="btn btn-default" data-dismiss="modal">Cerrar</button>
+					<input class="btn btn-dark btn-md" type="button" value="Guardar" name="goGuardar" id="goGuardar">
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+</div>
+</div>			
+</div>

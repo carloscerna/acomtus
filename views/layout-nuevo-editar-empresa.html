@@ -1,0 +1,301 @@
+ {# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+/* mensajes de error para el validate de los form de input*/
+ input.error {
+    border-color: #f00 !important;
+}
+
+small.required {
+    color:#f00;
+}
+  
+/* when not active use specificity to override the !important on border-(color) */
+.nav-tabs .nav-link:not(.active) {
+    border-color: transparent !important;
+}
+
+fieldset {
+	/*background-color: rgba(111, 66, 193, 0.3);*/
+	  border-radius: 6px;
+    border: 1px solid #0080FF;
+    padding: 10px 10px 10px 10px;
+}
+
+legend {
+	background-color: #FFFFFF;
+	border: 1.5px solid #0080FF;
+	border-radius: 4px;
+	color: var(--green);
+	font-size: 17px;
+	font-weight: bold;
+	padding: 5px 5px 3px 7px;
+	width: auto;
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<!-- JS para esta página. -->
+  <script type="text/JavaScript" src="js/main_nuevo_editar_empresa.js"></script>
+  <script type="text/javascript" src="js/jquery-mask/jquery.maskedinput.js"></script>
+
+
+<script language="javascript">
+	// VALIDAR LOS ENTER EN EL FORMULARIO.
+$(document).ready(function() {
+  $('form').keypress(function(e){   
+    if(e == 13){
+      return false;
+    }
+  });
+
+  $('input').keypress(function(e){
+    if(e.which == 13){
+      return false;
+    }
+  });
+
+  // Llenas LISTAS DESPLEGABLES.
+    var codigo_departamento = '01';
+    listar_departamento();  // LLENAR CATALOGO PERFIL.
+    listar_municipio(codigo_departamento,''); // LLENAR CATALOGO ESTATUS.
+  // configurar el Select2
+  $(document).ready(function() {
+    $('.personal').select2(
+      {
+        theme: "classic"
+      }
+    );
+  });
+// Jquery-mask - entrado de datos.
+jQuery(function($){
+    // Form Users Agregar.
+     $("#telefono_fijo").mask("9999-9999");
+     $("#telefono_movil").mask("9999-9999");
+     $("#telefono_fax").mask("9999-9999");
+     $("#nit").mask("9999-999999-999-9");
+     $("#nrc").mask("999999-9");
+  }); 
+});
+
+ /* SCRIPT PARA SUBIR LA FOTO DEL ALUMNO.*/
+ $(document).ready(function() {
+    $(".upload").on('click', function() {
+        var formData = new FormData();
+        var files = $('#imagenFoto')[0].files[0];
+        formData.append('file',files);
+        $.ajax({
+            url: 'php_libs/soporte/upload_foto.php',
+            type: 'post',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                if (response != 0) {
+                    $('.card-img-top').removeAttr('src');
+                    $(".card-img-top").attr("src", response);
+                    toastr["success"]('Imagen Cargada...', "Sistema");
+                } else {
+                  toastr["error"]('Formato de imagen incorrecto.', "Sistema");
+                }
+            }
+        });
+		return false;
+    });
+});
+</script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            <h4><label for="txtEdicionNuevo">Edición</label></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="empresa.php" data-toggle="tooltip" data-placement="left" title="Empresa">Buscar</a></li>
+              <li class="breadcrumb-item active"><label for="iEdicionNuevo">Editar</label></li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+  <!-- Main content -->
+    <section class="content">
+     <!-- FORM PRINCIPAL -->
+     <form action="" method="post" id="formUsers" name="formUsers" role="form" enctype="multipart/form-data">
+     <div class="tab-content tab-validate"> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+        <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            
+        <input type="hidden" id="accion_buscar" name="accion_buscar" value = "GenerarCodigoNuevo" class="{required:true}">-->            
+        <input type="hidden" id="id_user" name="id_user" value = '{{ id }}'>            
+        <input type="hidden" id="accion" name="accion" value = '{{ accion }}'>            
+        <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-success">
+            <div class="card-header">
+              <h3 class="card-title">
+                <label for="LblNombre"></label>
+              </h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+            <!-- Nav tabs -->
+            <div class="container py-2">
+              <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Empresa</a>
+                </li>
+              </ul>
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <div class="tab-pane p-2 active border border-primary" id="home" role="tabpanel" aria-labelledby="home-tab">
+                      <!-- MODAL BODY ROW -->
+                      <div class="modal-body row">
+                        <div class="col-md-8">
+                            <!-- INICIO DEL FORMULARIO -->
+                            <fieldset>
+                                <legend>Información General</legend>
+                                <!-- USUARIO -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Nombre de la Empresa</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtnombres" name="txtnombres" maxlength="60" required="required" placeholder="" autocomplete = "off" onchange='conMayusculas(this);'>
+                                      </div>
+                                    </div>
+                                <!-- DIRECCIÓN -->
+                                    <div class="form-group row">
+                                      <label for="" class="col-lg-3 col-form-label form-control-label">Dirección</label>
+                                      <div class="col-lg-9">
+                                        <textarea style="height: 60px;" id="direccion" name="direccion" class="form-control"></textarea>
+                                      </div>
+                                    </div>
+                                <!-- DEPARTAMENTO -->
+                                    <div class="form-group row">
+                                        <label class="col-lg-3 col-form-label form-control-label">Departamento</label>
+                                        <div class="col-lg-9">
+                                          <select id="lstdepartamento" name="lstdepartamento" class="custom-select"  onchange="listar_municipio(this.value)"></select>
+                                        </div>
+                                      </div>
+                                <!-- MUNICIPIO -->
+                                      <div class="form-group row">
+                                        <label class="col-lg-3 col-form-label form-control-label">Municipio</label>
+                                        <div class="col-lg-9">
+                                          <select id="lstmunicipio" name="lstmunicipio" class="custom-select"></select>
+                                        </div>
+                                      </div>
+                              </fieldset>
+                        </div>
+                        <!-- LOGO DE LA EMPRESA-->
+                              <div class="col-md-4">
+                                    <form method="post" action="#" enctype="multipart/form-data">
+                                      <div class="card">
+                                        <img class="card-img-top" src="" alt="Logo Institución">
+                                        <div class="card-body">
+                                          <h4 class="card-title"><label for="NombreUser"></label></h4>
+                                          <p class="card-text"></p>
+                                          <div class="form-group">
+                                           <label for="exampleInputFile">Foto</label>
+                                           <div class="input-group">
+                                             <div class="custom-file">
+                                               <input type="file" class="custom-file-input" id="imagenFoto" name="imagenFoto">
+                                               <label class="custom-file-label" for="imagenFoto">Seleccionar Archivo...</label>
+                                             </div>
+                                             <div class="input-group-append">
+                                               <input type="button" class="btn btn-primary upload" value="Subir">
+                                             </div>
+                                           </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </form>
+                              </div>
+                            <!-- INICIO DEL FORMULARIO CONTACTO-->
+                            <div class="col-md-12">
+                            <fieldset>
+                                <legend>Información Contacto</legend>
+                                <!-- TELEFONO FIJO -->
+                                    <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Telefono Fijo</label>
+                                    <div class="col-lg-9">
+                                        <input class="form-control" type="text" name="telefono_fijo" id="telefono_fijo">
+                                    </div>
+                                    </div>
+                                <!-- TELEFONO MOVIL -->
+                                    <div class="form-group row">
+                                    <label for="" class="col-lg-3 col-form-label form-control-label">Móvil</label>
+                                    <div class="col-lg-9">
+                                        <input class="form-control" type="text" name="telefono_movil" id="telefono_movil">
+                                    </div>
+                                    </div>
+                                <!-- TELEFON FAX -->
+                                    <div class="form-group row">
+                                        <label class="col-lg-3 col-form-label form-control-label">Fax</label>
+                                        <div class="col-lg-9">
+                                            <input class="form-control" type="text" name="telefono_fax" id="telefono_fax">
+                                        </div>
+                                    </div>
+                                <!-- CORREO ELECTRICO -->
+                                    <div class="form-group row">
+                                        <label class="col-lg-3 col-form-label form-control-label">Correo Electrónico</label>
+                                        <div class="col-lg-9">
+                                            <input type="text" name="correo_electronico" id="correo_electronico" placeholder="" class="form-control">
+                                        </div>
+                                    </div>
+                            </fieldset>
+                            <!-- INICIO DEL FORMULARIO CONTACTO-->
+                            <fieldset>
+                                <legend>Otros</legend>
+                                <!-- NIT -->
+                                    <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Número de Identificación Tributaria (NIT)</label>
+                                    <div class="col-lg-9">
+                                        <input class="form-control" type="text" name="nit" id="nit">
+                                    </div>
+                                    </div>
+                                <!-- NCR -->
+                                    <div class="form-group row">
+                                        <label for="" class="col-lg-3 col-form-label form-control-label">Número Registro NCR</label>
+                                        <div class="col-lg-9">
+                                            <input class="form-control" type="text" name="nrc" id="nrc">
+                                        </div>
+                                    </div>
+                            </fieldset>
+                            <!-- INICIO DEL FORMULARIO -->
+                        </div>
+                      </div><!-- FIN MODAL BODY INFORMACIÓN GENERAL-->
+                  </div>
+
+              </div> <!-- /.tab-content -->
+            </div> <!-- /.container -->
+            </div> <!-- /.card-body -->
+            <!-- /.card-footer -->
+            <div class="card-footer">
+              <div class="form-group row">
+               <div class="col d-flex justify-content-center">
+                <input class="btn btn-primary btn-sm" type="submit" value="Guardar" name="Guardar">
+               </div>
+              </div>              
+            </div>
+          </div> <!-- /.card -->
+          </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+     </form> <!-- fin del form -->            
+        </div>
+      </div>
+    </section>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

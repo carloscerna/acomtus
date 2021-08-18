@@ -1,0 +1,163 @@
+ {# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+/* mensajes de error para el validate de los form de input*/
+ input.error {
+    border-color: #f00 !important;
+}
+
+small.required {
+    color:#f00;
+}
+  
+/* when not active use specificity to override the !important on border-(color) */
+.nav-tabs .nav-link:not(.active) {
+    border-color: transparent !important;
+}
+
+fieldset {
+	/*background-color: rgba(111, 66, 193, 0.3);*/
+	  border-radius: 6px;
+    border: 1px solid #0080FF;
+    padding: 10px 10px 10px 10px;
+}
+
+legend {
+	background-color: #FFFFFF;
+	border: 1.5px solid #0080FF;
+	border-radius: 4px;
+	color: var(--green);
+	font-size: 17px;
+	font-weight: bold;
+	padding: 5px 5px 3px 7px;
+	width: auto;
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<!-- JS para esta página. -->
+  <script type="text/JavaScript" src="js/main_nuevo_editar_catalogos.js"></script>
+
+<script language="javascript">
+	// VALIDAR LOS ENTER EN EL FORMULARIO.
+$(document).ready(function() {
+  $('form').keypress(function(e){   
+    if(e == 13){
+      return false;
+    }
+  });
+
+  $('input').keypress(function(e){
+    if(e.which == 13){
+      return false;
+    }
+  });
+});
+</script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            <h4><label for="txtEdicionNuevo">Edición</label></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="catalogos.php" data-toggle="tooltip" data-placement="left" title="Catalogos">Buscar</a></li>
+              <li class="breadcrumb-item active"><label for="iEdicionNuevo">Editar</label></li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+  <!-- Main content -->
+    <section class="content">
+     <!-- FORM PRINCIPAL -->
+     
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-success">
+            <div class="card-header">
+              <h3 class="card-title">
+                <label for="LblNombreTabla"></label>
+              </h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+            <!-- Nav tabs -->
+            <div class="container py-2">
+              <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Catálogos</a>
+                </li>
+              </ul>
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <div class="tab-pane p-2 active border border-primary" id="home" role="tabpanel" aria-labelledby="home-tab">
+                      <!-- MODAL BODY ROW -->
+                      <div class="modal-body row">
+                        <div class="col-md-12">
+                            <!-- INICIO DEL FORMULARIO -->
+                            <form action="#!" method="post" id="formCatalogos" name="formCatalogos" role="form" enctype="multipart/form-data">
+                               <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S  <div class="tab-content tab-validate">-->
+                                 <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            
+                                                  -->
+                                     <input type="hidden" id="IdCatalogo" name="IdCatalogo" value = '{{ id_ }}'>          
+                                     <input type="hidden" id="NombreTabla" name="NombreTabla" value = '{{ NombreTabla }}'>     
+                                     <input type="hidden" id="accionCatalogo" name="accionCatalogo" value = '{{ accionCatalogo }}'>            
+                                     <input type="hidden" id="CodigoTabla" name="CodigoTabla" value = '{{ CodigoTabla }}'>
+                                 <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
+                            <fieldset>
+                                <legend>Información General</legend>
+                                <!-- Codigo del catalogo -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Código</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtCodigo" name="txtCodigo" maxlength="2" required="required" placeholder="" autocomplete = "off" disabled="disabled">
+                                      </div>
+                                    </div>
+                                <!-- Descripción del catalogo -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Descripción</label>
+                                  <div class="col-lg-9">
+                                    <input class="form-control" type="text" id="Descripcion" name="Descripcion" maxlength="22" required="required" placeholder="" autocomplete = "off">
+                                  </div>
+                                </div>
+                              </fieldset>
+                              <input class="btn btn-primary" type="submit" value="Guardar" id="goGuardar">
+                            </form> <!-- fin del form -->   
+                            <!-- INICIO DEL FORMULARIO -->
+                        </div>
+                      </div><!-- FIN MODAL BODY INFORMACIÓN GENERAL-->
+                  </div>
+
+              </div> <!-- /.tab-content -->
+            </div> <!-- /.container -->
+            </div> <!-- /.card-body -->
+            <!-- /.card-footer -->
+            <div class="card-footer">
+              <div class="form-group row">
+               <div class="col d-flex justify-content-center">
+                    
+               </div>
+              </div>              
+            </div>
+          </div> <!-- /.card -->
+          </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+    </section>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

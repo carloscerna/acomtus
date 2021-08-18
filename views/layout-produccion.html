@@ -1,0 +1,218 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+  /* mensajes de error para el validate de los form de input*/
+   input.error {
+      border-color: #f00 !important;
+  }
+  
+  small.required {
+      color:#f00;
+  }
+    
+  /* when not active use specificity to override the !important on border-(color) */
+  .nav-tabs .nav-link:not(.active) {
+      border-color: transparent !important;
+  }
+  
+  fieldset {
+    /*background-color: rgba(111, 66, 193, 0.3);*/
+      border-radius: 6px;
+      border: 1px solid #0080FF;
+      padding: 10px 10px 10px 10px;
+      background-color: #D4D4D4;
+  }
+  
+  legend {
+    background-color: #FFFFFF;
+    border: 1.5px solid #0080FF;
+    border-radius: 4px;
+    color: var(--green);
+    font-size: 17px;
+    font-weight: bold;
+    padding: 5px 5px 3px 7px;
+    width: auto;
+  }
+  </style>
+{% endblock %}
+
+{% block javascripts %}
+    <!-- JS para esta página. -->
+    <script type="text/JavaScript" src="js/main_produccion.js"></script>
+    <script>   
+        (function(){
+            function removeAccents ( data ) {
+                if ( data.normalize ) {
+                    // Use I18n API if avaiable to split characters and accents, then remove
+                    // the accents wholesale. Note that we use the original data as well as
+                    // the new to allow for searching of either form.
+                    return data +' '+ data
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '');
+                }
+              
+                return data;
+            }
+              
+            var searchType = jQuery.fn.DataTable.ext.type.search;
+              
+            searchType.string = function ( data ) {
+                return ! data ?
+                    '' :
+                    typeof data === 'string' ?
+                        removeAccents( data ) :
+                        data;
+            };
+              
+            searchType.html = function ( data ) {
+                return ! data ?
+                    '' :
+                    typeof data === 'string' ?
+                        removeAccents( data.replace( /<.*?>/g, '' ) ) :
+                        data;
+            };
+              
+            }());
+
+            /////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+	// VALIDAR LOS ENTER EN EL FORMULARIO.
+  
+  $('form').keypress(function(e){   
+    if(e == 13){
+      return false;
+    }
+  });
+
+  $('input').keypress(function(e){
+    if(e.which == 13){
+      return false;
+    }
+  });
+    </script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            <h4></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="index.php">Home</a></li>
+              <li class="breadcrumb-item active">Busqueda</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+
+  <!-- Small boxes (Stat box) -->
+  <div class="col-md-12">
+    <div class="card card-secondary">
+      <div class="card-header">
+
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+          </button>
+        </div>
+
+                  
+        <div class="row">
+          <div class="col-md-8 col-lg-8 col-xl-8">
+            <h3 class="card-title "><span class="fas fa-layer-group"></span> Producción | Control de Ingreso de Tiquete</h3>
+          </div>
+          
+          <div class="col-md-4 col-lg-4 col-xl-4  d-flex justify-content-end">
+            <button class="btn btn-info" type="button" id="goBuscarPorTiquete" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Buscar # Tiquete en Control"><span class="fal fa-ticket-alt"></span></button>
+            <button class="btn btn-dark btn-md" data-toggle="tooltip" data-placement="top" title="Devolucio(nes) Cambiar Fecha" id = "goDevolucionesProduccion"><span class="fad fa-exchange-alt"></span></button>
+            <button class="btn btn-dark btn-md" data-toggle="tooltip" data-placement="top" title="Producción Diaria de Control de Tiquete" id = "goVerProduccion"><span class="fas fa-clipboard-list-check"></span></button>
+            <button class="btn btn-dark" type="button" id="goVerImprimirControles" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Buscar e Imprimir Controles"><span class="fal fa-print-search"></span></button>
+            <button class="btn btn-primary btn-md" data-toggle="tooltip" data-placement="top" title="Crear Control de Tiquete" id = "goNuevoControl"><span class="fad fa-layer-plus"></span></button>
+          </div>
+        </div>
+        <!-- /.card-tools -->
+      </div>
+      <!-- /.card-header -->
+      <div class="card-body" >
+        <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
+        <div class="card-body">
+          <div class="row">
+              <div class="col col-md-12 col-lg-6 col-xl-6">
+                <div class="input-group">
+                    <span class="input-group-text">Fecha</span>
+                    <input type="date" id="FechaProduccion" name="FechaProduccion" class="form-control" required>
+                </div>
+              </div>
+
+              <div class="col col-md-12 col-lg-6 col-xl-6">
+                  <div class="input-group">
+                    <span class="input-group-text fal fa-file-search"> N.º Control</span>
+                    <input type="text" class="global_filter form-control font-weight-bold text-green text-right" id="global_filter" placeholder="" autofocus autocomplete="off" style="padding: 0px; font-size: large; color:green; text-align: right;" autofocus>
+                  </div>
+              </div>
+          </div>
+          <!-- 
+            TABLA QUE CONTIENE LOS CONTROLES YA CREADOS.
+          -->
+          <fieldset id="FieldTablaProduccion" class="mt-2">
+            <legend> Producción | N.º Controles </legend>
+              <table id="listado" class="table display responsive nowrap" style="width: 100%;">
+                <thead>
+                    <tr>
+                      <th>Acción</th>
+                      <th>Producción</th>
+                      <th>Fecha</th>
+                      <th>Jornada</th>
+                      <th>Ruta</th>
+                      <th>Estatus</th>
+                    </tr>                
+                </thead>
+                  <tbody id="listadoOk">
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                        <th>Acción</th>
+                        <th>Producción</th>
+                        <th>Fecha</th>
+                        <th>Jornada</th>
+                        <th>Ruta</th>
+                        <th>Estatus</th>
+                    </tr>
+                  </tfoot>
+              </table>
+            </fieldset>
+        </div> <!-- /.card-body -->
+      </div>        <!-- /.card-body -->
+    </div>      <!-- /.card -->
+  </div>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+
+<!-- plantilla que contiene el . -->
+{% include 'VentanaGuardarProduccionDevolucion.html' %}
+
+<!-- plantilla que contiene el . -->
+{% include 'VentanaVerProduccion.html' %}
+
+<!-- plantilla que contiene el . -->
+{% include 'VentanaBuscarPorTiquete.html' %}
+
+
+<!-- plantilla que contiene el . -->
+{% include 'VentanaAgregarTalonarioEnControl.html' %}
+
+
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

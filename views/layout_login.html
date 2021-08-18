@@ -1,0 +1,66 @@
+{# Heredando la plantilla principal #}
+
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+      body{
+            background: url(./img/background.jpg) no-repeat center fixed;
+            background-size: cover;
+      }
+</style>
+{% endblock %}
+
+{% block loginUser %}
+      <div class="container-fluid">
+		<div class="d-flex align-items-center flex-column justify-content-center h-200  text-white" id="header">
+				<div class="border-bottom mb-4 mt-4 pb-2">
+					<div class="alert alert-info" role="alert">
+						<h2>Administración</h2>
+					</div>
+				</div>
+                  <div class="login-box hold-transition">
+			  <!-- /.login-logo -->
+			  <div class="card">
+				<div class="card-body">
+				  <p class="login-box-msg text-dark">Iniciar Sesión con tu Cuenta</p>
+                        <!-- FORM LOGIN -->
+				  <form action="" method="post" name="formLogin" id="formLogin">
+					<!-- INPUT OCULTOS -->
+						<input type="hidden" id="accion_buscar" name="accion_buscar" value = "BuscarUser" class="{required:true}">
+							<div class="input-group mb-3">
+							  <div class="input-group-append">
+								<div class="input-group-text">
+								  <span class="fas fa-user"></span>
+								</div>
+							  </div>
+                                    <input type="text" class="form-control" placeholder="Usuario" name="txtnombre" id="txtnombre" pattern="[a-zA-Z0-9]{1,35}" minlength="4" maxlength="20" autofocus="autofocus" required="required">
+							</div>
+							<div class="input-group mb-3">
+							  <div class="input-group-append">
+								<div class="input-group-text">
+								  <span class="fas fa-lock"></span>
+								</div>
+							  </div>
+                                    <input type="password" class="form-control" placeholder="Contraseña" id="txtpassword" name="txtpassword" maxlength="20" required="required">
+							</div>
+							<div class="row">
+                                               <!-- /.col -->
+                                               <div class="col">
+                                                   <button type="submit" class="btn btn-primary float-right">Iniciar Sesión</button>
+                                               </div>
+                                               <!-- /.col -->
+                                          </div>
+				  </form>			
+				</div>
+				<!-- /.login-card-body -->
+			  </div>
+			</div>
+		</div>
+	  </div>
+{% endblock %}
+
+{% block javascripts %}
+
+{% endblock %}

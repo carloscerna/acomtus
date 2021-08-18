@@ -1,0 +1,174 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+{% block extraCSS %}
+
+{% endblock %}  
+
+{% block javascripts %}
+   <!-- JS para esta página. -->
+
+
+    <script type="text/JavaScript" src="js/main_catalogos.js"></script>
+    <script>   
+        (function(){
+            function removeAccents ( data ) {
+                if ( data.normalize ) {
+                    // Use I18n API if avaiable to split characters and accents, then remove
+                    // the accents wholesale. Note that we use the original data as well as
+                    // the new to allow for searching of either form.
+                    return data +' '+ data
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '');
+                }
+              
+                return data;
+            }
+              
+            var searchType = jQuery.fn.DataTable.ext.type.search;
+              
+            searchType.string = function ( data ) {
+                return ! data ?
+                    '' :
+                    typeof data === 'string' ?
+                        removeAccents( data ) :
+                        data;
+            };
+              
+            searchType.html = function ( data ) {
+                return ! data ?
+                    '' :
+                    typeof data === 'string' ?
+                        removeAccents( data.replace( /<.*?>/g, '' ) ) :
+                        data;
+            };
+              
+            }());
+    </script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            <h4></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="index.php">Home</a></li>
+              <li class="breadcrumb-item active">Busqueda</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+      <form name="formCatalogo" id="formCatalogo" class="border border-light p-1" action="#!">
+        <input type="hidden" id="accionCatalogo" name="accionCatalogo" value = '{{ accionCatalogo }}'>            
+        <input type="hidden" id="CodigoTabla" name="CodigoTabla" value = '{{ CodigoTabla }}'>                       
+        <input type="hidden" id="IdCatalogo" name="IdCatalogo" value = '0'>            
+        </form>
+    </section>
+
+
+  <!-- Small boxes (Stat box) -->
+  <div class="col-md-12">
+    <div class="card card-success">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-user-cog nav-icon"></i> BIENVENIDOS AL MANTENIMIENTO - CATALOGOS</h3>
+
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+          </button>
+        </div>
+        <!-- /.card-tools -->
+      </div>
+      <!-- /.card-header -->
+      <div class="card-body">
+        <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
+        <div class="card-body">
+                <!-- SELECCIONAR CATALOGO A BUSCAR -->
+                  <fieldset class="border border-primary p-3">
+                    <legend class="text-red">Seleccione el Tipo de Catálogo</legend>
+                    <div class="form-group row">
+                        <div class="col-12 col-md-4 col-lg-4">
+                            <select id="lstCatalogo" class="custom-select">
+                                <option value="0" selected>Cargo</option>
+                                <option value="1">Departamento (Cargo)</option>
+                                <option value="2">Taller</option>
+                                <option value="3">Ruta</option>
+                                <option value="4">Clase de Licencia</option>
+                                <option value="5">Tiquete - Serie</option>
+                                <option value="6">Tipo - Transporte</option>
+                              </select>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-4">
+                            <button type="button" id="goBuscarTodos" class="btn btn-info btn-md" value="BuscarTodos">Más Información</button>
+                        </div>
+                      </div>
+                  </fieldset>
+                <!-- LISTADO DE INFORMACIÓN SEGUN CATALOGO --->
+                <section id="TablaListadoCatalogo"  style="box-shadow: #99FFFF;">
+                  <fieldset class="border border-secondary p-3">
+                    <legend class="text-red">Tabla y Registros</legend>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col col-md-6 col-lg-10">
+                                <div class="input-group">
+                                    <input type="text" class="global_filter form-control" id="global_filter" placeholder="Ingresar dato a buscar">
+                                    <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                                </div>
+                            </div>
+                            <div class="col col-md-6 col-lg-2">
+                                <button class="btn btn-success" style="width: auto;" data-toggle="tooltip" data-placement="right" title="Nuevo Registro" id = "goNuevoCatalogo">
+                                <span class="fas fa-user-plus"> Nuevo Registro</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- NOMBRE DE LA TABLA QUE SE ESTÁ CONSULTANDO. --->
+                    <div class="row">
+                      <div class="col">
+                        <div>
+                          <h3><label for="LblCatalogo">Nombre de la Tabla</label></h3>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row d-flex justify-content-center">
+                      <div class="col col-lg-8">
+                        <table id="listado" class="table display responsive nowrap row-border" style="width: 80%;">
+                          <thead class="black white-text">
+                              <tr>
+                                <th>Acción</th>
+                                <th>Id</th>
+                                <th>Código</th>
+                                <th>Descripción</th>
+                              </tr>                
+                          </thead>
+                          <tbody id="listadoOK">
+                          </tbody>
+                          <tfoot class="black white-text">
+                              <tr>
+                              <th>Acción</th>
+                              <th>Id</th>
+                              <th>Código</th>
+                              <th>Descripción</th>
+                              </tr>
+                          </tfoot>
+                        </table>        
+                      </div>
+                    </div>
+                  </fieldset>
+                </section>
+        </div> <!-- /.card-body -->
+      </div>        <!-- /.card-body -->
+    </div>      <!-- /.card -->
+  </div>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

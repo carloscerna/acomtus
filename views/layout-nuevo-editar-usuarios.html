@@ -1,0 +1,222 @@
+ {# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+/* mensajes de error para el validate de los form de input*/
+ input.error {
+    border-color: #f00 !important;
+}
+
+small.required {
+    color:#f00;
+}
+  
+/* when not active use specificity to override the !important on border-(color) */
+.nav-tabs .nav-link:not(.active) {
+    border-color: transparent !important;
+}
+
+fieldset {
+	/*background-color: rgba(111, 66, 193, 0.3);*/
+	  border-radius: 6px;
+    border: 1px solid #0080FF;
+    padding: 10px 10px 10px 10px;
+}
+
+legend {
+	background-color: #FFFFFF;
+	border: 1.5px solid #0080FF;
+	border-radius: 4px;
+	color: var(--green);
+	font-size: 17px;
+	font-weight: bold;
+	padding: 5px 5px 3px 7px;
+	width: auto;
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<!-- JS para esta página. -->
+  <script type="text/JavaScript" src="js/main_nuevo_editar_usuarios.js"></script>
+  <script type="text/javascript" src="js/jquery-mask/jquery.maskedinput.js"></script>
+
+
+<script language="javascript">
+	// VALIDAR LOS ENTER EN EL FORMULARIO.
+$(document).ready(function() {
+  $('form').keypress(function(e){   
+    if(e == 13){
+      return false;
+    }
+  });
+
+  $('input').keypress(function(e){
+    if(e.which == 13){
+      return false;
+    }
+  });
+
+  // Llenas LISTAS DESPLEGABLES.
+      listar_perfil();  // LLENAR CATALOGO PERFIL.
+      listar_estatus(); // LLENAR CATALOGO ESTATUS.
+      listar_personal();  // LLENAR con tabla personal lstpersonal.
+      listar_empresa();  // LLENAR con tabla personal lstempresa.
+  // configurar el Select2
+  $(document).ready(function() {
+    $('.personal').select2(
+      {
+        theme: "classic"
+      }
+    );
+  });
+
+});
+</script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            <h4><label for="txtEdicionNuevo">Edición</label></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="usuarios.php" data-toggle="tooltip" data-placement="left" title="Usuarios">Buscar</a></li>
+              <li class="breadcrumb-item active"><label for="iEdicionNuevo">Editar</label></li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+  <!-- Main content -->
+    <section class="content">
+     <!-- FORM PRINCIPAL -->
+     <form action="" method="post" id="formUsers" name="formUsers" role="form" enctype="multipart/form-data">
+     <div class="tab-content tab-validate"> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+        <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            
+        <input type="hidden" id="accion_buscar" name="accion_buscar" value = "GenerarCodigoNuevo" class="{required:true}">-->            
+        <input type="hidden" id="id_user" name="id_user" value = '{{ id }}'>            
+        <input type="hidden" id="accion" name="accion" value = '{{ accion }}'>            
+        <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-success">
+            <div class="card-header">
+              <h3 class="card-title">
+                <label for="LblNombre"></label>
+              </h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+            <!-- Nav tabs -->
+            <div class="container py-2">
+              <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Usuarios</a>
+                </li>
+              </ul>
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <div class="tab-pane p-2 active border border-primary" id="home" role="tabpanel" aria-labelledby="home-tab">
+                      <!-- MODAL BODY ROW -->
+                      <div class="modal-body row">
+                        <div class="col-md-12">
+                            <!-- INICIO DEL FORMULARIO -->
+                            <fieldset>
+                                <legend>Información General</legend>
+                                <!-- USUARIO -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Usuario</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtnombres" name="txtnombres" maxlength="60" required="required" placeholder="Ingreso Usuario" autocomplete = "off">
+                                      </div>
+                                    </div>
+                                <!-- CONTRASEÑA -->
+                                  <!-- CHECK CONFIRMAR CAMBIO DE CONTRASEÑA -->
+                                  <div class="form-group row" id="chk1">
+                                    <div class="custom-control custom-checkbox">
+                                      <input class="custom-control-input" type="checkbox" id="chkcambiopassword" name="chkcambiopassword" onclick="Activar_Password();">
+                                      <label for="chkcambiopassword" class="custom-control-label">Cambiar Contraseña</label>
+                                    </div>
+                                  </div>
+                                    <div class="form-group row">
+                                      <label for="" class="col-lg-3 col-form-label form-control-label">Contraseña</label>
+                                      <div class="col-lg-9">
+                                        <input type="password" class="form-control" id="Password" name="Password" placeholder="Ingrese Contraseña" required="required" autocomplete = "off" >
+                                      </div>
+                                    </div>
+                                <!-- CONFIRMAR CONTRASEÑA -->
+                                    <div class="form-group row">
+                                      <label for="" class="col-lg-3 col-form-label form-control-label" autocomplete = "off" >Confirme Contraseña</label>
+                                      <div class="col-lg-9">
+                                        <input type="password" class="form-control" id="ConfirmaPassword" name="ConfirmaPassword" placeholder="Confirme Contraseña" required="required">
+                                      </div>
+                                    </div>
+                                <!-- EMPRESA -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Empresa</label>
+                                      <div class="col-lg-9">
+                                        <select class="custom-select" id="lstempresa" name="lstempresa">
+                                        </select>
+                                      </div>
+                                    </div>
+                                <!-- ROL O PERFIL -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Rol o Perfil</label>
+                                  <div class="col-lg-9">
+                                    <select class="custom-select" id="lstperfil" name="lstperfil"></select>
+                                  </div>
+                                </div>
+                                <!-- nombre de la persona responsable -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Persona Encargado(a)</label>
+                                  <div class="col-lg-9">
+                                    <select class="personal col-md-12" id="lstpersonal" name="lstpersonal">
+                                    </select>
+                                  </div>
+                                </div>
+                                <!-- ESTATUS -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Estatus</label>
+                                  <div class="col-lg-9">
+                                    <select class="custom-select" id="lstestatus" name="lstestatus"></select>
+                                  </div>
+                                </div>
+                              </fieldset>
+                            <!-- INICIO DEL FORMULARIO -->
+                        </div>
+                      </div><!-- FIN MODAL BODY INFORMACIÓN GENERAL-->
+                  </div>
+
+              </div> <!-- /.tab-content -->
+            </div> <!-- /.container -->
+            </div> <!-- /.card-body -->
+            <!-- /.card-footer -->
+            <div class="card-footer">
+              <div class="form-group row">
+               <div class="col d-flex justify-content-center">
+                <input class="btn btn-primary btn-sm" type="submit" value="Guardar" name="Guardar">
+               </div>
+              </div>              
+            </div>
+          </div> <!-- /.card -->
+          </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+     </form> <!-- fin del form -->            
+        </div>
+      </div>
+    </section>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

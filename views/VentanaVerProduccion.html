@@ -1,0 +1,62 @@
+<!-- VENTANA MODAL - MODIFICAR LA FECHA DE LA FACTURA -->
+<div class="row mt-3">
+<div class="col">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="VentanaVerProduccion" tabindex="-1" role="dialog" aria-labelledby="VentanaVerProduccion" aria-hidden="true">
+<div class="modal-dialog modal-lg">
+	<div class="modal-content">
+		<div class="modal-header modal-header-info">
+			<h6 class="modal-title" id="">
+        <span class="fad fa-layer-group"></span>
+          <label>Producción | Control de Ingresos Tiquete</label>
+      </h6>
+			<button class="close" data-dismiss="modal" aria-label="Cerrar" id="VentanaVerProduccion">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<!-- FORMULARIO PRINCIPAL. -->
+		<form  action="" method="post" name="form" id="formVerProduccion" role="form">
+			<div class="modal-body">
+				<div class="container">
+					<div class="row">
+						<div class="col-12 col-md-12 col-lg-12 col-xl-12">
+                            <fieldset id="FieldsetTabla">
+                                <legend> Últimos Control de Ingresos Tiquete</legend>
+                                <div class="table-responsive">
+                                    <table id="listadoVerControles" class="table display responsive nowrap" style="width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                              <th style="text-align: center;"># Control</th>
+                                              <th style="text-align: center;"># Talonarios</th>
+                                              <th style="text-align: center;">Fecha</th>
+                                              <th style="text-align: right;">Hora</th>
+                                            </tr>                
+                                        </thead>
+                                          <tbody id="listadoVerControlesOk">
+                                          </tbody>
+                                          <tfoot>
+                                            <tr>
+                                                <th></th>
+                                                <th style="text-align: center;"># Control</th>
+                                                <th style="text-align: center;">Cantidad Talonarios</th>
+                                                <th style="text-align: center;">Fecha</th>
+                                                <th style="text-align: right;">Hora</th>
+                                            </tr>
+                                          </tfoot>
+                                      </table>
+                                </div>
+                                </fieldset>
+						</div> <!-- DIV SECUNDARIO -->
+					</div> <!-- ROW -->
+				</div> <!-- CONTAINER -->
+			</div> <!-- MODAL BODY -->
+				<!-- footer modal -->
+				<div class="modal-footer">
+					<button class="btn btn-default" data-dismiss="modal">Cerrar</button>
+				</div>
+		</form>
+	</div>
+</div>
+</div>
+</div>			
+</div>

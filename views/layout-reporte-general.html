@@ -1,0 +1,548 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+  /* mensajes de error para el validate de los form de input*/
+   input.error {
+      border-color: #f00 !important;
+  }
+  
+  small.required {
+      color:#f00;
+  }
+    
+  /* when not active use specificity to override the !important on border-(color) */
+  .nav-tabs .nav-link:not(.active) {
+      border-color: transparent !important;
+  }
+  
+  fieldset {
+    /*background-color: rgba(111, 66, 193, 0.3);*/
+      border-radius: 6px;
+      border: 1px solid #0080FF;
+      padding: 10px 10px 10px 10px;
+      background-color: #D4D4D4;
+  }
+  
+  legend {
+    background-color: #FFFFFF;
+    border: 1.5px solid #0080FF;
+    border-radius: 4px;
+    color: var(--green);
+    font-size: 17px;
+    font-weight: bold;
+    padding: 5px 5px 3px 7px;
+    width: auto;
+  }
+  </style>
+{% endblock %}
+
+{% block javascripts %}
+    <!-- JS para esta página. -->
+    <script type="text/JavaScript" src="js/main_reporte_general.js"></script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            <h4></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="informes.php"> Informes</a></li>
+              <li class="breadcrumb-item active">General</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+
+  <!-- Small boxes (Stat box) -->
+  <div class="col-md-12">
+    <div class="card card-secondary">
+      <div class="card-header">
+
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+          </button>
+        </div>
+
+                  
+        <div class="row">
+          <div class="col-md-12 col-lg-12 col-xl-12">
+            <h3 class="card-title"><i class="far fa-cash-register"></i> Reporte Diario | Control de Tiquete E Ingreso</h3>
+          </div>
+        </div>
+        <!-- /.card-tools -->
+      </div>
+      <!-- /.card-header -->
+      <div class="card-body">
+        <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
+        <div class="card-body">
+        <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
+        <input type="hidden" id="MenuTab" value='{{ codigo_perfil }}'>         
+          <fieldset id="field_fecha">
+            <legend>Fecha | N.º Control</legend>
+                <div class="row" id="DivSoloParaContabilidad">
+                  <div class="col col-md-12 col-lg-6 col-xl-6">
+                    <div class="input-group">
+                        <span class="input-group-text">Fecha</span>
+                        <input type="date" id="FechaProduccion" name="FechaProduccion" class="form-control" required autofocus>
+                      <!-- Botón Buscar Producción -->
+                      <button class='btn btn-secondary' id="goBuscarProduccion" data-toggle="tooltip" data-placement="left" title="Buscar"> 
+                        <div style='text-align:center;'><i class="fa fa-search"></i></div>  
+                      </button>
+                      <!-- Botón Buscar Producción Informe Generales Diferencias.-->
+                      <button class='btn btn-secondary' id="goProduccionDiferencias" data-toggle="tooltip" data-placement="left" title="Guardar Diferencias"> 
+                        <div style='text-align:center;'><i class="fal fa-money-check-alt"></i></div>  
+                      </button>
+                      <!-- Botón Imprimir Toda La Producción.-->
+                      <button class='btn btn-secondary' id="goReporteGeneral" data-toggle="tooltip" data-placement="left" title="Reporte General"> 
+                        <div style='text-align:center;'><i class="fa fa-print "></i></div>  
+                      </button>
+                      <!-- Botón Imprimir Toda La Producción por unidad (bus).-->
+                      <button class='btn btn-secondary' id="goReporteGeneralUnidadTransporte" data-toggle="tooltip" data-placement="left" title="Reporte por Unidad"> 
+                        <div style='text-align:center;'><i class="fal fa-bus-alt"></i></div>  
+                      </button>
+                      <!-- Botón Imprimir Toda La Producción por Motorista.-->
+                      <button class='btn btn-secondary' id="goReporteGeneralMotorista" data-toggle="tooltip" data-placement="left" title="Reporte por Motorista"> 
+                        <div style='text-align:center;'><i class="fal fa-address-card"></i></div>  
+                      </button>
+                    </div> 
+                  </div>
+                  <div class="col col-md-12 col-lg-6 col-xl-6">
+                    <div class="input-group">
+                        <span class="input-group-text text-bold">Buscar N.º Control</span>
+                        <input type="text" id="NumeroCorrelativo" name="NumeroCorrelativo" class="form-control input-lg font-weight-bold text-green text-right" value="" style="font-size: xx-large;" autocomplete="off">
+                    </div>
+                  </div>
+              </div>
+
+                <div class="row" id="MenuSoloParaGerenciaTrafico">
+                  <div class="col">
+                    <div class="input-group">
+                      <span class="input-group-text">Buscar Por:</span>
+                        <!-- Botón Buscar por Undiad (Bus).-->
+                        <button class='btn btn-info' id="goBuscarPorUnidad" data-toggle="tooltip" data-placement="left" title="Buscar por Undiad (Bus)"> 
+                          <div style='text-align:center;'><i class="fad fa-bus-school"></i></div>  
+                        </button>                    
+                        <!-- Botón Buscar por Motorista-->
+                        <button class='btn btn-info' id="goBuscarPorMotorista" data-toggle="tooltip" data-placement="left" title="Buscar por Motorista"> 
+                          <div style='text-align:center;'><i class="fad fa-user-tie"></i></div>  
+                        </button>                    
+                        <!-- Botón Buscar por Tiquete.-->
+                        <button class='btn btn-info' id="goBuscarPorTiquete" data-toggle="tooltip" data-placement="left" title="Buscar por Tiquete"> 
+                          <div style='text-align:center;'><i class="fal fa-ticket"></i></div>  
+                        </button>                    
+                    </div>
+                  </div>
+                </div>
+            </fieldset>
+              <!-- BLOQUE DE BUSQUEDAS -->
+                <!-- POR MOTORISTA -->
+          <fieldset id="BuscarPorMotorista" style="display: none;">
+                  <legend>Buscar por: Motorista</legend>
+                  <form action="" method="post" id="formBuscarPorMotorista" name="formBuscarPorMotorista" role="form" enctype="multipart/form-data">
+                    <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
+                    <input type="hidden" id="id_user" name="id_user" value = 0>            
+                    <input type="hidden" id="accion" name="accion" value = 'BuscarPorMotorista'>    
+                    <!-- SELECCIONAR ENTRE TODO Y FECHA            -->
+                    <div class="form-group row">
+                      <label class="col-lg-3 col-form-label form-control-label">Buscar Por:</label>
+                      <div class="form-check-inline">
+                        <label class="form-check-label" for="radio1">
+                          <input type="radio" class="form-check-input" id="radioTodoPM" name="OptBuscarPM" value="todo" checked>Todo
+                        </label>
+                      </div>
+                      <div class="form-check-inline">
+                        <label class="form-check-label" for="radio2">
+                          <input type="radio" class="form-check-input" id="radioFechaPM" name="OptBuscarPM" value="fecha">Fecha
+                        </label>
+                      </div>
+                      <div class="form-group form-select">
+                        <label for="Desde">Desde: 
+                            <input type="date" id="FechaDesdePM" name="FechaDesdePM" class="form-control" readonly="readonly">
+                        </label>
+                        
+                        <label for="Hasta">Hasta: 
+                          <input type="date" id="FechaHastaPM" name="FechaHastaPM" class="form-control" readonly="readonly">
+                      </label>
+                      </div>
+                    </div>
+                      <!-- NOmbre Personal (motorista) . -->
+                      <div class="form-group row">
+                          <label class="col-lg-3 col-form-label form-control-label">Nombre (motorista)</label>
+                          <div class="col-lg-9">
+                            <div class="input-group">
+                              <select class="" name="lstPersonalPorMotorista" id="lstPersonalPorMotorista"></select> 
+                              </select>
+                              <!-- Botón Buscar Producción -->
+                              <button class='btn btn-secondary' id="goBuscarProduccionPM" data-toggle="tooltip" data-placement="left" title="Buscar"> 
+                                <div style='text-align:center;'><i class="fa fa-search"></i></div>  
+                              </button>
+                            </div>
+                        </div>
+                      </div>
+                  </form>
+                <!-- DETALLE DE TOTAL INGRESO Y TOTAL DE TIQUETES VENDIDOS. -->  
+                    <div class="row">
+                      <div class="col d-flex justify-content-between">
+                        <label for="LblProduccionesTotalPorMotorista" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Tiquetes Vendidos : </label>
+                        <label for="LblProduccionesTotalIngresoPorMotorista" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Total Ingreso $ </label>
+                      </div>
+                    </div>
+                  
+                <!-- DETALLE table DE LA PRODUCCIÓN DIFERENCIAS -->
+                  <table id="listadoPorMotorista" class="table table-condensed display responsive nowrap" style="width: 100%; padding: 0; text-align: right;">
+                    <thead>
+                        <tr>
+                          <th style="text-align: left; ">Fecha</th>
+                          <th style="text-align: right;"># Control</th>
+                          <th style="text-align: left;">N.º Unidad y Placa</th>
+                          <th style="text-align: left;">Ruta</th>
+                          <th style="text-align: right;">P/U</th>
+                          <th style="text-align: center;">Tiquete/V</th>
+                          <th style="text-align: right;">Ingresos</th>
+                        </tr>                
+                    </thead>
+                      <tbody id="listadoPorMotoristaOk">
+                      </tbody>
+                      <tfoot>
+
+                      </tfoot>
+                  </table>              
+          </fieldset>
+              <!-- BLOQUE DE BUSQUEDAS -->
+                <!-- ************************************************************************************************************************************************** -->
+                <!-- ************************************************************************************************************************************************** -->
+                <!-- POR n.º UNIDAD Y N.º PLACA -->
+                <fieldset id="BuscarPorUnidadPlaca" style="display: none;">
+                  <legend>Buscar por: Motorista</legend>
+                  <form action="" method="post" id="formBuscarPorUnidadPlaca" name="formBuscarPorUnidadPlaca" role="form" enctype="multipart/form-data">
+                    <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
+                    <input type="hidden" id="id_user" name="id_user" value = 0>            
+                    <input type="hidden" id="accion" name="accion" value = 'BuscarPorUnidadPlaca'>    
+                    <!-- SELECCIONAR ENTRE TODO Y FECHA            -->
+                    <div class="form-group row">
+                      <label class="col-lg-3 col-form-label form-control-label">Buscar Por:</label>
+                      <div class="form-check-inline">
+                        <label class="form-check-label" for="radio1">
+                          <input type="radio" class="form-check-input" id="radioTodoUP" name="OptBuscarUP" value="todo" checked>Todo
+                        </label>
+                      </div>
+                      <div class="form-check-inline">
+                        <label class="form-check-label" for="radio2">
+                          <input type="radio" class="form-check-input" id="radioFechaUP" name="OptBuscarUP" value="fecha">Fecha
+                        </label>
+                      </div>
+                      <div class="form-group form-select">
+                        <label for="Desde">Desde: 
+                            <input type="date" id="FechaDesdeUP" name="FechaDesdeUP" class="form-control" readonly="readonly">
+                        </label>
+                        
+                        <label for="Hasta">Hasta: 
+                          <input type="date" id="FechaHastaUP" name="FechaHastaUP" class="form-control" readonly="readonly">
+                      </label>
+                      </div>
+                    </div>
+                      <!-- NOmbre Personal (motorista) . -->
+                      <div class="form-group row">
+                          <label class="col-lg-3 col-form-label form-control-label">N.º Unidad y Placa</label>
+                          <div class="col-lg-9">
+                            <div class="input-group">
+                              <select class="" name="lstPorUnidadPlaca" id="lstPorUnidadPlaca"></select> 
+                              </select>
+                              <!-- Botón Buscar Producción -->
+                              <button class='btn btn-secondary' id="goBuscarProduccionUP" data-toggle="tooltip" data-placement="left" title="Buscar"> 
+                                <div style='text-align:center;'><i class="fa fa-search"></i></div>  
+                              </button>
+                            </div>
+                        </div>
+                      </div>
+                  </form>
+                <!-- DETALLE DE TOTAL INGRESO Y TOTAL DE TIQUETES VENDIDOS. -->  
+                    <div class="row">
+                      <div class="col d-flex justify-content-between">
+                        <label for="LblProduccionesTotalPorUnidadPlaca" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Tiquetes Vendidos : </label>
+                        <label for="LblProduccionesTotalIngresoPorUnidadPlaca" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Total Ingreso $ </label>
+                      </div>
+                    </div>
+                  
+                <!-- DETALLE table DE LA PRODUCCIÓN DIFERENCIAS -->
+                  <table id="listadoPorUnidadPlaca" class="table table-condensed display responsive nowrap" style="width: 100%; padding: 0; text-align: right;">
+                    <thead>
+                        <tr>
+                          <th style="text-align: left; ">Fecha</th>
+                          <th style="text-align: right;"># Control</th>
+                          <th style="text-align: left;">Nombre (Motorista)</th>
+                          <th style="text-align: left;">Ruta</th>
+                          <th style="text-align: right;">P/U</th>
+                          <th style="text-align: center;">Tiquete/V</th>
+                          <th style="text-align: right;">Ingresos</th>
+                        </tr>                
+                    </thead>
+                      <tbody id="listadoPorUnidadPlacaOk">
+                      </tbody>
+                      <tfoot>
+
+                      </tfoot>
+                  </table>              
+                </fieldset>
+              <!-- BLOQUE DE BUSQUEDAS -->
+              <!-- DETALLE DE LA PRODUCCIÓN DIFERENCIAS -->
+            <fieldset id="ProduccionDiferencias" style="display: none;">
+              <legend>Ingresos Diarios | Diferencias</legend>
+              <form action="" method="post" id="formDiferencias" name="formDiferencias" role="form" enctype="multipart/form-data">
+                <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
+                <input type="hidden" id="id_user" name="id_user" value = 0>            
+                <input type="hidden" id="accion" name="accion" value = 'Agregar'>    
+                  <!-- NOmbre Personal (motorista) . -->
+                  <div class="form-group row">
+                    <label class="col-lg-3 col-form-label form-control-label">Buscar (motorista)</label>
+                    <div class="col-lg-9">
+                        <select class="" name="lstPersonal" id="lstPersonal"></select> 
+                        </select>
+                    </div>
+                  </div>
+                  <!-- nombre puede ser cualquier -->
+                  <div class="form-group row">
+                    <label class="col-lg-3 col-form-label form-control-label">Nombre</label>
+                    <div class="col-lg-9">
+                      <input class="form-control" type="text" id="txtnombres" name="txtnombres" maxlength="60" required="required" placeholder="" autocomplete = "off">
+                    </div>
+                  </div>
+                  <!-- VALOR -->
+                  <div class="form-group row">
+                    <!-- codigo Bus N.º . -->
+                    <label class="col-lg-3 col-form-label form-control-label">Valor $</label>
+                    <div class="col-lg-3">
+                      <input type="text" class="form-control font-weight-bold input-md" name="Valor" id="Valor" value="" style="font-size: medium; text-align: right;" autocomplete="off">
+                    </div>
+                  </div>
+                  <!-- CONCEPTO -->
+                  <div class="form-group row">
+                    <label class="col-lg-3 col-form-label form-control-label">Concepto</label>
+                    <div class="col-lg-9">
+                      <input class="form-control" type="text" id="concepto" name="concepto" maxlength="60" required="required" placeholder="" autocomplete = "off">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12 col-md-12 col-lg-12 col-xl-12">
+                      <div class="input-group">
+                        <!-- GUARDAR Y CANCELAR  PRODUCCIÓN DIFERENCIAS -->
+                        <input class="btn btn-primary btn-sm" type="submit" value="Guardar" name="Guardar">
+                        <input class='btn btn-secondary' type="button" id="goDiferenciasCancelar" name="goDiferenciasCancelar" value="Cancelar"> 
+                      </div>
+                    </div> <!-- DIV  -->
+                  </div>
+              </form>
+
+            <!-- DETALLE table DE LA PRODUCCIÓN DIFERENCIAS -->
+              <table id="listadoDiferencia" class="table table-condensed display responsive nowrap" style="width: 100%; padding: 0; text-align: right;">
+                <thead>
+                    <tr>
+                      <th style="text-align: left; ">Id</th>
+                      <th style="text-align: left;">Nombre</th>
+                      <th style="text-align: center;">Valor $</th>
+                      <th style="text-align: left;">Concepto</th>
+                      <th style="text-align: right;"></th>
+                      <th style="text-align: right;"></th>
+                    </tr>                
+                </thead>
+                  <tbody id="listadoDiferenciasOk">
+                  </tbody>
+                  <tfoot>
+
+                  </tfoot>
+              </table>              
+            </fieldset>
+            <!-- DETALLE DE LA PRODUCCIÓN tabla -->
+            <fieldset id="ProduccionTabla" style="display: none;">
+              <legend>Producción</legend>
+              <div class="row">
+                <div class="col d-flex justify-content-between">
+                  <label for="LblCantidadProduccionesVendidas" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Cantidad Controles Vendidos: </label>
+                  <label for="LblTotalTiquetes" style="padding: 0px; font-size: large; color:darkblue; text-align: left;"># Tiquetes Vendidos: </label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col d-flex justify-content-between">
+                  <label for="LblProduccionesTotal" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Total Producciones : </label>
+                  <label for="LblProduccionesTotalIngreso" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Total Ingreso $ </label>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col">
+                  <table id="listado" class="table display responsive nowrap" style="width: 100%;">
+                    <thead>
+                      <tr>
+                        <th colspan="3" style="padding: 0px; font-size: large; color:blue; text-align: left;"></th>
+                        <th colspan="2" style="padding: 0px; font-size: large; color: white; text-align: center; background-color:teal;"># Controles</th>
+                        <th colspan="4" style="padding: 0px; font-size: large; color:white; text-align: center; background-color: darkgreen;"># Tiquetes</th>
+                        <th colspan="2" style="padding: 0px; font-size: large; color:blue; text-align: left; "></th>
+                      </tr>
+                        <tr>
+                          <th></th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"></th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Ruta</th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: right;">Rango</th>
+                          <th style="padding: 0px; font-size: l; color:blue; text-align: center;">Cantidad</th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Entregados</th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Devolucion</th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Vendidos</th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Precio Público</th>
+                          <th style="padding: 0px; font-size: medium; color:green; text-align: right;">$ Ingreso</th>
+                        </tr>                
+                    </thead>
+                      <tbody id="listadoOk">
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th></th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"></th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Ruta</th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: right;">Rango</th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Cantidad</th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Entregados</th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Devolucion</th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Vendidos</th>
+                          <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Precio Público</th>
+                          <th style="padding: 0px; font-size: medium; color:green; text-align: right;">$ Ingreso</th>
+                        </tr>
+                      </tfoot>
+                  </table>
+                </div>
+              </div>
+              </fieldset>
+            <!-- DETALLE DE LA PRODUCCIÓN ASIGNADA -->
+            <fieldset id="field_produccion_detalle" style="display: none;">
+              <legend> Producción | Detalle </legend>
+              <div class="row">
+                <div class="col d-flex justify-content-between">
+                  <!-- <label for="LblProduccionesTotal" style="padding: 0px; font-size: x-medium; color:blue; text-align: left;">Total Producciones : </label> -->
+                  <label for="LblDetalleTotalIngreso" style="padding: 0px; font-size: x-large; color:blue; text-align: left;">Total $ </label>
+                </div>
+              </div>
+
+                <div class="row">
+                  <div class="col">
+                    <table id="listadoDetalle" class="table display responsive nowrap" style="width: 100%;">
+                      <thead>
+                          <tr>
+                            <th></th>
+                            <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"># Control</th>
+                            <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Ruta</th>
+                            <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Equipo</th>
+                            <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Motorista</th>
+                            <th style="padding: 0px; font-size: medium; color:green; text-align: right;">$ Ingreso</th>
+                          </tr>                
+                      </thead>
+                        <tbody id="listadoDetalleOk">
+                        </tbody>
+                        <tfoot>
+                          <tr>
+                            <th></th>
+                            <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"># Control</th>
+                            <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Ruta</th>
+                            <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Equipo</th>
+                            <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Motorista</th>
+                            <th style="padding: 0px; font-size: medium; color:green; text-align: right;">$ Ingreso</th>
+                          </tr>
+                        </tfoot>
+                    </table>
+                  </div>
+                </div>
+            </fieldset>
+            <!-- DETALLE DE LA PRODUCCIÓN ASIGNADA -->
+
+            <fieldset id="FieldsetTabla" style="display: none;">
+              <legend>Producción | Talonario - Serie - Tiquete</legend>
+              <div class="row">
+                <!--   RUTA  -->
+                <div class="col col-md-6 col-lg-6 col-xl-6">
+                  <!-- NOMBRE Y TOTAL INGRESO -->
+                  <label for="LblNombreMotorista" style="padding: 0px; font-size: medium; color:blue; text-align: left;">Motorista : </label>
+                  <h5> Código: <span class="badge badge-info" id="LblDescripcionCodigo">CódigoPersonal</span></h5>
+                  <h5> Ruta: <span class="badge badge-info" id="LblDescripcionRuta">Ruta</span></h5>
+                  <h5> Unidad: <span class="badge badge-info" id="LblDescripcionUnidad">Unidad</span></h5>
+                  <h5> Fecha : <span class="badge badge-info" id="LblListadoIdFecha">Fecha</span></h5>
+                </div>
+                <!--   tiquete vendidos, devueltos y total  -->
+                <div class="col col-md-6 col-lg-6 col-xl-6 d-flex justify-content-end">
+                  <h5> Precio Público : <span class="badge badge-info" id="LblListadoPrecio">Precio</span></h5>
+                  <br>
+                  <h5> Cantidad Vendida : <span class="badge badge-info" id="LblListadoCantidad">Cantidad</span></h5>
+                  <br>
+                  <h5> Total : <span class="badge badge-info" id="LblListadoTotalIngreso">total</span></h5>
+                </div>
+              </div>
+
+              <table id="listadoAsignacion" class="table table-condensed display responsive nowrap" style="width: 100%; padding: 0; text-align: right;">
+                  <thead>
+                      <tr>
+                        <th style="text-align: left; " colspan="3"># Correlativo</th>
+                        <th style="text-align: center;">Serie</th>
+                        <th style="text-align: right;">Cola</th>
+                        <th style="text-align: right;">Desde</th>
+                        <th style="text-align: right;">Hasta</th>
+                        <th style="text-align: right;">Total</th>
+                      </tr>                
+                  </thead>
+                    <tbody id="listadoDevolucionIngresoOk">
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                          <th style="text-align: left; " colspan="3"># Correlativo</th>
+                          <th style="text-align: center;">Serie</th>
+                          <th style="text-align: right;">Cola</th>
+                          <th style="text-align: right;">Desde</th>
+                          <th style="text-align: right;">Hasta</th>
+                          <th style="text-align: right;">Total</th>
+                      </tr>
+  
+                      <div class="row">
+                        <div class="col">
+                          <!-- <label for="">Inventiario Tiquete</label> -->
+                            <input type="hidden" name="CodigoInventarioTiquete" id="CodigoInventarioTiquete"> 
+                          <!-- <label for="">Cantidad Tiquete</label> -->
+                            <input type="hidden" name="CantidadTiqueteAsignado" id="CantidadTiqueteAsignado">
+                           <!--<label for="">Precio Publico</label> -->
+                            <input type="hidden" id="PrecioPublico">
+                          <!-- <label for="">total</label> -->
+                            <input type="hidden" name="TotalAsignado" id="TotalAsignado">
+                           <!-- <label for="">Codigo producción Asignado</label> -->
+                            <input type="hidden" id="CodigoProduccionAsignacion">
+                          <!-- <label for="">Código Producción</label> -->
+                            <input type="hidden" id="CodigoProduccion">
+                          <!-- <label for="">Código Producción</label> -->
+                          <input type="hidden" id="DesdeTablaAsignado">
+                        </div>
+                      </div>
+                    </tfoot>
+                </table>
+            </fieldset>
+        </div> <!-- /.card-body -->
+      </div>        <!-- /.card-body -->
+    </div>      <!-- /.card -->
+  </div>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+
+
+
+<!-- plantilla que contiene el . -->
+{% include 'VentanaBuscarPorTiquete.html' %}
+
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

@@ -1,0 +1,214 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+  <!-- Bootstrap core CSS -->
+  <link href="js/plugins/mdb/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="js/plugins/mdb/css/mdb.min.css" rel="stylesheet">
+  <!-- Your custom styles (optional) -->
+  <link href="js/plugins/mdb/css/style.css" rel="stylesheet">
+{% endblock %}  
+
+{% block javascripts %}
+    <!-- JS para esta página. -->
+  <!-- Bootstrap tooltips -->
+  <script type="text/javascript" src="js/plugins/mdb/js/popper.min.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="js/plugins/mdb/js/bootstrap.min.js"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="js/plugins/mdb/js/mdb.min.js"></script>
+
+  <script type="text/JavaScript" src="js/main_nuevo_editar_catalogos.js"></script>
+  <script>   
+    (function(){
+        function removeAccents ( data ) {
+            if ( data.normalize ) {
+                // Use I18n API if avaiable to split characters and accents, then remove
+                // the accents wholesale. Note that we use the original data as well as
+                // the new to allow for searching of either form.
+                return data +' '+ data
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '');
+            }
+          
+            return data;
+        }
+          
+        var searchType = jQuery.fn.DataTable.ext.type.search;
+          
+        searchType.string = function ( data ) {
+            return ! data ?
+                '' :
+                typeof data === 'string' ?
+                    removeAccents( data ) :
+                    data;
+        };
+          
+        searchType.html = function ( data ) {
+            return ! data ?
+                '' :
+                typeof data === 'string' ?
+                    removeAccents( data.replace( /<.*?>/g, '' ) ) :
+                    data;
+        };
+          
+        }());
+</script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            <h4></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="index.php">Home</a></li>
+              <li class="breadcrumb-item active">Catálogo</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+  <!-- Small boxes (Stat box) -->
+  <div class="col-md-12">
+    <div class="card card-success">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-table nav-icon"></i> BIENVENIDOS AL MANTENIMIENTO DE CATALOGOS</h3>
+
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+          </button>
+        </div>
+        <!-- /.card-tools -->
+      </div>
+      <!-- /.card-header -->
+      <div class="card-body">
+        <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
+          <div class="row">
+            <div class="col-12 col-md-4 col-lg-4">
+              <select id="lstCatalogo" class="form-control">
+                <option value="01" selected>Cargo</option>
+                <option value="02">Departamento (Cargo)</option>
+                <option value="03">Taller</option>
+                <option value="04">Ruta</option>
+                <option value="05">Clase de Licencia</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-8 col-lg-8">
+              <div class="d-flex justify-content-between">
+                <button type="button" id="goNuevoCatalogo" class="btn btn-info btn-md" value="Agregar">Agregar</button>
+                <button type="button" id="goBuscarTodos" class="btn btn-success btn-md" value="BuscarTodos">Más Información</button>
+              </div>  
+            </div>
+          </div>
+        </div> <!-- /.card-body -->
+    </div>      <!-- /.card -->
+
+  <!-- SECTION QUE CONTENDRA LA INFORMACIÓN DE NUEVO, EDICIÓN -->
+<!-- INCIIO DE CATALOGOS Y LISTADO.-->
+<section id="EditarNuevoCatalogo"  style="display: none;  box-shadow: #99FFFF;">
+  <div class="row">              
+    <div class="col col-lg-6">
+      <div class="card border-success mb-3" style="max-width: auto;">
+        <div class="card-header border-default" id="CardHeader"><h3><label for="LblCatalogo">Catálogo...</label></h3></div>
+        <div class="card-body text-default">
+          <form name="formCatalogo" id="formCatalogo" class="border border-light p-1" action="#!">
+            <input type="text" id="accionCatalogo" name="accionCatalogo" value = ''>            
+            <input type="text" id="Codigo" name="Codigo" value = ''>            
+            <input type="text" id="IdCatalogo" name="IdCatalogo" value = '0'>            
+              <div class="row">
+                <div class="col-12 col-md-4 col-lg-4">
+                <!-- Código -->
+                  <label class="form-label form-control-label">Código</label>
+                  <input class="form-control" type="text" id="txtCodigo" name="txtCodigo" tabindex="1" autofocus>  
+                </div>
+                <!-- DESCRIPCION  -->
+                  <div class="col-12 col-md-8 col-lg-8">
+                        <div class="md-form input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text md-addon">Descripción</span>
+                          </div>
+                          <textarea id="Descripcion" name="Descripcion" class="md-textarea form-control" aria-label="With textarea" tabindex="2" required></textarea>
+                        </div>
+                  </div>
+          </form>
+        </div>
+        <!-- CARD FOOTER - BOTONES GUARDAR -->
+        <div class="card-footer border-success inner" id="CardFooter">
+          <button class="btn btn-default" data-toggle="tooltip" data-placement="top" title="Agregar" id = "goGuardar">
+            <span class="fas fa-save"> Guardar </span>
+          </button>
+        </div>
+      </div>                
+  </div>  <!-- div class col  - fin -->
+</div>  <!-- div class row  - fin -->
+</section>  <!-- FIN DEL SECTION -->
+
+
+  <!-- SECTION QUE CONTENDRA LA INFORMACIÓN DE NUEVO, EDICIÓN -->
+
+
+<!-- SECTION QUE CONTENDRA LA INFORMACIÓN DEL LISTADO -->
+<section id="TablaListadoCatalogo">
+  <div class="row">
+    <div class="col-12 col-md-12 col-lg-12">
+          <!-- MOSTRAR IMAGENES SEGUN EL REGISTRO.-->
+            <!-- Card -->
+            <div class="card card-success border-success mb-3" style="max-width: auto;">
+              <h3 class="card-title"><i class="fas fa-table nav-icon"></i> Catálogo</h3>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
+                <div class="form-group">
+                  <div class="row">
+                      <div class="col-12 col-md-4 col-lg- 4">
+                          <div class="input-group">
+                              <input type="text" class="global_filter form-control" id="global_filter" placeholder="Ingresar dato a buscar">
+                              <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+                <table id="listado" class="table display responsive nowrap" style="width: 100%;">
+                  <thead>
+                      <tr>
+                        <th>Acción</th>
+                        <th>Id</th>
+                        <th>Código</th>
+                        <th>Descripción</th>
+                      </tr>                
+                  </thead>
+                    <tbody id="listadoOK">
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>Acción</th>
+                        <th>Id</th>
+                        <th>Código</th>
+                        <th>Descripción</th>
+                      </tr>
+                    </tfoot>
+                </table>
+            </div>        <!-- /.card-body -->
+          </card>
+            <!-- Card -->
+          <!-- MOSTRAR IMAGENES SEGUN EL REGISTRO.-->
+      </div>
+  </div>
+</section>
+</div>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

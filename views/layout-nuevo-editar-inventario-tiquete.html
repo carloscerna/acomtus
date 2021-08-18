@@ -1,0 +1,312 @@
+ {# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+/* mensajes de error para el validate de los form de input*/
+ input.error {
+    border-color: #f00 !important;
+}
+
+small.required {
+    color:#f00;
+}
+  
+/* when not active use specificity to override the !important on border-(color) */
+.nav-tabs .nav-link:not(.active) {
+    border-color: transparent !important;
+}
+
+fieldset {
+	/*background-color: rgba(111, 66, 193, 0.3);*/
+	  border-radius: 6px;
+    border: 1px solid #0080FF;
+    padding: 10px 10px 10px 10px;
+}
+
+legend {
+	background-color: #FFFFFF;
+	border: 1.5px solid #0080FF;
+	border-radius: 4px;
+	color: var(--green);
+	font-size: 17px;
+	font-weight: bold;
+	padding: 5px 5px 3px 7px;
+	width: auto;
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<!-- JS para esta página. -->
+  <script type="text/JavaScript" src="js/main_nuevo_editar_inventario_tiquete.js"></script>
+  <script type="text/javascript" src="js/plugins/Inputmask-5.x/dist/jquery.inputmask.js"></script>
+<!-- SOLO SCRIPT -->
+<script language="javascript">
+	// VALIDAR LOS ENTER EN EL FORMULARIO.
+$(document).ready(function() {
+// JQuery.Inputmask example.
+var customInputmask = (function() {
+  var config = {
+    extendDefaults: {
+      showMaskOnHover: false,
+      showMaskOnFocus: false
+    },
+    extendDefinitions: {},
+    extendAliases: {
+      'numeric': {
+        radixPoint: '.',
+        groupSeparator: ',',
+        autoGroup: true,
+        placeholder: ''
+      },
+      'currency': {
+        alias: 'numeric',
+        prefix: '$',
+        digits: '*',
+        digitsOptional: true,
+        radixPoint: '.',
+        groupSeparator: ',',
+        autoGroup: true,
+        placeholder: ''
+      },
+      'euro': {
+        alias: 'currency',
+        prefix: '',
+        suffix: ' €',
+        radixPoint: ',',
+        groupSeparator: '',
+        autoGroup: false,
+      },
+      'euroComplex': {
+        alias: 'currency',
+        prefix: '',
+        suffix: ' €',
+      }
+    }
+  };
+
+  var init = function() {
+    Inputmask.extendDefaults(config.extendDefaults);
+    Inputmask.extendDefinitions(config.extendDefinitions);
+    Inputmask.extendAliases(config.extendAliases);
+    $('[data-inputmask]').inputmask();
+  };
+
+  return {
+    init: init
+  };
+}());
+
+// Initialize app.
+(function() {
+  customInputmask.init();
+}());
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+// EVITAR EL ENTER EN UN FORM.
+  $('form').keypress(function(e){   
+    if(e == 13){
+      return false;
+    }
+  });
+
+  $('input').keypress(function(e){
+    if(e.which == 13){
+      return false;
+    }
+  });
+  // Llenas LISTAS DESPLEGABLES.
+      listar_estatus(); // LLENAR CATALOGO ESTATUS.
+      listar_tiquete_serie();  // LLENAR con tabla personal lstpersonal.
+      listar_proveedor(); // LLENAR CATALOGO PROVEEDOR
+      listar_tiquete_color(); // tabla catalogo tiquete color.
+});
+
+// Calculo del Total = Tiraje * costo
+function MyCalculo(a) {
+  var tiraje = $('#txtTiraje').val();
+  var costo = $("#txtCosto").val();
+  tiraje = tiraje.replace(/,/g,"");
+  costo = costo.substring(1);
+  console.log(costo);
+  var total = Number(tiraje) * Number(costo);
+  // pasar el valor.
+    $('#txtTotal').val(total);
+}
+</script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="inventario_tiquete.php" data-toggle="tooltip" data-placement="left" title="Usuarios">Buscar</a></li>
+              <li class="breadcrumb-item active"><label for="iEdicionNuevo">Editar</label></li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+  <!-- Main content -->
+    <section class="content">
+     <!-- FORM PRINCIPAL -->
+     <form action="" method="post" id="formUsers" name="formUsers" role="form" enctype="multipart/form-data">
+     <div class="tab-content tab-validate"> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+        <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            
+        <input type="hidden" id="accion_buscar" name="accion_buscar" value = "GenerarCodigoNuevo" class="{required:true}">-->            
+        <input type="hidden" id="id_user" name="id_user" value = '{{ id }}'>            
+        <input type="hidden" id="accion" name="accion" value = '{{ accion }}'>            
+        <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-success">
+            <div class="card-header">
+              <h3 class="card-title">
+                <h3 class="card-title"><i class="fas fa-ticket-alt nav-icon"></i> <label for="txtEdicionNuevo">Edición</label>
+                </h3>
+                
+              </h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+            <!-- Nav tabs -->
+            <div class="container py-2">
+              <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Tiquete</a>
+                </li>
+              </ul>
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <div class="tab-pane p-2 active border border-primary" id="home" role="tabpanel" aria-labelledby="home-tab">
+                      <!-- MODAL BODY ROW -->
+                      <div class="modal-body row">
+                        <div class="col-md-12">
+                            <!-- INICIO DEL FORMULARIO -->
+                            <fieldset id="informacion">
+                                <legend>Información General</legend>
+                                <!-- FECHA -->
+                                <div class="form-group row">
+                                  <label class="col-lg-2 col-form-label form-control-label">Estatus</label>
+                                    <div class="col-lg-4">
+                                      <select class="custom-select" id="lstestatus" name="lstestatus"></select>
+                                    </div>
+                                <!-- ESTATUS -->
+                                    <label class="col-lg-2 col-form-label form-control-label">Fecha</label>
+                                    <div class="col-lg-4">
+                                        <input class="form-control" type="date" id="txtFecha" name="txtFecha">
+                                        <input class="form-control" type="hidden" id="year" name="year">
+                                    </div>
+                                </div>
+                                <!-- NOMBRE PROVEEDOR -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Nombre Proveedor</label>
+                                  <div class="col-lg-9">
+                                    <select class="custom-select" id="lstProveedor" name="lstProveedor"></select>
+                                  </div>
+                                </div>
+                                <!-- SERIE TIQUETE -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-4 col-form-label form-control-label">Serie</label>
+                                      <div class="col-lg-2">
+                                        <select class="custom-select" id="lstTiqueteSerie" name="lstTiqueteSerie">
+                                        </select>
+                                      </div>
+                                <!-- TIRAJE-->
+                                      <label class="col-lg-4 col-form-label form-control-label">Cantidad Tiraje</label>
+                                      <div class="col-lg-2">
+                                           <input class="form-control" type="text" id="txtTiraje" name="txtTiraje"  required="required" data-inputmask="'alias': 'numeric'" onblur="MyCalculo(this.value)">
+                                      </div>
+                                    </div>
+                                <!-- EXISTENCIA INICIAL TIQUETE - N.º INICIO-->
+                                <div class="form-group row">
+                                    <label class="col-lg-4 col-form-label form-control-label">N.º Correlativo Desde </label>
+                                    <div class="col-lg-2">
+                                        <input class="form-control" type="text" id="txtNumeroInicio" name="txtNumeroInicio"  required="required" data-inputmask="'alias': 'numeric'"> 
+                                    </div>
+                                <!-- EXISTENCIA INICIAL TIQUETE-->
+                                  <label class="col-lg-4 col-form-label form-control-label">N.º Correlativo Hasta</label>
+                                  <div class="col-lg-2">
+                                      <input class="form-control" type="text" id="txtNumeroFin" name="txtNumeroFin"  required="required" data-inputmask="'alias': 'numeric'" onblur="MyCalculo(this.value)"> 
+                                  </div>
+                                </div>
+                              </fieldset>
+                                <!-- COSTO  -->
+                              <fieldset>
+                                <legend> Costos $ </legend>
+                                <!-- COSTO TIQUETE -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-2 col-form-label form-control-label">Costo </label>
+                                      <div class="col-lg-2">
+                                        <input class="form-control" type="text" id="txtCosto" name="txtCosto"  required="required"  onblur="MyCalculo(this.value)" data-inputmask="'alias': 'currency'"> 
+                                      </div>
+                                <!-- TOTAL TIRAJE * COSTO -->
+                                  <label class="col-lg-2 col-form-label form-control-label">Total</label>
+                                  <div class="col-lg-2">
+                                      <input class="form-control" type="text" id="txtTotal" name="txtTotal"  required="required" readonly data-inputmask="'alias': 'currency'"> 
+                                  </div>
+                                <!-- VALOR AL PUBLICO $00.00 -->
+                                    <label class="col-lg-2 col-form-label form-control-label">Valor Público</label>
+                                    <div class="col-lg-2">
+                                        <input class="form-control" type="text" id="txtPrecioPublico" name="txtPrecioPublico"  required="required" data-inputmask="'alias': 'currency'"> 
+                                    </div>
+                                  </div>
+                              </fieldset>
+                              <!-- OTROS -->
+                              <fieldset>
+                                <legend> Descripción y Color</legend>
+                                <!-- TIQUETE COLOR -->
+                                <div class="form-group row">
+                                  <label class="col-lg-4 col-form-label form-control-label">Color</label>
+                                    <div class="col-lg-2">
+                                      <select class="custom-select" id="lstTiqueteColor" name="lstTiqueteColor">
+                                      </select>
+                                    </div>
+                                </div>
+                                <!-- DESCRIPCION -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Descripcion</label>
+                                  <div class="col-lg-9">
+                                    <input class="form-control" type="text" id="txtDescripcion" name="txtDescripcion" maxlength="25" required="required" placeholder="" autocomplete = "off">
+                                  </div>
+                                </div>
+                              </fieldset>
+                            <!-- INICIO DEL FORMULARIO -->
+                        </div>
+                      </div><!-- FIN MODAL BODY INFORMACIÓN GENERAL-->
+                  </div>
+
+              </div> <!-- /.tab-content -->
+            </div> <!-- /.container -->
+            </div> <!-- /.card-body -->
+            <!-- /.card-footer -->
+            <div class="card-footer">
+              <div class="form-group row">
+               <div class="col d-flex justify-content-center">
+                <input class="btn btn-primary btn" type="submit" value="Guardar" name="Guardar">
+               </div>
+              </div>              
+            </div>
+          </div> <!-- /.card -->
+          </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+     </form> <!-- fin del form -->            
+        </div>
+      </div>
+    </section>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

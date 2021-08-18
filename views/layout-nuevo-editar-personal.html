@@ -1,0 +1,714 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<!-- CSS ESTILO PLANTILLA PERSONAL -->
+  <link rel="stylesheet" href="css/estilo_personal.css">
+  <!-- Bootstrap core CSS -->
+  <link href="js/plugins/mdb/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="js/plugins/mdb/css/mdb.min.css" rel="stylesheet">
+  <!-- Your custom styles (optional) -->
+  <link href="js/plugins/mdb/css/style.css" rel="stylesheet">
+{% endblock %}
+
+{% block javascripts %}
+<!-- JS para esta página. -->
+  <!-- Bootstrap tooltips -->
+  <script type="text/javascript" src="js/plugins/mdb/js/popper.min.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="js/plugins/mdb/js/bootstrap.min.js"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="js/plugins/mdb/js/mdb.min.js"></script>
+
+  <script type="text/javascript" src="js/calcular_edad.js"></script>
+  <script type="text/JavaScript" src="js/main_nuevo_editar_personal.js"></script>
+  <script type="text/JavaScript" src="js/main_nuevo_editar_personal_portafolio.js"></script>
+  <script type="text/JavaScript" src="js/main_nuevo_editar_personal_historial.js"></script>
+  <script type="text/javascript" src="js/jquery-mask/jquery.maskedinput.js"></script>
+<!-- JS para esta página. -->
+<script language="javascript">
+// VALIDAR LOS ENTER EN EL FORMULARIO.
+$(document).ready(function() {
+  $('form').keypress(function(e){   
+    if(e == 13){
+      return false;
+    }
+  });
+
+  $('input').keypress(function(e){
+    if(e.which == 13){
+      return false;
+    }
+  });
+// Llenas LISTAS DESPLEGABLES.
+    var codigo_departamento = '01';
+    listar_departamento();  // LLENAR CATALOGO PERFIL.
+    listar_municipio(codigo_departamento,''); // LLENAR CATALOGO ESTATUS.
+    listar_genero();
+    listar_estado_civil();
+    listar_estatus();
+    listar_estudios();
+    listar_vivienda();
+    listar_afp();
+    listar_cargo();
+    listar_departamento_cargo();
+    listar_taller();
+    listar_ruta();
+    listar_socio();
+    listar_licencia();
+// configurar el Select2
+  $(document).ready(function() {
+    $('.personal').select2(
+      {
+        theme: "classic"
+      }
+    );
+
+
+    // colocar la misma dirección en la del encargado.
+	  $("#txtNumeroLicencia").keyup(function () {
+              var value = $(this).val();
+              $("#txtNit").val(value);
+          });
+  });
+// Jquery-mask - entrado de datos.
+jQuery(function($){
+    // Form Users Agregar.
+     $("#telefono_fijo").mask("9999-9999");
+     $("#telefono_movil").mask("9999-9999");
+     $("#telefono_fax").mask("9999-9999");
+
+     $("#txtDui").mask("99999999-9");
+     $("#txtNit").mask("9999-999999-999-9");
+     $("#txtNumeroLicencia").mask("9999-999999-999-9");
+
+     //$("#").mask("");
+  }); 
+});
+
+ /* SCRIPT PARA SUBIR LA FOTO.*/
+ $(document).ready(function() {
+  $('#fileup').change(function(){
+//here we take the file extension and set an array of valid extensions
+    var res=$('#fileup').val();
+    var arr = res.split("\\");
+    var filename=arr.slice(-1)[0];
+    console.log(this.files);
+
+    filextension=filename.split(".");
+    filext="."+filextension.slice(-1)[0];
+    valid=[".jpg",".png",".jpeg",".bmp"];
+//if file is not valid we show the error icon, the red alert, and hide the submit button
+    if (valid.indexOf(filext.toLowerCase())==-1){
+        $( ".imgupload.ok" ).hide("slow");
+        $( ".imgupload.stop" ).show("slow");
+      
+        $('#namefile').css({"color":"red","font-weight":700});
+        $('#namefile').html("No es una Imagen!");
+    }else{
+        //if file is valid we show the green alert and show the valid submit
+        $( ".imgupload.stop" ).hide("slow");
+        $( ".imgupload.ok" ).show("slow");
+      
+        $('#namefile').css({"color":"green","font-weight":700});
+        $('#namefile').html("Imagen!");
+    }
+});
+// CARGAR DEL ARCHIVO A LA TABLA CORRESPONDIENTE.
+    $(".upload").on('click', function() {
+        var formData = new FormData();
+        var files = $('#fileup')[0].files[0];
+        formData.append('file',files);
+        $.ajax({
+            cache: false,
+            url: 'php_libs/soporte/upload_foto_personal.php',
+            type: 'post',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                if (response != 0) {
+                    //$('.card-img-top').removeAttr('src');
+                    $(".card-img-top").attr("src", response);
+                    //let timestamp = Math.floor( Date.now() );
+                    //$("#Imagen").attr("src", response + '?ver=' + timestamp);
+
+                    $('#namefile').html("Sólo Imagen!");
+                    toastr["success"]('Imagen Cargada...', "Sistema");
+                } else {
+                  toastr["error"]('Formato de imagen incorrecto.', "Sistema");
+                }
+            }
+        });
+		return false;
+    });
+});
+</script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            <h4><label for="txtEdicionNuevo">Edición</label></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="personal.php" data-toggle="tooltip" data-placement="left" title="Personal">Buscar</a></li>
+              <li class="breadcrumb-item active"><label for="iEdicionNuevo">Editar</label></li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+  <!-- Main content -->
+    <section class="content">
+     <!-- FORM PRINCIPAL -->
+     <form action="" method="post" id="formUsers" name="formUsers" role="form" enctype="multipart/form-data">
+     <div class="tab-content tab-validate"> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+        <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            
+        <input type="hidden" id="accion_buscar" name="accion_buscar" value = "GenerarCodigoNuevo" class="{required:true}">-->            
+        <input type="hidden" id="id_user" name="id_user" value = '{{ id }}'>            
+        <input type="hidden" id="accion" name="accion" value = '{{ accion }}'>            
+        <input type="hidden" id="txtId" name="txtId" value = ''>   
+        <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
+        <input type="hidden" id="MenuTab" value='{{ codigo_perfil }}'>         
+        <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-success">
+            <div class="card-header">
+              <div class="row">
+                <div class="col-lg-4">
+                  <h3 class="card-title">
+                    <label for="LblNombre"></label>
+                  </h3>
+                </div>
+              </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+            <!-- Nav tabs -->
+            <div class="container py-2">
+              <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Empleado</a>
+                </li>
+                <li class="nav-time">
+                    <a class="nav-link border border-secondary border-bottom-0" id="empresa-tab" data-toggle="tab" href="#empresa" role="tab" aria-controls="empresa" aria-selected="true">En la Empresa</a>
+                </li>                
+                <li class="nav-time">
+                  <a class="nav-link border border-secondary border-bottom-0" id="docuemntos-tab" data-toggle="tab" href="#documentos" role="tab" aria-controls="dlcumentos" aria-selected="true">Documentos</a>
+                </li>                
+                <li class="nav-time">
+                  <a class="nav-link border border-secondary border-bottom-0" id="historial-tab" data-toggle="tab" href="#historial" role="tab" aria-controls="historial" aria-selected="true">Historial</a>
+                </li>                
+                <li class="nav-time">
+                  <a class="nav-link border border-secondary border-bottom-0" id="digitalizacion-tab" data-toggle="tab" href="#digitalizacion" role="tab" aria-controls="digitalizacion" aria-selected="true">Portafolio</a>
+                </li>                
+              </ul>
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <!-- Tab INFORMACION DEL EMPLEADO -->
+                <div class="tab-pane p-2 active border border-primary" id="home" role="tabpanel" aria-labelledby="home-tab">
+                  <div class="row">
+                    <div class="col-lg-4">
+                        <!-- EDITAR CODIGO EMPLEADO -->
+                            <div class="input-group">
+                              <div class="input-group-prepend">
+                                <span class="icheck-primary d-inline">
+                                  <input type="checkbox" id="ActivarEditarCodigo" name="ActivarEditarCodigo">
+                                  <label for="ActivarEditarCodigo">
+                                    Editar Código
+                                  </label>
+                                </span>
+                              </div>
+                                  <input type="text" class="form-control text-primary text-bold text-right" id="txtcodigo" maxlength="5" name="txtcodigo" alt="Activar Código para Edición" readonly="readonly">
+                            </div>
+                    </div>
+                    <div class="col-lg-8">
+                      <!-- ESTATUS -->
+                        <div class="form-group row">
+                          <label class="col-lg-3 col-form-label form-control-label text-right">Estatus</label>
+                          <div class="col-lg-3">
+                            <select class="custom-select" id="lstestatus" name="lstestatus"></select>
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+                  <!-- MODAL BODY ROW -->
+                      <div class="modal-body row">
+                        <div class="col-md-8">
+                            <!-- INICIO DEL FORMULARIO -->
+                            <fieldset>
+                                <legend>Información General</legend>
+                                <!-- NOMBRES  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Nombres</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtnombres" name="txtnombres" maxlength="60" required="required" placeholder="" autocomplete = "off" onchange='conMayusculas(this);' autofocus="autofocus">
+                                      </div>
+                                    </div>
+                                <!-- APELLIDOS  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Apellidos</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtapellido" name="txtapellido" maxlength="60" required="required" placeholder="" autocomplete = "off" onchange='conMayusculas(this);'>
+                                      </div>
+                                    </div>
+                                <!-- FECHA DE NACIMIENTO -->
+                                      <div class="form-group row">
+                                        <label class="col-lg-3 col-form-label form-control-label">Fecha Nacimiento</label>
+                                        <div class="col-lg-4">
+                                          <input class="form-control" type="date" id="txtfechanacimiento" name="fechanacimiento" onblur="calcular_edad(this.value);">
+                                        </div>
+                                <!-- EDAD -->        
+                                        <label class="col-lg-2 col-form-label form-control-label text-right">Edad</label>
+                                        <div class="col-lg-3">
+                                          <input class="form-control text-right" type="text" id="txtedad" name="txtedad" value = "0" readonly="readonly">
+                                          <input type="hidden" name= "edad_enviar" id="edad_enviar" value = "00" class="form-control">
+                                        </div>
+                                      </div>
+                                      <div class="form-group row">
+                                        <div class="col-lg-3"></div>
+                                        <div class="col-lg-9">
+                                          <label for="lbl_edad_y_mes" class="control-label" style="color: blue;"></label>
+                                        </div>
+                                      </div>
+                                <!-- GÉNERO -->
+                                      <div class="form-group row">
+                                        <label class="col-lg-3 col-form-label form-control-label">Género</label>
+                                        <div class="col-lg-3">
+                                          <select class="custom-select" id="lstgenero" name="lstgenero"></select>
+                                        </div>
+                                <!-- ESTADO CIVIL -->
+                                        <label class="col-lg-3 col-form-label form-control-label text-right">Estado Civil</label>
+                                        <div class="col-lg-3">
+                                          <select class="custom-select text-right" id="lstEstadoCivil" name="lstEstadoCivil"></select>
+                                        </div>
+                                      </div>
+                                <!-- TIPO DE SANGRE -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Tipo de Sangre</label>
+                                      <div class="col-lg-4">
+                                        <input class="form-control" aria-describedby="basic-addon1" type="text" id="txtTipoSangre" name="txtTipoSangre" onchange='conMayusculas(this)'>
+                                      </div>
+                                <!-- ESTUDIOS -->        
+                                      <label class="col-lg-2 col-form-label form-control-label text-right">Estudios</label>
+                                      <div class="col-lg-3">
+                                        <select class="form-control" aria-describedby="basic-addon1" id="lstEstudios" name="lstEstudios"></select>
+                                      </div>
+                                    </div>
+                                <!-- TIPO DE SANGRE -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Vivienda</label>
+                                      <div class="col-lg-4">
+                                        <select class="form-control" aria-describedby="basic-addon1" id="lstVivienda" name="lstVivienda"></select>
+                                      </div>
+                                <!-- ESTUDIOS -->        
+                                      <label class="col-lg-2 col-form-label form-control-label text-right">AFP</label>
+                                      <div class="col-lg-3">
+                                        <select class="form-control" aria-describedby="basic-addon1" id="lstAfp" name="lstAfp"></select>
+                                      </div>
+                                    </div>
+                                <!-- NOMBRE DEL CÓNYUGE  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Nombre del Cónyuge</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" aria-describedby="basic-addon1 sizing-addon2" type="text" id="txtConyuge" name="txtConyuge" placeholder="nombre del conyuge" autofocus class="{required:false,minlength:3,maxlength:40} span3 form-control" onchange='conMayusculas(this)'>
+                                      </div>
+                                    </div>
+                              </fieldset>
+                        </div>
+                        <!-- FOTO O IMAGEN DEL EMPLEADO-->
+                              <div class="col-md-4">
+                                <form name="formImagen" id="formImagen" class="text-center border border-light p-5" action="#!" enctype="multipart/form-data">
+                                  <div class="card" style="width: 18rem;">
+                                    <div class="card-head">
+                                          <div id="estilo_foto">             
+                                            <p id="AgregarFoto">Agregar Foto</p>
+                                              <input type="file" value="" name="fileup" id="fileup" disabled>
+                                          </div>
+                                          <label class="text-center" id="namefile"></label>
+                                            <span class="imgupload ok"><i class="fa fa-check"></i></span>
+                                            <span class="imgupload stop"><i class="fa fa-times"></i></span>
+                                    </div>
+                                      <div class="card-body">
+                                        <form method="post" action="#" enctype="multipart/form-data">
+                                          <img class="card-img-top img-fluid" id="Imagen" src="">
+                                        </form>
+                                      </div>
+                                      <div class="card-footer text-center">
+                                        <input type="button" class="btn btn-primary btn-block upload" value="Subir" id="SubirImagen" disabled>
+                                      </div>
+                                  </div>                                  
+                                  </form>
+                              </div>
+                            <!-- INICIO DEL FORMULARIO CONTACTO-->
+                            <div class="col-md-12">
+                            <fieldset>
+                                <legend>Residencia y Contacto</legend>
+                                    <!-- DEPARTAMENTO -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Departamento</label>
+                                      <div class="col-lg-3">
+                                        <select id="lstdepartamento" name="lstdepartamento" class="custom-select"  onchange="listar_municipio(this.value)"></select>
+                                      </div>
+                                    <!--  MUNICIPIOS -->
+                                      <label class="col-lg-3 col-form-label form-control-label text-right">Municipio</label>
+                                      <div class="col-lg-3">
+                                        <select id="lstmunicipio" name="lstmunicipio" class="custom-select"></select>
+                                      </div>
+                                    </div>
+                                <!-- DIRECCIÓN -->
+                                    <div class="form-group row">
+                                      <label for="" class="col-lg-3 col-form-label form-control-label">Dirección</label>
+                                      <div class="col-lg-9">
+                                        <textarea style="height: 60px;" id="direccion" name="direccion" class="form-control"></textarea>
+                                      </div>
+                                    </div>
+                                    <!-- TELEFONO FIJO -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Teléfono Fijo</label>
+                                      <div class="col-lg-3">
+                                        <input class="form-control" type="text" name="telefono_fijo" id="telefono_fijo">
+                                      </div>
+                                    <!--  TELEFONO MOVIL -->
+                                      <label class="col-lg-3 col-form-label form-control-label text-right">Teléfono Móvil</label>
+                                      <div class="col-lg-3">
+                                        <input class="form-control" type="text" name="telefono_movil" id="telefono_movil">
+                                      </div>
+                                    </div>
+                                <!-- CORREO ELECTRICO -->
+                                    <div class="form-group row">
+                                        <label class="col-lg-3 col-form-label form-control-label">Correo Electrónico</label>
+                                        <div class="col-lg-9">
+                                            <input type="text" name="correo_electronico" id="correo_electronico" placeholder="" class="form-control">
+                                        </div>
+                                    </div>
+                            </fieldset>
+
+                            <!-- INICIO DEL FORMULARIO -->
+                        </div>
+                      </div><!-- FIN MODAL BODY INFORMACIÓN GENERAL-->
+                </div>
+                <!-- Tab EN LA EMPRESA -->
+                <div class="tab-pane p-2 border border-secondary" id="empresa" role="tabpanel" aria-labelledby="empresa-tab">
+                  <div class="modal-body row">
+                    <div class="col-md-12">
+                        <!-- EN LA EMPRESA-->
+                        <fieldset>
+                          <legend><span class="fas fa-edit"></span></legend>
+                            <div class="row">
+                              <div class="col-md-4">
+                                  <div class="form-group">    
+                                    <!-- CARGO -->
+                                    <label class="form-label form-control-label">Cargo</label>
+                                    <select class="custom-select" id="lstCargo" name="lstCargo"  tabindex="1" autofocus></select>
+                                    <!-- DEPARTAMENTO (CARGO) -->
+                                    <label class="form-label form-control-label">Departamento</label>
+                                    <select class="custom-select" id="lstCargoDepartamento" name="lstCargoDepartamento" tabindex="3"></select>
+                                  </div>
+                              </div>
+                              <div class="col-md-4">
+                                  <div class="form-group">    
+                                    <!-- FECHA INGRESO  -->
+                                    <label class="form-label form-control-label text-right">Fecha Ingreso</label>
+                                    <input class="form-control" type="date" id="txtFechaIngreso" name="txtFechaIngreso"  tabindex="1">
+                                  
+                                    <!-- TALLER -->
+                                    <label class="form-label form-control-label">Taller</label>
+                                    <select class="custom-select" id="lstTaller" name="lstTaller" tabindex="4"></select>
+                                  </div>
+                              </div>
+                              <div class="col-md-4">
+                                <div class="form-group">    
+                                    <!-- FECHA RETIRO -->
+                                    <label class="form-label form-control-label text-right" >Fecha Retiro</label>
+                                    <input class="form-control" type="date" id="txtFechaRetiro" name="txtFechaRetiro" tabindex="2">  
+                                </div>
+                              </div>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                          <legend><span class="fas fa-edit"></span></legend>
+                          <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">    
+                                  <!-- RUTA -->
+                                  <label class="form-label form-control-label">Ruta</label>
+                                  <select class="custom-select" id="lstRuta" name="lstRuta" tabindex="5"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="form-group">    
+                                <!-- SOCIO -->
+                                <label class="form-label form-control-label">Socio</label>
+                                <select class="custom-select" id="lstSocio" name="lstSocio" tabindex="6"></select>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">    
+                                  <!-- NÚMERO DE CUENTA DE AHORRO -->
+                                  <label class="form-label form-control-label"># Cuenta Ahorro</label>
+                                  <input class="form-control" type="text" id="txtCuentaAhorro" name="txtCuentaAhorro" maxlength="15" tabindex="7">
+                                </div>
+                            </div>
+                          </div>
+                        </fieldset>
+                        <fieldset>
+                          <legend><span class="fas fa-edit"></span></legend>
+                          <div class="row">
+                            <div class="col-md-4">
+                              <div class="form-group">    
+                                <!-- PAGO DIARIO -->
+                                <label class="form-label form-control-label">Pago Diario $</label>
+                                <input class="form-control" type="numeric" id="PagoDiario" name="PagoDiario" tabindex="18" min="0.00">
+                              </div>
+                          </div>
+                            <div class="col-md-4">
+                                <div class="form-group">    
+                                  <!-- salario MENSUAL -->
+                                  <label class="form-label form-control-label">Salario Mensual $</label>
+                                  <input class="form-control" type="numeric" id="Salario" name="Salario" tabindex="19" min="0.00">
+                                </div>
+                            </div>
+                          </div>
+                        </fieldset>
+                    </div> <!-- FIN COL MD 12 -->
+                  </div> <!-- MODAL ROW -->
+                </div> <!-- FIN EN LA EMPRESA -->
+                <!-- Tab DOCUMENTOS -->
+                <div class="tab-pane p-2 border border-secondary" id="documentos" role="tabpanel" aria-labelledby="documentos-tab">
+                  <div class="modal-body row">
+                    <div class="col-md-12">
+                        <!-- EN DOCUMENTOS-->
+                        <fieldset>
+                          <legend><span class="fas fa-edit"></span> Documentos</legend>
+                          <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">    
+                                  <!-- N.º CLASE DE LICENCIA -->
+                                  <label class="form-label form-control-label">Clase de Licencia</label>
+                                  <select class="custom-select" id="lstClaseLicencia" name="lstClaseLicencia" tabindex="8"></select>
+                                  <!-- N.º ISSS -->
+                                  <label class="form-label form-control-label">N.º ISSS</label>
+                                  <input class="form-control" type="text" id="txtIsss" name="txtIsss" maxlength="10" tabindex="11">
+                                  
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="form-group">
+                                <!-- N.º DE LICENCIA -->
+                                <label class="form-label form-control-label">N.º de Licencia</label>
+                                <input class="form-control" type="text" id="txtNumeroLicencia" name="txtNumeroLicencia" maxlength="17" tabindex="9">
+                                <!-- N.º NIT -->
+                                <label class="form-label form-control-label">N.º NIT</label>
+                                <input class="form-control" type="text" id="txtNit" name="txtNit" tabindex="12">
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">    
+                                  <!-- N.º DUI -->
+                                  <label class="form-label form-control-label">N.º DUI</label>
+                                  <input class="form-control" type="text" id="txtDui" name="txtDui" tabindex="10">
+                                  <!-- N.º NUP -->
+                                  <label class="form-label form-control-label">N.º NUP (AFP)</label>
+                                  <input class="form-control" type="text" id="txtNup" name="txtNup" maxlength="15" tabindex="13">
+                                </div>
+                            </div>
+                          </div>
+                        </fieldset>
+                        <fieldset>
+                          <legend><span class="fas fa-edit"></span> Comentario</legend>
+                            <div class="md-form amber-textarea">
+                              <i class="fas fa-pencil-alt prefix"></i>
+                              <textarea class="form-control md-textarea" id="txtComentario" name="txtComentario" tabindex="14" rows="3"></textarea>
+                              <label for="txtComentario">Comentario</label>
+                            </div>
+                        </fieldset>
+                    </div>
+                  </div>
+                </div> <!-- FIN DOCUMENTOS -->
+                <!-- Tab HISTORIAL -->
+                <div class="tab-pane p-2 border border-secondary" id="historial" role="tabpanel" aria-labelledby="historial-tab">
+                  <div class="modal-body row">
+                    <div class="modal-body row">
+                      <div class="col-md-12">
+                          <!-- HISTORIAL -->
+                          <fieldset>
+                              <div class="row">
+                                <div class="col-lg-8 d-flex justify-content-start">
+                                  <h2><label for="LblHistorial" style="color: black;">Historial</label></h2>
+                                </div>
+                                <div class="col-lg-4 d-flex justify-content-end">
+                                    <input class="btn btn-primary" type="button" value="Agregar" name="goNuevoHistorial" id="goNuevoHistorial" style="width: 100%;">
+                                    <input class="btn btn-primary" type="button" value="Ver" name="goVerHistorial" id="goVerHistorial" style="display: none; width: 100%;">
+                                </div>
+                              </div>
+                              <section id="EditarNuevoHistorial"  style="display: none; background-color: #F5F5F5; box-shadow: #99FFFF;">
+                                <div class="row">                                     
+                                      <!-- .col para FORMULARIO DE LOS DATOS.. -->
+                                      <div class="col-md-8">
+                                        <!-- Default form subscription -->
+                                        <form name="formHistorial" id="formHistorial" class="text-center border border-light p-5" action="#!">
+                                          <input type="hidden" id="accionHistorial" name="accionHistorial" value = 'AgregarNuevo'>            
+                                          <input type="hidden" id="IdHistorial" name="IdHistorial" value = '0'>            
+                                              <div class="card">
+  
+                                                <div class="card-body">
+                                                  <div class="form-group text-left">    
+                                                    <!-- FECHA -->
+                                                    <label class="form-label form-control-label">Fecha</label>
+                                                    <input class="form-control" type="date" id="txtFechaHistorial" name="txtFechaHistorial" tabindex="1">  
+                                                    <!-- TÍTULO -->
+                                                    <label class="form-label form-control-label">Título</label>
+                                                    <input class="form-control" type="text" id="TituloHistorial" name="TituloHistorial" tabindex="2">  
+                                                    <!-- DESCRIPCION -->
+                                                    <div class="md-form amber-textarea">
+                                                      <i class="fas fa-pencil-alt prefix"></i>
+                                                      <textarea class="form-control md-textarea" id="txtComentarioHistorial" name="txtComentarioHistorial" tabindex="3" rows="3"></textarea>
+                                                      <label for="txtComentarioPortafolio">Descripción</label>
+                                                    </div>
+                                                  </div>
+                                                </div>
+    
+                                                <!-- CARD FOOTER - BOTONES GUARDAR -->
+                                                <div class="card-footer d-flex justify-content-end align-items-end">
+                                                  <button class="btn btn-success" data-toggle="tooltip" data-placement="top" title="Agregar" id = "goGuardarHistorial">
+                                                    <span class="fas fa-save"> Guardar </span>
+                                                  </button>
+                                                </div>
+                                            </div>  <!-- fin del card -->
+                                        </form> <!-- fin DEL FORMULARIO CONTACTO--> 
+                                      </div>  <!-- FIN DEL COLUM 8 -->
+                                </div>  <!-- div class row  - fin -->
+                              </section>  <!-- FIN DEL SECTION -->
+                              <section id="ListarHistorial">
+                                      <!-- MOSTRAR IMAGENES SEGUN EL REGISTRO.-->
+                                        <!-- Card -->
+                                        <!-- Card -->
+                                    <!-- MOSTRAR IMAGENES SEGUN EL REGISTRO.-->
+                              </section>
+                        </fieldset>
+                      </div>
+                    </div>
+                    
+                  </div>
+                </div> <!-- FIN EN LA HISTORIAL -->
+                <!-- Tab DIGITALIZACIÓN DOCUMENTOS -->
+                <div class="tab-pane p-2 border border-secondary" id="digitalizacion" role="tabpanel" aria-labelledby="digitalizacion-tab">
+                  <div class="modal-body row">
+                    <div class="col-md-12">
+                        <!-- EN LA DIGITALICACION DOCUMENOTS-->
+                        <fieldset>
+                            <div class="row">
+                              <div class="col-lg-8 d-flex justify-content-start">
+                                <h2><label for="LblPortafolio" style="color: black;">Portafolio</label></h2>
+                              </div>
+                              <div class="col-lg-4 d-flex justify-content-end">
+                                  <input class="btn btn-primary" type="button" value="Agregar" name="goNuevoPortafolio" id="goNuevoPortafolio" style="width: 100%;">
+                                  <input class="btn btn-primary" type="button" value="Ver" name="goVerPortafolio" id="goVerPortafolio" style="display: none; width: 100%;">
+                              </div>
+                            </div>
+                            <section id="EditarNuevoPortafolio"  style="display: none; background-color: #F5F5F5; box-shadow: #99FFFF;">
+                              <div class="row">
+                                    <!-- .col para subir la imagen. -->
+                                    <div class="col-md-4">
+                                      <form name="formImagen" id="formImagen" class="text-center border border-light p-5" action="#!">
+                                      <div class="card" style="width: 18rem;">
+                                        <div class="card-head ">
+                                              <div id="estilo_foto">             
+                                                <p id="AgregarFoto">Agregar Foto</p>
+                                                  <input type="file" value="" name="fileupPortafolio" id="fileupPortafolio" disabled>
+                                              </div>
+                                              <label class="text-center" id="namefilePortafolio"></label>
+                                                <span class="imguploadPortafolio ok"><i class="fa fa-check"></i></span>
+                                                <span class="imguploadPortafolio stop"><i class="fa fa-times"></i></span>
+                                        </div>
+                                          <div class="card-body">
+                                            <form method="post" action="#" enctype="multipart/form-data">
+                                              <img class="card-img-top-Portafolio img-fluid" id="ImagenPortafolio" src="">
+                                            </form>
+                                          </div>
+                                          <div class="card-footer text-center">
+                                            <input type="button" class="btn btn-primary btn-block uploadPortafolio" value="Subir" id="SubirImagenPortafolio" disabled>
+                                          </div>
+                                      </div>                                  
+                                      </form>
+                                    </div>
+                                    
+                                    <!-- .col para FORMULARIO DE LOS DATOS.. -->
+                                    <div class="col-md-8">
+                                      <!-- Default form subscription -->
+                                      <form name="formPortafolio" id="formPortafolio" class="text-center border border-light p-5" action="#!">
+                                        <input type="hidden" id="accionPortafolio" name="accionPortafolio" value = 'AgregarNuevo'>            
+                                        <input type="hidden" id="IdPortafolio" name="IdPortafolio" value = '0'>            
+                                            <div class="card">
+
+                                              <div class="card-body">
+                                                <div class="form-group text-left">    
+                                                  <!-- FECHA -->
+                                                  <label class="form-label form-control-label">Fecha</label>
+                                                  <input class="form-control" type="date" id="txtFechaPortafolio" name="txtFechaPortafolio" tabindex="1">  
+                                                  <!-- TÍTULO -->
+                                                  <label class="form-label form-control-label">Título</label>
+                                                  <input class="form-control" type="text" id="TituloPortafolio" name="TituloPortafolio" tabindex="2">  
+                                                  <!-- DESCRIPCION -->
+                                                  <div class="md-form amber-textarea">
+                                                    <i class="fas fa-pencil-alt prefix"></i>
+                                                    <textarea class="form-control md-textarea" id="txtComentarioPortafolio" name="txtComentarioPortafolio" tabindex="3" rows="3"></textarea>
+                                                    <label for="txtComentarioPortafolio">Descripción</label>
+                                                  </div>
+                                                </div>
+                                              </div>
+  
+                                              <!-- CARD FOOTER - BOTONES GUARDAR -->
+                                              <div class="card-footer d-flex justify-content-end align-items-end">
+                                                <button class="btn btn-success" data-toggle="tooltip" data-placement="top" title="Agregar" id = "goGuardarPortafolio">
+                                                  <span class="fas fa-save"> Guardar </span>
+                                                </button>
+                                              </div>
+                                          </div>  <!-- fin del card -->
+                                      </form> <!-- fin DEL FORMULARIO CONTACTO--> 
+                                    </div>  <!-- FIN DEL COLUM 8 -->
+                              </div>  <!-- div class row  - fin -->
+                            </section>  <!-- FIN DEL SECTION -->
+                            <section id="ListarPortafolio">
+                                    <!-- MOSTRAR IMAGENES SEGUN EL REGISTRO.-->
+                                      <!-- Card -->
+                                      <!-- Card -->
+                                  <!-- MOSTRAR IMAGENES SEGUN EL REGISTRO.-->
+                            </section>
+                      </fieldset>
+                    </div>
+                  </div>
+                </div> <!-- FIN DIGITALACIÓN DOCUMENTACIÓN -->
+              </div> <!-- /.tab-content -->
+            </div> <!-- /.container -->
+            </div> <!-- /.card-body -->
+            <!-- /.card-footer -->
+            <div class="card-footer">
+              <div class="form-group row">
+               <div class="col d-flex justify-content-center">
+                <input class="btn btn-primary btn-rounded" type="submit" value="Guardar" id="Guardar" name="Guardar">
+               </div>
+              </div>              
+            </div>
+          </div> <!-- /.card -->
+          </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+     </form> <!-- fin del form -->            
+    </section>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

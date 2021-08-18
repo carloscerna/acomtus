@@ -1,0 +1,397 @@
+ {# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+/* mensajes de error para el validate de los form de input*/
+ input.error {
+    border-color: #f00 !important;
+}
+
+small.required {
+    color:#f00;
+}
+  
+/* when not active use specificity to override the !important on border-(color) */
+.nav-tabs .nav-link:not(.active) {
+    border-color: transparent !important;
+}
+
+fieldset {
+	/*background-color: rgba(111, 66, 193, 0.3);*/
+	  border-radius: 6px;
+    border: 1px solid #0080FF;
+    padding: 10px 10px 10px 10px;
+    background-color: #D4D4D4;
+}
+
+legend {
+	background-color: #FFFFFF;
+	border: 1.5px solid #0080FF;
+	border-radius: 4px;
+	color: var(--green);
+	font-size: 17px;
+	font-weight: bold;
+	padding: 5px 5px 3px 7px;
+	width: auto;
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<!-- JS para esta página. -->
+  <script type="text/JavaScript" src="js/main_nuevo_editar_produccion.js"></script>
+  <script type="text/javascript" src="js/plugins/Inputmask-5.x/dist/jquery.inputmask.js"></script>
+<!-- SOLO SCRIPT -->
+<script language="javascript">
+$(document).ready(function() {
+// JQuery.Inputmask example.
+var customInputmask = (function() {
+  var config = {
+    extendDefaults: {
+      showMaskOnHover: false,
+      showMaskOnFocus: false
+    },
+    extendDefinitions: {},
+    extendAliases: {
+      'numeric': {
+        radixPoint: '.',
+        groupSeparator: ',',
+        autoGroup: true,
+        placeholder: ''
+      },
+      'currency': {
+        alias: 'numeric',
+        prefix: '$',
+        digits: '*',
+        digitsOptional: true,
+        radixPoint: '.',
+        groupSeparator: ',',
+        autoGroup: true,
+        placeholder: ''
+      },
+      'euro': {
+        alias: 'currency',
+        prefix: '',
+        suffix: ' €',
+        radixPoint: ',',
+        groupSeparator: '',
+        autoGroup: false,
+      },
+      'euroComplex': {
+        alias: 'currency',
+        prefix: '',
+        suffix: ' €',
+      }
+    }
+  };
+
+  var init = function() {
+    Inputmask.extendDefaults(config.extendDefaults);
+    Inputmask.extendDefinitions(config.extendDefinitions);
+    Inputmask.extendAliases(config.extendAliases);
+    $('[data-inputmask]').inputmask();
+  };
+
+  return {
+    init: init
+  };
+}());
+
+// Initialize app.
+(function() {
+  customInputmask.init();
+}());
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+	// VALIDAR LOS ENTER EN EL FORMULARIO.
+  $('form').keypress(function(e){   
+    if(e == 13){
+      return false;
+    }
+  });
+
+  $('input').keypress(function(e){
+    if(e.which == 13){
+      return false;
+    }
+  });
+// Jquery-mask - entrado de datos.
+jQuery(function($){
+    // Form Users Agregar.
+  }); 
+// PINTA EL INPUT OUT E IN. input
+  document.querySelectorAll('input').forEach((input) => {
+    input.addEventListener('focusin', (event) => {
+    event.target.style.background = '#CBE9EA';    
+    });
+  });
+
+  document.querySelectorAll('input').forEach((input) => {
+      input.addEventListener('focusout', (event) => {
+    event.target.style.background = '';    
+    });
+  });
+// PINTA EL INPUT OUT E IN. SELECT
+document.querySelectorAll('select').forEach((input) => {
+    input.addEventListener('focusin', (event) => {
+    event.target.style.background = '#CBE9EA';    
+    });
+  });
+
+  document.querySelectorAll('select').forEach((input) => {
+      input.addEventListener('focusout', (event) => {
+    event.target.style.background = '';    
+    });
+  });
+});
+</script>
+
+<!-- DEINIR EL AJAX START- STOP Y ERROR -->
+<script>
+  /*
+  $(document).ready(function () { 
+    /*$(document).ajaxStart(function () {
+         $('#myModal').modal('show');
+     });
+     $(document).ajaxStop(function () {
+         $('#myModal').modal('hide');
+     });
+     $(document).ajaxError(function () {
+         $('#myModal').modal('hide');
+     });   
+     
+ });*/
+ </script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="produccion.php" data-toggle="tooltip" data-placement="left" title="Usuarios">Buscar</a></li>
+              <li class="breadcrumb-item active"><label for="iEdicionNuevo">Editar</label></li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+  <!-- Main content -->
+    <section class="content">
+     <!-- FORM PRINCIPAL -->
+     <form action="" method="post" id="formUsers" name="formUsers" role="form" enctype="multipart/form-data">
+        <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
+        <input type="hidden" id="id_user" name="id_user" value = '{{ id }}'>            
+        <input type="hidden" id="accion" name="accion" value = '{{ accion }}'>            
+        <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
+        <input type="hidden" id="cp" name="cp" value = '{{ codigo_personal }}'>            
+        <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
+          <div class="card card-secondary">
+            <div class="card-header">
+              <div class="row">
+                <div class="col-md-8 col-lg-8 col-xl-8">
+                  <h3 class="card-title"><i class="fas fa-layer-group nav-icon"></i> <label for="txtEdicionNuevo">Texto.</label></h3>
+                </div>
+
+                
+                <div class="col-md-4 col-lg-4 col-xl-4 d-flex justify-content-end">
+                  <span class="input-group-btn">
+                    <button class="btn btn-dark" type="button" id="goUltimoControles" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Últimos # Controles"><span class="fas fa-clipboard-list"></span></button>
+                    <button class="btn btn-info" type="button" id="goBuscarPorTiquete" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Buscar # Tiquete en Control"><span class="fal fa-ticket-alt"></span></button>
+                    <button class="btn btn-dark" type="button" id="goVerImprimirControles" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Buscar e Imprimir Controles"><span class="fal fa-print-search"></span></button>
+                  </span>
+                </div>
+
+              </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body" style="background-color:darkgrey">
+              <div class="row"> <!-- ROW PRINCPAL -->
+                <!-- CONTENDRA LA INFORMACIÓN-->
+                <div class="col col-md-12 col-lg-6 col-xl-6"> <!-- COL PRINCPAL -->
+                  <!-- Fecha y Correlativo de la Producción. -->
+                  <fieldset id="field_fecha">
+                    <legend>Correlativo y Fecha</legend>
+                        <div class="row">
+                          <div class="col col-md-12 col-lg-6 col-xl-6">
+                            <div class="input-group">
+                                <span class="input-group-text text-bold">N.º Control</span>
+                                <input type="text" id="NumeroCorrelativo" name="NumeroCorrelativo" class="form-control input-lg font-weight-bold text-green text-right" readonly value="0" style="font-size: xx-large;" tabindex="-1">
+                            </div>
+                          </div>
+                            <div class="col col-md-12 col-lg-6 col-xl-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">Fecha</span>
+                                    <input type="date" id="FechaProduccion" name="FechaProduccion" class="form-control" required autofocus>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <!-- 
+                      CONTIENE INFORMACIÓN GENERAL.
+                    -->
+                    <fieldset id="FieldInformacion">
+                      <legend>Información General</legend>
+                        <div class="row">
+                          <!--   RUTA  -->
+                          <div class="col col-md-12 col-lg-6 col-xl-6">
+                              <div class="input-group">
+                                  <span class="input-group-text">Ruta</span>
+                                  <select class="custom-select" name="lstRuta" id="lstRuta"></select>
+                              </div>
+                          </div>
+                          <!-- JORNADA -->
+                          <div class="col col-md-12 col-lg-6 col-xl-6">
+                            <div class="input-group">
+                                <span class="input-group-text">Jornada</span>
+                                <select class="custom-select" name="lstJornada" id="lstJornada"></select>                                      
+                            </div>
+                          </div>
+                        </div>
+                  </fieldset>
+                   <!-- 
+                      CONTIENE SERIE PRECIO PUBLICO Y EXISTENCIA
+                    -->
+                  <fieldset id="FieldTiquete">
+                    <legend> Serie | Tiquete </legend>
+                        <div class="row">
+                            <div class="col col-sm-4 col-md-12 col-lg-4 col-xl-4">
+                                <!--   TIQUETE SERIE  -->
+                                <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Serie</label>
+                                    <div class="col-lg-9">
+                                    <select class="custom-select" name="lstSerie" id="lstSerie" autofocus></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col col-sm-4 col-md-12 col-lg-4 col-xl-4">
+                                <div class="form-group row">
+                                    <label class="col-lg-6 col-form-label form-control-label">Precio Público</label>
+                                    <div class="col-lg-6">
+                                        <input type="text" class="form-control font-weight-bold input-lg" name="PrecioPublico" id="PrecioPublico" readonly data-inputmask="'alias': 'currency'" style="font-size: x-large;" tabindex="-1">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col col-sm-4 col-md-12 col-lg-4 col-xl-4">
+                                <div class="form-group row">
+                                    <label class="col-lg-6 col-form-label form-control-label">Existencia</label>
+                                    <div class="col-lg-6">
+                                        <input type="text" class="form-control" name="Existencia" id="Existencia" readonly data-inputmask="'alias': 'numeric'" tabindex="-1">
+                                        <input type="hidden" class="form-control" name="CodigoTiqueteColor" id="CodigoTiqueteColor">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                  </fieldset>
+                   <!-- 
+                      CONTIENE SERIE TIQUETE DESDE HASTA
+                    -->
+                  <fieldset id="FieldsetAsignar" style="background-color: darkolivegreen;">
+                    <legend>Talonario | Tiquete</legend>
+                    <div class="row">
+                      <!--   DESDE  -->
+                      <div class="col col-md-12 col-lg-6 col-xl-6">
+                          <div class="input-group">
+                              <span class="input-group-text">De: </span>
+                              <input type="text" class="form-control font-weight-bold input-lg" name="DesdeAsignado" id="DesdeAsignado" value="" data-inputmask="'alias': 'numeric'" style="font-size: x-large;" autocomplete="off">
+                              <!-- <input type="text" class="form-control font-weight-bold input-lg" name="DesdeAsignado" id="DesdeAsignado" value="" data-inputmask="'alias': 'numeric'" onblur="CalcularIncremento(this.value)" style="font-size: x-large;">-->
+                          </div>
+                      </div>
+                      <!-- hasta -->
+                      <div class="col col-md-12 col-lg-6 col-xl-6"  id="Partial" style="display: none;">
+                        <div class="input-group">
+                            <span class="input-group-text">: </span>
+                            <input type="hidden" class="form-control font-weight-bold input-lg" name="HastaAsignado" id="HastaAsignado" value="" data-inputmask="'alias': 'numeric'"  readonly style="font-size: x-large;" autocomplete="off">
+                              <input type="text" class="form-control font-weight-bold input-lg" name="DesdeAsignadoPartial01" id="DesdeAsignadoPartial01" value="" style="font-size: xx-large; text-align: right;" autocomplete="off">
+                        </div>
+                      </div>
+                    </div>
+                  </fieldset>       
+                </div> <!-- COL PRINCPAL -->
+
+                <!-- CONTENDRÁ LA TABLA-->
+                <div class="col col-md-12 col-lg-6 col-xl-6"> <!-- COL SECUNDARIO -->
+                  <fieldset id="FieldsetTabla">
+                    <legend>Tabla | Serie - Tiquete</legend>
+                      <table id="listadoAsignacion" class="table display responsive nowrap" style="width: 100%;">
+                        <thead>
+                            <tr>
+                              <th colspan="2" style="text-align: center;">Acción</th>
+                              <th style="text-align: center;">Serie</th>
+                              <th style="text-align: right;">Desde</th>
+                              <th style="text-align: right;">Hasta</th>
+                              <th style="text-align: right;">Total</th>
+                            </tr>                
+                        </thead>
+                          <tbody id="listadoAsignacionOk">
+                          </tbody>
+                          <tfoot>
+                            <tr>
+                              <th colspan="2" style="text-align: center;">Acción</th>
+                              <th style="text-align: center;">Serie</th>
+                              <th style="text-align: right;">Desde</th>
+                              <th style="text-align: right;">Hasta</th>
+                              <th style="text-align: right;">Total</th>
+                            </tr>
+                            <div class="row">
+                              <div class="col d-flex justify-content-between">
+                                <label class="text-bold" style="font-size: x-large; color:blue;" for="LblIngreso" tabindex="-1"></label>
+                                <label class="text-bold" style="font-size: x-large; color:blue;" for="LblCantidad" tabindex="-1"></label>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col d-flex justify-content-between">
+                                <label class="text-bold" style="font-size: large; color:blue;" for="" tabindex="-1"></label>
+                                <label class="text-bold" style="font-size: large; color:blue;" for="LblCantidadTalonarios" tabindex="-1"></label>
+                              </div>
+                            </div>
+                          </tfoot>
+                      </table>
+                    </fieldset>
+                    <!-- 
+                      BOTÓN GUARDAR
+                    -->
+                    <div class="row">
+                      <div class="col d-flex justify-content-between">
+                        <input class="btn btn-dark btn-lg" type="button" value="Imprimir" name="goImprimir" id="goImprimir" tabindex="-1">
+                        <input class="btn btn-dark btn-lg" type="button" value="Cancelar" name="goFinaliar" id="goFinaliar" tabindex="-1">
+                        <input type="hidden" name="CantidadTiqueteAsignado" id="CantidadTiqueteAsignado">
+                        <input type="hidden" name="TotalAsignado" id="TotalAsignado">
+                      </div>
+                    </div>                     
+                </div> <!-- COL SECUNDARIO -->
+              </div> <!-- ROW PRINCIPAL -->
+            </div> <!-- /.card-body -->
+            <!-- /.card-footer -->
+            <div class="card-footer">
+
+            </div>
+          </div> <!-- /.card  CARD-SUCCESS-->
+     </form> <!-- fin del form -->            
+    </section> <!-- SECTION CONTENT-->
+</div> <!-- /.content-Wrapper, Contains page content. -->
+
+
+<!-- plantilla que contiene el VentanaClientesEmpresa. -->
+{% include 'VentanaVerProduccion.html' %}
+
+<!-- plantilla que contiene el . -->
+{% include 'VentanaBuscarPorTiquete.html' %}
+
+
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}
+

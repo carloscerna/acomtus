@@ -1,0 +1,136 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block javascripts %}
+    <!-- JS para esta página. -->
+    <script type="text/JavaScript" src="js/main_inventario_tiquete.js"></script>
+    <script>   
+        (function(){
+            function removeAccents ( data ) {
+                if ( data.normalize ) {
+                    // Use I18n API if avaiable to split characters and accents, then remove
+                    // the accents wholesale. Note that we use the original data as well as
+                    // the new to allow for searching of either form.
+                    return data +' '+ data
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '');
+                }
+              
+                return data;
+            }
+              
+            var searchType = jQuery.fn.DataTable.ext.type.search;
+              
+            searchType.string = function ( data ) {
+                return ! data ?
+                    '' :
+                    typeof data === 'string' ?
+                        removeAccents( data ) :
+                        data;
+            };
+              
+            searchType.html = function ( data ) {
+                return ! data ?
+                    '' :
+                    typeof data === 'string' ?
+                        removeAccents( data.replace( /<.*?>/g, '' ) ) :
+                        data;
+            };
+              
+            }());
+    </script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            <h4></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="inventario_tiquete.php">Home</a></li>
+              <li class="breadcrumb-item active">Busqueda</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+
+  <!-- Small boxes (Stat box) -->
+  <div class="col-md-12">
+    <div class="card card-success">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-ticket-alt nav-icon"></i> BIENVENIDOS AL CONTENIDO INVENTARIO TIQUETE</h3>
+
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+          </button>
+        </div>
+        <!-- /.card-tools -->
+      </div>
+      <!-- /.card-header -->
+      <div class="card-body">
+        <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
+        <div class="card-body">
+          <div class="form-group">
+            <div class="row">
+                <div class="col-lg-10">
+                    <div class="input-group">
+                        <input type="text" class="global_filter form-control" id="global_filter" placeholder="Ingresar dato a buscar">
+                        <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <button class="btn btn-success" style="width:100%" data-toggle="tooltip" data-placement="top" title="Nuevo" id = "goNuevoUser">
+                      <span class="fas fa-ticket-alt"> Nuevo </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+          <table id="listado" class="table display responsive nowrap" style="width: 100%;">
+            <thead>
+                <tr>
+                  <th>Acción</th>
+                  <th>Id</th>
+                  <th>Fecha</th>
+                  <th>Descripción</th>
+                  <th>Serie</th>
+                  <th>Color</th>
+                  <th>Tiraje</th>
+                  <th>Existencia</th>
+                  <th>Estatus</th>
+                </tr>                
+            </thead>
+              <tbody id="listadoOk">
+              </tbody>
+              <tfoot>
+                <tr>
+                <th>Acción</th>
+                <th>Id</th>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Serie</th>
+                <th>Color</th>
+                <th>Existencia Inicial</th>
+                <th>Existencia Actual</th>
+                <th>Estatus</th>
+                </tr>
+              </tfoot>
+          </table>
+        </div> <!-- /.card-body -->
+      </div>        <!-- /.card-body -->
+    </div>      <!-- /.card -->
+  </div>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

@@ -1,0 +1,346 @@
+ {# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+/* mensajes de error para el validate de los form de input*/
+ input.error {
+    border-color: #f00 !important;
+}
+
+small.required {
+    color:#f00;
+}
+  
+/* when not active use specificity to override the !important on border-(color) */
+.nav-tabs .nav-link:not(.active) {
+    border-color: transparent !important;
+}
+
+fieldset {
+	/*background-color: rgba(111, 66, 193, 0.3);*/
+	  border-radius: 6px;
+    border: 1px solid #0080FF;
+    padding: 10px 10px 10px 10px;
+    background-color: #D4D4D4;
+}
+
+legend {
+	background-color: #FFFFFF;
+	border: 1.5px solid #0080FF;
+	border-radius: 4px;
+	color: var(--green);
+	font-size: 17px;
+	font-weight: bold;
+	padding: 5px 5px 3px 7px;
+	width: auto;
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<!-- JS para esta página. -->
+  <script type="text/JavaScript" src="js/main_nuevo_editar_produccion.js"></script>
+  <script type="text/javascript" src="js/plugins/Inputmask-5.x/dist/jquery.inputmask.js"></script>
+<!-- SOLO SCRIPT -->
+<script language="javascript">
+$(document).ready(function() {
+// JQuery.Inputmask example.
+var customInputmask = (function() {
+  var config = {
+    extendDefaults: {
+      showMaskOnHover: false,
+      showMaskOnFocus: false
+    },
+    extendDefinitions: {},
+    extendAliases: {
+      'numeric': {
+        radixPoint: '.',
+        groupSeparator: ',',
+        autoGroup: true,
+        placeholder: ''
+      },
+      'currency': {
+        alias: 'numeric',
+        prefix: '$',
+        digits: '*',
+        digitsOptional: true,
+        radixPoint: '.',
+        groupSeparator: ',',
+        autoGroup: true,
+        placeholder: ''
+      },
+      'euro': {
+        alias: 'currency',
+        prefix: '',
+        suffix: ' €',
+        radixPoint: ',',
+        groupSeparator: '',
+        autoGroup: false,
+      },
+      'euroComplex': {
+        alias: 'currency',
+        prefix: '',
+        suffix: ' €',
+      }
+    }
+  };
+
+  var init = function() {
+    Inputmask.extendDefaults(config.extendDefaults);
+    Inputmask.extendDefinitions(config.extendDefinitions);
+    Inputmask.extendAliases(config.extendAliases);
+    $('[data-inputmask]').inputmask();
+  };
+
+  return {
+    init: init
+  };
+}());
+
+// Initialize app.
+(function() {
+  customInputmask.init();
+}());
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+	// VALIDAR LOS ENTER EN EL FORMULARIO.
+  $('form').keypress(function(e){   
+    if(e == 13){
+      return false;
+    }
+  });
+
+  $('input').keypress(function(e){
+    if(e.which == 13){
+      return false;
+    }
+  });
+// Jquery-mask - entrado de datos.
+jQuery(function($){
+    // Form Users Agregar.
+  }); 
+//  CUANDO CAMBIE EL SELECT.  
+});
+</script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="produccion.php" data-toggle="tooltip" data-placement="left" title="Usuarios">Buscar</a></li>
+              <li class="breadcrumb-item active"><label for="iEdicionNuevo">Editar</label></li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+  <!-- Main content -->
+    <section class="content">
+     <!-- FORM PRINCIPAL -->
+     <form action="" method="post" id="formUsers" name="formUsers" role="form" enctype="multipart/form-data">
+     <div class="tab-content tab-validate"> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+        <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            
+        <input type="hidden" id="accion_buscar" name="accion_buscar" value = "GenerarCodigoNuevo" class="{required:true}">-->            
+        <input type="hidden" id="id_user" name="id_user" value = '{{ id }}'>            
+        <input type="hidden" id="accion" name="accion" value = '{{ accion }}'>            
+        <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-success">
+            <div class="card-header">
+              <h3 class="card-title">
+                <h3 class="card-title"><i class="fas fa-industry nav-icon"></i> <label for="txtEdicionNuevo">Edición</label>
+                </h3>
+                
+              </h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body" style="background-color:darkgrey">
+            <!-- Nav tabs -->
+            <div class="container py-2">
+              <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Producción</a>
+                </li>
+              </ul>
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <div class="tab-pane p-2 active border border-primary" id="home" role="tabpanel" aria-labelledby="home-tab">
+                      <!-- MODAL BODY ROW -->
+                      <div class="modal-body row">
+                        <div class="col-md-12">
+                            <!-- INICIO DEL FORMULARIO -->
+                            <fieldset id="field_fecha">
+                                <legend>Fecha y Hora</legend>
+                                <!-- Fecha y Hora de la Producción. -->
+                                    <div class="row">
+                                        <div class="col col-4">
+                                            <div class="input-group">
+                                                <span class="input-group-text">Fecha</span>
+                                                <input type="date" id="FechaProduccion" name="FechaProduccion" class="form-control"  required>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </fieldset>
+
+                            <fieldset id="FieldInformacion">
+                                <legend>Información General</legend>
+                                <!-- codigo NOmbre Personal . -->
+                                <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Nombre (motorista)</label>
+                                    <div class="col-lg-9">
+                                        <select class="custom-select" name="lstPersonal" id="lstPersonal"></select>
+                                    </div>
+                                </div>
+                                <!-- JORNADA -->
+                                <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Jornada</label>
+                                    <div class="col-lg-9">
+                                        <select class="custom-select" name="lstJornada" id="lstJornada"></select>
+                                    </div>
+                                  </div>
+                                <!-- UNIDAD DE TRANSPORTE  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Unidad de Transporte</label>
+                                      <div class="col-lg-9">
+                                        <select class="custom-select" name="lstUnidadTransporte" id="lstUnidadTransporte"></select>
+                                      </div>
+                                    </div>
+                                <!--   RUTA  -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Ruta</label>
+                                  <div class="col-lg-9">
+                                    <select class="custom-select" name="lstRuta" id="lstRuta"></select>
+                                  </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset id="FieldTiquete">
+                                <legend> Serie | Tiquete </legend>
+                                    <div class="row">
+                                        <div class="col col-sm-4 col-md-4 col-lg-4 col-xl-4">
+                                            <!--   TIQUETE SERIE  -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label form-control-label">Serie</label>
+                                                <div class="col-lg-9">
+                                                <select class="custom-select" name="lstSerie" id="lstSerie"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col col-sm-4 col-md-4 col-lg-4 col-xl-4">
+                                            <div class="form-group row">
+                                                <label class="col-lg-6 col-form-label form-control-label">Precio Público</label>
+                                                <div class="col-lg-6">
+                                                    <input type="text" class="form-control" name="PrecioPublico" id="PrecioPublico" readonly data-inputmask="'alias': 'currency'">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col col-sm-4 col-md-4 col-lg-4 col-xl-4">
+                                            <div class="form-group row">
+                                                <label class="col-lg-6 col-form-label form-control-label">Existencia</label>
+                                                <div class="col-lg-6">
+                                                    <input type="text" class="form-control" name="Existencia" id="Existencia" readonly data-inputmask="'alias': 'numeric'">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                              </fieldset>
+                                <div class="row">
+                                    <div class="col">
+                                        <fieldset id="FieldsetAsignar">
+                                            <legend>Asignar | Tiquete</legend>
+
+                                            <div class="form-group row">
+                                                <label class="col-lg-6 col-form-label form-control-label">Desde | Tiquete</label>
+                                                <div class="col-lg-6">
+                                                    <input type="text" class="form-control" name="DesdeAsignado" id="DesdeAsignado" value="0" data-inputmask="'alias': 'numeric'">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-lg-6 col-form-label form-control-label">Hasta | Tiquete</label>
+                                                <div class="col-lg-6">
+                                                    <input type="text" class="form-control" name="HastaAsignado" id="HastaAsignado" value="0" onblur="CalcularDesdeHastaAsignado(this.value)" data-inputmask="'alias': 'numeric'">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-lg-6 col-form-label form-control-label">Total Tiquete</label>
+                                                <div class="col-lg-6">
+                                                    <input type="text" class="form-control" name="CantidadTiqueteAsignado" id="CantidadTiqueteAsignado" value="0" readonly data-inputmask="'alias': 'numeric'">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-lg-6 col-form-label form-control-label">Valor Estimado</label>
+                                                <div class="col-lg-6">
+                                                    <input type="text" class="form-control" name="TotalAsignado" id="TotalAsignado" value="0" readonly data-inputmask="'alias': 'currency'">
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col">
+                                        <fieldset id="FieldsetTabla">
+                                            <legend>Tabla | Serie - Tiquete</legend>
+                                            <table id="listadoAsignacion" class="table display responsive nowrap" style="width: 100%;">
+                                                <thead>
+                                                    <tr>
+                                                      <th colspan="2">Acción</th>
+                                                      <th>Serie</th>
+                                                      <th>Desde</th>
+                                                      <th>Hasta</th>
+                                                      <th>Total</th>
+                                                    </tr>                
+                                                </thead>
+                                                  <tbody id="listadoAsignacionOk">
+                                                  </tbody>
+                                                  <tfoot>
+                                                    <tr>
+                                                        <th colspan="2">Acción</th>
+                                                        <th>Serie</th>
+                                                        <th>Desde</th>
+                                                        <th>Hasta</th>
+                                                        <th>Total</th>
+                                                    </tr>
+                                                  </tfoot>
+                                              </table>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            <!-- INICIO DEL FORMULARIO -->
+                        </div>
+                      </div><!-- FIN MODAL BODY INFORMACIÓN GENERAL-->
+                  </div>
+
+              </div> <!-- /.tab-content -->
+            </div> <!-- /.container -->
+            </div> <!-- /.card-body -->
+            <!-- /.card-footer -->
+            <div class="card-footer">
+              <div class="form-group row">
+               <div class="col d-flex justify-content-center">
+                <input class="btn btn-primary btn" type="submit" value="Guardar" name="Guardar">
+               </div>
+              </div>              
+            </div>
+          </div> <!-- /.card -->
+          </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+     </form> <!-- fin del form -->            
+        </div>
+      </div>
+    </section>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}
