@@ -202,7 +202,7 @@ function FancyTable($header)
     $pdf=new PDF('L','mm','Letter');
     $data = array();
     #Establecemos los márgenes izquierda, arriba y derecha:
-    $pdf->SetMargins(15, 15, 5);
+    $pdf->SetMargins(5, 15, 5);
     #Establecemos el margen inferior: 
     $pdf->SetAutoPageBreak(true,10);
 //Títulos de las columnas
@@ -324,23 +324,7 @@ function rellenar($total_dias_quincena){
                 }else{
                     // CUANDO SEA IGUAL SOLO A  CODIGO DE LA JORNADA
                     $pdf->SetTextColor(0);
-                    // CAMBIAR EL TIPO DE CARACTER SI ES NECESARIOW.
-                    switch ($descripcion_jornada) {
-                        case '':
-                            # code...
-                            break;
-                        case '1T':  // Una Tanda cambiar por el .
-                            $pdf->SetFont('Arial','B',16); // I : Italica; U: Normal;
-                            $descripcion_jornada = ".";
-                            $pdf->Cell($w[3],6,$descripcion_jornada,'1',0,'C',$fill);
-                            $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
-                            break;
-                        default:
-                            $pdf->Cell($w[3],6,$descripcion_jornada,'1',0,'C',$fill);
-                            break;
-                    }
-
-                    
+                    $pdf->Cell($w[3],6,$descripcion_jornada,'1',0,'C',$fill);
                     // calcular el salario
                     switch ($descripcion_jornada) {
                         case '4H':
@@ -373,10 +357,10 @@ function rellenar($total_dias_quincena){
     // ESPACIO PARA EL TERCER 
         $pdf->SetFillColor(255,255,255);
             $pdf->Cell($w[3],6,'','L',0,'C',$fill);
-        $pdf->SetFillColor(213, 213, 213);
+        $pdf->SetFillColor(233, 224, 222);
     // TERCER BLOQUE DE LINEAS PARA.
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
-    for($j=0;$j<=4;$j++){
+    for($j=0;$j<=5;$j++){
         switch ($j) {
             case '0':
                 # PRESENTAR SALARIO
@@ -392,11 +376,15 @@ function rellenar($total_dias_quincena){
                 $pdf->Cell($w[1],6,'$' . $extra_pantalla,'1',0,'C',$fill);
                 break;
             case '3':
+                # PRESENTAR BONI
+                $pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                break;
+            case '4':
                 # PRESENTAR TOTAL TIEMPO EXTRA
                 $total_tiempo_extra_pantalla = number_format($total_tiempo_extra,2,'.',',');
                 $pdf->Cell($w[1],6,'$' . $total_tiempo_extra_pantalla,'1',0,'C',$fill);
                 break;
-            case '4':
+            case '5':
                 # PRESENTAR TOTAL SALARIO
                 $total_salario_pantalla = number_format($total_salario,2,'.',',');
                 $pdf->Cell($w[1],6,'$' . $total_salario_pantalla,'1',0,'C',$fill);

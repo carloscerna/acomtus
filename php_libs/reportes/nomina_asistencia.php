@@ -160,7 +160,7 @@ function FancyTable($header)
             $this->Cell($w[3],7,'','L',0,'C',1);
             //
             $this->SetFillColor(255);
-            $header2=array('','','','Total','');
+            $header2=array('','','','','Total','');
             for($j=0;$j<count($header2);$j++){
                 $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRT',0,'C',1);
             }
@@ -180,13 +180,13 @@ function FancyTable($header)
             $this->Cell($w[3],7,'','L',0,'C',1);
             //
             $this->SetFillColor(255);
-            $header2=array('Salario','Asuetos','Extra','Extra','TOTAL');
+            $header2=array('Salario','Asuetos','Extra','Boni','Extra','TOTAL');
             for($j=0;$j<count($header2);$j++){
                 $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRB',0,'C',1);
             }
             $this->Ln();  /// salto de linea
     //Restauración de colores y fuentes
-    $this->SetFillColor(213, 213, 213);
+    $this->SetFillColor(233, 224, 222);
     $this->SetTextColor(0);
     $this->SetFont('');
     //Datos
@@ -198,7 +198,7 @@ function FancyTable($header)
     $pdf=new PDF('L','mm','Letter');
     $data = array();
     #Establecemos los márgenes izquierda, arriba y derecha:
-    $pdf->SetMargins(15, 15, 5);
+    $pdf->SetMargins(5, 15, 5);
     #Establecemos el margen inferior: 
     $pdf->SetAutoPageBreak(true,10);
 //Títulos de las columnas
@@ -281,9 +281,9 @@ function rellenar($total_dias_quincena){
     // ESPACIO PARA EL TERCER 
         $pdf->SetFillColor(255,255,255);
             $pdf->Cell($w[3],6,'','L',0,'C',$fill);
-        $pdf->SetFillColor(213, 213, 213);
+        $pdf->SetFillColor(233, 224, 222);
     // TERCER BLOQUE DE LINEAS PARA.
-    for($j=0;$j<=4;$j++){
+    for($j=0;$j<=5;$j++){
         $pdf->Cell($w[1],6,'','1',0,'C',$fill);
     }
     // SALTO DE LINEA Y FILL.
