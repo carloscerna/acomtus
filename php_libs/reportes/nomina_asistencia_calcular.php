@@ -164,7 +164,7 @@ function FancyTable($header)
             $this->Cell($w[3],7,'','L',0,'C',1);
             //
             $this->SetFillColor(255);
-            $header2=array('','','','','Total','');
+            $header2=array('','','','Total','');
             for($j=0;$j<count($header2);$j++){
                 $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRT',0,'C',1);
             }
@@ -184,13 +184,13 @@ function FancyTable($header)
             $this->Cell($w[3],7,'','L',0,'C',1);
             //
             $this->SetFillColor(255);
-            $header2=array('Salario','Asuetos','Extra','Boni','Extra','TOTAL');
+            $header2=array('Salario','Asuetos','Extra','Extra','TOTAL');
             for($j=0;$j<count($header2);$j++){
                 $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRB',0,'C',1);
             }
             $this->Ln();  /// salto de linea
     //Restauración de colores y fuentes
-    $this->SetFillColor(233, 224, 222);
+    $this->SetFillColor(213, 213, 213);
     $this->SetTextColor(0);
     $this->SetFont('');
     //Datos
