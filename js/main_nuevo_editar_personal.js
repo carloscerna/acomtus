@@ -27,8 +27,8 @@ $(function(){ // INICIO DEL FUNCTION.
 			id_ = $("#id_user").val();
 			accion = $("#accion").val();
 			// cambiar texto de label y enlace.
-			$("label[for='txtEdicionNuevo']").text("Edición");
-            $("label[for='iEdicionNuevo']").text("Edición");
+			//$("label[for='txtEdicionNuevo']").text("Edición");
+            //$("label[for='iEdicionNuevo']").text("Edición");
             //  Botones de la imagen o foto personal.
             $("#fileup").attr("disabled",false);		// Botón Subir Imagen Portafolio
             $("#SubirImagen").attr("disabled",false);		// Botón Subir Imagen Portafolio
