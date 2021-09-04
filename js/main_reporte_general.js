@@ -534,6 +534,7 @@ $("#goProduccionDiferencias").on('click', function (e) {
 	$("#ProduccionDiferencias").show();
 	// fieldset buscar por motorista
 	$("#BuscarPorMotorista").hide();
+	$("#BuscarPorUnidadPlaca").hide();
 	$("#NumeroCorrelativo").prop('disabled', true);
 	$("#goReporteGeneral").prop('disabled', true);
 	$("#goBuscarProduccion").prop('disabled', true);
@@ -899,6 +900,7 @@ function BuscarProduccionPorFecha() {
 						$("#FieldsetTabla").hide();
 					// fieldset buscar por motorista
 						$("#BuscarPorMotorista").hide();
+						$("#BuscarPorUnidadPlaca").hide();
 					// limpiar tabla producción detalle.
 						$('#listadoDetalleOk').empty();
 					// cambiar el valor del ingreso.
@@ -950,6 +952,7 @@ function BuscarProduccionPorIdTabla() {
 						$("#FieldsetTabla").show();
 					// fieldset buscar por motorista
 						$("#BuscarPorMotorista").hide();
+						$("#BuscarPorUnidadPlaca").hide();
 					// limpiar tabla producción detalle.
 						$('#listadoDetalleOk').empty();
 					// cambiar el valor del ingreso.
@@ -1040,3 +1043,14 @@ function listar_serie(){
 }
 
 function delimitNumbers(str) { return (str + "").replace(/\b(\d+)((\.\d+)*)\b/g, function(a, b, c) { return (b.charAt(0) > 0 && !(c || ".").lastIndexOf(".") ? b.replace(/(\d)(?=(\d{3})+$)/g, "$1,") : b) + c; }); } 
+
+      // Mensaje de Carga de Ajax.
+      function configureLoadingScreen(screen){
+		$(document)
+			.ajaxStart(function () {
+				screen.fadeIn();
+			})
+			.ajaxStop(function () {
+				screen.fadeOut();
+			});
+	}
