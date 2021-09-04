@@ -3,6 +3,7 @@
 {% extends 'default_layout.html' %}
 
 {% block extraCSS %}
+  <link href="css/styles-loading.css" rel="stylesheet">
 <style>
   /* mensajes de error para el validate de los form de input*/
    input.error {
@@ -553,6 +554,8 @@
   </section> <!-- /.DIV QUE CONTIENE EL CARD -->
 </div> <!-- /.content-Wrapper, Contains page content. -->
 
+<!-- plantilla que contiene el . -->
+{% include 'VentanaBuscarPorTiquete.html' %}
 
 <div id="loading-screen" style="display:none">
   <img src="img/spinning-circles.svg">
@@ -560,9 +563,6 @@
     <label for="LblDescripcion" class="">Por Favor Espere...</label>
   </h3>
 </div>
-<!-- plantilla que contiene el . -->
-{% include 'VentanaBuscarPorTiquete.html' %}
-
 {% endblock %}
 
 {% block loginUser %}

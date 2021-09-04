@@ -947,7 +947,7 @@ function BuscarProduccionPorIdTabla() {
 					// RELLENAR TABLA.
 						$('#listadoDevolucionIngresoOk').append(response.contenido);
 					//	
-						$("#ProduccionTabla").hide();
+						$("#ProduccionTabla").show();
 						$("#field_produccion_detalle").hide();
 						$("#FieldsetTabla").show();
 					// fieldset buscar por motorista
@@ -1042,8 +1042,6 @@ function listar_serie(){
     }, "json");    
 }
 
-function delimitNumbers(str) { return (str + "").replace(/\b(\d+)((\.\d+)*)\b/g, function(a, b, c) { return (b.charAt(0) > 0 && !(c || ".").lastIndexOf(".") ? b.replace(/(\d)(?=(\d{3})+$)/g, "$1,") : b) + c; }); } 
-
       // Mensaje de Carga de Ajax.
       function configureLoadingScreen(screen){
 		$(document)
@@ -1054,3 +1052,6 @@ function delimitNumbers(str) { return (str + "").replace(/\b(\d+)((\.\d+)*)\b/g,
 				screen.fadeOut();
 			});
 	}
+
+function delimitNumbers(str) { return (str + "").replace(/\b(\d+)((\.\d+)*)\b/g, function(a, b, c) { return (b.charAt(0) > 0 && !(c || ".").lastIndexOf(".") ? b.replace(/(\d)(?=(\d{3})+$)/g, "$1,") : b) + c; }); } 
+
