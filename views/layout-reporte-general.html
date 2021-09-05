@@ -16,6 +16,12 @@
   .nav-tabs .nav-link:not(.active) {
       border-color: transparent !important;
   }
+
+ /* CARD HORIZONAL CCSS CONFIGURACÓN */
+  .card-horizontal {
+    display: flex;
+    flex: 1 1 auto;
+}
   </style>
 {% endblock %}
 
@@ -381,12 +387,13 @@
     <div class="card-header bg-gradient-navy">
       <h5 class="card-title">Producción</h5>
       <div class="card-tools">
+        <span class="badge badge-primary">Label</span>
         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
         </button>
       </div>
     </div>
     <div class="card-body">
-      <div class="row">
+      <div class="row p-0">
         <div class="col d-flex justify-content-between">
           <label for="LblCantidadProduccionesVendidas" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Cantidad Controles Vendidos: </label>
           <label for="LblTotalTiquetes" style="padding: 0px; font-size: large; color:darkblue; text-align: left;"># Tiquetes Vendidos: </label>
@@ -401,157 +408,198 @@
 
       <div class="row">
         <div class="col">
-          <table id="listado" class="table display responsive nowrap" style="width: 100%;">
-            <thead>
-              <tr>
-                <th colspan="3" style="padding: 0px; font-size: large; color:blue; text-align: left;"></th>
-                <th colspan="2" style="padding: 0px; font-size: large; color: white; text-align: center; background-color:teal;"># Controles</th>
-                <th colspan="4" style="padding: 0px; font-size: large; color:white; text-align: center; background-color: darkgreen;"># Tiquetes</th>
-                <th colspan="2" style="padding: 0px; font-size: large; color:blue; text-align: left; "></th>
-              </tr>
-                <tr>
-                  <th></th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"></th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Ruta</th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: right;">Rango</th>
-                  <th style="padding: 0px; font-size: l; color:blue; text-align: center;">Cantidad</th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Entregados</th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Devolucion</th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Vendidos</th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Precio Público</th>
-                  <th style="padding: 0px; font-size: medium; color:green; text-align: right;">$ Ingreso</th>
-                </tr>                
-            </thead>
-              <tbody id="listadoOk">
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th></th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"></th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Ruta</th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: right;">Rango</th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Cantidad</th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Entregados</th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Devolucion</th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Vendidos</th>
-                  <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Precio Público</th>
-                  <th style="padding: 0px; font-size: medium; color:green; text-align: right;">$ Ingreso</th>
-                </tr>
-              </tfoot>
-          </table>
-        </div>
-      </div>
-      </fieldset>
-    <!-- DETALLE DE LA PRODUCCIÓN ASIGNADA -->
-    <fieldset id="field_produccion_detalle" style="display: none;">
-      <legend> Producción | Detalle </legend>
-      <div class="row">
-        <div class="col d-flex justify-content-between">
-          <!-- <label for="LblProduccionesTotal" style="padding: 0px; font-size: x-medium; color:blue; text-align: left;">Total Producciones : </label> -->
-          <label for="LblDetalleTotalIngreso" style="padding: 0px; font-size: x-large; color:blue; text-align: left;">Total $ </label>
-        </div>
-      </div>
-
-        <div class="row">
-          <div class="col">
-            <table id="listadoDetalle" class="table display responsive nowrap" style="width: 100%;">
+          <div class="table-responsive">
+            <table id="listado" class="table table-striped table-hover">
               <thead>
+                <tr>
+                  <th colspan="3" style="padding: 0px; font-size: large; color:blue; text-align: left;"></th>
+                  <th colspan="2" style="padding: 0px; font-size: large; color: white; text-align: center; background-color:teal;"># Controles</th>
+                  <th colspan="4" style="padding: 0px; font-size: large; color:white; text-align: center; background-color: darkgreen;"># Tiquetes</th>
+                  <th colspan="2" style="padding: 0px; font-size: large; color:blue; text-align: left; "></th>
+                </tr>
                   <tr>
                     <th></th>
-                    <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"># Control</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"></th>
                     <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Ruta</th>
-                    <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Equipo</th>
-                    <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Motorista</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: right;">Rango</th>
+                    <th style="padding: 0px; font-size: l; color:blue; text-align: center;">Cantidad</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Entregados</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Devolucion</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Vendidos</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Precio Público</th>
                     <th style="padding: 0px; font-size: medium; color:green; text-align: right;">$ Ingreso</th>
                   </tr>                
               </thead>
-                <tbody id="listadoDetalleOk">
+                <tbody id="listadoOk">
                 </tbody>
                 <tfoot>
                   <tr>
                     <th></th>
-                    <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"># Control</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"></th>
                     <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Ruta</th>
-                    <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Equipo</th>
-                    <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Motorista</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: right;">Rango</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Cantidad</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Entregados</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Devolucion</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: center;"># Vendidos</th>
+                    <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Precio Público</th>
                     <th style="padding: 0px; font-size: medium; color:green; text-align: right;">$ Ingreso</th>
                   </tr>
                 </tfoot>
             </table>
           </div>
-        </div>
-    </fieldset>
-    <!-- DETALLE DE LA PRODUCCIÓN ASIGNADA -->
-
-    <fieldset id="FieldsetTabla" style="display: none;">
-      <legend>Producción | Talonario - Serie - Tiquete</legend>
-      <div class="row">
-        <!--   RUTA  -->
-        <div class="col col-md-6 col-lg-6 col-xl-6">
-          <!-- NOMBRE Y TOTAL INGRESO -->
-          <label for="LblNombreMotorista" style="padding: 0px; font-size: medium; color:blue; text-align: left;">Motorista : </label>
-          <h5> Código: <span class="badge badge-info" id="LblDescripcionCodigo">CódigoPersonal</span></h5>
-          <h5> Ruta: <span class="badge badge-info" id="LblDescripcionRuta">Ruta</span></h5>
-          <h5> Unidad: <span class="badge badge-info" id="LblDescripcionUnidad">Unidad</span></h5>
-          <h5> Fecha : <span class="badge badge-info" id="LblListadoIdFecha">Fecha</span></h5>
-        </div>
-        <!--   tiquete vendidos, devueltos y total  -->
-        <div class="col col-md-6 col-lg-6 col-xl-6 d-flex justify-content-end">
-          <h5> Precio Público : <span class="badge badge-info" id="LblListadoPrecio">Precio</span></h5>
-          <br>
-          <h5> Cantidad Vendida : <span class="badge badge-info" id="LblListadoCantidad">Cantidad</span></h5>
-          <br>
-          <h5> Total : <span class="badge badge-info" id="LblListadoTotalIngreso">total</span></h5>
+          
         </div>
       </div>
+    </div> <!-- CIERRE DEL CARD BODY-->
+    </div>  <!-- CIERRA DEL CARD-->
+  </section> <!-- CIERE DE LA SECTION DEL CARD PRODUCCTION-->
 
-      <table id="listadoAsignacion" class="table table-condensed display responsive nowrap" style="width: 100%; padding: 0; text-align: right;">
-          <thead>
-              <tr>
-                <th style="text-align: left; " colspan="3"># Correlativo</th>
-                <th style="text-align: center;">Serie</th>
-                <th style="text-align: right;">Cola</th>
-                <th style="text-align: right;">Desde</th>
-                <th style="text-align: right;">Hasta</th>
-                <th style="text-align: right;">Total</th>
-              </tr>                
-          </thead>
-            <tbody id="listadoDevolucionIngresoOk">
-            </tbody>
-            <tfoot>
-              <tr>
-                  <th style="text-align: left; " colspan="3"># Correlativo</th>
-                  <th style="text-align: center;">Serie</th>
-                  <th style="text-align: right;">Cola</th>
-                  <th style="text-align: right;">Desde</th>
-                  <th style="text-align: right;">Hasta</th>
-                  <th style="text-align: right;">Total</th>
-              </tr>
+    <!-- DETALLE DE LA PRODUCCIÓN ASIGNADA -->
+  <section id="field_produccion_detalle" style="display: none;">
+    <div class="card">
+      <div class="card-header bg-gradient-navy">
+        <h5 class="card-title">Detalle de la Producción</h5>
+        <div class="card-tools">
+          <span class="badge badge-primary"><label for="LblDetalleTotalIngreso" style="padding: 0px; font-size: medium; text-align: left;">Total $ </label></span>
+          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col">
+            <div class="table-responsive">
+              <table id="listadoDetalle" class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                      <th></th>
+                      <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"># Control</th>
+                      <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Ruta</th>
+                      <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Equipo</th>
+                      <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Motorista</th>
+                      <th style="padding: 0px; font-size: medium; color:green; text-align: right;">$ Ingreso</th>
+                    </tr>                
+                </thead>
+                  <tbody id="listadoDetalleOk">
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th></th>
+                      <th style="padding: 0px; font-size: medium; color:blue; text-align: left;"># Control</th>
+                      <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Ruta</th>
+                      <th style="padding: 0px; font-size: medium; color:blue; text-align: center;">Equipo</th>
+                      <th style="padding: 0px; font-size: medium; color:blue; text-align: left;">Motorista</th>
+                      <th style="padding: 0px; font-size: medium; color:green; text-align: right;">$ Ingreso</th>
+                    </tr>
+                  </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div> <!-- CIERRE DEL CARD BODY-->
+      <div class="card-footer bg-gradient-cyan"></div>
+    </div> <!-- CIERRE DEL CARD-->
+  </section>
 
-              <div class="row">
-                <div class="col">
-                  <!-- <label for="">Inventiario Tiquete</label> -->
-                    <input type="hidden" name="CodigoInventarioTiquete" id="CodigoInventarioTiquete"> 
-                  <!-- <label for="">Cantidad Tiquete</label> -->
-                    <input type="hidden" name="CantidadTiqueteAsignado" id="CantidadTiqueteAsignado">
-                   <!--<label for="">Precio Publico</label> -->
-                    <input type="hidden" id="PrecioPublico">
-                  <!-- <label for="">total</label> -->
-                    <input type="hidden" name="TotalAsignado" id="TotalAsignado">
-                   <!-- <label for="">Codigo producción Asignado</label> -->
-                    <input type="hidden" id="CodigoProduccionAsignacion">
-                  <!-- <label for="">Código Producción</label> -->
-                    <input type="hidden" id="CodigoProduccion">
-                  <!-- <label for="">Código Producción</label> -->
-                  <input type="hidden" id="DesdeTablaAsignado">
+    <!-- DETALLE DE LA PRODUCCIÓN ASIGNADA -->
+    <section id="FieldsetTabla" style="display: none;">
+      <div class="card">
+        <div class="card-header bg-gradient-navy">
+          <h5 class="card-title">Producción | Talonario - Serie - Tiquete</h5>
+          <div class="card-tools">
+            <!-- Buttons, labels, and many other things can be placed here! -->
+            <!-- Here is a label for example -->
+            <span class="badge badge-dark">
+              <!-- NOMBRE Y TOTAL INGRESO -->
+              <label for="LblNombreMotorista"></label>
+            </span>
+          </div>
+        </div>
+          <div class="card-horizontal">
+            <div class="img-square-wrapper">
+              <img class="card-img-top img-fluid" style="width: 8rem;" id="ImagenPersonal" src="">
+            </div>
+              <div class="card-body p-0">
+                <div class="row">
+                  <!--   RUTA  -->
+                  <div class="col col-md-6 col-lg-6 col-xl-6">
+
+                    <div class="info-box">
+                      <span class="info-box-icon bg-info"><i class="fal fa-info-circle"></i></span>
+                      <div class="info-box-content p-0">
+                        <span class="info-box-text">Código: <span class="badge badge-dark" id="LblDescripcionCodigo">CódigoPersonal</span></span>
+                        <span class="info-box-text">Ruta: <span class="badge badge-dark" id="LblDescripcionRuta">Ruta</span></span>
+                        <span class="info-box-text">Unidad: <span class="badge badge-dark" id="LblDescripcionUnidad">Unidad</span></span>
+                        <span class="info-box-text">Fecha: <span class="badge badge-dark" id="LblListadoIdFecha">Fecha</span></span>
+                      </div>
+                    </div>
+
+                  </div>
+                  <!--   tiquete vendidos, devueltos y total  -->
+                  <div class="col col-md-6 col-lg-6 col-xl-6 d-flex justify-content-end">
+                    <div class="info-box">
+                      <span class="info-box-icon bg-info"><i class="fad fa-dollar-sign"></i></span>
+                      <div class="info-box-content p-0">
+                        <span class="info-box-text">Precio Público: <span class="badge badge-dark" id="LblListadoPrecio">Precio</span></span>
+                        <span class="info-box-text">Cantidad Vendida: <span class="badge badge-dark" id="LblListadoCantidad">Cantidad</span></span>
+                        <span class="info-box-text">Total: <span class="badge badge-dark" id="LblListadoTotalIngreso">Total</span></span>
+                      </div>
+                    </div>
+                  </div> 
                 </div>
               </div>
-            </tfoot>
-        </table>
-    </div>
-    <div class="card-footer bg-gradient-cyan">...</div>
-  </div>
-  </section> <!-- /.DIV QUE CONTIENE EL CARD -->
+            </div>  <!-- card horizontal cierre-->
+        <div class="card-footer">
+          <div class="table-responsive">
+            <table id="listadoAsignacion" class="table table-hover table-striped">
+              <thead>
+                  <tr>
+                    <th style="text-align: left; " colspan="3"># Correlativo</th>
+                    <th style="text-align: center;">Serie</th>
+                    <th style="text-align: right;">Cola</th>
+                    <th style="text-align: right;">Desde</th>
+                    <th style="text-align: right;">Hasta</th>
+                    <th style="text-align: right;">Total</th>
+                  </tr>                
+              </thead>
+                <tbody id="listadoDevolucionIngresoOk">
+                </tbody>
+                <tfoot>
+                  <tr>
+                      <th style="text-align: left; " colspan="3"># Correlativo</th>
+                      <th style="text-align: center;">Serie</th>
+                      <th style="text-align: right;">Cola</th>
+                      <th style="text-align: right;">Desde</th>
+                      <th style="text-align: right;">Hasta</th>
+                      <th style="text-align: right;">Total</th>
+                  </tr>
+    
+                  <div class="row">
+                    <div class="col">
+                      <!-- <label for="">Inventiario Tiquete</label> -->
+                        <input type="hidden" name="CodigoInventarioTiquete" id="CodigoInventarioTiquete"> 
+                      <!-- <label for="">Cantidad Tiquete</label> -->
+                        <input type="hidden" name="CantidadTiqueteAsignado" id="CantidadTiqueteAsignado">
+                      <!--<label for="">Precio Publico</label> -->
+                        <input type="hidden" id="PrecioPublico">
+                      <!-- <label for="">total</label> -->
+                        <input type="hidden" name="TotalAsignado" id="TotalAsignado">
+                      <!-- <label for="">Codigo producción Asignado</label> -->
+                        <input type="hidden" id="CodigoProduccionAsignacion">
+                      <!-- <label for="">Código Producción</label> -->
+                        <input type="hidden" id="CodigoProduccion">
+                      <!-- <label for="">Código Producción</label> -->
+                      <input type="hidden" id="DesdeTablaAsignado">
+                    </div>
+                  </div>
+                </tfoot>
+          </table>
+          </div>
+           
+        </div>
+      </div>
+    </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->
 
 <!-- plantilla que contiene el . -->

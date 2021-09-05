@@ -40,6 +40,8 @@ $fecha_hasta = "";
 $OptBuscarPM = "";
 $descripcion_ruta_pm = "";
 $descripcion_ruta_rg = "";
+$url_foto = "";
+$codigo_genero = "";
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);    
 // Incluimos el archivo de funciones y conexi�n a la base de datos
@@ -202,9 +204,9 @@ if($errorDbConexion == false){
                         }   // IF DE LA CONSULTA PRODUCCION POR RUTA..
                     // DAR VALORES A VARIABLES.
                         // ESTILO
-                        $estilo_l = 'style="padding: 0px; font-size: medium; color:blue; text-align: left;"';
-                        $estilo_c = 'style="padding: 0px; font-size: medium; color:blue; text-align: center;"';
-                        $estilo_r = 'style="padding: 0px; font-size: medium; color:blue; text-align: right;"';
+                        $estilo_l = 'style="padding: 0px; font-size: medium; text-align: left;"';
+                        $estilo_c = 'style="padding: 0px; font-size: medium; text-align: center;"';
+                        $estilo_r = 'style="padding: 0px; font-size: medium; text-align: right;"';
                         $estilo_r_green = 'style="padding: 0px; font-size: medium; color:green; text-align: right;"';
                         // CUANDO YA SE HA CALCULADO LA PRODUCCIÓN ASIGNADA.
                         // Validar si hay registros.
@@ -293,10 +295,10 @@ if($errorDbConexion == false){
                                         $totalIngresoOKPantalla = $totalIngresoOK;
                                 // DAR VALORES A VARIABLES.
                                     // ESTILO
-                                    $estilo_l = 'style="padding: 0px; font-size: large; color:blue; text-align: left;"';
-                                    $estilo_c = 'style="padding: 0px; font-size: large; color:blue; text-align: center;"';
-                                    $estilo_r = 'style="padding: 0px; font-size: x-large; color:blue; text-align: right;"';
-                                    $estilo_r_green = 'style="padding: 0px; font-size: x-large; color:green; text-align: right;"';
+                                    $estilo_l = 'style="padding: 0px; font-size: medium; text-align: left;"';
+                                    $estilo_c = 'style="padding: 0px; font-size: medium; text-align: center;"';
+                                    $estilo_r = 'style="padding: 0px; font-size: medium;  text-align: right;"';
+                                    $estilo_r_green = 'style="padding: 0px; font-size: medium; color:green; text-align: right;"';
                                     // CUANDO YA SE HA CALCULADO LA PRODUCCIÓN ASIGNADA.
                                     // Validar si hay registros.
                                         $contenidoOK .= "<tr>
@@ -350,6 +352,8 @@ else{
             "cantidadTiquetePantalla" => number_format($cantidadTiquetePantalla,0),
             "nombreMotorista" => $nombre_motorista,
             "codigoPersonal" => $codigo_personal,
+            "url_foto" => $url_foto,
+            "codigo_genero" => $codigo_genero,
             "descripcionRuta" => $descripcion_ruta_rg,
             "descripcionUnidad" => $numero_equipo . ' | ' . $numero_placa,
             "precioPublico" => $precio_publico_,
@@ -363,7 +367,7 @@ else{
 
     function ListadoAsignado(){
         global $id_produccion, $dblink, $contenidoOK, $codigo_produccion, $totalIngresoOK, $respuestaOK, $mensajeError, $CantidadtiqueteOK, $totalIngresoOKPantalla, $nombre_motorista, $codigo_personal,
-        $descripcion_ruta_rg, $numero_equipo, $numero_placa, $precio_publico, $precio_publico_, $fecha; 
+        $descripcion_ruta_rg, $numero_equipo, $numero_placa, $precio_publico, $precio_publico_, $fecha, $url_foto, $codigo_genero; 
         // consulta.
         $query_c = "SELECT p.id_ AS id_produccion, p.fecha, p.codigo_inventario_tiquete, 
                 cat_ts.descripcion as nombre_serie, 
@@ -372,7 +376,7 @@ else{
                 cat_r.descripcion as descripcion_ruta,
                 it.precio_publico,
                 cat_e.descripcion as descripcion_estatus,
-                btrim(per.nombres || CAST(' ' AS VARCHAR) || per.apellidos) as nombre_motorista, per.codigo as codigo_personal,
+                btrim(per.nombres || CAST(' ' AS VARCHAR) || per.apellidos) as nombre_motorista, per.codigo as codigo_personal, per.foto, per.codigo_genero,
                 cat_t_c.numero_placa as numero_placa, cat_t_c.numero_equipo as numero_equipo
                     FROM produccion p 
                         INNER JOIN personal per ON per.codigo = p.codigo_personal
@@ -407,24 +411,26 @@ else{
                 $descripcion_ruta_rg = trim($listado['descripcion_ruta']);
                 $nombre_motorista = trim($listado['nombre_motorista']);
                 $codigo_personal = trim($listado['codigo_personal']);
+                $url_foto = trim($listado['foto']);
+                $codigo_genero = trim($listado['codigo_genero']);
                 $numero_equipo = trim($listado['numero_equipo']);
                 $numero_placa = trim($listado['numero_placa']);
                 $estilo = ""; // definimos el estilo de cada elmento encontrado en codigo_esttratus.
     
                 // variable armanda para posteriormente actualizar en <produccion_correlativo.
                     $todos = $id_pro_a . "#" . $pa_codigo_produccion . "#" . $tiquete_desde . "#" . $tiquete_hasta . "#" . $fecha . "#" . $precio_publico . "#" . $cantidad . "#" . $total . "#" . $tiquete_cola;                // Variables que pasa  a la tabla.s
-                    $estilo_l = 'style="padding: 0px; font-size: large; color:blue; text-align: left;"';
-                    $estilo_c = 'style="padding: 0px; font-size: large; color:blue; text-align: center;"';
-                    $estilo_r = 'style="padding: 0px; font-size: large; color:blue; text-align: right;"';
-                    $estilo_cola = 'style="padding: 0px; font-size: large; color:green; text-align: right; font-weight: bold;"';
+                    $estilo_l = 'style="padding: 0px; font-size: medium; text-align: left;"';
+                    $estilo_c = 'style="padding: 0px; font-size: medium; text-align: center;"';
+                    $estilo_r = 'style="padding: 0px; font-size: medium; text-align: right;"';
+                    $estilo_cola = 'style="padding: 0px; font-size: medium; text-align: right; font-weight: bold;"';
                     //"flat-red" checked="" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"';
 
                 // cambiar color al estatus 04= Devolución , y 05= Vendido.
                     if($codigo_estatus == "04"){
-                        $estilo = 'class="text-danger font-weight-bold" ' . 'style="padding: 0px; font-size: large; color:blue; text-align: right;"';
+                        $estilo = 'class="text-danger font-weight-bold" ' . 'style="padding: 0px; font-size: medium; color:black; text-align: right;"';
                     }
                     if($codigo_estatus == "05"){
-                        $estilo = 'class="text-primary font-weight-bold" ' . 'style="padding: 0px; font-size: large; color:blue; text-align: right;"';
+                        $estilo = 'class="text-primary font-weight-bold" ' . 'style="padding: 0px; font-size: medium; color:black; text-align: right;"';
                     }
                 //
                 if($procesado == '1'){  // si el estatus es verdadero

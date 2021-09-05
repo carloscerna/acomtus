@@ -776,7 +776,6 @@ $('body').on('click','#listadoDetalle a',function (e){
 	if(accionAsignacion  == 'ProduccionVerAsignacion'){
 		// show FIELDSET  PRODUCCION DETALLE
 			$("#FieldsetTabla").show();
-
 	///////////////////////////////////////////////////////////////			
 	// Inicio del Ajax. Buscar, Actualizar Producción Devolución e Ingreso.
 	///////////////////////////////////////////////////////////////
@@ -813,6 +812,17 @@ $('body').on('click','#listadoDetalle a',function (e){
 					$("#LblListadoTotalIngreso").html("$ " + response.totalIngreso);
 					$("#LblListadoCantidad").html(response.cantidadTiquete);
 					$("#LblCantidadProduccionesVendidas").html(response.cantidadTiquete);
+					// FOTO DEL EMPLEADO.
+						if(response.url_foto == "")
+						{
+							if(response.codigo_genero == "01"){
+								$(".card-img-top").attr("src", "../acomtus/img/avatar_masculino.png");
+							}else{
+								$(".card-img-top").attr("src", "../acomtus/img/avatar_femenino.png");
+							}
+						}else{
+							$(".card-img-top").attr("src", "../acomtus/img/fotos/" + response.url_foto);	
+						}
 				}
 			},	// DATA.
 		});
@@ -947,7 +957,7 @@ function BuscarProduccionPorIdTabla() {
 					// RELLENAR TABLA.
 						$('#listadoDevolucionIngresoOk').append(response.contenido);
 					//	
-						$("#ProduccionTabla").show();
+						$("#ProduccionTabla").hide();
 						$("#field_produccion_detalle").hide();
 						$("#FieldsetTabla").show();
 					// fieldset buscar por motorista
@@ -965,6 +975,18 @@ function BuscarProduccionPorIdTabla() {
 						$("#LblListadoPrecio").html("$ " + response.precioPublico);
 						$("#LblListadoTotalIngreso").html("$ " + response.totalIngreso);
 						$("#LblListadoCantidad").html(response.cantidadTiquete);
+
+						// FOTO DEL EMPLEADO.
+						if(response.url_foto == "")
+						{
+							if(response.codigo_genero == "01"){
+								$(".card-img-top").attr("src", "../acomtus/img/avatar_masculino.png");
+							}else{
+								$(".card-img-top").attr("src", "../acomtus/img/avatar_femenino.png");
+							}
+						}else{
+							$(".card-img-top").attr("src", "../acomtus/img/fotos/" + response.url_foto);	
+						}
 				}
 			},	// DATA.
 		});
