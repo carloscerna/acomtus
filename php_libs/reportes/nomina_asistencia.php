@@ -99,16 +99,16 @@ function Header()
     global $reporte_trabajo, $reporte_ruta;
 //Logo
     $img = $_SERVER['DOCUMENT_ROOT'].'/acomtus/img/'.$_SESSION['logo_uno'];
-    $this->Image($img,5,4,24,24);
+    $this->Image($img,15,10,24,24);
 //Arial bold 14
     $this->SetFont('Arial','B',14);
 //Título
 //$0titulo1 = utf8_decode("Educación Parvularia - Básica - Tercer Ciclo y Bachillerato.");
-    $this->RotatedText(30,10,utf8_decode($_SESSION['nombre_institucion']),0);
+    $this->RotatedText(40,22,utf8_decode($_SESSION['nombre_institucion']),0);
 //Arial bold 13
     $this->SetFont('Arial','B',12);
-    $this->RotatedText(30,17,utf8_decode($reporte_trabajo),0);
-    $this->RotatedText(30,22,utf8_decode($reporte_ruta),0);
+    $this->RotatedText(40,28,utf8_decode($reporte_trabajo),0);
+    $this->RotatedText(40,34,utf8_decode($reporte_ruta),0);
 // Posición en donde va iniciar el texto.
     $this->SETY(35);
 }
@@ -160,7 +160,7 @@ function FancyTable($header)
             $this->Cell($w[3],7,'','L',0,'C',1);
             //
             $this->SetFillColor(255);
-            $header2=array('','','','','Total','');
+            $header2=array('','','','Total','');
             for($j=0;$j<count($header2);$j++){
                 $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRT',0,'C',1);
             }
@@ -180,7 +180,7 @@ function FancyTable($header)
             $this->Cell($w[3],7,'','L',0,'C',1);
             //
             $this->SetFillColor(255);
-            $header2=array('Salario','Asuetos','Extra','Boni','Extra','TOTAL');
+            $header2=array('Salario','Asuetos','Extra','Extra','TOTAL');
             for($j=0;$j<count($header2);$j++){
                 $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRB',0,'C',1);
             }
@@ -198,7 +198,7 @@ function FancyTable($header)
     $pdf=new PDF('L','mm','Letter');
     $data = array();
     #Establecemos los márgenes izquierda, arriba y derecha:
-    $pdf->SetMargins(5, 15, 5);
+    $pdf->SetMargins(15, 25, 5);
     #Establecemos el margen inferior: 
     $pdf->SetAutoPageBreak(true,10);
 //Títulos de las columnas
@@ -283,7 +283,7 @@ function rellenar($total_dias_quincena){
             $pdf->Cell($w[3],6,'','L',0,'C',$fill);
         $pdf->SetFillColor(233, 224, 222);
     // TERCER BLOQUE DE LINEAS PARA.
-    for($j=0;$j<=5;$j++){
+    for($j=0;$j<=4;$j++){
         $pdf->Cell($w[1],6,'','1',0,'C',$fill);
     }
     // SALTO DE LINEA Y FILL.

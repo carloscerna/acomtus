@@ -40,7 +40,7 @@ $datos=array(); $fila_array = 0;
     $objPHPExcel = $objReader->load($origen);
 
 // N�mero de hoja.
-   $numero_de_hoja = 1;
+   $numero_de_hoja = 2;
 	$numero = 5;	
 // 	Recorre el numero de hojas que contenga el libro
        $objPHPExcel->setActiveSheetIndex($numero_de_hoja);
@@ -50,23 +50,28 @@ $datos=array(); $fila_array = 0;
 			 //  DATOS GENERALES.
 				$codigo = $objPHPExcel->getActiveSheet()->getCell("A".$fila)->getValue();
 				$nombre_empleado = $objPHPExcel->getActiveSheet()->getCell("B".$fila)->getValue();
+				$nombres = $objPHPExcel->getActiveSheet()->getCell("G".$fila)->getCalculatedValue();
+				$apellidos = $objPHPExcel->getActiveSheet()->getCell("H".$fila)->getCalculatedValue();
 				$dui = $objPHPExcel->getActiveSheet()->getCell("C".$fila)->getValue();
 				$nit = $objPHPExcel->getActiveSheet()->getCell("D".$fila)->getValue();
-				$pago_diario = 12;
+				
+				$pago_diario = 12.17;
 				$salario = $pago_diario * 30;
-				$codigo_ruta = 2;
+				$codigo_ruta = 3;
 				$codigo_clasificacion_empresa = '09';
-				$codigo_cargo_empresa = '32';
+				$codigo_cargo = '32';
 				$codigo_departamento_empresa = '02';
+				$codigo_socio = '02';
 				// Armar query para guardar en la tabla CATALOGO_PRODUCTOS.
 				//$query = "UPDATE personal SET dui='$dui', nit='$nit', pago_diario = '$pago_diario', salario = '$salario', codigo_ruta = '$codigo_ruta' WHERE codigo = $codigo";
-					$query = "UPDATE personal SET  codigo_clasificacion_empresa = $codigo_clasificacion_empresa, codigo_cargo_empresa = '$codigo_cargo_empresa', codigo_departamento_empresa = '$codigo_departamento_empresa',
-											pago_diario = '$pago_diario', salario = '$salario', codigo_ruta = '$codigo_ruta'
+					$query = "UPDATE personal SET  codigo_clasificacion_empresa = '$codigo_clasificacion_empresa', codigo_cargo = '$codigo_cargo', codigo_departamento_empresa = '$codigo_departamento_empresa',
+											pago_diario = '$pago_diario', salario = '$salario', codigo_ruta = '$codigo_ruta', codigo_cargo_empresa = '$codigo_clasificacion_empresa',
+											codigo_socio = '$codigo_socio', nombres = '$nombres', apellidos = '$apellidos'
 											 WHERE codigo = '$codigo'";
 						$consulta = $dblink -> query($query);
 			
          	$fila++;
-			print $codigo .  ' - ' . $pago_diario . ' - ' . $salario . ' - ' . $codigo_ruta;
+			print $codigo .  ' - ' . $pago_diario . ' - ' . $salario . ' - ' . $codigo_ruta .  ' -  ' . $codigo_cargo . ' - ' . $codigo_clasificacion_empresa;
 			print "<br>";
 		}	// FIN DEL WHILE PRINCIPAL DE L AHOJA DE CALCULO.
 /*

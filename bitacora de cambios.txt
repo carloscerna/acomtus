@@ -1,0 +1,4 @@
+# Actualizar la Tabla para agregar a todos los motoristas
+# Para la tabla personal
+Nombres, apellidos, dui, nit, codigo_cargo, codigo_departamento_empresa, codigo_clasificacion_empresa(taller),
+pago_diario, salario, codigo_socio, codigo_ruta
