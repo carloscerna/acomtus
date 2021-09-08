@@ -66,84 +66,71 @@
 
 
   <!-- Small boxes (Stat box) -->
-  <div class="col-md-12">
+    <section class="col col-sm-12 col-md-12 col-lg-8 col-xl-6 m-auto">
   <!-- FORM PRINCIPAL -->
-  <form action="" method="post" id="formAsistencia" name="formAsistencia" role="form" enctype="multipart/form-data">
+      <form action="" method="post" id="formAsistencia" name="formAsistencia" role="form" enctype="multipart/form-data">
             <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
             <input type="hidden" id="id_user" name="id_" value = ''>            
             <input type="hidden" id="accion" name="accion" value = 'GuardarAsistencia'>            
-    <div class="card w-50 m-auto">
-      <div class="card-header bg-gradient-navy">
+              <class="card m-auto">
+                <div class="card-header bg-gradient-navy">
 
-        <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
-          </button>
-        </div>
-                 
-        <div class="row">
-          <div class="col-md-12 col-lg-12 col-xl-12">
-            <h3 class="card-title"><i class="far fa-clipboard-list"></i> Control de Asistencia | Personal</h3>
-          </div>
-        </div>
-        <!-- /.card-tools -->
-      </div>
-      <!-- /.card-header -->
-      <div class="card-body bg-gradient-gray">
-        <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
-        <input type="hidden" id="MenuTab" value='{{ codigo_perfil }}'>  
-        <!-- Fecha de la Asistencia -->       
-            <div class="form-group">
-            <label for="FechaAsistencia">Fecha:</label>
-            <input type="date" class="form-control" id="FechaAsistencia" name="FechaAsistencia" autofocus>
-          </div>
-          <div class="form-group">
-            <label for="CodigoPersonal">Código Empleado:</label>
-                <div class="input-group">
-                    <input type="text" class="form-control"  id="CodigoPersonal" name="CodigoPersonal" maxlength="5" minlength="5" autocomplete="off" autofocus>
-                        <!-- Botón Buscar Personal -->
-                        
-                        <input type="button" class='btn btn-success' id="goBuscarPersonalAsistencia" data-toggle="tooltip" data-placement="left" value="Buscar">
+                  <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                    </button>
+                  </div>
+                          
+                  <div class="row">
+                    <div class="col-md-12 col-lg-12 col-xl-12">
+                      <h3 class="card-title"><i class="far fa-clipboard-list"></i> Control de Asistencia | Personal</h3>
+                    </div>
+                  </div>
+                  <!-- /.card-tools -->
                 </div>
-            <input type="text" class="form-control text-bold"  id="NombrePersonal" name="NombrePersonal" readonly required>
-          </div>
-          <!-- SELECT CATALOGO JORNADA -->
-          <div class="input-group">
-            <span class="input-group-text">Jornada</span>
-            <select class="custom-select" name="lstJornada" id="lstJornada"></select>                                      
-          </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
+                <input type="hidden" id="MenuTab" value='{{ codigo_perfil }}'>  
+                <!-- Fecha de la Asistencia -->       
+                    <div class="form-group">
+                    <label for="FechaAsistencia">Fecha:</label>
+                    <input type="date" class="form-control" id="FechaAsistencia" name="FechaAsistencia" autofocus>
+                  </div>
+                  <div class="form-group">
+                    <label for="CodigoPersonal">Código Empleado:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control"  id="CodigoPersonal" name="CodigoPersonal" maxlength="5" minlength="5" autocomplete="off" autofocus>
+                                <!-- Botón Buscar Personal -->
+                                
+                                <input type="button" class='btn btn-success' id="goBuscarPersonalAsistencia" data-toggle="tooltip" data-placement="left" value="Buscar">
+                        </div>
+                    <input type="text" class="form-control text-bold"  id="NombrePersonal" name="NombrePersonal" readonly required>
+                  </div>
+                  <!-- SELECT CATALOGO JORNADA -->
+                  <div class="input-group">
+                    <span class="input-group-text">Jornada</span>
+                    <select class="custom-select" name="lstJornada" id="lstJornada"></select>                                      
+                  </div>
 
-          <!-- CHECK Y CATALOGO TIPO DE LICENCIA O PERMISO -->
-          <div class="form-group form-check">
-            <label class="form-check-label">
-              <input class="form-check-input" type="checkbox" id="TipoLicenciaCheck" name="TipoLicenciaCheck"> Tipo de Licencia
-            </label>
+                  <!-- CHECK Y CATALOGO TIPO DE LICENCIA O PERMISO -->
+                  <div class="form-group form-check">
+                    <label class="form-check-label">
+                      <input class="form-check-input" type="checkbox" id="TipoLicenciaCheck" name="TipoLicenciaCheck"> Tipo de Licencia
+                    </label>
 
-            <div class="input-group">
-              <span class="input-group-text" id="LblAsistencia"></span>
-              <select class="custom-select" name="lstTipoLicencia" id="lstTipoLicencia" disabled></select>                                      
-            </div>
-          </div>
-
-                    <!-- 
-                      BOTÓN GUARDAR
-                    -->
-                    <div class="row">
-                      <div class="col d-flex justify-content-end">
-                        <input class="btn btn-primary btn-md" type="submit" value="Enviar" name="goEnviar" id="goEnviar" tabindex="-1">
-                      </div>
-                    </div>   
-
-
-
-                <div class="row" id="DivSoloPlanilla">
-                  <div class="col col-md-12 col-lg-6 col-xl-6">
-                    </div>               
-              </div>
-              <!-- BLOQUE DE BUSQUEDAS -->
-
-        </div> <!-- /.card-body -->
-    </div>      <!-- /.card -->
-  </form>
+                    <div class="input-group">
+                      <span class="input-group-text" id="LblAsistencia"></span>
+                      <select class="custom-select" name="lstTipoLicencia" id="lstTipoLicencia" disabled></select>                                      
+                    </div>
+                  </div>
+              </div> <!-- /.card-body -->
+                  <!-- /.CARD  footer -->
+                  <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-end">
+                    <input class="btn btn-primary btn-md" type="submit" value="Enviar" name="goEnviar" id="goEnviar" tabindex="-1">
+                  </div>
+              </div>      <!-- /.card -->
+      </form>
+    </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->
 
 {% endblock %}
