@@ -40,7 +40,7 @@ $datos=array(); $fila_array = 0;
     $objPHPExcel = $objReader->load($origen);
 
 // N�mero de hoja.
-   $numero_de_hoja = 2;
+   $numero_de_hoja = 5;
 	$numero = 5;	
 // 	Recorre el numero de hojas que contenga el libro
        $objPHPExcel->setActiveSheetIndex($numero_de_hoja);
@@ -57,7 +57,7 @@ $datos=array(); $fila_array = 0;
 				
 				$pago_diario = 12.17;
 				$salario = $pago_diario * 30;
-				$codigo_ruta = 3;
+				$codigo_ruta = 9;
 				$codigo_clasificacion_empresa = '09';
 				$codigo_cargo = '32';
 				$codigo_departamento_empresa = '02';
