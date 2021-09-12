@@ -61,10 +61,9 @@ $("#Jornada, #Permiso").change(function () {
 ///////////////////////////////////////////////////////////////////////////////
 /// EVENTOS JQUERY Y para disparar la busqueda. del por nombre motorista.
 ///////////////////////////////////////////////////////////////////////////////
-/*$("#goBuscarProduccionPM").on('click', function(){
-	var codigo = $("#lstPersonalPorMotorista option:selected").val();
-	$("#formBuscarPorMotorista").submit();
-});*/
+$("#goEnviar").on('click', function(){
+	$("#formAsistencia").submit();
+});
 ///////////////////////////////////////////////////////
 // Validar Formulario, para la busqueda de un registro por codigo del motorista.
  //////////////////////////////////////////////////////
