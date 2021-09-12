@@ -47,8 +47,9 @@ if($errorDbConexion == false){
 			case 'BuscarPersonalCodigo':
 				$codigo_personal = trim($_POST['codigo_personal']);
 				// Armamos el query.
-				$query = "SELECT p.id_personal, p.codigo, TRIM(p.nombres) as nombre, TRIM(p.apellidos) as apellido, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado
-                         FROM personal p WHERE codigo = '$codigo_personal'";
+				$query = "SELECT p.id_personal, p.codigo, TRIM(p.nombres) as nombre, TRIM(p.apellidos) as apellido, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado,
+							p.foto, p.codigo_genero
+                         		FROM personal p WHERE codigo = '$codigo_personal'";
 				// Ejecutamos el Query.
 				$consulta = $dblink -> query($query);
 				// Validar si hay registros.
@@ -62,11 +63,15 @@ if($errorDbConexion == false){
                             $id_ = trim($listado['id_personal']);
 							$codigo = trim($listado['codigo']);
 							$nombre_personal = trim($listado['nombre_empleado']);
+							$url_foto = trim($listado['foto']);
+							$codigo_genero = trim($listado['codigo_genero']);
 
 						// Rellenando la array.
 							$datos[$fila_array]["id_"] = $id_;
 							$datos[$fila_array]["codigo"] = $codigo;
 							$datos[$fila_array]["nombre_empleado"] = $nombre_personal;
+							$datos[$fila_array]["codigo_genero"] = $codigo_genero;
+							$datos[$fila_array]["url_foto"] = $url_foto;
 					}
 					$datos[$fila_array]["mensajeError"] = 'El código si Existe...';
 					$datos[$fila_array]["respuestaOK"] = true;

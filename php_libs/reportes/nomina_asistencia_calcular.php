@@ -320,11 +320,21 @@ function rellenar($total_dias_quincena){
                         }
                         
                         $pdf->Cell($w[3],6,$descripcion_licencia,'1',0,'C',$fill);
-                    $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+                        $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
                 }else{
                     // CUANDO SEA IGUAL SOLO A  CODIGO DE LA JORNADA
                     $pdf->SetTextColor(0);
-                    $pdf->Cell($w[3],6,$descripcion_jornada,'1',0,'C',$fill);
+                    // VALIDAR EL FORMATO O PRESENTACI{ON DE LA DESCRIPCION LICENCIA}
+                    if($descripcion_jornada == '1T'){
+                        $pdf->SetFont('Arial','B',20); // I : Italica; U: Normal;
+                            $pdf->Cell($w[3],6,'','LTR',0,'C',$fill);
+                            $x = $pdf->GetX() -4 ; $y = $pdf->GetY() + 3.5;
+                            $pdf->RotatedText($x,$y,'.',0);
+                        $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+                    }else{
+                        $pdf->Cell($w[3],6,$descripcion_jornada,'1',0,'C',$fill);    
+                    }
+                    
                     // calcular el salario
                     switch ($descripcion_jornada) {
                         case '4H':
@@ -377,7 +387,7 @@ function rellenar($total_dias_quincena){
                 break;
             case '3':
                 # PRESENTAR BONI
-                $pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                //$pdf->Cell($w[1],6,'','1',0,'C',$fill);
                 break;
             case '4':
                 # PRESENTAR TOTAL TIEMPO EXTRA

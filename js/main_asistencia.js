@@ -9,22 +9,10 @@ $(function(){ // iNICIO DEL fUNCTION.
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
 ///////////////////////////////////////////////////////////////////////////////
 $(document).ready(function(){
-		//
-		// configurar el Select2
-		$('#lstPersonal').select2({
-			theme: "bootstrap4"
-		});
-		// configurar el Select2
-		$('#lstPersonalPorMotorista').select2({
-			theme: "bootstrap4"
-		});
-
-		if($('#MenuTab').val() == '06'){
-			$("#DivSoloParaContabilidad").hide();
-		}
 	// LLAMAR A LA TABLA PERSONAL.
 		listar_jornada();
-		//istar_tipo_licencia();
+	// IMAGEN PREDETERMINADA
+		$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
 });		
 ///////////////////////////////////////////////////////////////////////////////
 /// EVENTOS JQUERY Y BOTON NUEVO REGISTRO. CALCULO Y OTROS
@@ -57,32 +45,19 @@ $("#goBuscarPersonalAsistencia").on('click', function (e) {
 ///////////////////////////////////////////////////////////////////////////////	  
 // SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL MOTORISTA.
 ///////////////////////////////////////////////////////////////////////////////	  
-$('[name="TipoLicenciaCheck"]').change(function()
-{
-  if ($(this).is(':checked')) {
-	//
-	$("#LblAsistencia").text('');
-	//
-	$("#lstTipoLicencia").prop("disabled", false);
-	//
-	$("#lstJornada").prop("disabled", true);
-	// listar tipo de licencia
-		listar_tipo_licencia();
-  }else{
-	//
-	$("#LblAsistencia").text('');
-	//
-		// limpiar listado tipo de licencia.
-		var miselect=$("#lstTipoLicencia");
-		miselect.empty();
-	//
-	$("#lstTipoLicencia").prop("disabled", true);
-	//
-	$("#lstJornada").prop("disabled", false);
-
-  }
-
+$("#Jornada, #Permiso").change(function () {
+	if ($("#Jornada").is(":checked")) {
+		$('#DivJornada').show();
+		$('#DivPermisos').hide();
+	}
+	else if ($("#Permiso").is(":checked")) {
+		$('#DivPermisos').show();
+		$('#DivJornada').hide();
+		// Listar tipo licencia.
+			listar_tipo_licencia();
+	}
 });
+
 ///////////////////////////////////////////////////////////////////////////////
 /// EVENTOS JQUERY Y para disparar la busqueda. del por nombre motorista.
 ///////////////////////////////////////////////////////////////////////////////
@@ -122,10 +97,10 @@ $('[name="TipoLicenciaCheck"]').change(function()
 			},
 		submitHandler: function(){	
 		var str = $('#formAsistencia').serialize();
-	//	alert(str);
+		//alert(str);
 							// casilla de verificación revisar el valor.
 							var TipoLicenciaChecks = "off";
-							if ($("#TipoLicenciaCheck").is(':checked')) {
+							if ($("#Permiso").is(':checked')) {
 								//
 									TipoLicenciaChecks = "on";
 							}
@@ -149,20 +124,21 @@ $('[name="TipoLicenciaCheck"]').change(function()
 					}
 					else{
 						toastr["success"](response.mensaje, "Sistema");
-						// remover el atributo checked
-						$("#TipoLicenciaCheck").prop('checked', false);
 						// LIMPIAR VARIABLES.ab-b-l
 						$("#CodigoPersonal").val("");
 						$("#NombrePersonal").val("");
 						//
 						$("#LblAsistencia").text('');
-						//
-						$("#lstTipoLicencia").prop("disabled", true);
-						//
-						$("#lstJornada").prop("disabled", false);
-						}         
+						// PERMISO Y JORNADA DIV
+						$('#DivPermisos').hide();
+						$('#DivJornada').hide();
+						$("input:radio[value='Jornada']").prop('checked',false);
+						$("input:radio[value='Permiso']").prop('checked',false);  
+						// limpiar el control de la foto
+						$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
 						// focus
-						$("#CodigoPersonal").focus();      
+						$("#CodigoPersonal").focus();
+					}      
 				},
 			});
 		},
@@ -189,11 +165,23 @@ function buscar_personal(codigo_personal){
 			if(data[0].respuestaOK == true){
 				var nombre_empleado = data[0].nombre_empleado;
 				$("#NombrePersonal").val(nombre_empleado);
+				// FOTO DEL ALUMNO.
+					if(data[0].url_foto == "")
+					{
+						if(data[0].codigo_genero == "01"){
+							$(".card-img-top").attr("src", "../acomtus/img/avatar_masculino.png");
+						}else{
+							$(".card-img-top").attr("src", "../acomtus/img/avatar_femenino.png");
+						}
+					}else{
+						$(".card-img-top").attr("src", "../acomtus/img/fotos/" + data[0].url_foto);	
+					}
 				toastr["success"](data[0].mensajeError, "Sistema");
 			}else{
+				// IMAGEN PREDETERMINADA
+				$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
 				toastr["error"](data[0].mensajeError, "Sistema");
 			}
-
         }, "json");    
 }
 // FUNCION LISTAR TABLA catalogo_jornada
