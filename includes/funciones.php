@@ -487,10 +487,31 @@ function genera_bach()
 			}
 		return $nuevo_de_del;
 	}
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //				**	Bloque de Código AGREGAR CEROS A LA IZQUIERDA..
 /////////////////////////////////////////////////////////////////////////////////////////
+function codigos_nuevos_personal($tiquete)
+	{
+	$nuevo_codigo = ""; $codigo_mas = ""; $iv = 0;
+	//
+		if(strlen(trim($tiquete)) == 1){
+			$codigo_mas = "00" . trim($tiquete);}
+		if(strlen(trim($tiquete)) == 2){
+			$codigo_mas = "0" . trim($tiquete);}
+		if(strlen(trim($tiquete)) == 3){
+			$codigo_mas = "000" . trim($tiquete);}
+		if(strlen(trim($tiquete)) == 4){
+			$codigo_mas = "00" . trim($tiquete);}
+		if(strlen(trim($tiquete)) == 5){
+			$codigo_mas = "0" . trim($tiquete);}
+		if(strlen(trim($tiquete)) == 6){
+			$codigo_mas = "" . trim($tiquete);}
+		if(strlen(trim($tiquete)) == 7){
+			$codigo_mas = "" . trim($tiquete);}
+		//
+		$nuevo_codigo = $codigo_mas;						
+			return $nuevo_codigo;
+	}
 function codigos_nuevos($tiquete)
 	{
 	$nuevo_codigo = ""; $codigo_mas = ""; $iv = 0;

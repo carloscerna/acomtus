@@ -46,7 +46,7 @@ if($errorDbConexion == false){
 					{
 						$codigo_entero = trim($listado['codigo_empleado_numero_entero']) + 1;
 						$codigo_string = (string) $codigo_entero;
-						$codigo_nuevo = codigos_nuevos($codigo_string);
+						$codigo_nuevo = codigos_nuevos_personal($codigo_string);
 						// Generar el Código
 						$codigo_nuevo = $codigo_nuevo . $ann_;
 						// retornar variable que contendrá el nuevo código.
@@ -273,7 +273,7 @@ if($errorDbConexion == false){
 					codigo_municipio, codigo_departamento, direccion,
 					telefono_residencia, telefono_celular, correo_electronico,
 					codigo_cargo, fecha_ingreso, fecha_retiro, codigo_departamento_empresa, codigo_clasificacion_empresa,
-					codigo_ruta, codigo_socio, numero_cuenta, p.pago_diario, p.salario,
+					codigo_ruta, codigo_socio, numero_cuenta, pago_diario, salario,
 					codigo_tipo_licencia, licencia, dui, nit, isss, afp,
 					comentario, codigo, codigo_estatus)
 						VALUES ('$nombre', '$apellido', '$fecha_nacimiento', '$edad', '$codigo_genero', '$codigo_estado_civil', '$tipo_sangre', '$codigo_estudios', '$codigo_tipo_vivienda', '$codigo_afp', '$nombre_conyuge',
