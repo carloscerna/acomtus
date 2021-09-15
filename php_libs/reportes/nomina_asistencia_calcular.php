@@ -245,6 +245,7 @@ function FancyTable($header)
                 $fill=!$fill;
                 $i=$i+1;
             }
+  
             // RELLENAR DATOS SI ES MENOR A 25 SEGUN $I
                 rellenar_datos($i);    
     // RELLENAR LINEA DE ABAJO
@@ -308,6 +309,7 @@ function rellenar($total_dias_quincena){
                 $horas_jornada = trim($row['horas']);
                 $codigo_tipo_licencia = trim($row['codigo_tipo_licencia']);
                 $descripcion_licencia = trim($row['descripcion_licencia']);
+                $fecha_asistencia = trim($row['fecha']);
             // rellenar con valores según consulta.
                 if($descripcion_jornada == "0H"){
                     // CUANDO ESTÁ VACÍO EL CODIGO PERTENECE A UNA LICENCIA.
@@ -334,25 +336,43 @@ function rellenar($total_dias_quincena){
                     }else{
                         $pdf->Cell($w[3],6,$descripcion_jornada,'1',0,'C',$fill);    
                     }
-                    
-                    // calcular el salario
-                    switch ($descripcion_jornada) {
-                        case '4H':
-                            // Media Tanda.
-                            $salario = $salario + ($horas_jornada * $pago_diario_hora);
-                            break;
-                        case '1T':
-                            $salario = $salario + ($horas_jornada * $pago_diario_hora);
-                            break;
-                        case '1.5T':
-                                $salario = $salario + (8 * $pago_diario_hora);
-                                $extra = $extra + (4 * $pago_diario_hora);
-                                $total_tiempo_extra = $total_tiempo_extra + $extra;
-                            break;
-                        default:
-                            # code...
-                            break;
-                    }
+                    // REVISAR Y CALCULAR SI LA FECHA PERTENECIA A UN DÍA DE ASUETO
+                        $fecha_partial = explode("-",$fecha_asistencia);
+                        $asueto = false;
+                        //print_r($fecha_partial);
+                        $asueto_mes = (int)$fecha_partial[1];    // mes 
+                        $asueto_dia = (int)$fecha_partial[2];    // dia
+                        //print 'Mes ' .$asueto_mes;
+                        //print 'Día ' . $asueto_dia;
+                         // ARMAR LA CONSULTA
+                           $query_asueto = "SELECT * FROM catalogo_asuetos WHERE mes = '$asueto_mes' and dia = '$asueto_dia'";
+                            // EJECUTAR LA CONSULTA
+                            $consulta_asueto = $dblink -> query($query_asueto);
+                            if($consulta_asueto -> rowCount() != 0){
+                                // Es asueto
+                                $asueto = true;
+                            }else{
+                                // CUANDO EL DIA NO ES ASUETO.
+                                $asueto = false;
+                                // calcular el salario
+                                switch ($descripcion_jornada) {
+                                    case '4H':
+                                        // Media Tanda.
+                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                        break;
+                                    case '1T':
+                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                        break;
+                                    case '1.5T':
+                                            $salario = $salario + (8 * $pago_diario_hora);
+                                            $extra = $extra + (4 * $pago_diario_hora);
+                                            $total_tiempo_extra = $total_tiempo_extra + $extra;
+                                        break;
+                                    default:
+                                        # code...
+                                        break;
+                                }
+                            }   // CONDICIÓN DEL DIA DE ASUETO.
                 }   // FIN DEL IF DESCRIPCION JORNADA
                 
             }   // FIN DEL WHILE QUE BUSCA SI HAY REGISTRO GUARDADOS.
