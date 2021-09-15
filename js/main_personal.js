@@ -18,7 +18,7 @@ $(function(){ // iNICIO DEL fUNCTION.
 		$(document).ready(function(){
 			// Cambiar el Menú Contextual que se cuentra a la par de cada empleado.
 			MenuEmergente = $('#MenuContextual').val();
-			if(MenuEmergente == '05'){
+			if(MenuEmergente == '0'){
 				defaultContentMenu = '<div class="dropdown">'
 				+'<button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-wrench"></i></button>'
 				+'<div class="dropdown-menu">'
