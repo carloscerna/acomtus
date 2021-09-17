@@ -101,6 +101,7 @@
             <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
             <input type="hidden" id="id_user" name="id_" value = ''>            
             <input type="hidden" id="accion" name="accion" value = 'GuardarAsistencia'>            
+            <input type="hidden" id="BooleanAsueto" name="BooleanAsueto" value = "no">
               <class="card m-auto">
                 <div class="card-header bg-gradient-navy">
                   <div class="card-tools">
@@ -118,12 +119,12 @@
                 <!-- /.card-header -->
                 <div class="card-body">
                 <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
-                <input type="hidden" id="MenuTab" value='{{ codigo_perfil }}'>  
+                 <input type="hidden" id="MenuTab" value='{{ codigo_perfil }}'>  
                 <!-- Fecha de la Asistencia -->       
                     <div class="form-group">
-                    <label for="FechaAsistencia">Fecha:</label>
-                    <input type="date" class="form-control" id="FechaAsistencia" name="FechaAsistencia" autofocus>
-                  </div>
+                      <label for="FechaAsistencia">Fecha:</label>
+                      <input type="date" class="form-control" id="FechaAsistencia" name="FechaAsistencia" autofocus>
+                    </div>
                   <div class="form-group">
                     <label for="CodigoPersonal">Código Empleado:</label>
                         <div class="input-group">
@@ -139,7 +140,7 @@
                           </div>
                   </div>
                   <!-- SELECT CATALOGO JORNADA -->
-                  <div class="form-group">
+                  <div class="form-group" id="JornadaSin">
                     <div class="form-check form-check-inline">
                       <input class="form-check-input" type="radio" name="Radios" id="Jornada" value="Jornada" required>
                       <label class="form-check-label text-info" for="Jornada">
@@ -165,6 +166,18 @@
                       <select class="custom-select" name="lstTipoLicencia" id="lstTipoLicencia"></select>                                      
                     </div>
                   </div>
+                  <!-- SELECT CATALOGO JORNADA SE ACTIVARA CUANDO LA FECHA SEA DE ASUETO-->
+                  <div class="form-group" id="JornadaAsueto" style="display: none;">
+                      <label class="form-check-label text-info" for="JornadaAsueto">
+                        Jornada por Asueto
+                      </label>
+                      <span class="badge badge-primary" id="TextAsuetoDescripcion"></span>
+                    <!-- BLOQUE PARA LA JORNADA POR ASUENTO-->
+                    <div class="border border-info rounded p-3">
+                      <label for="lstJornadaAsueto">Por</label>
+                      <select class="custom-select" name="lstJornadaAsueto" id="lstJornadaAsueto"></select>      
+                    </div>
+                  </div>                  
               </div> <!-- /.card-body -->
                   <!-- /.CARD  footer -->
                   <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">

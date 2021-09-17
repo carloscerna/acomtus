@@ -11,15 +11,15 @@ small.required {
 }
 fieldset {
 	/*background-color: rgba(111, 66, 193, 0.3);*/
-	  border-radius: 6px;
+/*	  border-radius: 6px;
     border: 1px solid #0080FF;
-    padding: 10px 10px 10px 10px;
+    padding: 10px 10px 10px 10px;*/
 }
 legend {
-	background-color: #E1FFD8;
+	/*background-color: #383a38;*/
 	border: 1.5px solid #0080FF;
 	border-radius: 4px;
-	color: var(--green);
+	color: white;
 	font-size: 17px;
 	font-weight: bold;
 	padding: 5px 5px 3px 7px;

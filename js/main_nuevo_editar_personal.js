@@ -26,6 +26,7 @@ $(function(){ // INICIO DEL FUNCTION.
 			// Variables Principales.
 			id_ = $("#id_user").val();
 			accion = $("#accion").val();
+            $("#txtEdicionNuevo").text("Edición");
 			// cambiar texto de label y enlace.
 			//$("label[for='txtEdicionNuevo']").text("Edición");
             //$("label[for='iEdicionNuevo']").text("Edición");
@@ -44,7 +45,8 @@ $(function(){ // INICIO DEL FUNCTION.
 			// Variables accion para guardar datos.
 			accion = $("#accion").val();
 			// cambiar texto de label y enlace.
-			$("label[for='txtEdicionNuevo']").text("Agregar Personal");
+            $("#txtEdicionNuevo").text("Nuevo");
+			//$("label[for='txtEdicionNuevo']").text("Agregar Personal");
             $("label[for='iEdicionNuevo']").text("Agregar");
             //  Botones de la imagen o foto personal.
             $("#fileup").attr("disabled",true);		// Botón Subir Imagen Portafolio

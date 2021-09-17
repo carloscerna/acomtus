@@ -152,13 +152,10 @@ jQuery(function($){
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header p-0" style="background-color: rgb(234, 236, 238);">
+    <section class="content-header p-0">
       <div class="container-fluid">
-        <div class="row mb-1">
-          <div class="col-sm-6">
-            <h4><label for="txtEdicionNuevo"></label></h4>
-          </div>
-          <div class="col-sm-6">
+        <div class="row">
+          <div class="col">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="personal.php" data-toggle="tooltip" data-placement="left" title="Personal">Buscar</a></li>
               <li class="breadcrumb-item active"><label for="iEdicionNuevo">Editar</label></li>
@@ -184,14 +181,14 @@ jQuery(function($){
       <div class="row">
         <div class="col-12">
           <div class="card m-auto">
-            <div class="card-header bg-gradient-navy p-0">
-              <div class="row">
-                <div class="col-lg-4">
+            <div class="card-header bg-gradient-navy">
                   <h3 class="card-title">
                     <label for="LblNombre"></label>
                   </h3>
-                </div>
-              </div>
+                  <div class="card-tools">
+                    <span class="badge badge-primary" id="txtEdicionNuevo">Edición</span>
+                  </div>
+                  
             </div>
             <!-- /.card-header -->
             <div class="card-body">
@@ -546,7 +543,7 @@ jQuery(function($){
                           <fieldset>
                               <div class="row">
                                 <div class="col-lg-8 d-flex justify-content-start">
-                                  <h2><label for="LblHistorial" style="color: black;">Historial</label></h2>
+                                  <h2><label for="LblHistorial">Historial</label></h2>
                                 </div>
                                 <div class="col-lg-4 d-flex justify-content-end">
                                     <input class="btn btn-primary" type="button" value="Agregar" name="goNuevoHistorial" id="goNuevoHistorial" style="width: 100%;">
@@ -611,7 +608,7 @@ jQuery(function($){
                         <fieldset>
                             <div class="row">
                               <div class="col-lg-8 d-flex justify-content-start">
-                                <h2><label for="LblPortafolio" style="color: black;">Portafolio</label></h2>
+                                <h2><label for="LblPortafolio">Portafolio</label></h2>
                               </div>
                               <div class="col-lg-4 d-flex justify-content-end">
                                   <input class="btn btn-primary" type="button" value="Agregar" name="goNuevoPortafolio" id="goNuevoPortafolio" style="width: 100%;">

@@ -46,6 +46,7 @@ if($errorDbConexion == false){
 		switch ($_POST['accion']) {
 			case 'BuscarPersonalCodigo':
 				$codigo_personal = trim($_POST['codigo_personal']);
+				$fecha = trim($_POST['fecha']);
 				// Armamos el query.
 				$query = "SELECT p.id_personal, p.codigo, TRIM(p.nombres) as nombre, TRIM(p.apellidos) as apellido, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado,
 							p.foto, p.codigo_genero
@@ -73,13 +74,41 @@ if($errorDbConexion == false){
 							$datos[$fila_array]["codigo_genero"] = $codigo_genero;
 							$datos[$fila_array]["url_foto"] = $url_foto;
 					}
-					$datos[$fila_array]["mensajeError"] = 'El código si Existe...';
+					$datos[$fila_array]["mensajeError"] = 'Código Encontrado.';
 					$datos[$fila_array]["respuestaOK"] = true;
+				
+					// BUSCAR SI LA FECHA ES D{IA DE ASUETO}
+					//
+					// REVISAR Y CALCULAR SI LA FECHA PERTENECIA A UN DÍA DE ASUETO
+					$fecha_partial = explode("-",$fecha);
+					$asueto = false;
+					//print_r($fecha_partial);
+					$asueto_mes = (int)$fecha_partial[1];    // mes 
+					$asueto_dia = (int)$fecha_partial[2];    // dia
+					//print 'Mes ' .$asueto_mes;
+					//print 'Día ' . $asueto_dia;
+					 // ARMAR LA CONSULTA
+					   $query_asueto = "SELECT * FROM catalogo_asuetos WHERE mes = '$asueto_mes' and dia = '$asueto_dia'";
+						// EJECUTAR LA CONSULTA
+						$consulta_asueto = $dblink -> query($query_asueto);
+						// convertimos el objeto
+						if($consulta_asueto -> rowCount() != 0){
+							while($listado = $consulta_asueto -> fetch(PDO::FETCH_BOTH))
+							{
+								// Es asueto
+								$descripcion = trim($listado['descripcion']);
+								$datos[$fila_array]["descripcion"] = $descripcion;
+								$datos[$fila_array]["asueto"] = "si";
+							}
+						}else{
+							$datos[$fila_array]["descripcion"] = "--";
+							$datos[$fila_array]["asueto"] = "no";
+						}
 				}
 				else{
 					$contenidoOK = '';
 					$datos[$fila_array]["respuestaOK"] = false;
-					$datos[$fila_array]["mensajeError"] = 'El código no Existe...';
+					$datos[$fila_array]["mensajeError"] = 'Código No Existe.';
 				}
 			break;
 			case 'BuscarTipoLicencia':
@@ -106,6 +135,7 @@ if($errorDbConexion == false){
 				$codigo_personal = trim($_POST['CodigoPersonal']);
 				$fecha = trim($_POST['FechaAsistencia']);
 				$tipolicenciacheck = trim($_POST['tipochecks']);
+				$boolean_asueto = trim($_POST['BooleanAsueto']);
 				// VALIDAR VALORES PARA TIPO LICENCIA JORNADA.
 				if($tipolicenciacheck == "on"){
 					$codigo_tipo_licencia = trim($_POST['lstTipoLicencia']);
@@ -113,6 +143,12 @@ if($errorDbConexion == false){
 				}else{
 					$codigo_jornada = trim($_POST['lstJornada']);
 					$codigo_tipo_licencia = "1";
+				}
+				// VALIDAR VALORES CUANDO ASUETO SEA IGUAL A "SI"
+				if($boolean_asueto == "si"){
+					$codigo_jornada_asueto = trim($_POST['lstJornadaAsueto']);
+				}else{
+					$codigo_jornada_asueto = trim($_POST['lstJornadaAsueto']);
 				}
 				// 	validar la fecha de la producción.
 				$fechas = explode("-",$fecha);
@@ -141,7 +177,8 @@ if($errorDbConexion == false){
 					break;
 				}
 				// GUARDAR DATOS SIN VALIDAR
-					$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia) VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia')";
+					$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto) 
+									VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto')";
 				// Ejecutamos el Query.
 					$consulta = $dblink -> query($query);
 				// Linea de mensajes.

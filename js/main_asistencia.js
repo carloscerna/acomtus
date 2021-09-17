@@ -49,6 +49,7 @@ $("#Jornada, #Permiso").change(function () {
 	if ($("#Jornada").is(":checked")) {
 		$('#DivJornada').show();
 		$('#DivPermisos').hide();
+		listar_jornada();
 	}
 	else if ($("#Permiso").is(":checked")) {
 		$('#DivPermisos').show();
@@ -96,7 +97,7 @@ $("#goEnviar").on('click', function(){
 			},
 		submitHandler: function(){	
 		var str = $('#formAsistencia').serialize();
-		//alert(str);
+		alert(str);
 							// casilla de verificación revisar el valor.
 							var TipoLicenciaChecks = "off";
 							if ($("#Permiso").is(':checked')) {
@@ -159,12 +160,13 @@ function AbrirVentana(url)
 ////////////////////////////////////////////////////////////
 function buscar_personal(codigo_personal){
     var codigo_personal = $("#CodigoPersonal").val();
-    $.post("php_libs/soporte/NuevoEditarPersonalAsistencia.php", {accion_buscar: 'BuscarPersonalCodigo', codigo_personal: codigo_personal},
+	var fecha_ = $("#FechaAsistencia").val();
+    $.post("php_libs/soporte/NuevoEditarPersonalAsistencia.php", {accion_buscar: 'BuscarPersonalCodigo', codigo_personal: codigo_personal, fecha: fecha_},
         function(data) {
 			if(data[0].respuestaOK == true){
 				var nombre_empleado = data[0].nombre_empleado;
 				$("#NombrePersonal").val(nombre_empleado);
-				// FOTO DEL ALUMNO.
+				// FOTO DEL EMPELADO.
 					if(data[0].url_foto == "")
 					{
 						if(data[0].codigo_genero == "01"){
@@ -175,6 +177,31 @@ function buscar_personal(codigo_personal){
 					}else{
 						$(".card-img-top").attr("src", "../acomtus/img/fotos/" + data[0].url_foto);	
 					}
+				// VALIDAR SI EL D{IA SELECCIONADO ES DE ASUETO O NO
+					if(data[0].asueto == "si"){
+						$("#BooleanAsueto").val(data[0].asueto);
+						$("#TextAsuetoDescripcion").text(data[0].descripcion);
+						$("#JornadaAsueto").show();
+						listar_jornada_asueto(4);
+						// Activar y bloquear Permiso y seleccionar un item.
+						$("#Jornada").prop("checked", true);
+						$('#DivJornada').show();
+						listar_jornada(2);
+						$("#Permiso").prop("disabled", true);
+						$("#lstJornada").prop("readonly", true);
+					}else{
+						$("#TextAsuetoDescripcion").text("");
+						$("#JornadaAsueto").hide();
+						listar_jornada_asueto(4);
+						// Activar y bloquear Permiso y seleccionar un item.
+						$("#Jornada").prop("checked", false);
+						$("#Permiso").prop("checked", false);
+						$('#DivJornada').hide();
+						$('#DivPermiso').hide();
+						$("#Permiso").prop("disabled", false);
+						$("#lstJornada").prop("readonly", false);
+					}
+				//	MENSAJE DEL SISEMA
 				toastr["success"](data[0].mensajeError, "Sistema");
 			}else{
 				// IMAGEN PREDETERMINADA
@@ -187,6 +214,29 @@ function buscar_personal(codigo_personal){
 ////////////////////////////////////////////////////////////
 function listar_jornada(codigo_jornada){
     var miselect=$("#lstJornada");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                if(codigo_jornada == data[i].codigo){
+						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+                }else{
+					if(i==1){
+						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+					}else{
+						miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+					}
+                }
+            }
+    }, "json");    
+}
+// FUNCION LISTAR TABLA catalogo_jornada
+////////////////////////////////////////////////////////////
+function listar_jornada_asueto(codigo_jornada){
+    var miselect=$("#lstJornadaAsueto");
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
