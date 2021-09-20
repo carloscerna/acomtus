@@ -20,14 +20,16 @@
     <script type="text/JavaScript" src="js/main_asistencia.js"></script>
     <script>
       var AM_or_PM = "AM";
+      var h = 0;
       startTime();
       function startTime(){
 
           var today = new Date();
-          var h = today.getHours();
+          h = today.getHours();
           var m = today.getMinutes();
           var s = today.getSeconds();
-
+          $("#SoloHora").val(h);
+          //  CONVERTISION A FORMATO DE 12 HORAS.
           h = twelve_hour_time(h);
           m = checkTime(m);
           s = checkTime(s);
@@ -55,24 +57,6 @@
 
       }
     </script>
-    <script>
-      /* JavaScript code
-        showTime();
-        function showTime(){
-        myDate = new Date();
-        hours = myDate.getHours();
-        minutes = myDate.getMinutes();
-        seconds = myDate.getSeconds();
-        if (hours < 10) hours = 0 + hours;
-
-        if (minutes < 10) minutes = "0" + minutes;
-
-        if (seconds < 10) seconds = "0" + seconds;
-
-        $("#HoraActual").text(hours+ ":" +minutes+ ":" +seconds);
-          setTimeout("showTime()", 1000);
-        }*/
-    </script>
 {% endblock %}
 
 {% block contenidos %}
@@ -94,14 +78,22 @@
         </div>
       </div><!-- /.container-fluid -->
     </section>
+    
+    <section class="col col-sm-12 col-md-12 col-lg-8 col-xl-6 m-auto" id="PantallaPrincipalApagado" style="display: none;">
+      <div class="alert alert-primary" role="alert">
+        Ha Terminado el Tiempo para agregar la Asistencia (Punteado) de éste día.
+      </div>
+    </section>
   <!-- Small boxes (Stat box) -->
-    <section class="col col-sm-12 col-md-12 col-lg-8 col-xl-6 m-auto">
-  <!-- FORM PRINCIPAL -->
+    <section class="col col-sm-12 col-md-12 col-lg-8 col-xl-6 m-auto" id="PantallaPrincipal">
+      <!-- FORM PRINCIPAL -->
       <form action="" method="post" id="formAsistencia" name="formAsistencia" role="form" enctype="multipart/form-data">
             <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
             <input type="hidden" id="id_user" name="id_" value = ''>            
             <input type="hidden" id="accion" name="accion" value = 'GuardarAsistencia'>            
             <input type="hidden" id="BooleanAsueto" name="BooleanAsueto" value = "no">
+            <input type="hidden" id="codigo_perfil" name="codigo_perfil" value = {{ codigo_perfil }}>
+            <input type="hidden" id="codigo_personal_usuario" name="codigo_personal_usuario" value = {{ codigo_personal }}
               <class="card m-auto">
                 <div class="card-header bg-gradient-navy">
                   <div class="card-tools">
@@ -123,7 +115,7 @@
                 <!-- Fecha de la Asistencia -->       
                     <div class="form-group">
                       <label for="FechaAsistencia">Fecha:</label>
-                      <input type="date" class="form-control" id="FechaAsistencia" name="FechaAsistencia" autofocus>
+                      <input type="date" class="form-control" id="FechaAsistencia" name="FechaAsistencia" readonly>
                     </div>
                   <div class="form-group">
                     <label for="CodigoPersonal">Código Empleado:</label>
@@ -180,10 +172,10 @@
                   </div>                  
               </div> <!-- /.card-body -->
                   <!-- /.CARD  footer -->
-                  <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
-                    <!-- Botón Buscar Personal -->
-                    <a href="#" class="btn btn-primary" id="goEnviar"> Enviar <i class="fas fa-paper-plane"></i></a>                   
-                  </div>
+                    <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
+                      <!-- Botón Buscar Personal -->
+                      <a href="#" class="btn btn-primary" id="goEnviar"> Enviar <i class="fas fa-paper-plane"></i></a>                   
+                    </div>
               </div>      <!-- /.card -->
       </form>
     </section>

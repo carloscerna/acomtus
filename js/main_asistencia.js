@@ -13,6 +13,28 @@ $(document).ready(function(){
 		listar_jornada();
 	// IMAGEN PREDETERMINADA
 		$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
+	//	VALIDAR LA HORA QUE PUEDA GUARDAR DE 7:00 A.M. A 5:30 P.M.
+		var h = $("#SoloHora").val();
+		 if(h > 17){
+			//alert(h);
+			 $("#PantallaPrincipal").hide();
+			 $("#PantallaPrincipalApagado").show();
+		   }else{
+			 $("#PantallaPrincipal").show();
+			 $("#PantallaPrincipalApagado").hide();
+		   }
+	// VALIDAR CUANDO EL CODIGO DEL PERFIL DEL USUARIO SEA IGUAL A 
+	// 01, 02 o 05
+		var codigo_perfil = $("#codigo_perfil").val();
+			if(codigo_perfil == '01' || codigo_perfil == '02' || codigo_perfil == '05'){
+				$("#PantallaPrincipal").show();
+				$("#PantallaPrincipalApagado").hide();
+				$("#FechaAsistencia").attr("readonly",false);
+			}else{
+				$("#PantallaPrincipal").hide();
+				$("#PantallaPrincipalApagado").show();
+				$("#FechaAsistencia").attr("readonly",true);
+			}
 });		
 ///////////////////////////////////////////////////////////////////////////////
 /// EVENTOS JQUERY Y BOTON NUEVO REGISTRO. CALCULO Y OTROS
@@ -22,7 +44,6 @@ $("#lstPersonal").on('change', function(){
 	//var partial = nombre.split("|");
 	//$("#txtnombres").val(partial[1].trim());
 	$("#txtnombres").val(nombre);
-
 });
 ///////////////////////////////////////////////////////////////////////////////
 //	FUNCION LISTAR BUSQUEDA DE LOS REGISTROS

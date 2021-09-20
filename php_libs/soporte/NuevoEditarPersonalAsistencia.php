@@ -133,9 +133,11 @@ if($errorDbConexion == false){
 			break;			
 			case 'GuardarAsistencia':
 				$codigo_personal = trim($_POST['CodigoPersonal']);
+				$codigo_personal_usuario = trim($_POST['codigo_personal_usuario']);
 				$fecha = trim($_POST['FechaAsistencia']);
 				$tipolicenciacheck = trim($_POST['tipochecks']);
 				$boolean_asueto = trim($_POST['BooleanAsueto']);
+				$codigo_perfil = trim($_POST['codigo_perfil']);
 				// VALIDAR VALORES PARA TIPO LICENCIA JORNADA.
 				if($tipolicenciacheck == "on"){
 					$codigo_tipo_licencia = trim($_POST['lstTipoLicencia']);
@@ -167,34 +169,73 @@ if($errorDbConexion == false){
 					$mensajeError = "Fecha No Válida $dia . $mes . $ann";
 						break;
 				}
-				// BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
-					$query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha'";
-				// Ejecutamos el Query.
-					$consulta_b = $dblink -> query($query_buscar);
-					// Validar si hay registros.
-				if($consulta_b -> rowCount() != 0){
-					$mensajeError = "El Código Empleado ya fue Ingresado...";
-					break;
-				}
-				// GUARDAR DATOS SIN VALIDAR
-					$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto) 
-									VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto')";
-				// Ejecutamos el Query.
-					$consulta = $dblink -> query($query);
-				// Linea de mensajes.
+				// 	VERIFICAR QUE TIPO DE USUARIO DESEA MODIFICAR EL REGISTRO DEL PUNTEADO.
+				// SOLO EL ADMINISTRADOR, GERSION PERSONAL Y RECURSOS HUMANOS PUEDEN MODIFICARLO
+					if($codigo_perfil == '01' || $codigo_perfil == '02' || $codigo_perfil == '05'){
+						// BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
+						$query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha'";
+						// Ejecutamos el Query.
+							$consulta_b = $dblink -> query($query_buscar);
+							// Validar si hay registros.
+							if($consulta_b -> rowCount() != 0){
+								// convertimos el objeto
+								while($listado_b = $consulta_b -> fetch(PDO::FETCH_BOTH))
+									{
+									// Nombres de los campos de la tabla.
+										$id_ = trim($listado_b['id_']);
+									}
+								//$mensajeError = "El Código Empleado ya fue Ingresado...";
+									 $query_update = "UPDATE personal_asistencia SET
+													codigo_jornada = '$codigo_jornada',
+													codigo_tipo_licencia = '$codigo_tipo_licencia',
+													codigo_jornada_asueto = '$codigo_jornada_asueto',
+													codigo_personal_encargado = '$codigo_personal_usuario'
+														WHERE id_ = '$id_'
+											";
+								// Ejecutamos el Query.
+									$consulta_update = $dblink -> query($query_update);
+								//
+									$respuestaOK = true;
+									$mensajeError = "Se ha Actualizado el registro correctamente";
+									$contenidoOK = '';
+									break;
+							}else{
+								// SI NO EXISTE AGREGARLO
+								//
+								$mensajeError = "El Código Empleado NO EXISTE...";
+								$respuestaOK = false;
+									break;
+							}
+					}else{
+						// BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
+						$query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha'";
+						// Ejecutamos el Query.
+							$consulta_b = $dblink -> query($query_buscar);
+							// Validar si hay registros.
+							if($consulta_b -> rowCount() != 0){
+								$mensajeError = "El Código Empleado ya fue Ingresado...";
+									break;
+							}
+						// GUARDAR DATOS SIN VALIDAR
+							$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado) 
+											VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario')";
+						// Ejecutamos el Query.
+							$consulta = $dblink -> query($query);
+						// Linea de mensajes.
 
-				///////////////////////////////////////////////////////////////////////////////////////
-				// VALIDAR SI SE GUARDO BIEN LA INFORMACI{ON.}
-				if($consulta == true){
-					$respuestaOK = true;
-					$mensajeError = "Se ha Guardado el registro correctamente";
-					$contenidoOK = '';
-				}
-				else{
-					$respuestaOK = false;
-					$mensajeError = "No se puede guardar el registro en la base de datos ";
-				}
-			break;
+						///////////////////////////////////////////////////////////////////////////////////////
+						// VALIDAR SI SE GUARDO BIEN LA INFORMACI{ON.}
+						if($consulta == true){
+							$respuestaOK = true;
+							$mensajeError = "Se ha Guardado el registro correctamente";
+							$contenidoOK = '';
+						}
+						else{
+							$respuestaOK = false;
+							$mensajeError = "No se puede guardar el registro en la base de datos ";
+						}
+					}				
+				break;
             default:
 				$mensajeError = 'Esta acción no se encuentra disponible';
 			break;
