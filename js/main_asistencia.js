@@ -288,9 +288,9 @@ function listar_tipo_licencia(codigo_tipo_licencia){
             miselect.empty();
             for (var i=0; i<data.length; i++) {
                 if(codigo_tipo_licencia == data[i].codigo){
-                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + ' - ' + data[i].descripcion_completa + '</option>');
                 }else{
-                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + ' - ' +  data[i].descripcion_completa + '</option>');
                 }
             }
     }, "json");    

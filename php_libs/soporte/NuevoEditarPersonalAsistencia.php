@@ -114,7 +114,7 @@ if($errorDbConexion == false){
 			case 'BuscarTipoLicencia':
                 # Buscar en tabla catalogo_jornada.
                 // armando el Query.
-                    $query = "SELECT id_, descripcion from catalogo_tipo_licencia_o_permiso WHERE id_ > '1' ORDER BY id_";
+                    $query = "SELECT id_, descripcion, descripcion_completa from catalogo_tipo_licencia_o_permiso WHERE id_ > '1' ORDER BY id_";
                     // Ejecutamos el Query.
                     $consulta = $dblink -> query($query);
                     // Inicializando el array
@@ -123,11 +123,13 @@ if($errorDbConexion == false){
                         while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
                         {
                             // Nombres de los campos de la tabla.
-                        $codigo = trim($listado['id_']); $descripcion = trim($listado['descripcion']);
+                        $codigo = trim($listado['id_']); $descripcion_completa = trim($listado['descripcion_completa']);
+						$descripcion = trim($listado['descripcion']);
                         //. ' ' . trim($listado['hora_hasta']);
                         // Rellenando la array.
                            $datos[$fila_array]["codigo"] = $codigo;
                             $datos[$fila_array]["descripcion"] = $descripcion;
+							$datos[$fila_array]["descripcion_completa"] = $descripcion_completa;
                                 $fila_array++;
                             }
 			break;			
