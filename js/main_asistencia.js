@@ -13,16 +13,6 @@ $(document).ready(function(){
 		listar_jornada();
 	// IMAGEN PREDETERMINADA
 		$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
-	//	VALIDAR LA HORA QUE PUEDA GUARDAR DE 7:00 A.M. A 5:30 P.M.
-		var h = $("#SoloHora").val();
-		 if(h > 17){
-			//alert(h);
-			 $("#PantallaPrincipal").hide();
-			 $("#PantallaPrincipalApagado").show();
-		   }else{
-			 $("#PantallaPrincipal").show();
-			 $("#PantallaPrincipalApagado").hide();
-		   }
 	// VALIDAR CUANDO EL CODIGO DEL PERFIL DEL USUARIO SEA IGUAL A 
 	// 01, 02 o 05
 		var codigo_perfil = $("#codigo_perfil").val();
@@ -31,9 +21,18 @@ $(document).ready(function(){
 				$("#PantallaPrincipalApagado").hide();
 				$("#FechaAsistencia").attr("readonly",false);
 			}else{
-				$("#PantallaPrincipal").hide();
-				$("#PantallaPrincipalApagado").show();
-				$("#FechaAsistencia").attr("readonly",true);
+					//	VALIDAR LA HORA QUE PUEDA GUARDAR DE 7:00 A.M. A 5:30 P.M.
+						var h = $("#SoloHora").val();
+						if(h > 17){
+						//alert(h);
+							$("#PantallaPrincipal").hide();
+							$("#PantallaPrincipalApagado").show();
+							$("#FechaAsistencia").attr("readonly",true);
+						}else{
+							$("#PantallaPrincipal").show();
+							$("#PantallaPrincipalApagado").hide();
+							$("#FechaAsistencia").attr("readonly",true);
+						}
 			}
 });		
 ///////////////////////////////////////////////////////////////////////////////
