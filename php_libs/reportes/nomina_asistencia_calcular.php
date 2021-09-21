@@ -19,6 +19,8 @@
      $total_dias_quincena = 0;
      $reporte_trabajo = "";
      $InicioFinDia = 0;
+     $pago_diario = 0;
+     $horas_jornada = 0;
 //  imprimir datos del bachillerato.
            //
 	    // Establecer formato para la fecha.
@@ -236,10 +238,10 @@ function FancyTable($header)
     // ARMAR LA CONSULTA
     // DE ACUERDO AL CODIGO DEL DEPARTAMENTO EMPRESA
     if($DepartamentoEmpresa == '02'){
-        $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo 
+        $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario 
         FROM personal WHERE codigo_ruta = '$ruta' and codigo_estatus = '01' ORDER BY codigo";
     }else{
-        $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo 
+        $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario 
         FROM personal WHERE codigo_departamento_empresa = '$DepartamentoEmpresa' and codigo_estatus = '01' ORDER BY codigo";
     }
     // EJECUTAR LA CONSULTA
