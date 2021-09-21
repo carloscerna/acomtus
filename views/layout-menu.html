@@ -350,7 +350,14 @@
 {% endif %}
 
 <!-- PERFIL JEFE DE LINEA PARA AGREGAR LA ASISTENCIA DIARIA -->
-{% if codigo_perfil == '07' %}
+<!-- JEFES DE LINEA-->
+<!-- REVISADORES-->
+<!-- VIGILANTES-->
+<!-- Administración -->
+<!-- Aseo -->
+<!-- Mantenimiento-->
+
+{% if codigo_perfil == '07' or codigo_perfil == '08' or codigo_perfil == '09'%}
   <li class="nav-item has-treeview menu-open">
     <a href="index.php" class="nav-link active">
       <i class="nav-icon fas fa-school"></i>
