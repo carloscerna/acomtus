@@ -66,10 +66,10 @@ input.error {
         <!-- /.card-tools -->
       </div>
     <!-- /.card-header -->
-      <div class="card-body bg-gradient-gray">
+      <div class="card-body">
         <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
         <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
-        <input type="hidden" id="MenuTab" va  lue='{{ codigo_perfil }}'>         
+          <input type="hidden" id="MenuTab" va  lue='{{ codigo_perfil }}'>         
                 <div class="row" id="DivSoloPlanilla">
                   <div class="col col-md-12 col-lg-12 col-xl-12">
                     <!-- SELECT CATALOGO JORNADA -->
@@ -90,12 +90,12 @@ input.error {
                         <option value="12">Diciembre</option>
                       </select>                                      
                     </div>
-
+                    <!-- AÑO ACTUAL-->
                     <div class="form-group">
                       <label class="año">Año</label>
                       <select class="custom-select" name="lstFechaAño" id="lstFechaAño"></select>                                      
                     </div>
-
+                    <!-- QUINCENA-->
                     <div class="form-group">
                     <label for="Quincena">Quincena</label>
                         <select class="custom-select" name="lstQuincena" id="lstQuincena">
@@ -103,26 +103,34 @@ input.error {
                         <option value="Q2">Segunda</option>
                       </select>    
                     </div>
+                    <!-- DEPARTAMENTO-->
 
                     <div class="form-group">
+                      <label for="lstDepartamentoEmpresa">Departamento en la Empresa</label>
+                      <select class="custom-select" name="lstDepartamentoEmpresa" id="lstDepartamentoEmpresa"></select>    
+                    </div>
+                    <!-- RUTA - APARACERA CUANDO EN DEPARTAMENTO SE SELECCIONE MOTORISTAS-->
+                    <div class="form-group" id="DivRuta" style="display: none;">
                       <label for="Ruta">Ruta</label>
                       <select class="custom-select" name="lstRuta" id="lstRuta"></select>    
                     </div>
-
-                    <div class="d-flex justify-content-between">
-                      <!-- Botón Crear Planilla -->
-                      <button class='btn btn-success btn-lg' id="goCrearPlanilla" data-toggle="tooltip" data-placement="left" title="Crear"> 
-                        <div style='text-align:center;'><i class="fad fa-clipboard-list"></i></div>  
-                      </button>
-
-                      <!-- Botón Crear Planilla -->
-                      <button class='btn btn-primary btn-lg' id="goCalcularPlanilla" data-toggle="tooltip" data-placement="left" title="Calcular"> 
-                        <div style='text-align:center;'><i class="fal fa-clipboard-list-check"></i></div>  
-                      </button>
-                    </div>
               </div>
+                </div>
+      </div> <!-- CARDO BODY CIERRE-->
+      <!-- /.CARD  footer -->
+        <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
+          <div class="d-flex justify-content-between">
+            <!-- Botón Crear Planilla -->
+            <button class='btn btn-success btn-lg' id="goCrearPlanilla" data-toggle="tooltip" data-placement="left" title="Crear"> 
+              <div style='text-align:center;'><i class="fad fa-clipboard-list"></i></div>  
+            </button>
+
+            <!-- Botón Crear Planilla -->
+            <button class='btn btn-primary btn-lg' id="goCalcularPlanilla" data-toggle="tooltip" data-placement="left" title="Calcular"> 
+              <div style='text-align:center;'><i class="fal fa-clipboard-list-check"></i></div>  
+            </button>
           </div>
-      </div>
+        </div>
 </div> <!-- /.content-Wrapper, Contains page content. -->
 {% endblock %}
 

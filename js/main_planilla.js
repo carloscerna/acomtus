@@ -4,6 +4,10 @@ var accion = "todos";
 var tabla = "";
 var miselect = "";
 var today = "";
+var value_d = "";
+var value = "";
+var RutaText = "";
+var DepartamentoText = "";
 $(function(){ // iNICIO DEL fUNCTION.
 ///////////////////////////////////////////////////////////////////////////////
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
@@ -25,6 +29,7 @@ $(document).ready(function(){
 		//
 			listar_ruta();
 			listar_ann(year);
+			listar_departamento_cargo();	// Departamentos que existen en la Empresa.
 });		
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,8 +42,6 @@ var month = ("0" + (now.getMonth() + 1)).slice(-2);
 var year = now.getFullYear();
 
 today = now.getFullYear()+"-"+(month)+"-"+(day) ;
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // CUANDO CAMBIA LA FECHA. BUSCAR LA PRODUCCIÓN EN LA TABLA
 /// EVENTOS JQUERY IMPRIMIR TODA LA PRODUCCIÓN O POR RANGO.
@@ -48,11 +51,24 @@ $("#goCrearPlanilla").on('click', function (e) {
 		fechaMes = $("#lstFechaMes").val();
 		fechaAnn = $("#lstFechaAño").val();
 		quincena = $("#lstQuincena").val();
+		// LstDepartmaentoEmpresa
+		DepartamentoEmpresa = $("#lstDepartamentoEmpresa").val();
+		value_d = $("#lstDepartamentoEmpresa option:selected");
+		DepartamentoText = value_d.text();
+		// lstruta
 		ruta = $("#lstRuta").val();
-		var value = $("#lstRuta option:selected");
-		var RutaText = value.text();
+		value = $("#lstRuta option:selected");
+		RutaText = value.text();
+
+		//Validar que información llevara el informe 
+		// Cìdog 02 corresponde a los motoristas
+		if(DepartamentoEmpresa == '02'){
 		// Ejecutar Informe
-			varenviar = "/acomtus/php_libs/reportes/nomina_asistencia.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText;
+			varenviar = "/acomtus/php_libs/reportes/nomina_asistencia.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText;
+		}else{
+		// Ejecutar Informe
+			varenviar = "/acomtus/php_libs/reportes/nomina_asistencia.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText;
+		}
 		// Ejecutar la función abre otra pestaña.
 			AbrirVentana(varenviar);   
   });
@@ -70,7 +86,19 @@ $("#goCalcularPlanilla").on('click', function (e) {
 	// Ejecutar la función abre otra pestaña.
 		AbrirVentana(varenviar);   
 });
+// CUANDO SE ENCUENTRA EL CAMBIO DEL DEPARTAMENTO EN LA EMPRESA
+	$("#lstDepartamentoEmpresa").change(function () {
+		var miselect=$("#lstDepartamentoEmpresa");
 
+		$("#lstDepartamentoEmpresa option:selected").each(function () {
+				elegido=$(this).val();
+				if(elegido == '02'){
+					$("#DivRuta").show();
+				}else{
+					$("#DivRuta").hide();
+				}
+			});
+	});
 ///////////////////////////////////////////////////////
 // Validar Formulario, para la busqueda de un registro por codigo del motorista.
  //////////////////////////////////////////////////////
@@ -190,6 +218,21 @@ function listar_ann(codigo_ann){
                 }else{
                     miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
                 }
+            }
+    }, "json");    
+}
+// FUNCION LISTAR DEPARTAMENTO CARGO
+////////////////////////////////////////////////////////////
+function listar_departamento_cargo(){
+    var miselect=$("#lstDepartamentoEmpresa");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_departamento_cargo.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
             }
     }, "json");    
 }
