@@ -13,6 +13,8 @@
      $quincena = $_REQUEST["quincena"];
      $ruta = $_REQUEST["ruta"];
      $RutaText = $_REQUEST["RutaText"];
+     $DepartamentoEmpresa = $_REQUEST["DepartamentoEmpresa"];
+     $DepartamentoEmpresaText = $_REQUEST["DepartamentoText"];
      $db_link = $dblink;
      $total_dias_quincena = 0;
      $reporte_trabajo = "";
@@ -85,11 +87,21 @@ foreach($periodo as $date){
     // ARMAR EL NOMBRE DLE REPORTE CON NOMBRE QUINCE DE TAL DIA A TAL DIA.
     if($quincena == "Q1"){
         $reporte_trabajo = "Reporte de trabajo correspondiente a la quincena del 1 al 15 de $NombreMes de $anyo";
-        $reporte_ruta = "NOMBRE DE MOTORISTAS ($RutaText)";
+        // Validar texto 
+        if($DepartamentoEmpresa == '02'){
+            $reporte_ruta = "NOMBRE DE MOTORISTAS ($RutaText)";
+        }else{
+            $reporte_ruta = "NOMBRE EMPLEADOS ($DepartamentoEmpresaText)";
+        }
     }
     if($quincena == "Q2"){
         $reporte_trabajo = "Reporte de trabajo correspondiente a la quincena del 16 al $total_de_dias de $NombreMes de $anyo";
-        $reporte_ruta = "NOMBRE DE MOTORISTAS ($RutaText)";
+        // Validar texto 
+        if($DepartamentoEmpresa == '02'){
+            $reporte_ruta = "NOMBRE DE MOTORISTAS ($RutaText)";
+        }else{
+            $reporte_ruta = "NOMBRE EMPLEADOS ($DepartamentoEmpresaText)";
+        }
     }
 class PDF extends FPDF
 {
@@ -97,26 +109,26 @@ class PDF extends FPDF
 function Header()
 {
     global $reporte_trabajo, $reporte_ruta;
-//Logo
+    //Logo
     $img = $_SERVER['DOCUMENT_ROOT'].'/acomtus/img/'.$_SESSION['logo_uno'];
     $this->Image($img,15,10,24,24);
-//Arial bold 14
+    //Arial bold 14
     $this->SetFont('Arial','B',14);
-//Título
-//$0titulo1 = utf8_decode("Educación Parvularia - Básica - Tercer Ciclo y Bachillerato.");
+    //Título
+    //$0titulo1 = utf8_decode("Educación Parvularia - Básica - Tercer Ciclo y Bachillerato.");
     $this->RotatedText(40,22,utf8_decode($_SESSION['nombre_institucion']),0);
-//Arial bold 13
+    //Arial bold 13
     $this->SetFont('Arial','B',12);
     $this->RotatedText(40,28,utf8_decode($reporte_trabajo),0);
     $this->RotatedText(40,34,utf8_decode($reporte_ruta),0);
-// Posición en donde va iniciar el texto.
+    // Posición en donde va iniciar el texto.
     $this->SETY(35);
 }
 
 //Pie de página
 function Footer()
 {
-//
+    //
   // Establecer formato para la fecha.
   // 
    date_default_timezone_set('America/El_Salvador');
@@ -175,7 +187,7 @@ function FancyTable($header)
             for($j=$InicioFinDia;$j<=count($nombreDia_a)-1;$j++){
                 $this->Cell($w1[0],7,$numeroDia_a[$j],'1',0,'C',1);
             }
-//                $this->Ln();  /// salto de linea
+    //                $this->Ln();  /// salto de linea
     // ESPACIO PARA EL TERCER BLOQUE
             $this->Cell($w[3],7,'','L',0,'C',1);
             //
@@ -218,8 +230,14 @@ function FancyTable($header)
     $w1=array(5.66); //determina el ancho de las columnas
 
     // ARMAR LA CONSULTA
-   $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo 
-                FROM personal WHERE codigo_ruta = '$ruta' and codigo_estatus = '01' ORDER BY codigo";
+    // DE ACUERDO AL CODIGO DEL DEPARTAMENTO EMPRESA
+        if($DepartamentoEmpresa == '02'){
+            $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo 
+            FROM personal WHERE codigo_ruta = '$ruta' and codigo_estatus = '01' ORDER BY codigo";
+        }else{
+            $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo 
+            FROM personal WHERE codigo_departamento_empresa = '$DepartamentoEmpresa' and codigo_estatus = '01' ORDER BY codigo";
+        }
     // EJECUTAR LA CONSULTA
     $consulta = $dblink -> query($query);
     //
