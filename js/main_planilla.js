@@ -78,12 +78,23 @@ $("#goCalcularPlanilla").on('click', function (e) {
 	fechaMes = $("#lstFechaMes").val();
 	fechaAnn = $("#lstFechaAño").val();
 	quincena = $("#lstQuincena").val();
+	// LstDepartmaentoEmpresa
+	DepartamentoEmpresa = $("#lstDepartamentoEmpresa").val();
+	value_d = $("#lstDepartamentoEmpresa option:selected");
+	DepartamentoText = value_d.text();
+	// lstruta
 	ruta = $("#lstRuta").val();
 	var value = $("#lstRuta option:selected");
 	var RutaText = value.text();
-	// Ejecutar Informe
-		varenviar = "/acomtus/php_libs/reportes/nomina_asistencia_calcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText;
-	// Ejecutar la función abre otra pestaña.
+		//Validar que información llevara el informe 
+		// Cìdog 02 corresponde a los motoristas
+		if(DepartamentoEmpresa == '02'){
+			// Ejecutar Informe
+				varenviar = "/acomtus/php_libs/reportes/nomina_asistencia_calcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText;
+			}else{
+			// Ejecutar Informe
+				varenviar = "/acomtus/php_libs/reportes/nomina_asistencia_calcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText;
+			}
 		AbrirVentana(varenviar);   
 });
 // CUANDO SE ENCUENTRA EL CAMBIO DEL DEPARTAMENTO EN LA EMPRESA

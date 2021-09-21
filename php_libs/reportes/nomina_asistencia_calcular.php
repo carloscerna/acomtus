@@ -13,6 +13,8 @@
      $quincena = $_REQUEST["quincena"];
      $ruta = $_REQUEST["ruta"];
      $RutaText = $_REQUEST["RutaText"];
+     $DepartamentoEmpresa = $_REQUEST["DepartamentoEmpresa"];
+     $DepartamentoEmpresaText = $_REQUEST["DepartamentoText"];
      $db_link = $dblink;
      $total_dias_quincena = 0;
      $reporte_trabajo = "";
@@ -89,11 +91,21 @@ foreach($periodo as $date){
     // ARMAR EL NOMBRE DLE REPORTE CON NOMBRE QUINCE DE TAL DIA A TAL DIA.
     if($quincena == "Q1"){
         $reporte_trabajo = "Reporte de trabajo correspondiente a la quincena del 1 al 15 de $NombreMes de $anyo";
-        $reporte_ruta = "NOMBRE DE MOTORISTAS ($RutaText)";
+        // Validar texto 
+        if($DepartamentoEmpresa == '02'){
+            $reporte_ruta = "NOMBRE DE MOTORISTAS ($RutaText)";
+        }else{
+            $reporte_ruta = "NOMBRE EMPLEADOS ($DepartamentoEmpresaText)";
+        }
     }
     if($quincena == "Q2"){
         $reporte_trabajo = "Reporte de trabajo correspondiente a la quincena del 16 al $total_de_dias de $NombreMes de $anyo";
-        $reporte_ruta = "NOMBRE DE MOTORISTAS ($RutaText)";
+        // Validar texto 
+        if($DepartamentoEmpresa == '02'){
+            $reporte_ruta = "NOMBRE DE MOTORISTAS ($RutaText)";
+        }else{
+            $reporte_ruta = "NOMBRE EMPLEADOS ($DepartamentoEmpresaText)";
+        }
     }
 class PDF extends FPDF
 {
@@ -222,8 +234,14 @@ function FancyTable($header)
     $w1=array(5.66); //determina el ancho de las columnas
 
     // ARMAR LA CONSULTA
-   $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario 
-                FROM personal WHERE codigo_ruta = '$ruta' and codigo_estatus = '01' ORDER BY codigo";
+    // DE ACUERDO AL CODIGO DEL DEPARTAMENTO EMPRESA
+    if($DepartamentoEmpresa == '02'){
+        $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo 
+        FROM personal WHERE codigo_ruta = '$ruta' and codigo_estatus = '01' ORDER BY codigo";
+    }else{
+        $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo 
+        FROM personal WHERE codigo_departamento_empresa = '$DepartamentoEmpresa' and codigo_estatus = '01' ORDER BY codigo";
+    }
     // EJECUTAR LA CONSULTA
     $consulta = $dblink -> query($query);
     //
