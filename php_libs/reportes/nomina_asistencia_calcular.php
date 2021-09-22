@@ -356,8 +356,28 @@ function rellenar($total_dias_quincena){
                                 // PERMISO PERSONAL Una tanda 8 horas
                                 //$salario = $salario + ($horas_licencia * $pago_diario_hora);
                                 break;
+                            case 'F':
+                                // CUANDO SEA FALTA QUE ACCIÓN REALIZAR
+                                break;
                             case 'C':
                                 // CUANDO SEA CASTIGO QUE ACCIÓN REALIZAR
+                                break;
+                            case 'V':
+                                // CUANDO SEA VACACION QUE ACCIÓN REALIZAR
+                                $salario = $salario + ($horas_licencia * $pago_diario_hora);
+                                break;
+                            case 'TV':
+                                // CUANDO SEA TRABAJO VACACION QUE ACCIÓN REALIZAR
+                                $salario = $salario + ($horas_licencia * $pago_diario_hora);
+                                break;
+                            case 'D':
+                                // CUANDO SEA DESCANSO QUE ACCIÓN REALIZAR
+                                $salario = $salario + ($horas_licencia * $pago_diario_hora);
+                                break;
+                            case 'TD':
+                                // CUANDO SEA TRABAJO DESCANSO QUE ACCIÓN REALIZAR
+                                $salario = $salario + ($horas_licencia * $pago_diario_hora);
+                                break;
                             default:
                                 # code...
                                 break;
