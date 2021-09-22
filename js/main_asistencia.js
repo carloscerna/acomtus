@@ -69,13 +69,21 @@ $("#Jornada, #Permiso").change(function () {
 	if ($("#Jornada").is(":checked")) {
 		$('#DivJornada').show();
 		$('#DivPermisos').hide();
+		//
 		$("#JornadaTV").hide();
 		$("#lstJornadaDescanso").hide();
+		// VOLVER A COLOCAR EN VALOR "no" AMBAS BOOLEAN
+		$("#BooleanTV").val('no');
+		$("#BooleanDescanso").val('no');
 		listar_jornada();
 	}
 	else if ($("#Permiso").is(":checked")) {
 		$('#DivPermisos').show();
 		$('#DivJornada').hide();
+		// VOLVER A COLOCAR EN VALOR "no" AMBAS BOOLEAN
+		$("#BooleanTV").val('no');
+		$("#BooleanDescanso").val('no');
+		//
 		$("#JornadaTV").hide();
 		$("#JornadaDescanso").hide();
 		// Listar tipo licencia.
@@ -90,16 +98,28 @@ $("#lstTipoLicencia").change(function () {
 	var miselect=$("#lstTipoLicencia");
 
 	$("#lstTipoLicencia option:selected").each(function () {
+			// ELEJIR EL VALOR DEL SELECT
 			elegido=$(this).val();
+			// SE HA SELECCIONADO TRABAJÓ EN VACACIÓN
 			if(elegido == '12'){
+				// VOLVER A COLOCAR EN VALOR "si"
+				$("#BooleanTV").val('si');
+				//
 				$("#JornadaTV").show();
 				$("#JornadaDescanso").hide();
 				listar_jornada_vacacion(2);
-			}else if(elegido == '14'){
+			}else if(elegido == '14'){	// SE HA SELECCIONADO TRABAJO EN DESCANSO
+				// VOLVER A COLOCAR EN VALOR "si"
+				$("#BooleanDescanso").val('si');
+				//
 				$("#JornadaTV").hide();
 				$("#JornadaDescanso").show();
 				listar_jornada_descanso(2);
 			}else{
+				// VOLVER A COLOCAR EN VALOR "no" AMBAS BOOLEAN
+				$("#BooleanTV").val('no');
+				$("#BooleanDescanso").val('no');
+				// OCULTAR
 				$("#JornadaDescanso").hide();
 				$("#JornadaTV").hide();
 			}
@@ -143,7 +163,7 @@ $("#goEnviar").on('click', function(){
 			},
 		submitHandler: function(){	
 		var str = $('#formAsistencia').serialize();
-		//alert(str);
+		alert(str);
 							// casilla de verificación revisar el valor.
 							var TipoLicenciaChecks = "off";
 							if ($("#Permiso").is(':checked')) {

@@ -140,12 +140,26 @@ if($errorDbConexion == false){
 				$tipolicenciacheck = trim($_POST['tipochecks']);
 				$boolean_asueto = trim($_POST['BooleanAsueto']);
 				$boolean_vacaciones = trim($_POST['BooleanTV']);
-				$boolean_descanso = trim($_POST['BooleanDescanso']);
+				$boolean_descanso = trim($_POST['BooleanDescanso']) ;
 				$codigo_perfil = trim($_POST['codigo_perfil']);
 				// VALIDAR VALORES PARA TIPO LICENCIA JORNADA.
 				if($tipolicenciacheck == "on"){
 					$codigo_tipo_licencia = trim($_POST['lstTipoLicencia']);
 					$codigo_jornada = '4';
+
+						// VALIDAR VALORES CUANDO TRABAJO VACACIONES SEA IGUAL A "SI"
+						//
+						if($boolean_vacaciones == "si"){
+							$codigo_jornada_vacaciones = trim($_POST['lstJornadaTV']);
+						}else{
+							$codigo_jornada_vacaciones = '4';
+						}
+						// VALIDAR VALORES CUANDO DESCANSO SEA IGUAL A "SI"
+						if($boolean_descanso == "si"){
+							$codigo_jornada_descanso = trim($_POST['lstJornadaDescanso']);
+						}else{
+							$codigo_jornada_descanso = '4';
+						}
 				}else{
 					$codigo_jornada = trim($_POST['lstJornada']);
 					$codigo_tipo_licencia = "1";
@@ -155,18 +169,6 @@ if($errorDbConexion == false){
 					$codigo_jornada_asueto = trim($_POST['lstJornadaAsueto']);
 				}else{
 					$codigo_jornada_asueto = trim($_POST['lstJornadaAsueto']);
-				}
-				// VALIDAR VALORES CUANDO TRABAJO VACACIONES SEA IGUAL A "SI"
-				if($boolean_vacaciones == "si"){
-					$codigo_jornada_vacaciones = trim($_POST['lstJornadaTV']);
-				}else{
-					$codigo_jornada_vacaciones = trim($_POST['lstJornadaTV']);
-				}
-				// VALIDAR VALORES CUANDO DESCANSO SEA IGUAL A "SI"
-				if($boolean_descanso == "si"){
-					$codigo_jornada_descanso = trim($_POST['lstJornadaDescanso']);
-				}else{
-					$codigo_jornada_descanso = trim($_POST['lstJornadaDescanso']);
 				}
 				// 	validar la fecha de la producción.
 				$fechas = explode("-",$fecha);
@@ -205,7 +207,9 @@ if($errorDbConexion == false){
 													codigo_jornada = '$codigo_jornada',
 													codigo_tipo_licencia = '$codigo_tipo_licencia',
 													codigo_jornada_asueto = '$codigo_jornada_asueto',
-													codigo_personal_encargado = '$codigo_personal_usuario'
+													codigo_personal_encargado = '$codigo_personal_usuario',
+													codigo_jornada_vacaciones = '$codigo_jornada_vacaciones',
+													codigo_jornada_descanso = '$codigo_jornada_descanso'
 														WHERE id_ = '$id_'
 											";
 								// Ejecutamos el Query.
@@ -230,8 +234,8 @@ if($errorDbConexion == false){
 												break;
 										}
 								// GUARDAR DATOS SIN VALIDAR
-									$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado) 
-													VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario')";
+									$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso) 
+													VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario', '$codigo_jornada_vacaciones', '$codigo_jornada_descanso')";
 								// Ejecutamos el Query.
 									$consulta = $dblink -> query($query);
 								// Linea de mensajes.
@@ -250,7 +254,8 @@ if($errorDbConexion == false){
 									break;
 							}
 					}else{
-						// BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
+						// CUANDO NO ES EL ADMINISTRADOR U OTROS
+						// BUSCAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
 						$query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha'";
 						// Ejecutamos el Query.
 							$consulta_b = $dblink -> query($query_buscar);
@@ -260,8 +265,8 @@ if($errorDbConexion == false){
 									break;
 							}
 						// GUARDAR DATOS SIN VALIDAR
-							$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado) 
-											VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario')";
+							$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso) 
+											VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario','$codigo_jornada_vacaciones', '$codigo_jornada_descanso')";
 						// Ejecutamos el Query.
 							$consulta = $dblink -> query($query);
 						// Linea de mensajes.
