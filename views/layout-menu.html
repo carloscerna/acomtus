@@ -1,141 +1,140 @@
 <!-- PERFIL ADMINISTRADOR -->
-{% if codigo_perfil == '01' %}
-	      <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
-               <li class="nav-item has-treeview menu-open">
-                <a href="index.php" class="nav-link active">
-                  <i class="nav-icon fas fa-school"></i>
-                  <p>
-                    Dashboard
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
+  {% if codigo_perfil == '01' %}
+	       <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
+          <li class="nav-item has-treeview menu-open">
+          <a href="index.php" class="nav-link active">
+            <i class="nav-icon fas fa-school"></i>
+            <p>
+              Dashboard
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          </li>
+          <!-- /. CONFIGURACIÓN INICIAL -->
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-wrench"></i>
+              <p>
+                Administración
+                <i class="fas fa-angle-left right"></i>
+                <span class="badge badge-info right"></span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="empresa.php" class="nav-link">
+                  <i class="far fa-building nav-icon"></i>
+                  <p>Empresa</p>
                 </a>
               </li>
-              <!-- /. CONFIGURACIÓN INICIAL -->
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-wrench"></i>
-                  <p>
-                    Administración
-                    <i class="fas fa-angle-left right"></i>
-                    <span class="badge badge-info right"></span>
-                  </p>
+              <li class="nav-item">
+                <a href="personal.php" class="nav-link">
+                  <i class="fas fa-user-friends nav-icon"></i>
+                  <p>Personal</p>
                 </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="empresa.php" class="nav-link">
-                      <i class="far fa-building nav-icon"></i>
-                      <p>Empresa</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="personal.php" class="nav-link">
-                      <i class="fas fa-user-friends nav-icon"></i>
-                      <p>Personal</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="asistencia.php" class="nav-link">
-                      <i class="fal fa-clipboard-user nav-icon"></i>
-                      <p>Asistencia</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="planilla.php" class="nav-link">
-                      <i class="far fa-file-invoice-dollar nav-icon"></i>
-                      <p>Planilla</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="usuarios.php" class="nav-link">
-                      <i class="fas fa-user-cog nav-icon"></i>
-                      <p>Usuarios</p>
-                    </a>
-                  </li>
-                </ul>
               </li>
-                <!-- /. ITEMS PARA LA PRODUCCIÓN. -->
-                <li class="nav-item has-treeview">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon far fa-building"></i>
-                    <p>
-                      Producción
-                      <i class="fas fa-angle-left right"></i>
-                      <span class="badge badge-info right"></span>
-                    </p>
-                  </a>
-                  <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                      <a href="produccion.php" class="nav-link">
-                        <i class="fas fa-layer-group nav-icon"></i>
-                        <p>Crear</p>
-                      </a>
-                    </li> 
-                    <li class="nav-item">
-                      <a href="produccion_calcular.php" class="nav-link">
-                        <i class="fas fa-dollar-sign nav-icon"></i>
-                        <p>Calcular</p>
-                      </a>
-                    </li> 
-                    <li class="nav-item">
-                      <a href="transporte.php" class="nav-link">
-                        <i class="fas fa-bus-alt nav-icon"></i>
-                        <p>Transporte Colectivo</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="proveedores.php" class="nav-link">
-                        <i class="fas fa-industry nav-icon"></i>
-                        <p>Proveedores</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="inventario_tiquete.php" class="nav-link">
-                        <i class="fas fa-dolly-flatbed nav-icon"></i>
-                        <p>Inventario</p>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                <!-- /. INFORMES -->
-                <li class="nav-item has-treeview">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon fas fa-file-chart-line"></i>
-                    <p>
-                      Informes
-                      <i class="fas fa-angle-left right"></i>
-                      <span class="badge badge-info right"></span>
-                    </p>
-                  </a>
-                  <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                      <a href="informes.php" class="nav-link">
-                        <i class="fas fa-file-invoice-dollar nav-icon"></i>
-                        <p>General</p>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                <!-- /. MANTENIMIENTO -->
-                <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-wrench"></i>
-                  <p>
-                    Mantenimiento
-                    <i class="fas fa-angle-left right"></i>
-                    <span class="badge badge-info right"></span>
-                  </p>
+              <li class="nav-item">
+                <a href="asistencia.php" class="nav-link">
+                  <i class="fal fa-clipboard-user nav-icon"></i>
+                  <p>Asistencia</p>
                 </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="catalogos.php" class="nav-link">
-                      <i class="fas fa-table nav-icon"></i>
-                      <p>Catalogos</p>
-                    </a>
-                  </li>
-                </ul>
               </li>
-{% endif %}
+              <li class="nav-item">
+                <a href="planilla.php" class="nav-link">
+                  <i class="far fa-file-invoice-dollar nav-icon"></i>
+                  <p>Planilla</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="usuarios.php" class="nav-link">
+                  <i class="fas fa-user-cog nav-icon"></i>
+                  <p>Usuarios</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <!-- /. ITEMS PARA LA PRODUCCIÓN. -->
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon far fa-building"></i>
+              <p>
+                Producción
+                <i class="fas fa-angle-left right"></i>
+                <span class="badge badge-info right"></span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="produccion.php" class="nav-link">
+                  <i class="fas fa-layer-group nav-icon"></i>
+                  <p>Crear</p>
+                </a>
+              </li> 
+              <li class="nav-item">
+                <a href="produccion_calcular.php" class="nav-link">
+                  <i class="fas fa-dollar-sign nav-icon"></i>
+                  <p>Calcular</p>
+                </a>
+              </li> 
+              <li class="nav-item">
+                <a href="transporte.php" class="nav-link">
+                  <i class="fas fa-bus-alt nav-icon"></i>
+                  <p>Transporte Colectivo</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="proveedores.php" class="nav-link">
+                  <i class="fas fa-industry nav-icon"></i>
+                  <p>Proveedores</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="inventario_tiquete.php" class="nav-link">
+                  <i class="fas fa-dolly-flatbed nav-icon"></i>
+                  <p>Inventario</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <!-- /. INFORMES -->
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-file-chart-line"></i>
+              <p>
+                Informes
+                <i class="fas fa-angle-left right"></i>
+                <span class="badge badge-info right"></span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="informes.php" class="nav-link">
+                  <i class="fas fa-file-invoice-dollar nav-icon"></i>
+                  <p>General</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <!-- /. MANTENIMIENTO -->
+          <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-wrench"></i>
+            <p>
+              Mantenimiento
+              <i class="fas fa-angle-left right"></i>
+              <span class="badge badge-info right"></span>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="catalogos.php" class="nav-link">
+                <i class="fas fa-table nav-icon"></i>
+                <p>Catalogos</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+  {% endif %}
 <!-- PERFIL GESTION DE PERSONAL. -->
 {% if codigo_perfil == '02' %}
   <li class="nav-item has-treeview menu-open">
@@ -162,6 +161,18 @@
         <a href="personal.php" class="nav-link">
           <i class="fas fa-user-friends nav-icon"></i>
           <p>Personal</p>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="asistencia.php" class="nav-link">
+          <i class="fal fa-clipboard-user nav-icon"></i>
+          <p>Asistencia</p>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="planilla.php" class="nav-link">
+          <i class="far fa-file-invoice-dollar nav-icon"></i>
+          <p>Planilla</p>
         </a>
       </li>
     </ul>
@@ -196,125 +207,134 @@
           <p>Personal</p>
         </a>
       </li>
+      <li class="nav-item">
+        <a href="asistencia.php" class="nav-link">
+          <i class="fal fa-clipboard-user nav-icon"></i>
+          <p>Asistencia</p>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="planilla.php" class="nav-link">
+          <i class="far fa-file-invoice-dollar nav-icon"></i>
+          <p>Planilla</p>
+        </a>
+      </li>
     </ul>
   </li>
 {% endif %}
 
 <!-- PERFIL DE PRODUCCIÓN -->
 {% if codigo_perfil == '03' %}
-<li class="nav-item has-treeview menu-open">
-  <a href="index.php" class="nav-link active">
-    <i class="nav-icon fas fa-school"></i>
-    <p>
-      Dashboard
-      <i class="right fas fa-angle-left"></i>
-    </p>
-  </a>
+  <li class="nav-item has-treeview menu-open">
+    <a href="index.php" class="nav-link active">
+      <i class="nav-icon fas fa-school"></i>
+      <p>
+        Dashboard
+        <i class="right fas fa-angle-left"></i>
+      </p>
+    </a>
+  </li>
+    <!-- /. ITEMS PARA LA PRODUCCIÓN. -->
+    <li class="nav-item has-treeview">
+      <a href="#" class="nav-link">
+        <i class="nav-icon far fa-building"></i>
+        <p>
+          Producción
+          <i class="fas fa-angle-left right"></i>
+          <span class="badge badge-info right"></span>
+        </p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item">
+          <a href="produccion.php" class="nav-link">
+            <i class="fas fa-layer-group nav-icon"></i>
+            <p>Crear</p>
+          </a>
+        </li> 
+        <li class="nav-item">
+          <a href="produccion_calcular.php" class="nav-link">
+            <i class="fas fa-dollar-sign nav-icon"></i>
+            <p>Calcular</p>
+          </a>
+        </li> 
+        <li class="nav-item">
+          <a href="transporte.php" class="nav-link">
+            <i class="fas fa-bus-alt nav-icon"></i>
+            <p>Transporte Colectivo</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="proveedores.php" class="nav-link">
+            <i class="fas fa-industry nav-icon"></i>
+            <p>Proveedores</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="inventario_tiquete.php" class="nav-link">
+            <i class="fas fa-dolly-flatbed nav-icon"></i>
+            <p>Inventario</p>
+          </a>
+        </li>
+      </ul>
+        <!-- /. INFORMES -->
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-file-chart-line"></i>
+            <p>
+              Informes
+              <i class="fas fa-angle-left right"></i>
+              <span class="badge badge-info right"></span>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="informes.php" class="nav-link">
+                <i class="fas fa-file-invoice-dollar nav-icon"></i>
+                <p>General</p>
+              </a>
+            </li>
+          </ul>
+        </li>
 </li>
-<!-- /. ITEMS PARA LA PRODUCCIÓN. -->
-<li class="nav-item has-treeview">
-  <a href="#" class="nav-link">
-    <i class="nav-icon far fa-building"></i>
-    <p>
-      Producción
-      <i class="fas fa-angle-left right"></i>
-      <span class="badge badge-info right"></span>
-    </p>
-  </a>
-  <ul class="nav nav-treeview">
-    <li class="nav-item">
-      <a href="produccion.php" class="nav-link">
-        <i class="fas fa-layer-group nav-icon"></i>
-        <p>Crear</p>
-      </a>
-    </li> 
-    <li class="nav-item">
-      <a href="produccion_calcular.php" class="nav-link">
-        <i class="fas fa-dollar-sign nav-icon"></i>
-        <p>Calcular</p>
-      </a>
-    </li> 
-    <li class="nav-item">
-      <a href="transporte.php" class="nav-link">
-        <i class="fas fa-bus-alt nav-icon"></i>
-        <p>Transporte Colectivo</p>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a href="proveedores.php" class="nav-link">
-        <i class="fas fa-industry nav-icon"></i>
-        <p>Proveedores</p>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a href="inventario_tiquete.php" class="nav-link">
-        <i class="fas fa-dolly-flatbed nav-icon"></i>
-        <p>Inventario</p>
-      </a>
-    </li>
-  </ul>
-                <!-- /. INFORMES -->
-                <li class="nav-item has-treeview">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon fas fa-file-chart-line"></i>
-                    <p>
-                      Informes
-                      <i class="fas fa-angle-left right"></i>
-                      <span class="badge badge-info right"></span>
-                    </p>
-                  </a>
-                  <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                      <a href="informes.php" class="nav-link">
-                        <i class="fas fa-file-invoice-dollar nav-icon"></i>
-                        <p>General</p>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-</li>
-
 {% endif %}
  
 <!-- PERFIL DE PRODUCCIÓN CALCULAR -->
 {% if codigo_perfil == '04' %}
-<li class="nav-item has-treeview menu-open">
-  <a href="index.php" class="nav-link active">
-    <i class="nav-icon fas fa-school"></i>
-    <p>
-      Dashboard
-      <i class="right fas fa-angle-left"></i>
-    </p>
-  </a>
-</li>
-<!-- /. ITEMS PARA LA PRODUCCIÓN. -->
-<li class="nav-item has-treeview">
-  <a href="#" class="nav-link">
-    <i class="nav-icon far fa-building"></i>
-    <p>
-      Producción
-      <i class="fas fa-angle-left right"></i>
-      <span class="badge badge-info right"></span>
-    </p>
-  </a>
-  <ul class="nav nav-treeview">
-    <li class="nav-item">
-      <a href="produccion.php" class="nav-link">
-        <i class="fas fa-layer-group nav-icon"></i>
-        <p>Crear</p>
+  <li class="nav-item has-treeview menu-open">
+    <a href="index.php" class="nav-link active">
+      <i class="nav-icon fas fa-school"></i>
+      <p>
+        Dashboard
+        <i class="right fas fa-angle-left"></i>
+      </p>
+    </a>
+  </li>
+    <!-- /. ITEMS PARA LA PRODUCCIÓN. -->
+    <li class="nav-item has-treeview">
+      <a href="#" class="nav-link">
+        <i class="nav-icon far fa-building"></i>
+        <p>
+          Producción
+          <i class="fas fa-angle-left right"></i>
+          <span class="badge badge-info right"></span>
+        </p>
       </a>
-    </li> 
-    <li class="nav-item">
-      <a href="produccion_calcular.php" class="nav-link">
-        <i class="fas fa-dollar-sign nav-icon"></i>
-        <p>Calcular</p>
-      </a>
-    </li> 
-  </ul>
-</li>
-
+      <ul class="nav nav-treeview">
+        <li class="nav-item">
+          <a href="produccion.php" class="nav-link">
+            <i class="fas fa-layer-group nav-icon"></i>
+            <p>Crear</p>
+          </a>
+        </li> 
+        <li class="nav-item">
+          <a href="produccion_calcular.php" class="nav-link">
+            <i class="fas fa-dollar-sign nav-icon"></i>
+            <p>Calcular</p>
+          </a>
+        </li> 
+      </ul>
+    </li>
 {% endif %}
-
 
 <!-- PERFIL DE GERENCIA E TRANSPORTE -->
 {% if codigo_perfil == '06' %}
@@ -327,6 +347,31 @@
     </p>
   </a>
 </li>
+  <!-- /. GESTION DE PERSONAL -->
+  <li class="nav-item has-treeview">
+    <a href="#" class="nav-link">
+      <i class="nav-icon fas fa-address-card"></i>
+      <p>
+        Administración
+        <i class="fas fa-angle-left right"></i>
+        <span class="badge badge-info right"></span>
+      </p>
+    </a>
+    <ul class="nav nav-treeview">
+      <li class="nav-item">
+        <a href="asistencia.php" class="nav-link">
+          <i class="fal fa-clipboard-user nav-icon"></i>
+          <p>Asistencia</p>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="planilla.php" class="nav-link">
+          <i class="far fa-file-invoice-dollar nav-icon"></i>
+          <p>Planilla</p>
+        </a>
+      </li>
+    </ul>
+  </li>
  <!-- /. INFORMES -->
  <li class="nav-item has-treeview">
   <a href="#" class="nav-link">
@@ -346,7 +391,6 @@
     </li>
   </ul>
 </li>
-
 {% endif %}
 
 <!-- PERFIL JEFE DE LINEA PARA AGREGAR LA ASISTENCIA DIARIA -->
@@ -356,7 +400,6 @@
 <!-- Administración -->
 <!-- Aseo -->
 <!-- Mantenimiento-->
-
 {% if codigo_perfil == '07' or codigo_perfil == '08' or codigo_perfil == '09'%}
   <li class="nav-item has-treeview menu-open">
     <a href="index.php" class="nav-link active">
@@ -388,51 +431,49 @@
   </li>
 {% endif %}
 
-
 <!-- PERFIL DE ROOT ROOT - PARA CREAR LOS USUARIOS Y MANTENIMIENTO DEL PESONAL. -->
 {% if codigo_perfil == '99' %}
- <!-- Sidebar Menu -->
-          <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
-               <li class="nav-item has-treeview menu-open">
-                <a href="index.php" class="nav-link active">
-                  <i class="nav-icon fas fa-school"></i>
-                  <p>
-                    Dashboard
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-              </li>
-              <!-- /. ESTUDIANTES -->
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-wrench"></i>
-                  <p>
-                    Configuración
-                    <i class="fas fa-angle-left right"></i>
-                    <span class="badge badge-info right"></span>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="empresa.php" class="nav-link">
-                      <i class="far fa-building nav-icon"></i>
-                      <p>Empresa</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="personal.php" class="nav-link">
-                      <i class="fas fa-user-friends nav-icon"></i>
-                      <p>Personal</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="usuarios.php" class="nav-link">
-                      <i class="fas fa-user-cog nav-icon"></i>
-                      <p>Usuarios</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
+    <!-- Sidebar Menu -->
+    <!-- Add icons to the links using the .nav-icon class
+          with font-awesome or any other icon font library -->
+          <li class="nav-item has-treeview menu-open">
+          <a href="index.php" class="nav-link active">
+            <i class="nav-icon fas fa-school"></i>
+            <p>
+              Dashboard
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+        </li>
+        <!-- /. ESTUDIANTES -->
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-wrench"></i>
+            <p>
+              Configuración
+              <i class="fas fa-angle-left right"></i>
+              <span class="badge badge-info right"></span>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="empresa.php" class="nav-link">
+                <i class="far fa-building nav-icon"></i>
+                <p>Empresa</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="personal.php" class="nav-link">
+                <i class="fas fa-user-friends nav-icon"></i>
+                <p>Personal</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="usuarios.php" class="nav-link">
+                <i class="fas fa-user-cog nav-icon"></i>
+                <p>Usuarios</p>
+              </a>
+            </li>
+          </ul>
+        </li>
 {% endif %}
-
