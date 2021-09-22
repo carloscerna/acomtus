@@ -204,8 +204,35 @@ if($errorDbConexion == false){
 							}else{
 								// SI NO EXISTE AGREGARLO
 								//
-								$mensajeError = "El Código Empleado NO EXISTE...";
-								$respuestaOK = false;
+								//$mensajeError = "El Código Empleado NO EXISTE...";
+								//$respuestaOK = false;
+									// BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
+									$query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha'";
+									// Ejecutamos el Query.
+										$consulta_b = $dblink -> query($query_buscar);
+										// Validar si hay registros.
+										if($consulta_b -> rowCount() != 0){
+											$mensajeError = "El Código Empleado ya fue Ingresado...";
+												break;
+										}
+								// GUARDAR DATOS SIN VALIDAR
+									$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado) 
+													VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario')";
+								// Ejecutamos el Query.
+									$consulta = $dblink -> query($query);
+								// Linea de mensajes.
+
+								///////////////////////////////////////////////////////////////////////////////////////
+								// VALIDAR SI SE GUARDO BIEN LA INFORMACI{ON.}
+								if($consulta == true){
+									$respuestaOK = true;
+									$mensajeError = "Se ha Guardado el registro correctamente";
+									$contenidoOK = '';
+								}
+								else{
+									$respuestaOK = false;
+									$mensajeError = "No se puede guardar el registro en la base de datos ";
+								}
 									break;
 							}
 					}else{

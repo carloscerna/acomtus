@@ -69,16 +69,42 @@ $("#Jornada, #Permiso").change(function () {
 	if ($("#Jornada").is(":checked")) {
 		$('#DivJornada').show();
 		$('#DivPermisos').hide();
+		$("#JornadaTV").hide();
+		$("#lstJornadaDescanso").hide();
 		listar_jornada();
 	}
 	else if ($("#Permiso").is(":checked")) {
 		$('#DivPermisos').show();
 		$('#DivJornada').hide();
+		$("#JornadaTV").hide();
+		$("#JornadaDescanso").hide();
 		// Listar tipo licencia.
 			listar_tipo_licencia();
 	}
 });
+///////////////////////////////////////////////////////////////////////////////	  
+// SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL MOTORISTA.
+///////////////////////////////////////////////////////////////////////////////	  
+// CUANDO SE ENCUENTRA EL CAMBIO DEL DEPARTAMENTO EN LA EMPRESA
+$("#lstTipoLicencia").change(function () {
+	var miselect=$("#lstTipoLicencia");
 
+	$("#lstTipoLicencia option:selected").each(function () {
+			elegido=$(this).val();
+			if(elegido == '12'){
+				$("#JornadaTV").show();
+				$("#JornadaDescanso").hide();
+				listar_jornada_vacacion(2);
+			}else if(elegido == '14'){
+				$("#JornadaTV").hide();
+				$("#JornadaDescanso").show();
+				listar_jornada_descanso(2);
+			}else{
+				$("#JornadaDescanso").hide();
+				$("#JornadaTV").hide();
+			}
+		});
+});
 ///////////////////////////////////////////////////////////////////////////////
 /// EVENTOS JQUERY Y para disparar la busqueda. del por nombre motorista.
 ///////////////////////////////////////////////////////////////////////////////
@@ -117,7 +143,7 @@ $("#goEnviar").on('click', function(){
 			},
 		submitHandler: function(){	
 		var str = $('#formAsistencia').serialize();
-		//alert(str);
+		alert(str);
 							// casilla de verificación revisar el valor.
 							var TipoLicenciaChecks = "off";
 							if ($("#Permiso").is(':checked')) {
@@ -152,6 +178,8 @@ $("#goEnviar").on('click', function(){
 						// PERMISO Y JORNADA DIV
 						$('#DivPermisos').hide();
 						$('#DivJornada').hide();
+						$("#JornadaTV").hide();
+						$("#JornadaDescanso").hide();
 						$("input:radio[value='Jornada']").prop('checked',false);
 						$("input:radio[value='Permiso']").prop('checked',false);  
 						// limpiar el control de la foto
@@ -253,7 +281,53 @@ function listar_jornada(codigo_jornada){
             }
     }, "json");    
 }
-// FUNCION LISTAR TABLA catalogo_jornada
+// FUNCION LISTAR TABLA catalogo_jornada trabajo en vaci{on}
+////////////////////////////////////////////////////////////
+// FUNCION LISTAR TABLA catalogo_jornada descanso
+////////////////////////////////////////////////////////////
+function listar_jornada_descanso(codigo_jornada){
+    var miselect=$("#lstJornadaDescanso");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                if(codigo_jornada == data[i].codigo){
+						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+                }else{
+					if(i==1){
+						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+					}else{
+						miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+					}
+                }
+            }
+    }, "json");    
+}
+function listar_jornada_vacacion(codigo_jornada){
+    var miselect=$("#lstJornadaTV");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                if(codigo_jornada == data[i].codigo){
+						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+                }else{
+					if(i==1){
+						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+					}else{
+						miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+					}
+                }
+            }
+    }, "json");    
+}
+// FUNCION LISTAR TABLA catalogo_jornada cuando es asueto
 ////////////////////////////////////////////////////////////
 function listar_jornada_asueto(codigo_jornada){
     var miselect=$("#lstJornadaAsueto");
