@@ -91,10 +91,15 @@
             <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
             <input type="hidden" id="id_user" name="id_" value = ''>            
             <input type="hidden" id="accion" name="accion" value = 'GuardarAsistencia'>            
+            <!-- BOLLEAN PARA LOS DIFERETNES DATOS ASUETO, VACACIONES, DESCANSO-->
             <input type="hidden" id="BooleanAsueto" name="BooleanAsueto" value = "no">
+            <input type="hidden" id="BooleanTV" name="BooleanTV" value = "no">
+            <input type="hidden" id="BooleanDescanso" name="BooleanDescanso" value = "no">
+            <!-- INFORMACIÓN DEL USUARIO CON SU PERFIL-->
             <input type="hidden" id="codigo_perfil" name="codigo_perfil" value = {{ codigo_perfil }}>
-            <input type="hidden" id="codigo_personal_usuario" name="codigo_personal_usuario" value = {{ codigo_personal }}
-              <class="card m-auto">
+            <input type="hidden" id="codigo_personal_usuario" name="codigo_personal_usuario" value = {{ codigo_personal }}>
+            <!-- APERTURA DEL CARD-->
+              <div class="card m-auto">
                 <div class="card-header bg-gradient-navy">
                   <div class="card-tools">
                     <span class="badge badge-primary" id="HoraActual"></span>

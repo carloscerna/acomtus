@@ -139,6 +139,8 @@ if($errorDbConexion == false){
 				$fecha = trim($_POST['FechaAsistencia']);
 				$tipolicenciacheck = trim($_POST['tipochecks']);
 				$boolean_asueto = trim($_POST['BooleanAsueto']);
+				$boolean_vacaciones = trim($_POST['BooleanTV']);
+				$boolean_descanso = trim($_POST['BooleanDescanso']);
 				$codigo_perfil = trim($_POST['codigo_perfil']);
 				// VALIDAR VALORES PARA TIPO LICENCIA JORNADA.
 				if($tipolicenciacheck == "on"){
@@ -153,6 +155,18 @@ if($errorDbConexion == false){
 					$codigo_jornada_asueto = trim($_POST['lstJornadaAsueto']);
 				}else{
 					$codigo_jornada_asueto = trim($_POST['lstJornadaAsueto']);
+				}
+				// VALIDAR VALORES CUANDO TRABAJO VACACIONES SEA IGUAL A "SI"
+				if($boolean_vacaciones == "si"){
+					$codigo_jornada_vacaciones = trim($_POST['lstJornadaTV']);
+				}else{
+					$codigo_jornada_vacaciones = trim($_POST['lstJornadaTV']);
+				}
+				// VALIDAR VALORES CUANDO DESCANSO SEA IGUAL A "SI"
+				if($boolean_descanso == "si"){
+					$codigo_jornada_descanso = trim($_POST['lstJornadaDescanso']);
+				}else{
+					$codigo_jornada_descanso = trim($_POST['lstJornadaDescanso']);
 				}
 				// 	validar la fecha de la producción.
 				$fechas = explode("-",$fecha);
@@ -288,6 +302,4 @@ else{
 			"contenido" => $contenidoOK);
 		echo json_encode($salidaJson);
 	}
-
-	
 ?>
