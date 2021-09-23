@@ -71,7 +71,7 @@ $("#Jornada, #Permiso").change(function () {
 		$('#DivPermisos').hide();
 		//
 		$("#JornadaTV").hide();
-		$("#lstJornadaDescanso").hide();
+		$("#JornadaDescanso").hide();
 		// VOLVER A COLOCAR EN VALOR "no" AMBAS BOOLEAN
 		$("#BooleanTV").val('no');
 		$("#BooleanDescanso").val('no');
@@ -163,7 +163,7 @@ $("#goEnviar").on('click', function(){
 			},
 		submitHandler: function(){	
 		var str = $('#formAsistencia').serialize();
-		alert(str);
+		//alert(str);
 							// casilla de verificación revisar el valor.
 							var TipoLicenciaChecks = "off";
 							if ($("#Permiso").is(':checked')) {

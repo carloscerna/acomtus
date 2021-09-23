@@ -163,6 +163,8 @@ if($errorDbConexion == false){
 				}else{
 					$codigo_jornada = trim($_POST['lstJornada']);
 					$codigo_tipo_licencia = "1";
+					$codigo_jornada_vacaciones = '4';
+					$codigo_jornada_descanso = '4';
 				}
 				// VALIDAR VALORES CUANDO ASUETO SEA IGUAL A "SI"
 				if($boolean_asueto == "si"){
