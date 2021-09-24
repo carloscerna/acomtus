@@ -252,7 +252,7 @@ function FancyTable($header)
             {
             // variable para verificar que tipo de permiso o días trabajados.
             $codigo = $row['codigo'];
-            $pago_diario = $row['pago_diario'];
+            $pago_diario = round($row['pago_diario'],2);
             //
             $pdf->Cell($w[0],6,$i,'LR',0,'C',$fill);        // núermo correlativo
             $pdf->Cell($w[1],6,utf8_decode(trim($row['codigo'])),'LR',0,'L',$fill); // codigo empleado
@@ -305,7 +305,7 @@ function rellenar($total_dias_quincena){
     //
     // crear las matrices para el calculo del salario
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
-    $salario = 0; $asuetos = 0; $extra = 0; $boni = 0; $total_tiempo_extra = 0; $total = 0; $pago_diario_hora = round($pago_diario / 8,2); $asueto = 0; $horas_jornadas = 0;
+    $salario = 0; $asuetos = 0; $extra = 0; $boni = 0; $total_tiempo_extra = 0; $total = 0; $pago_diario_hora = round($pago_diario / 8,4); $asueto = 0; $horas_jornadas = 0;
     $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
     // SEGUNDO BLOQUE DE LINEAS PARA EL NOMBRE Y NUMERO DEL DIA.
     for($j=0;$j<=$total_dias_quincena-1;$j++){
