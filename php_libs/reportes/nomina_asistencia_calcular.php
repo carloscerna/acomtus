@@ -21,8 +21,9 @@
      $InicioFinDia = 0;
      $pago_diario = 0;
      $horas_jornada = 0;
-//  imprimir datos del bachillerato.
-           //
+     $total_lineas = 1;
+        //  imprimir datos del bachillerato.
+        //
 	    // Establecer formato para la fecha.
 	    // 
 		date_default_timezone_set('America/El_Salvador');
@@ -115,26 +116,26 @@ class PDF extends FPDF
 function Header()
 {
     global $reporte_trabajo, $reporte_ruta;
-//Logo
+    //Logo
     $img = $_SERVER['DOCUMENT_ROOT'].'/acomtus/img/'.$_SESSION['logo_uno'];
     $this->Image($img,5,4,24,24);
-//Arial bold 14
+    //Arial bold 14
     $this->SetFont('Arial','B',14);
-//Título
-//$0titulo1 = utf8_decode("Educación Parvularia - Básica - Tercer Ciclo y Bachillerato.");
+    //Título
+    //$0titulo1 = utf8_decode("Educación Parvularia - Básica - Tercer Ciclo y Bachillerato.");
     $this->RotatedText(30,10,utf8_decode($_SESSION['nombre_institucion']),0);
-//Arial bold 13
+    //Arial bold 13
     $this->SetFont('Arial','B',12);
     $this->RotatedText(30,17,utf8_decode($reporte_trabajo),0);
     $this->RotatedText(30,22,utf8_decode($reporte_ruta),0);
-// Posición en donde va iniciar el texto.
+    // Posición en donde va iniciar el texto.
     $this->SETY(35);
 }
 
 //Pie de página
 function Footer()
 {
-//
+    //
   // Establecer formato para la fecha.
   // 
    date_default_timezone_set('America/El_Salvador');
@@ -238,14 +239,16 @@ function FancyTable($header)
     // ARMAR LA CONSULTA
     // DE ACUERDO AL CODIGO DEL DEPARTAMENTO EMPRESA
     if($DepartamentoEmpresa == '02'){
-        $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario 
+       $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario 
         FROM personal WHERE codigo_ruta = '$ruta' and codigo_estatus = '01' ORDER BY codigo";
     }else{
-        $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario 
+       $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario 
         FROM personal WHERE codigo_departamento_empresa = '$DepartamentoEmpresa' and codigo_estatus = '01' ORDER BY codigo";
     }
     // EJECUTAR LA CONSULTA
     $consulta = $dblink -> query($query);
+    // OBTENER EL TOTAL DE LINEAS
+        $total_lineas = $consulta -> rowCount();
     //
     $fill=false; $i=1; $m = 0; $f = 0; $suma = 0;
         while($row = $consulta -> fetch(PDO::FETCH_BOTH))
@@ -265,7 +268,6 @@ function FancyTable($header)
                 $fill=!$fill;
                 $i=$i+1;
             }
-  
             // RELLENAR DATOS SI ES MENOR A 25 SEGUN $I
                 rellenar_datos($i);    
     // RELLENAR LINEA DE ABAJO
@@ -278,12 +280,14 @@ function FancyTable($header)
     // FUNCIONES.
 /////////////////////////////////////////////////////////////////////////////////////
 function rellenar_i($i){
-    global $pdf, $fill, $w, $header, $i, $total_dias_quincena;
+    global $pdf, $fill, $w, $header, $i, $total_dias_quincena, $total_lineas;
     // SALTO DE PAGINA QUE DEPENDE DEL NUMERO DE LINEAS.
     if($i==25 || $i == 51 || $i == 65){
         $pdf->Cell(array_sum($w),0,'','T');
-        $pdf->AddPage();
-        $pdf->FancyTable($header);
+        if($total_lineas > 25){
+            $pdf->AddPage();
+            $pdf->FancyTable($header);
+        }
     }    
 }
 
@@ -292,11 +296,11 @@ function rellenar_datos($linea){
         // EVALUAR SI $I ES MENOR DE 25.
         if($i<=25){
             //
-            $pdf->Cell($w[0],6,$i,'LR',0,'C',$fill);    // núermo correlativo
-            $pdf->Cell($w[1],6,'','LR',0,'L',$fill);    // codigo empleado
-            $pdf->Cell($w[2],6,'','LR',0,'L',$fill);    // Nombre + apellido_materno + apellido_paterno
+           // $pdf->Cell($w[0],6,$i,'LR',0,'C',$fill);    // núermo correlativo
+           // $pdf->Cell($w[1],6,'','LR',0,'L',$fill);    // codigo empleado
+           // $pdf->Cell($w[2],6,'','LR',0,'L',$fill);    // Nombre + apellido_materno + apellido_paterno
             //
-            rellenar($total_dias_quincena);
+          //  rellenar($total_dias_quincena);
         }
 }
 
@@ -554,9 +558,9 @@ function rellenar($total_dias_quincena){
         //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
             $total_salario = $salario + $total_tiempo_extra + $asuetos;
     }
-    // ESPACIO PARA EL TERCER 
+    // ESPACIO PARA EL TERCER, se asigna una separación para las columnas.
         $pdf->SetFillColor(255,255,255);
-            $pdf->Cell($w[3],6,'','L',0,'C',$fill);
+        $pdf->Cell($w[3],6,'','L',0,'C',$fill);
         $pdf->SetFillColor(233, 224, 222);
     // TERCER BLOQUE DE LINEAS PARA.
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
