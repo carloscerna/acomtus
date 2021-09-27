@@ -528,7 +528,9 @@ function codigos_nuevos($tiquete)
 			$codigo_mas = "0" . trim($tiquete);}
 		if(strlen(trim($tiquete)) == 6){
 			$codigo_mas = "" . trim($tiquete);}
-		//
+			if(strlen(trim($tiquete)) == 7){
+				$codigo_mas = "" . trim($tiquete);}
+			//
 		$nuevo_codigo = $codigo_mas;						
 			return $nuevo_codigo;
 	}
