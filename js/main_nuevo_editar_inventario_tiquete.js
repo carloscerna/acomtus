@@ -24,8 +24,9 @@ $(function(){ // INICIO DEL FUNCTION.
 			$("label[for='txtEdicionNuevo']").text("Actualizar - Tiquete 'Serie'");
             $("label[for='iEdicionNuevo']").text("Edición");
             // Desactivar ciertas opciones
-            $('#informacion').prop("disabled", true);
-
+            $('#informacion').prop("disabled", false);
+            // Activar la edición de Estatus Tiquete.
+            $("#lstestatus").prop("disabled", false)
             // Llamar a la función listar.
                 listar();
 		}
@@ -159,7 +160,7 @@ function listar_estatus(){
     $.post("includes/cargar_estatus.php",
         function(data) {
             miselect.empty();
-            for (var i=0; i<data.length; i++) {
+            for (var i=0; i<=1; i++) {
                 miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
             }
     }, "json");    

@@ -190,7 +190,7 @@ if($errorDbConexion == false){
 				//$numero_fin = $_POST['txtNumeroFin'];
 				//$numero_fin = intval(str_replace(",","",$numero_fin));
 				$descripcion = trim($_POST['txtDescripcion']);
-				//$codigo_estatus = trim($_POST['lstestatus']);	
+				$codigo_estatus = trim($_POST['lstestatus']);	
 				//
 				$costo = trim($_POST['txtCosto']);
 				$costo = str_replace("$","",$costo);
@@ -202,12 +202,12 @@ if($errorDbConexion == false){
                /* if(!is_int($tiraje)){
                     $mensajeError = "Existencia Inicial, tiene que ser un Número Entero.";
                         break;
-				}
-               	$query_ = sprintf("UPDATE inventario_tiquete SET descripcion = '%s', costo = '%s', total = '%s', precio_publico = '%s'
+				}*/
+               	$query_ = sprintf("UPDATE inventario_tiquete SET descripcion = '%s', costo = '%s', total = '%s', precio_publico = '%s', codigo_estatus = '%s'
 						WHERE id_ = %d",
-						$descripcion, $costo, $total, $precio_publico,
-							$_POST['id_user']);	
-               /* $query_ = sprintf("UPDATE inventario_tiquete SET fecha = '%s', codigo_proveedor  = '%s', codigo_serie = '%s', tiraje = '%s', numero_inicio = '%s', numero_fin = '%s', descripcion = '%s', codigo_estatus = '%s',
+						$descripcion, $costo, $total, $precio_publico, $codigo_estatus,
+							$_POST['id_user']);	/*
+                $query_ = sprintf("UPDATE inventario_tiquete SET fecha = '%s', codigo_proveedor  = '%s', codigo_serie = '%s', tiraje = '%s', numero_inicio = '%s', numero_fin = '%s', descripcion = '%s', codigo_estatus = '%s',
 						costo = '%s', total = '%s', precio_publico = '%s'
 						WHERE id_ = %d",
 						$fecha, $codigo_proveedor, $codigo_serie, $tiraje, $numero_inicio, $numero_fin, $descripcion, $codigo_estatus,

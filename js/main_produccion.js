@@ -88,6 +88,8 @@ $("#FechaProduccionDevolucion").val(today);
 	//
 		// Varaible de Entornos.php
 			var buscartodos = "BuscarTodos";
+			var fecha_year = year;
+			var fecha_month = month;
 		// Tabla que contrendrá los registros.
 			tabla = jQuery("#listado").DataTable({
 				"lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
@@ -100,7 +102,7 @@ $("#FechaProduccionDevolucion").val(today);
 				"ajax":{
 					method:"POST",
 					url:"php_libs/soporte/ProduccionBuscar.php",
-					data: {"accion_buscar": buscartodos}
+					data: {"accion_buscar": buscartodos, "year": fecha_year, "month": fecha_month}
 				},
 				"columns":[
 					{
@@ -899,7 +901,7 @@ function listar_serie(){
             miselect.empty();
             miselect.append('<option value="">Seleccionar...</option>');
             for (var i=0; i<data.length; i++) {
-                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color +'</option>');
+				miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color + " - " + data[i].precio_publico + '</option>');
                     //$('#PrecioPublico').val(data[0].precio_publico);
                     //$('#Existencia').val(data[0].existencia);
             }
@@ -918,7 +920,7 @@ function listar_serie_agregar_talonario(){
             miselect.empty();
             miselect.append('<option value="">Seleccionar...</option>');
             for (var i=0; i<data.length; i++) {
-                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color +'</option>');
+				miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color + " - " + data[i].precio_publico + '</option>');
                     //$('#PrecioPublico').val(data[0].precio_publico);
                     //$('#Existencia').val(data[0].existencia);
             }

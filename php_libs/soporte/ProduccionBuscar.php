@@ -37,12 +37,15 @@ if($errorDbConexion == false){
 		// Verificamos las variables de acci�n
 		switch ($_POST['accion']) {
 		    case 'BuscarTodos':
+                $fecha_year = $_POST['year'];
+                $fecha_month = $_POST['month'];
                 // Armamos el query.
                 $query = "SELECT pro.id_, pro.fecha, pro.hora, to_char(pro.fecha,'dd/mm/yyyy') as fecha, pro.codigo_estatus, 
                     cat_j.descripcion as nombre_jornada, cat_j.id_ as id_jornada, cat_r.descripcion as nombre_ruta 
                     FROM produccion pro 
                     INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = pro.codigo_jornada
                     INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = pro.codigo_ruta
+                    WHERE extract(year from pro.fecha) = '$fecha_year' and extract(month from pro.fecha) = '$fecha_month'
                     ORDER BY pro.fecha DESC, pro.id_ DESC";
 				// Ejecutamos el Query.
 				$consulta = $dblink -> query($query);
@@ -137,27 +140,28 @@ if($errorDbConexion == false){
             case 'BuscarSerie':
                 # buscar en la tabla catalogo_serie
                 // armando el Query.
-                $query = "SELECT it.id_, it.codigo_serie, it.precio_publico, it.existencia,
+                $query = "SELECT it.id_, it.codigo_serie, it.precio_publico, it.existencia, it.codigo_estatus, it.descripcion as descripcion_completa,
                         cat_ts.descripcion as nombre_serie,
                         cat_tc.descripcion as tiquete_color, cat_tc.id_ as codigo_tiquete_color
                         FROM inventario_tiquete it
                         INNER JOIN catalogo_tiquete_serie cat_ts ON cat_ts.id_ = it.codigo_serie
                         INNER JOIN catalogo_tiquete_color cat_tc On cat_tc.id_ = it.codigo_tiquete_color
-                        WHERE it.existencia > 0";
+                        WHERE it.codigo_estatus = '01'";
                         // Ejecutamos el Query.
                         $consulta = $dblink -> query($query);
-                        // Inicializando el array
+                        // Inicializando el array_co
                         $datos=array(); $fila_array = 0;
                         // Recorriendo la Tabla con PDO::
                             while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
                             {
                                 // Nombres de los campos de la tabla.
-                            $codigo = trim($listado['id_']); $descripcion = trim($listado['nombre_serie']);
+                            $codigo = trim($listado['id_']); $descripcion = trim($listado['nombre_serie']); $descripcion_completa = trim($listado['descripcion_completa']);
                             $precio_publico = trim($listado['precio_publico']); $existencia = trim($listado['existencia']);
                             $tiquete_color = trim($listado['tiquete_color']); $codigo_tiquete_color = trim($listado['codigo_tiquete_color']);
                             // Rellenando la array.
                                 $datos[$fila_array]["codigo"] = $codigo;
                                 $datos[$fila_array]["descripcion"] = $descripcion;
+                                $datos[$fila_array]["descripcion_completa"] = $descripcion_completa;
                                 $datos[$fila_array]["precio_publico"] = $precio_publico;
                                 $datos[$fila_array]["existencia"] = $existencia;
                                 $datos[$fila_array]["tiquete_color"] = $tiquete_color;
@@ -666,7 +670,10 @@ function VerUltimasProducciones(){
 		$estilo_r = 'style="padding: 0px; font-size: medium; color:black; text-align: right;"';
 	# VER LOS ULTIMOS ID_ DE PRODUCCION AGREGADOS.
         //$query_p = "SELECT id_, fecha, hora FROM produccion WHERE fecha = '$fecha' ORDER BY id_ DESC LIMIT 15";
-        $query_p = "SELECT id_, fecha, hora FROM produccion ORDER BY id_ DESC LIMIT 80";
+        $query_p = "SELECT p.id_, p.fecha, p.hora, p.codigo_ruta, cat_r.descripcion as descripcion_ruta
+                    FROM produccion p
+                    INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta =  p.codigo_ruta
+                        ORDER BY id_ DESC LIMIT 80";
 		$consulta_p = $dblink -> query($query_p);      
 	// Validar si hay registros.
 		if($consulta_p -> rowCount() != 0){  
@@ -676,6 +683,7 @@ function VerUltimasProducciones(){
 					$codigo_produccion = trim($listado['id_']);
 					$fecha = cambiaf_a_normal(trim($listado['fecha']));
 					$hora = trim($listado['hora']);
+                    $descripcion_ruta = trim($listado['descripcion_ruta']);
 
 					// contar cuantos talonarios hay en la producción. 
 					$query_c = "SELECT count(*) as cantidad from produccion_asignado where codigo_produccion = '$codigo_produccion'";
@@ -691,6 +699,7 @@ function VerUltimasProducciones(){
 					<a data-accion=VerProduccion data-toggle=tooltip data-placement=left title='Ver Controles' href=$codigo_produccion style='color: black;'><i class='fad fa-search fa-md'></i></a>
 					<a data-accion=VerEliminarProduccion data-toggle=tooltip data-placement=left title='Eliminar Control' href=$codigo_produccion style='color: black;'><i class='fad fa-trash fa-md'></i></a>
 					<td $estilo_c>$codigo_produccion
+                    <td $estilo_l>$descripcion_ruta
 					<td $estilo_c>$CantidadTalonario
 					<td $estilo_r>$fecha
 					<td $estilo_r>$hora"

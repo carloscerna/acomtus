@@ -989,12 +989,12 @@ function listar_serie(codigo_inventario_tiquete){
             miselect.append('<option value="">Seleccionar...</option>');
             for (var i=0; i<data.length; i++) {
                 if(codigo_inventario_tiquete == data[i].codigo){
-                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].tiquete_color +'</option>');
+                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].tiquete_color + " - " + data[i].precio_publico + '</option>');
                     $('#PrecioPublico').val(data[i].precio_publico);
                     $('#Existencia').val(data[i].existencia);
                     $('#CodigoTiqueteColor').val(data[i].codigo_tiquete_color);
                 }else{
-                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color +'</option>');
+                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color + " - " + data[i].precio_publico +'</option>');
                     //$('#PrecioPublico').val(data[0].precio_publico);
                     //$('#Existencia').val(data[0].existencia);
                 }
@@ -1043,7 +1043,7 @@ function listar_serie_tiquete(){
             miselect.empty();
             miselect.append('<option value="">Seleccionar...</option>');
             for (var i=0; i<data.length; i++) {
-                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color +'</option>');
+                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color + " - " + data[i].precio_publico + '</option>');
                     //$('#PrecioPublico').val(data[0].precio_publico);
                     //$('#Existencia').val(data[0].existencia);
             }

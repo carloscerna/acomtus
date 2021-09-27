@@ -1034,7 +1034,7 @@ function listar_serie(){
             miselect.empty();
             miselect.append('<option value="">Seleccionar...</option>');
             for (var i=0; i<data.length; i++) {
-                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color +'</option>');
+                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color + " - " + data[i].precio_publico + '</option>');
                     //$('#PrecioPublico').val(data[0].precio_publico);
                     //$('#Existencia').val(data[0].existencia);
             }

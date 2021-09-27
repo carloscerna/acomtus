@@ -46,9 +46,9 @@
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header">
+    <section class="content-header p-0"  style="background-color: rgb(234, 236, 238);">
       <div class="container-fluid">
-        <div class="row mb-1">
+        <div class="row">
           <div class="col-sm-6">
             <h4></h4>
           </div>
@@ -62,21 +62,17 @@
       </div><!-- /.container-fluid -->
     </section>
 
-
   <!-- Small boxes (Stat box) -->
-  <div class="col-md-12">
-    <div class="card card-success">
-      <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-ticket-alt nav-icon"></i> BIENVENIDOS AL CONTENIDO INVENTARIO TIQUETE</h3>
-
+  <section class="col col-sm-12 col-md-12 col-lg-12 col-xl-12 m-auto" id="">
+    <div class="card m-auto">
+      <div class="card-header bg-gradient-navy">
+        <h3 class="card-title"><i class="fas fa-ticket-alt nav-icon"></i> Inventario Series - Tiquete</h3>
+        <!-- /.card-tools -->
         <div class="card-tools">
           <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
           </button>
         </div>
-        <!-- /.card-tools -->
       </div>
-      <!-- /.card-header -->
-      <div class="card-body">
         <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
         <div class="card-body">
           <div class="form-group">
@@ -93,41 +89,46 @@
                     </button>
                 </div>
             </div>
-        </div>
-          <table id="listado" class="table display responsive nowrap" style="width: 100%;">
-            <thead>
-                <tr>
+          </div>
+          <div class="table-responsive display responsive nowrap">
+            <table id="listado" class="table table-hover table-striped">
+              <thead>
+                  <tr>
+                    <th>Acción</th>
+                    <th>Id</th>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    <th>Serie</th>
+                    <th>Color</th>
+                    <th>Tiraje</th>
+                    <th>Existencia</th>
+                    <th>Estatus</th>
+                  </tr>                
+              </thead>
+                <tbody id="listadoOk">
+                </tbody>
+                <tfoot>
+                  <tr>
                   <th>Acción</th>
                   <th>Id</th>
                   <th>Fecha</th>
                   <th>Descripción</th>
                   <th>Serie</th>
                   <th>Color</th>
-                  <th>Tiraje</th>
-                  <th>Existencia</th>
+                  <th>Existencia Inicial</th>
+                  <th>Existencia Actual</th>
                   <th>Estatus</th>
-                </tr>                
-            </thead>
-              <tbody id="listadoOk">
-              </tbody>
-              <tfoot>
-                <tr>
-                <th>Acción</th>
-                <th>Id</th>
-                <th>Fecha</th>
-                <th>Descripción</th>
-                <th>Serie</th>
-                <th>Color</th>
-                <th>Existencia Inicial</th>
-                <th>Existencia Actual</th>
-                <th>Estatus</th>
-                </tr>
-              </tfoot>
-          </table>
+                  </tr>
+                </tfoot>
+            </table>
+          </div>
         </div> <!-- /.card-body -->
-      </div>        <!-- /.card-body -->
+          <!-- /.CARD  footer -->
+          <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
+
+         </div>
     </div>      <!-- /.card -->
-  </div>
+  </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->
 {% endblock %}
 

@@ -170,9 +170,9 @@ document.querySelectorAll('select').forEach((input) => {
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header">
+    <section class="content-header p-0" style="background-color: rgb(234, 236, 238);">
       <div class="container-fluid">
-        <div class="row mb-1">
+        <div class="row">
           <div class="col-sm-6">
             
           </div>
@@ -196,8 +196,8 @@ document.querySelectorAll('select').forEach((input) => {
         <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
         <input type="hidden" id="cp" name="cp" value = '{{ codigo_personal }}'>            
         <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
-          <div class="card card-secondary">
-            <div class="card-header">
+          <div class="card">
+            <div class="card-header bg-gradient-navy">
               <div class="row">
                 <div class="col-md-8 col-lg-8 col-xl-8">
                   <h3 class="card-title"><i class="fas fa-layer-group nav-icon"></i> <label for="txtEdicionNuevo">Texto.</label></h3>
