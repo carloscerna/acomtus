@@ -3,7 +3,10 @@
 {% extends 'default_layout.html' %}
 
 {% block extraCSS %}
+<link href="css/styles-loading.css" rel="stylesheet">
+
 <style>
+  
   /* mensajes de error para el validate de los form de input*/
    input.error {
       border-color: #f00 !important;
@@ -23,7 +26,7 @@
       border-radius: 6px;
       border: 1px solid #0080FF;
       padding: 10px 10px 10px 10px;
-      background-color: #D4D4D4;
+      /*background-color: #D4D4D4;*/
   }
   
   legend {
@@ -93,6 +96,13 @@
     }
   });
     </script>
+<!-- DEINIR EL AJAX START- STOP Y ERROR -->
+<script>
+  $(document).ready(function () { 
+   var screen = $('#loading-screen');
+     configureLoadingScreen(screen);
+   })
+</script>
 {% endblock %}
 
 {% block contenidos %}
@@ -151,6 +161,7 @@
                 <div class="input-group">
                     <span class="input-group-text">Fecha</span>
                     <input type="date" id="FechaProduccion" name="FechaProduccion" class="form-control" required>
+                      <button class="btn btn-info" type="button" id="goActualizarTabla" tabindex="-1" data-toggle="tooltip" data-placement="bottom" title="Actualiza Datos según Mes y Año"><span class="fas fa-sync-alt"></span></button>
                 </div>
               </div>
 
@@ -166,7 +177,7 @@
           -->
           <fieldset id="FieldTablaProduccion" class="mt-2">
             <legend> Producción | N.º Controles </legend>
-              <table id="listado" class="table display responsive nowrap" style="width: 100%;">
+              <table id="listado" class="table table-stripe table-condensed  table-hover responsive nowrap" style="width: 100%;">
                 <thead>
                     <tr>
                       <th>Acción</th>
@@ -210,6 +221,8 @@
 <!-- plantilla que contiene el . -->
 {% include 'VentanaAgregarTalonarioEnControl.html' %}
 
+<!-- Loading Screen -->
+{% include 'loading-screen.html' %}
 
 {% endblock %}
 
