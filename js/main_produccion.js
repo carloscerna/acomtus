@@ -5,6 +5,9 @@ var tabla = "";
 var accion = "";
 var today = "";
 var accionAsignacion = "";
+var reload = false;
+var fecha_year = "";
+var fecha_month = "";
 //	ARMAR ITEM DE MENU DEPENDIENDO DEL CODIGO DEL USUARIO.
 	// GESTION PRODUCCION
 	var defaultContentMenu = '<div class="dropdown">'
@@ -64,32 +67,43 @@ $(function(){ // iNICIO DEL fUNCTION.
 ///////////////////////////////////////////////////////////////////////////////
 var listar = function(){
 // Escribir la hora actual.
-var hora = new Date();
-var hora_formato_24 = hora.getHours();
-var hora_formato_12 = hora.getHours();
-var minutos = hora.getMinutes();
+	var hora = new Date();
+	var hora_formato_24 = hora.getHours();
+	var hora_formato_12 = hora.getHours();
+	var minutos = hora.getMinutes();
 // Agregar el AM O PM
-var formato_12 = hora_formato_24 > 12 ? " p.m." : " a.m.";
-var hora_actual = hora_formato_12 + ':' + minutos + formato_12;
+	var formato_12 = hora_formato_24 > 12 ? " p.m." : " a.m.";
+	var hora_actual = hora_formato_12 + ':' + minutos + formato_12;
 // Asignar la input Producción:
 // Escribir la fecha actual.
-var now = new Date();                
-var day = ("0" + now.getDate()).slice(-2);
-var month = ("0" + (now.getMonth() + 1)).slice(-2);
-var year = now.getFullYear();
+	var now = new Date();                
+	var day = ("0" + now.getDate()).slice(-2);
+	var month = ("0" + (now.getMonth() + 1)).slice(-2);
+	var year = now.getFullYear();
 
-today = now.getFullYear()+"-"+(month)+"-"+(day) ;
-// ASIGNAR FECHA ACTUAL A LOS DATE CORRESPONDIENTES.
-$('#FechaProduccion').val(today);
+	today = now.getFullYear()+"-"+(month)+"-"+(day) ;
 //	RELACIONADO CON LA FECHA PARA LA DEVOLCUIÓN.
 // Variables.
-$("#FechaProduccionCreacion").val(today);
-$("#FechaProduccionDevolucion").val(today);
-	//
+	$("#FechaProduccionCreacion").val(today);
+	$("#FechaProduccionDevolucion").val(today);
+// ASIGNAR FECHA ACTUAL A LOS DATE CORRESPONDIENTES.
+if(reload == true){
+	var buscartodos = "BuscarTodos";
+	var fecha_ =  $("#FechaProduccion").val();
+	var fecha_partial = fecha_.split("-");
+	fecha_year = (fecha_partial[0]) // año
+	fecha_month = (fecha_partial[1])	// mes
+	console.log(fecha_partial[0])	// dia
+	console.log(fecha_partial[1])	// dia
+	console.log(fecha_partial[2])	// dia
+	reload = false;
+}else{
+	$('#FechaProduccion').val(today);
 		// Varaible de Entornos.php
-			var buscartodos = "BuscarTodos";
-			var fecha_year = year;
-			var fecha_month = month;
+		var buscartodos = "BuscarTodos";
+		fecha_year = year;
+		fecha_month = month;
+}
 		// Tabla que contrendrá los registros.
 			tabla = jQuery("#listado").DataTable({
 				"lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
@@ -315,6 +329,12 @@ $(tbody).on("click","a.agregarTalonario",function(){
 //
 // CREAR EL PROCESO, PARA CAMBIAR LA FECHA DE PRODUCCIÓN A UNA NUEVA DEVOLUCIÓN
 ///////////////////////////////////////////////////////////////////////////////	  
+$('#goActualizarTabla').on( 'click', function () {
+	// DAR VALOR A LA FECHA.
+	listar();
+	reload = true;
+	//$('#listado').DataTable().ajax.reload();
+});
 $('#goDevolucionesProduccion').on( 'click', function () {
 	// DAR VALOR A LA FECHA.
 		$("#FechaProduccionCreacion").val(today);
@@ -973,3 +993,18 @@ function CalcularIncremento(valor) {
     GlobalDesde = hasta + 1;
 
 }
+// Pasar foco cuando seleccionar un encargado.
+function PasarFoco()
+   {
+       $('#lstannlectivo').focus();
+   }
+      // Mensaje de Carga de Ajax.
+      function configureLoadingScreen(screen){
+         $(document)
+             .ajaxStart(function () {
+                 screen.fadeIn();
+             })
+             .ajaxStop(function () {
+                 screen.fadeOut();
+             });
+     }
