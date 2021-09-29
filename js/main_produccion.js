@@ -331,8 +331,8 @@ $(tbody).on("click","a.agregarTalonario",function(){
 ///////////////////////////////////////////////////////////////////////////////	  
 $('#goActualizarTabla').on( 'click', function () {
 	// DAR VALOR A LA FECHA.
-	listar();
 	reload = true;
+	listar();
 	//$('#listado').DataTable().ajax.reload();
 });
 $('#goDevolucionesProduccion').on( 'click', function () {
