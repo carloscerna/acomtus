@@ -41,12 +41,20 @@ if($errorDbConexion == false){
                 $fecha_month = $_POST['month'];
                 // Armamos el query.
                 $query = "SELECT pro.id_, pro.fecha, pro.hora, to_char(pro.fecha,'dd/mm/yyyy') as fecha, pro.codigo_estatus, 
+                cat_j.descripcion as nombre_jornada, cat_j.id_ as id_jornada, cat_r.descripcion as nombre_ruta 
+                FROM produccion pro 
+                INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = pro.codigo_jornada
+                INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = pro.codigo_ruta
+                WHERE extract(year from pro.fecha) = '$fecha_year'
+                ORDER BY pro.fecha DESC, pro.id_ DESC";
+                /*
+                $query = "SELECT pro.id_, pro.fecha, pro.hora, to_char(pro.fecha,'dd/mm/yyyy') as fecha, pro.codigo_estatus, 
                     cat_j.descripcion as nombre_jornada, cat_j.id_ as id_jornada, cat_r.descripcion as nombre_ruta 
                     FROM produccion pro 
                     INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = pro.codigo_jornada
                     INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = pro.codigo_ruta
                     WHERE extract(year from pro.fecha) = '$fecha_year' and extract(month from pro.fecha) = '$fecha_month'
-                    ORDER BY pro.fecha DESC, pro.id_ DESC";
+                    ORDER BY pro.fecha DESC, pro.id_ DESC";*/
 				// Ejecutamos el Query.
 				$consulta = $dblink -> query($query);
 				// Validar si hay registros.

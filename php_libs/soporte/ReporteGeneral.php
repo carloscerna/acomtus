@@ -228,6 +228,24 @@ if($errorDbConexion == false){
                             ";
                         }
             }   // FOR DE LA TABLA INVENTARIO TIQUETE..
+            // GUARDAR EN LA TABLA PRODUCCION_DIARIO
+            // id_, fecha, total_dolares, total_colones
+                $query_p_s = "SELECT * FROM produccion_diaria WHERE fecha = '$fecha'";
+                        // Ejecutamos el query
+                    $consulta_p_s = $dblink -> query($query_p_s);              
+                    // obtener el último dato en este caso el Id_
+                        // Validar si hay registros.
+                    if($consulta_p_s -> rowCount() != 0){  
+                       // ACTUALIZAR VALOREStotal_colones
+                       $total_colones = round($ProduccionTotalIngresoOk * 8.75,2);
+                       $query_p_d = "UPDATE produccion_diaria SET total_dolares = '$ProduccionTotalIngresoOk', total_colones = '$total_colones' WHERE fecha = '$fecha'";
+                       $consultas_p_d = $dblink -> query($query_p_d);
+                    }else{
+                        // GUARDAR
+                        $total_colones = round($ProduccionTotalIngresoOk * 8.75,2);
+                        $query_p_d = "INSERT INTO produccion_diaria (fecha, total_dolares, total_colones) VALUES ('$fecha','$ProduccionTotalIngresoOk','$total_colones')";
+                        $consultas_p_d = $dblink -> query($query_p_d);
+                    }
                     // 
                     $respuestaOK = true;
                     $mensajeError = "Producción Encontrada.";

@@ -8,6 +8,7 @@ var accionAsignacion = "";
 var reload = false;
 var fecha_year = "";
 var fecha_month = "";
+var listar = "";
 //	ARMAR ITEM DE MENU DEPENDIENDO DEL CODIGO DEL USUARIO.
 	// GESTION PRODUCCION
 	var defaultContentMenu = '<div class="dropdown">'
@@ -274,6 +275,8 @@ $(tbody).on("click","a.eliminar",function(){
 ///////////////////////////////////////////////////////////////////////////////
 $(tbody).on("click","a.agregarTalonario",function(){
 	var data = tabla.row($(this).parents("tr")).data();
+	alert(data);
+	console.log(data);
 	id_ = data[0];
 	fecha = data[1];
 	accion = "AgregarTalonario";	// variable global
@@ -332,7 +335,10 @@ $(tbody).on("click","a.agregarTalonario",function(){
 $('#goActualizarTabla').on( 'click', function () {
 	// DAR VALOR A LA FECHA.
 	reload = true;
+	//$("#listado").DataTable().ajax.empty();
+
 	listar();
+	//$('#listado').DataTable().ajax.reload();
 	//$('#listado').DataTable().ajax.reload();
 });
 $('#goDevolucionesProduccion').on( 'click', function () {
@@ -837,13 +843,8 @@ $('#goGuardar').on( 'click', function () {
 $('#AgregarTiqueteDesde').on('focusout',function(){
 	CalcularIncremento(this.value);
 });
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
-
-
 });	// final de FUNCTION.
 
 function AbrirVentana(url)
