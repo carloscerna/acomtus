@@ -19,7 +19,7 @@ $lista = "";
 $fecha = "";
 $arreglo = array();
 $datos = array();
-$listado = array("0","1","2","3","4","5","6","7");
+$listado = array(0,"1","2","3","4","5","6","7","8");
 //$codigo_estatus = array('','Activo','Inactivo','Entregado','Devolución','Vendido');
 $codigo_estatus = array('','01','02','03','04','05');
 // ruta de los archivos con su carpeta
@@ -40,21 +40,21 @@ if($errorDbConexion == false){
                 $fecha_year = $_POST['year'];
                 $fecha_month = $_POST['month'];
                 // Armamos el query.
-                $query = "SELECT pro.id_, pro.fecha, pro.hora, to_char(pro.fecha,'dd/mm/yyyy') as fecha, pro.codigo_estatus, 
+                /*$query = "SELECT pro.id_, pro.fecha, pro.hora, to_char(pro.fecha,'dd/mm/yyyy') as fecha, pro.codigo_estatus, 
                 cat_j.descripcion as nombre_jornada, cat_j.id_ as id_jornada, cat_r.descripcion as nombre_ruta 
                 FROM produccion pro 
                 INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = pro.codigo_jornada
                 INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = pro.codigo_ruta
                 WHERE extract(year from pro.fecha) = '$fecha_year'
-                ORDER BY pro.fecha DESC, pro.id_ DESC";
-                /*
+                ORDER BY pro.fecha DESC, pro.id_ DESC";*/
+                
                 $query = "SELECT pro.id_, pro.fecha, pro.hora, to_char(pro.fecha,'dd/mm/yyyy') as fecha, pro.codigo_estatus, 
                     cat_j.descripcion as nombre_jornada, cat_j.id_ as id_jornada, cat_r.descripcion as nombre_ruta 
                     FROM produccion pro 
                     INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = pro.codigo_jornada
                     INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = pro.codigo_ruta
                     WHERE extract(year from pro.fecha) = '$fecha_year' and extract(month from pro.fecha) = '$fecha_month'
-                    ORDER BY pro.fecha DESC, pro.id_ DESC";*/
+                    ORDER BY pro.fecha DESC, pro.id_ DESC";
 				// Ejecutamos el Query.
 				$consulta = $dblink -> query($query);
 				// Validar si hay registros.
@@ -309,11 +309,11 @@ if($errorDbConexion == false){
                         // Ejecutamos el Query.
                             $consulta = $dblink -> query($query_u_a);
                         // actulizar fcha en la tabla produccion _correlativo.
-                            for ($ij=0; $ij < count($codigo_produccion_asignacion) ; $ij++) { 
+                            /*for ($ij=0; $ij < count($codigo_produccion_asignacion) ; $ij++) { 
                                 $query_u_c = "UPDATE produccion_correlativo SET fecha = '$fecha_nueva' WHERE codigo_produccion_asignacion = '$codigo_produccion_asignacion[$ij]' and fecha = '$fecha_produccion'";
                                 // Ejecutamos el Query.
                                     $consulta = $dblink -> query($query_u_c);
-                            }
+                            }*/
                         // IF VERDADERO DEL CHECKBOX
                         }
                     }

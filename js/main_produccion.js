@@ -99,11 +99,15 @@ if(reload == true){
 	console.log(fecha_partial[2])	// dia
 	reload = false;
 }else{
-	$('#FechaProduccion').val(today);
+	$('#FechaProduccion').val();
 		// Varaible de Entornos.php
 		var buscartodos = "BuscarTodos";
-		fecha_year = year;
-		fecha_month = month;
+		var fecha_ =  $("#FechaProduccion").val();
+		var fecha_partial = fecha_.split("-");
+		fecha_year = (fecha_partial[0]) // año
+		fecha_month = (fecha_partial[1])	// mes
+		//fecha_year = year;
+		//fecha_month = month;
 }
 		// Tabla que contrendrá los registros.
 			tabla = jQuery("#listado").DataTable({
@@ -333,13 +337,9 @@ $(tbody).on("click","a.agregarTalonario",function(){
 // CREAR EL PROCESO, PARA CAMBIAR LA FECHA DE PRODUCCIÓN A UNA NUEVA DEVOLUCIÓN
 ///////////////////////////////////////////////////////////////////////////////	  
 $('#goActualizarTabla').on( 'click', function () {
-	// DAR VALOR A LA FECHA.
 	reload = true;
-	//$("#listado").DataTable().ajax.empty();
-
-	listar();
-	//$('#listado').DataTable().ajax.reload();
-	//$('#listado').DataTable().ajax.reload();
+	var fecha = $("#FechaProduccion").val();
+	window.location.href = 'produccion.php?fecha='+fecha;
 });
 $('#goDevolucionesProduccion').on( 'click', function () {
 	// DAR VALOR A LA FECHA.
@@ -833,9 +833,6 @@ $('#goGuardar').on( 'click', function () {
 		  });
 		},
 });
-
-
-
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////

@@ -798,13 +798,21 @@ if($errorDbConexion == false){
 				// Ver nuevamente el listado
 					ListadoAsignadoTemp();
 			break;	
-			case 'ActualizarTalonario1':
+			case 'ActualizarTalonario':
 				// id_ de la asignacion.
 				$IdEditarTiquete = trim($_POST['IdEditarTiqueteDesde']);
 				$tiquete_desde = intval(trim($_POST['TiqueteDesde']));
 				$codigo_produccion = trim($_POST['codigo_produccion']);
+				$costo = trim($_POST['CantidadTiqueteAsignado']);
+				$cantidad_asignado = preg_replace("/[$,]/","",trim($_POST['CantidadTiqueteAsignado']));
+				$total = preg_replace("/[$,]/","",trim($_POST['TotalAsignado']));
+				$total = trim($_POST['TotalAsignado']);
 				// query actualizar
-					$query = "UPDATE produccion_asignado_temp SET tiquete_desde = '$tiquete_desde' WHERE id_ = '$IdEditarTiquete'";
+					$query = "UPDATE produccion_asignado_temp 
+								SET tiquete_desde = '$tiquete_desde',
+									cantidad = '$cantidad_asignado',
+									total = '$total' 
+								WHERE id_ = '$IdEditarTiquete'";
 				// Ejecutamos el query
 					$resultadoQuery = $dblink -> query($query);              
 						$respuestaOK = true;

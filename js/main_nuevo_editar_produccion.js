@@ -5,8 +5,12 @@ var accion = 'noAccion';
 var tableA = "";
 var GlobalDesde = 0; 
 var GlobalHasta = 0;
+var GlobalDesdeM = 0; 
+var GlobalHastaM = 0;
 var codigo_produccion = 0;
 var IdEditarTiqueteDesde = 0;
+var TiqueteHasta = 0;
+var TiqueteDesde = 0;
 $(function(){ // INICIO DEL FUNCTION.
 // Escribir la hora actual.
     var hora = new Date();
@@ -172,6 +176,7 @@ var NuevoRegistro = function(){
 $("#DesdeAsignadoPartial01").on('keyup', function (e) {
     var keycode = e.keyCode || e.which;
     console.log(keycode);
+
       // CALCULOS -tecla escape
       if (keycode == 27) {
         // Pasar foco.
@@ -187,40 +192,55 @@ $("#DesdeAsignadoPartial01").on('keyup', function (e) {
                 // Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
                 ///////////////////////////////////////////////////////////////
                 // Valor
-                    var TiqueteDesde = $("#DesdeAsignadoPartial01").val();
+                   // var TiqueteDesde = $("#DesdeAsignadoPartial01").val();
                     codigo_produccion = $("#NumeroCorrelativo").val();
-                // Ajax
-                $.ajax({
-                    beforeSend: function(){
-                        $('#listadoAsignacionOk').empty();
-                    },
-                    cache: false,
-                    type: "POST",
-                    dataType: "json",
-                    url:"php_libs/soporte/NuevoEditarProduccion.php",
-                    data: "IdEditarTiqueteDesde=" + IdEditarTiqueteDesde + "&accion_buscar=" + 'ActualizarTalonario' + "&TiqueteDesde=" + TiqueteDesde + "&iid="  + Math.random() + "&codigo_produccion=" + codigo_produccion,
-                    success: function(response){
-                        // Validar mensaje de error
-                        if(response.respuesta == true){
-                            // Pasar foco.
+                    CalcularIncrementoModificarTalonario(this.value);
+                    CalcularDesdeHastaAsignadoModificarTalonario(this.value);
+                    CantidadTiqueteAsignado = $("#CantidadTiqueteAsignado").val();
+                    TotalAsignado = $("#TotalAsignado").val();
+                    TiqueHasta = $("#HastaAsignado").val();
+                    TiqueteDesde = this.value;
+                        // VALIDAR EL VALOR.VALUE NO SEA MAYOR QUE GLOBAL DESDE Y GLOBAL HASTA
+                    if(this.value < parseInt(GlobalDesdeM)){
+                        toastr["warning"]("Desde es MENOR", "Sistema");
+                        $("#DesdeAsignadoPartial01").focus().select();
+                    }else if(this.value > parseInt(GlobalHastaM)){
+                        toastr["warning"]("Hasta es MAYOR", "Sistema");
+                        $("#DesdeAsignadoPartial01").focus().select();
+                    }else{
+                        // Ajax
+                        $.ajax({
+                            beforeSend: function(){
+                                $('#listadoAsignacionOk').empty();
+                            },
+                            cache: false,
+                            type: "POST",
+                            dataType: "json",
+                            url:"php_libs/soporte/NuevoEditarProduccion.php",
+                            data: "TotalAsignado=" + TotalAsignado + "&CantidadTiqueteAsignado=" + CantidadTiqueteAsignado + "&TiqueteHasta=" + TiqueteHasta + "&IdEditarTiqueteDesde=" + IdEditarTiqueteDesde + "&accion_buscar=" + 'ActualizarTalonario' + "&TiqueteDesde=" + TiqueteDesde + "&iid="  + Math.random() + "&codigo_produccion=" + codigo_produccion,
+                            success: function(response){
+                                // Validar mensaje de error
+                                if(response.respuesta == true){
+                                    // Pasar foco.
+                                        $("#Partial").hide();
+                                    //
+                                        $("#DesdeAsignado").show();
+                                        $("#DesdeAsignado").focus().select();
+                                    //
+                                        toastr["success"](response.mensaje, "Sistema");
+                                    //
+                                        $('#listadoAsignacionOk').append(response.contenido);
+                                }
+                                if(response.respuesta == false){
+                                // Pasar foco.
                                 $("#Partial").hide();
-                            //
-                                $("#DesdeAsignado").show();
-                                $("#DesdeAsignado").focus().select();
-                            //
-                                toastr["success"](response.mensaje, "Sistema");
-                            //
-                                $('#listadoAsignacionOk').append(response.contenido);
-                        }
-                        if(response.respuesta == false){
-                        // Pasar foco.
-                        $("#Partial").hide();
-                        //
-                            $("#DesdeAsignado").show();
-                            $("#DesdeAsignado").focus().select();
-                         }
-                    },
-                });
+                                //
+                                    $("#DesdeAsignado").show();
+                                    $("#DesdeAsignado").focus().select();
+                                }
+                            },
+                        });
+                    }
             }
 });      
 
@@ -228,11 +248,28 @@ $("#DesdeAsignadoPartial01").on('keyup', function (e) {
 $("#DesdeAsignado").on('keyup', function (e) {
     var keycode = e.keyCode || e.which;
     console.log(keycode);
+
+    
+
+      // CUANDO EL VALOR ESTE VACIO O SEA IGUAL A CERO
+    /*  if(contar.trim() == 2){
+        if (keycode == 48 || keycode == 32 || $("#DesdeAsignado").val()== null) {
+            $("#DesdeAsignado").val("");
+            $("#DesdeAsignado").focus();
+            return;
+         }
+      }*/
+      
       // CALCULOS -tecla enter
       if (keycode == 13) {
-          CalcularIncremento(this.value);
-          CalcularDesdeHastaAsignado(this.value);
-          $("#formUsers").submit();
+          //validar si el valor solo es cero.
+          if(this.value == 0){
+            $("#DesdeAsignado").focus();
+          }else{
+            CalcularIncremento(this.value);
+            CalcularDesdeHastaAsignado(this.value);
+            $("#formUsers").submit();
+          }
       }
       // IMPRIMIR. f12
     if (keycode == 123) {
@@ -415,6 +452,7 @@ $('#goUltimoControles').on('click', function(){
 		ignore:"",
 		rules:{
                 lstSerie: {required: true},
+                DesdeAsignado: {required: true},
                 },
 		        errorElement: "em",
 		        errorPlacement: function ( error, element ) {
@@ -644,7 +682,7 @@ $('body').on('click','#listadoAsignacion a',function (e){
 		//console.log(Id_Editar_Eliminar);
 		var partial = Id_Editar_Eliminar.split("#");
 		// DAR LOS VALORES A LOS RESPECTIVOS OBJETOS
-        IdEditarTiqueteDesde = partial[0];
+        IdEditarTiqueteDesde = partial[0];  // VALOR DEL ID DE PRODUCCION ASIGNADO TEMP
 		//$("#CodigoProduccionAsignacion").val(partial[0]);
 		$("#CodigoProduccion").val(partial[1]);
 		// pasar valores AL PARTIAL.
@@ -657,11 +695,17 @@ $('body').on('click','#listadoAsignacion a',function (e){
 			partial_1 = Number(partial_1);
 			partial_2 = Number(partial_2);
 			partial_3 = Number(partial_3);
+            IdEditarTiqueteHasta = Number(partial_3);
         //
             $("#DesdeAsignado").hide();
 		// Definir Rango para Editar sólamente el rango seleccionado.
 		    GlobalDesde = partial[2];
 		    GlobalHasta = partial[3];
+        //  validar valores a modificar.
+            GlobalDesdeM = partial[2];
+		    GlobalHastaM = partial[3];
+        // cambiar valores del spam
+            $("#TextoModificarTalonario").show();
         // Pasar foco.
             $("#Partial").show();
         //
@@ -669,7 +713,7 @@ $('body').on('click','#listadoAsignacion a',function (e){
         //
             $("#DesdeAsignadoPartial01").focus().select();
         //
-            toastr["success"]("Editar Talonario.", "Sistema");
+            toastr["success"]("Editar Talonario.", "Sistema.");
 	}else if(accionAsignacion == "EliminarAsignacion"){
 		//	ENVIAR MENSAJE CON SWEETALERT 2, PARA CONFIRMAR SI ELIMINA EL REGISTRO.
 		const swalWithBootstrapButtons = Swal.mixin({
@@ -873,7 +917,52 @@ $('body').on('click','#listadoTiqueteEnControl a',function (e){
 		  }
 });
 }); // fin de la funcion principal ************************************/
+// Calcular desde - hasta con precio.
+function CalcularDesdeHastaAsignadoModificarTalonario(valor) {
+    var desde = valor;
+    var hasta = $("#HastaAsignado").val();
+    var precio_publico = $("#PrecioPublico").val();
+    desde = desde.replace(/,/g,"");
+    hasta = hasta.replace(/,/g,"");
+    precio_publico = precio_publico.substring(1);
+    var cantidad = 0;
+    var i = 0;
+    
+    for (i = Number(desde); i <= Number(hasta); i++) {
+      cantidad++;
+    }
+        var valor_estimado = (cantidad) * precio_publico
+        $('#CantidadTiqueteAsignado').val(cantidad);
+        $('#TotalAsignado').val(valor_estimado);
+}
+// CALCULAR INCREMENTO.
+function CalcularIncrementoModificarTalonario(valor) {
+    var constante99 = 99;
+    var constante100 = 100;
+    var hasta = 0;
+    var desde = ($("#DesdeAsignadoPartial01").val());
+    // quitar comas
+    desde = desde.replace(/,/g,"");
+    // obtener los últimos dos valores
+    lastDesde = desde.substr(desde.length - 2);
+    //alert(lastDesde);
+    // pasar la cantidad calculada a hasta
+    if(lastDesde == '01'){
+        hasta = Number(desde) + Number(constante99);
+    }else if(lastDesde == "1"){
+        hasta = Number(desde) + Number(constante99);
+    }else if(lastDesde == "00"){
+        hasta = Number(desde);
+    }else{
+        constante99 = constante100 - lastDesde;
+        hasta = Number(desde) + Number(constante99);
+    }
+    // pasar la cantidad calculada a hasta
+    $("#HastaAsignado").val(hasta); 
+    // sumar 1, y cuando guarde pasarlo a desde.
+    GlobalDesde = hasta + 1;
 
+}
 // Calcular desde - hasta con precio.
 function CalcularDesdeHastaAsignado(valor) {
     var desde = ($("#DesdeAsignado").val());

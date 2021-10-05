@@ -303,7 +303,7 @@ document.querySelectorAll('select').forEach((input) => {
                       <div class="col col-md-12 col-lg-6 col-xl-6">
                           <div class="input-group">
                               <span class="input-group-text">De: </span>
-                              <input type="text" class="form-control font-weight-bold input-lg" name="DesdeAsignado" id="DesdeAsignado" value="" data-inputmask="'alias': 'numeric'" style="font-size: x-large;" autocomplete="off">
+                              <input type="text" class="form-control font-weight-bold input-lg" name="DesdeAsignado" id="DesdeAsignado" value="" data-inputmask="'alias': 'numeric'" style="font-size: x-large;" autocomplete="off" required>
                               <!-- <input type="text" class="form-control font-weight-bold input-lg" name="DesdeAsignado" id="DesdeAsignado" value="" data-inputmask="'alias': 'numeric'" onblur="CalcularIncremento(this.value)" style="font-size: x-large;">-->
                           </div>
                       </div>
@@ -312,7 +312,13 @@ document.querySelectorAll('select').forEach((input) => {
                         <div class="input-group">
                             <span class="input-group-text">: </span>
                             <input type="hidden" class="form-control font-weight-bold input-lg" name="HastaAsignado" id="HastaAsignado" value="" data-inputmask="'alias': 'numeric'"  readonly style="font-size: x-large;" autocomplete="off">
-                              <input type="text" class="form-control font-weight-bold input-lg" name="DesdeAsignadoPartial01" id="DesdeAsignadoPartial01" value="" style="font-size: xx-large; text-align: right;" autocomplete="off">
+                              <input type="text" class="form-control font-weight-bold input-lg" name="DesdeAsignadoPartial01" id="DesdeAsignadoPartial01" value="" data-inputmask="'alias': 'numeric'" style="font-size: xx-large; text-align: right;" autocomplete="off">
+                              <div id="TextoModificarTalonario" style="display: none;" class="p-0">
+                                <div class="alert alert-info" role="alert">
+                                  <strong>ESC: </strong> Cancelar 
+                                  <strong>ENTER: </strong> Modificar
+                                </div>
+                              </div>
                         </div>
                       </div>
                     </div>
