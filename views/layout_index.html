@@ -4,7 +4,7 @@
 
 {% block javascripts %}
  <!-- JS SCRIPT  -->
-
+ <script type="text/JavaScript" src="js/main_layout_index.js"></script>
 <!-- DEINIR EL AJAX START- STOP Y ERROR -->
 <script>
   $(document).ready(function () { 
@@ -43,42 +43,115 @@
     </div>
     <!-- /.content-header -->
     
-  <!-- CUANDO EL USUARIO SEA ROOT -->
-  {% if codigo_perfil == '99' %}
-   <!-- Main content -->
-    <section class="content">
-      <div class="container-fluid">
-        <!-- Small boxes (Stat box) -->
-        <div class="col-md-12">
-          <div class="card card-success">
-            <div class="card-header">
-              <h3 class="card-title">PASOS INICIALES</h3>
-  
-              <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
-                </button>
+      <!-- CUANDO EL USUARIO SEA ROOT -->
+      {% if codigo_perfil == '99' %}
+      <!-- Main content -->
+        <section class="content">
+          <div class="container-fluid">
+            <!-- Small boxes (Stat box) -->
+            <div class="col-md-12">
+              <div class="card card-success">
+                <div class="card-header">
+                  <h3 class="card-title">PASOS INICIALES</h3>
+      
+                  <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                    </button>
+                  </div>
+                  <!-- /.card-tools -->
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                  El usuario predeterminado <b>"ROOT"</b>, permite crear lo siguiente:
+                  <ol>
+                    <li>Crear Empresa, tomará los datos principales para los diferentes informes o formularios.</li>
+                    <li>Crear Personal Administrativo u Otro.</li>
+                    <li>Crear Usuarios, El cual permite el acceso al sistema.</li>
+                  </ol>
+                </div>
+                <!-- /.card-body -->
               </div>
-              <!-- /.card-tools -->
+              <!-- /.card -->
             </div>
-            <!-- /.card-header -->
-            <div class="card-body">
-              El usuario predeterminado <b>"ROOT"</b>, permite crear lo siguiente:
-              <ol>
-                <li>Crear Empresa, tomará los datos principales para los diferentes informes o formularios.</li>
-                <li>Crear Personal Administrativo u Otro.</li>
-                <li>Crear Usuarios, El cual permite el acceso al sistema.</li>
-              </ol>
-            </div>
-            <!-- /.card-body -->
+            <!-- /.row -->
           </div>
-          <!-- /.card -->
-        </div>
-        <!-- /.row -->
-      </div>
-    </section>
-  {% endif %}
-  <!-- CUANDO EL USUARIO SEA ROOT -->
+        </section>
+      {% endif %}
+      <!-- CUANDO EL USUARIO SEA ROOT -->
    
+        <!-- CUANDO EL USUARIO SEA ROOT -->
+        {% if codigo_perfil == '01' or codigo_perfil == '03' %}
+        <!-- Main content -->
+        <section class="content">
+          	<!-- FORMULARIO PRINCIPAL. -->
+	      <form  action="" method="post" name="form" id="formProduccionDiaria" role="form">
+          <input type="hidden" id="accion" name="accion" value="BuscarProduccionDiaria">
+          <div class="container-fluid">
+            <!-- Small boxes (Stat box) -->
+            <div class="col-md-12">
+              <div class="card card-success">
+                <div class="card-header">
+                  <h3 class="card-title">PRODUCCION DIARIA</h3>
+      
+                  <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                    </button>
+                  </div>
+                  <!-- /.card-tools -->
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                   <!-- SELECCIONAR ENTRE TODO Y FECHA            -->
+                  <div class="form-group row">
+                    <div class="form-group form-select">
+                      <label for="Desde">Desde: 
+                          <input type="date" id="FechaDesdePD" name="FechaDesdePD" class="form-control">
+                      </label>
+                      
+                      <label for="Hasta">Hasta: 
+                        <input type="date" id="FechaHastaPD" name="FechaHastaPD" class="form-control">
+                      </label>
+                    </div>
+                  </div>
+                      <fieldset id="FieldsetTabla">
+                        <legend> Producción | Diaria</legend>
+                        <div class="table-responsive">
+                            <table id="ProduccionDiaria" class="table display responsive nowrap" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                      <th style="text-align: center;">Fecha</th>
+                                      <th style="text-align: center;">Dólares</th>
+                                      <th style="text-align: center;">Colones</th>
+                                    </tr>                
+                                </thead>
+                                  <tbody id="listadoVerProduccionDiaria">
+                                  </tbody>
+                                  <tfoot>
+                                    <tr>
+                                      <th style="text-align: center;">Fecha</th>
+                                      <th style="text-align: center;">Dólares</th>
+                                      <th style="text-align: center;">Colones</th>
+                                    </tr>
+                                  </tfoot>
+                              </table>
+                        </div>
+                        </fieldset>
+                </div>
+                <!-- /.card-body -->
+                  <!-- /.CARD  footer -->
+                  <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
+                    <!-- Botón Buscar Personal -->
+                    <a href="#" class="btn btn-primary" id="goBuscarProduccionDiaria"> Buscar <i class="fal fa-search-plus"></i></a>                   
+                  </div>
+              </div>
+              <!-- /.card -->
+            </div>
+            <!-- /.row -->
+          </div>
+        </form>
+        </section>
+      {% endif %}
+      <!-- CUANDO EL USUARIO SEA ROOT -->
   </div> <!-- /.content-Wrapper, Contains page content. --> 
   {% endblock %}
 
