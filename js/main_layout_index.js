@@ -69,6 +69,20 @@ $('#FechaHastaPD').val(today);
 $("#goBuscarProduccionDiaria").on('click', function(){
 	$("#formProduccionDiaria").submit();
 });
-
+// IMPRIMIR REPORTE DE INGRESO DIARIO POR FECHA.
+$("#goBuscarProduccionDiariaImpirmir").on('click', function(){
+			// Limpiar datos
+			fecha_inicio = $("#FechaDesdePD").val();
+			fecha_final = $("#FechaHastaPD").val();
+			// Ejecutar Informe
+				varenviar = "/acomtus/php_libs/reportes/reporte_ingreso_diario.php?fecha_inicio="+fecha_inicio+"&fecha_final="+fecha_final;
+			// Ejecutar la función abre otra pestaña.
+				AbrirVentana(varenviar);   
+});
 }); // FINAL DELA FUNCION
 
+function AbrirVentana(url)
+{
+    window.open(url, '_blank');
+    return false;
+}

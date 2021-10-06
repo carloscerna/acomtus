@@ -15,7 +15,7 @@ $(function(){ // iNICIO DEL fUNCTION.
 var listar = function(){
 		// Varaible de Entornos.php
 			var buscartodos = "BuscarTodos";
-		// Tabla que contrendrá los registros.
+		// Tabla que contrendrá los re.
 			tabla = jQuery("#listado").DataTable({
 				"lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
 				"destroy": true,
