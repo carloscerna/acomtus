@@ -23,8 +23,11 @@
 		date_default_timezone_set('America/El_Salvador');
 		setlocale(LC_TIME,'es_SV');
 	    //
-		    $nombresDias = array("","Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sábado");
+		    $nombresDias = array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sábado");
             $meses = array("","enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre");
+            // definimos 2 array uno para los nombre de los dias y otro para los nombres de los meses
+            //$nombresDias = array("D", "L", "M", "M", "J", "V", "S" );
+                $nombresMeses = array(1=>"Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
         //Salida: Viernes 24 de Febrero del 2012		
 		//Crear una línea. Fecha.
 		//$dia = strftime("%d");		// El Día.
@@ -35,7 +38,33 @@
 		$año = $fecha_partial[0];		// El Año.
 
 		setlocale(LC_MONETARY,"es_ES");
+// establecemos la fecha de inicio
+$inicio =  DateTime::createFromFormat('Y-m-d', $fecha_inicio, new DateTimeZone('America/El_Salvador'));
+// establecemos la fecha final (fecha de inicio + dias que queramos)
+$fin =  DateTime::createFromFormat('Y-m-d', $fecha_final, new DateTimeZone('America/El_Salvador'));
+// definier el número de días dependiendo de la quincena.
+    //$modify_dias = $fecha_final - $fecha_inicio;
+    //$fin->modify($modify_dias);
+// creamos el periodo de fechas
+$periodo = new DatePeriod($inicio, new DateInterval('P1D') ,$fin);
 
+// Crear Matriz para el # de dia y nombre del dia.
+$nombreDia_a = array(); $numeroDia_a = array();
+
+// recorremos las dechas del periodo
+foreach($periodo as $date){
+    // definimos la variables para verlo mejor
+    $nombreDia = $nombresDias[$date->format("w")];
+    $nombreMes = $nombresMeses[$date->format("n")];
+    $numeroDia = $date->format("j");
+    $anyo = $date->format("Y");
+    // mostramos los datos
+    //echo $nombreDia.' '.$numeroDia.' de '.$nombreMes.' de '.$anyo.'<br>';
+    $nombreDia_a[] = $nombreDia;
+    $numeroDia_a[] = $numeroDia;
+    
+    //echo $nombreDia.' '.$numeroDia.'<br>';
+}
 class PDF extends FPDF
 {
     //Cabecera de página
@@ -139,21 +168,31 @@ function FancyTable($header)
         // IMPRIMIR VALORES EN PANTALLA PROVENIENTE DE LA MATRIZ.
             $pdf->SetFont('Arial','',16); // I : Italica; U: Normal;
                 for($jji=0;$jji<count($fecha_a);$jji++){
-                    // convertir dia (nombre y numero)
-                    $fecha_partial_a = explode("-",$fecha_a[$jji]);
-                    $dia_a = (int)$fecha_partial_a[2];		// El Día.
-                    //$newDate = date("Y-m-d", $fecha_a[$jji]);
-                    $newDate = ($fecha_a[$jji]);
-                    //echo "Today is " . $nombresDias[$dia_numero];
-                    //
+                        // armar texto
+                        $direccion = utf8_decode($nombreDia_a[$jji]) . " " . $numeroDia_a[$jji] . "\n" . utf8_decode(" ¢ ") . number_format($total_colones_a[$jji],2,".",",");
                     if($salto_linea == 4){
                         $pdf->ln();
                         $pdf->SetX(10);
                         $salto_linea = 0;
-                        $pdf->Cell($w[0],$h[0],$newDate . "\n " . $dia_a,'LRT',0,'C',$fill);
+                        $pdf->MultiCell($w[0],$h[0],$direccion,'LRT','C',$fill);
+                            // Contar caracteres
+                            $total_caracteres = strlen(trim($direccion));
+                            if($total_caracteres > 50){
+                                $i=$i+1;            
+                            }else if($total_caracteres > 100){
+                                $i=$i+1;
+                            }
                     }else{
-                        //$pdf->Cell($w[0],$h[0],$dia_numero . " " . $dia_a,'LRT',0,'C',$fill);
-                        $pdf->Cell($w[0],$h[0],$nombresDias[$fecha_a[$jji]->format("w")] . " " . $dia_a,'LRT',0,'C',$fill);
+                        //$pdf->Cell($w[0],$h[0],utf8_decode($nombreDia_a[$jji]) . "\n " . $numeroDia_a[$jji],'LRT',0,'C',$fill);
+                                        // Dirección
+                        $pdf->MultiCell($w[0],$h[0],$direccion,'LRT','C',$fill,2);
+                        // Contar caracteres
+                            $total_caracteres = strlen(trim($direccion));
+                                if($total_caracteres > 50){
+                                    $i=$i+1;            
+                                }else if($total_caracteres > 100){
+                                    $i=$i+1;
+                                }
                         $salto_linea++;
                     }
                     
