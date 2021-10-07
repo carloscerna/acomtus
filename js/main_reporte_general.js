@@ -19,7 +19,7 @@ $(document).ready(function(){
 			theme: "bootstrap4"
 		});
 
-		if($('#MenuTab').val() == '06'){
+		if($('#MenuTab').val() == '000'){
 			$("#DivSoloParaContabilidad").hide();
 		}
 });		
