@@ -13,9 +13,10 @@
         $fecha_inicio = trim($_REQUEST['fecha_inicio']);
         $fecha_final = trim($_REQUEST['fecha_final']);
         $fecha_ = cambiaf_a_normal($_REQUEST["fecha_inicio"]);
+        $fecha_f = cambiaf_a_normal($_REQUEST["fecha_final"]);
         $fecha_partial = explode("-",$fecha_inicio);
-          $db_link = $dblink;
- 
+        $fecha_partial_f = explode("-",$fecha_final);
+        $db_link = $dblink;
 //  imprimir datos del bachillerato.
            //
 	    // Establecer formato para la fecha.
@@ -25,18 +26,20 @@
 	    //
 		    $nombresDias = array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sábado");
             $meses = array("","enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre");
-            // definimos 2 array uno para los nombre de los dias y otro para los nombres de los meses
-            //$nombresDias = array("D", "L", "M", "M", "J", "V", "S" );
+        // definimos 2 array uno para los nombre de los dias y otro para los nombres de los meses
                 $nombresMeses = array(1=>"Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
         //Salida: Viernes 24 de Febrero del 2012		
 		//Crear una línea. Fecha.
-		//$dia = strftime("%d");		// El Día.
+		$dias_numero = strftime("%d");		// El Día.
         //$mes = $meses[date('n')-1];     // El Mes.
         //$año = strftime("%Y");		// El Año.
         $dia = (int)$fecha_partial[2];		// El Día.
         $mes = $meses[(int)$fecha_partial[1]];     // El Mes.
 		$año = $fecha_partial[0];		// El Año.
-
+        //
+        $dia_f = (int)$fecha_partial_f[2];		// El Día.
+        $mes_f = $meses[(int)$fecha_partial_f[1]];     // El Mes.
+		$año_f = $fecha_partial_f[0];		// El Año.
 		setlocale(LC_MONETARY,"es_ES");
 // establecemos la fecha de inicio
 $inicio =  DateTime::createFromFormat('Y-m-d', $fecha_inicio, new DateTimeZone('America/El_Salvador'));
@@ -68,7 +71,7 @@ foreach($periodo as $date){
 class PDF extends FPDF
 {
     //Cabecera de página
-    function Header()
+function Header()
     {
     //Logo
     $img = $_SERVER['DOCUMENT_ROOT'].'/acomtus/img/'.$_SESSION['logo_uno'];
@@ -96,7 +99,7 @@ class PDF extends FPDF
 
 function Footer()
 {
-//Posición: a 1,5 cm del final
+    //Posición: a 1,5 cm del final
     $this->SetY(-10);
     //Arial italic 8
     $this->SetFont('Arial','I',9);
@@ -134,10 +137,10 @@ function FancyTable($header)
 // Diseño de Lineas y Rectangulos.
     $pdf->SetFillColor(224);
 	// FECHA.
-	$pdf->RotatedText(130,40,'Santa Ana, ' . $dia . ' de ' . $mes . ' de ' . $año,0);
+	$pdf->RotatedText(130,40,'Santa Ana, ' . (int)$dias_numero . ' de ' . $mes . ' de ' . $año,0);
 	// estado de cuenta
-	$pdf->RoundedRect(15, 45, 80, 8, 2, '1234', 'DF');
-	$pdf->RotatedText(18,50,'REPORTE DE INGRESO DIARIO',0);
+	$pdf->RoundedRect(15, 45, 160, 8, 2, '1234', 'DF');
+	$pdf->RotatedText(18,50,'Ingreso del  '. (int)$dia . ' de ' . $mes . ' de ' . $año . " al " . (int)$dia_f . ' de ' . $mes_f . ' de ' . $año_f,0);
 // Definimos el tipo de fuente, estilo y tamaño.
     $pdf->SetFont('Arial','',11); // I : Italica; U: Normal;
 //  mostrar los valores de la consulta
@@ -151,7 +154,8 @@ function FancyTable($header)
     // armando el Query. PARA LA TABLA CATALOGO RUTA.
     $query = "SELECT * FROM produccion_diaria WHERE fecha >= '$fecha_inicio' and fecha<= '$fecha_final' ORDER BY fecha";
     // crear varialbes array();
-        $fecha_a = array(); $total_dolares_a = array(); $total_colones_a = array(); $salto_linea = 0; $dia_numero = 0;
+        $fecha_a = array(); $total_dolares_a = array(); $total_colones_a = array(); $salto_linea = 0; $dia_numero = 0; $yy = 60; $xx = 10; $y_linea = 0; $yyy = 0;
+       
     // Ejecutamos el Query.
     $consulta = $dblink -> query($query);
     // recorrer consulta
@@ -163,36 +167,30 @@ function FancyTable($header)
             $total_dolares_a[] = $listado['total_dolares'];
             $total_colones_a[] = $listado['total_colones'];
             //
-            //$pdf->Cell($w[0],$h[0],$total_colones,'LRT',0,'C',$fill);
         }   // fin del while principal.
         // IMPRIMIR VALORES EN PANTALLA PROVENIENTE DE LA MATRIZ.
-            $pdf->SetFont('Arial','',16); // I : Italica; U: Normal;
-                for($jji=0;$jji<count($fecha_a);$jji++){
+            $pdf->SetFont('Arial','',16); // I : Italica; U: Normal;pri
+//print count($fecha_a);
+                for($jji=0;$jji<count($nombreDia_a);$jji++){
                         // armar texto
                         $direccion = utf8_decode($nombreDia_a[$jji]) . " " . $numeroDia_a[$jji] . "\n" . utf8_decode(" ¢ ") . number_format($total_colones_a[$jji],2,".",",");
-                    if($salto_linea == 4){
+                    if($salto_linea == 3){
+                        $pdf->SetXY($xx,$yy);
+                        $pdf->MultiCell($w[0],$h[0],$direccion,'LRTB','C',$fill);
                         $pdf->ln();
-                        $pdf->SetX(10);
+                        $xx = 10;
+                        $yy = ($yy + 20);
                         $salto_linea = 0;
-                        $pdf->MultiCell($w[0],$h[0],$direccion,'LRT','C',$fill);
-                            // Contar caracteres
-                            $total_caracteres = strlen(trim($direccion));
-                            if($total_caracteres > 50){
-                                $i=$i+1;            
-                            }else if($total_caracteres > 100){
-                                $i=$i+1;
-                            }
-                    }else{
-                        //$pdf->Cell($w[0],$h[0],utf8_decode($nombreDia_a[$jji]) . "\n " . $numeroDia_a[$jji],'LRT',0,'C',$fill);
-                                        // Dirección
-                        $pdf->MultiCell($w[0],$h[0],$direccion,'LRT','C',$fill,2);
-                        // Contar caracteres
-                            $total_caracteres = strlen(trim($direccion));
-                                if($total_caracteres > 50){
-                                    $i=$i+1;            
-                                }else if($total_caracteres > 100){
-                                    $i=$i+1;
-                                }
+                        //$pdf->SetXY(10,$yy);
+
+                        //$pdf->MultiCell($w[0],$h[0],$direccion . $yy . "-".$salto_linea,'LRTB','C',$fill);
+                     }else{
+                        // Producción
+                        $pdf->SetXY($xx,$yy);
+                        //$pdf->SetX($xx);
+                        $pdf->MultiCell($w[0],$h[0],$direccion,'LRTB','C',$fill,2);
+                        $xx = $xx + 50;
+                        //$pdf->MultiCell($w[0],$h[0],$direccion . $yy . "-".$salto_linea,'LRTB','C',$fill,2);
                         $salto_linea++;
                     }
                     
