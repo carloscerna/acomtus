@@ -181,16 +181,11 @@ function FancyTable($header)
                         $xx = 10;
                         $yy = ($yy + 20);
                         $salto_linea = 0;
-                        //$pdf->SetXY(10,$yy);
-
-                        //$pdf->MultiCell($w[0],$h[0],$direccion . $yy . "-".$salto_linea,'LRTB','C',$fill);
                      }else{
                         // Producción
                         $pdf->SetXY($xx,$yy);
-                        //$pdf->SetX($xx);
                         $pdf->MultiCell($w[0],$h[0],$direccion,'LRTB','C',$fill,2);
                         $xx = $xx + 50;
-                        //$pdf->MultiCell($w[0],$h[0],$direccion . $yy . "-".$salto_linea,'LRTB','C',$fill,2);
                         $salto_linea++;
                     }
                     
