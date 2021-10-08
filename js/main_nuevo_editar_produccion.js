@@ -283,7 +283,7 @@ $("#DesdeAsignado").on('keyup', function (e) {
             }
     }
       // LIMPIAR ACCION Y CORRELATIVO PARA UNO NUEVO. flecha hacia arriba.
-      if (keycode == 38){
+      if (keycode === 38){
         var r = confirm("Guardar Control de Ingresos");
         if (r == true) {
          // NUEVA PRODUCCIÓN.
@@ -295,6 +295,8 @@ $("#DesdeAsignado").on('keyup', function (e) {
              codigo_tiquete_color = $("#CodigoTiqueteColor").val();
              fecha = $("#FechaProduccion").val();
              codigo_personal = $("#cp").val();
+            //
+            $("#DesdeAsignado").val("0");
 
              if($("#accion").val() == "AgregarNuevoTemp"){
                 accion = "GuardarControlIngreso";
@@ -513,8 +515,8 @@ $('#goUltimoControles').on('click', function(){
                             $("#lstJornada").prop("readonly", true);
                             $("#lstSerie").prop("readonly", true);
                             // pasar foco.
-                            $("#DesdeAsignado").focus().select();
                             $("#HastaAsignado").val("");
+                            $("#DesdeAsignado").focus().select();
                             }               
 		            },
 		        });
