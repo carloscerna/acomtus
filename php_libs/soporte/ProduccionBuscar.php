@@ -681,7 +681,7 @@ function VerUltimasProducciones(){
         $query_p = "SELECT p.id_, p.fecha, p.hora, p.codigo_ruta, cat_r.descripcion as descripcion_ruta
                     FROM produccion p
                     INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta =  p.codigo_ruta
-                        ORDER BY id_ DESC LIMIT 80";
+                        ORDER BY id_ DESC LIMIT 30";
 		$consulta_p = $dblink -> query($query_p);      
 	// Validar si hay registros.
 		if($consulta_p -> rowCount() != 0){  

@@ -249,8 +249,40 @@ $("#DesdeAsignado").on('keyup', function (e) {
     var keycode = e.keyCode || e.which;
     console.log(keycode);
 
-    
+          // CALCULOS -tecla el punto 
+          if (keycode == 190 || keycode == 189) {
+            // Pasar foco.
+                $("#DesdeAsignado").val("");
+                $("#DesdeAsignado").focus().select();
+          }
 
+             // CALCULOS -tecla SUPRIMIR O ELIMINAR 
+               if (keycode == 46) {
+                codigo_produccion = $('#NumeroCorrelativo').val();
+                // ejecutar Ajax.. ACTUALIZAR ULITMO REGISTROS
+                $.ajax({
+                    beforeSend: function(){
+                        $('#listadoAsignacionOk').empty();
+                    },
+                    cache: false,                     
+                    type: "POST",                     
+                    dataType: "json",                     
+                    url:"php_libs/soporte/NuevoEditarProduccion.php",                     
+                    data: {                     
+                            accion_buscar: 'EliminarUltimoRegistroProduccion', codigo_produccion: codigo_produccion,
+                            },                     
+                    success: function(response) {                     
+                            if (response.respuesta === true) {                     
+                                toastr["info"](response.mensaje, "Sistema");
+                                $('#listadoAsignacionOk').append(response.contenido);
+                                                        // cambiar el valor del ingreso.
+                                $("label[for='LblIngreso']").text('Total Entregado $ ' + response.totalIngreso);
+                                $("label[for='LblCantidad']").text('Total Tiquete: ' + response.cantidad_tiquete);
+                                $("label[for='LblCantidadTalonarios']").text('Total Talonarios: ' + response.CantidadTalonarios);
+                            }                
+                    }                     
+                    });
+                      }
       // CUANDO EL VALOR ESTE VACIO O SEA IGUAL A CERO
     /*  if(contar.trim() == 2){
         if (keycode == 48 || keycode == 32 || $("#DesdeAsignado").val()== null) {

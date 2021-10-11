@@ -14,6 +14,7 @@
         $fecha_final = trim($_REQUEST['fecha_final']);
         $fecha_ = cambiaf_a_normal($_REQUEST["fecha_inicio"]);
         $fecha_f = cambiaf_a_normal($_REQUEST["fecha_final"]);
+        $tipo_moneda = trim($_REQUEST["tipo_moneda"]);
         $fecha_partial = explode("-",$fecha_inicio);
         $fecha_partial_f = explode("-",$fecha_final);
         $db_link = $dblink;
@@ -157,7 +158,7 @@ function FancyTable($header)
              FROM produccion_diaria WHERE fecha >= '$fecha_inicio' and fecha <= '$fecha_final' ORDER BY fecha";
     // crear varialbes array();
         $fecha_a = array(); $total_dolares_a = array(); $total_colones_a = array(); $salto_linea = 0; $dia_numero = 0; $yy = 60; $xx = 10; $y_linea = 0; $yyy = 0;
-        $numero_dia = array(); $nombre_dia = array();
+        $numero_dia = array(); $nombre_dia = array(); $print_tipo_moneda = array();
        
     // Ejecutamos el Query.
     $consulta = $dblink -> query($query);
@@ -167,8 +168,14 @@ function FancyTable($header)
         {
             // VARIABLES DE LA CONSULTA CATALOGO RUTA.
             $fecha_a[] = ($listado['fecha']);
-            $total_dolares_a[] = $listado['total_dolares'];
-            $total_colones_a[] = $listado['total_colones'];
+            if($tipo_moneda == "dolares"){
+                $print_tipo_moneda[] = $listado['total_dolares'];
+                $simbolo_moneda = " $ ";
+            }else{
+                $print_tipo_moneda[] = $listado['total_colones'];
+                $simbolo_moneda = utf8_decode(" ¢ ");
+            }
+           //            
             $nombre_dia[] = ($listado['nombre_dia']);
             $numero_dia[] = ($listado['numero_dia']);
             //
@@ -178,7 +185,7 @@ function FancyTable($header)
 //print count($fecha_a);
                 for($jji=0;$jji<count($fecha_a);$jji++){
                         // armar texto
-                        $direccion = utf8_decode($nombresDias2[$nombre_dia[$jji]]) . " " . $numero_dia[$jji] . "\n" . utf8_decode(" ¢ ") . number_format($total_colones_a[$jji],2,".",",");
+                        $direccion = utf8_decode($nombresDias2[$nombre_dia[$jji]]) . " " . $numero_dia[$jji] . "\n" . $simbolo_moneda . number_format($print_tipo_moneda[$jji],2,".",",");
                     if($salto_linea == 3){
                         $pdf->SetXY($xx,$yy);
                         $pdf->MultiCell($w[0],$h[0],$direccion,'LRTB','C',$fill);

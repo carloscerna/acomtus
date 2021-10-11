@@ -74,8 +74,18 @@ $("#goBuscarProduccionDiariaImpirmir").on('click', function(){
 			// Limpiar datos
 			fecha_inicio = $("#FechaDesdePD").val();
 			fecha_final = $("#FechaHastaPD").val();
+		//
+		if($('#chkDolares').is(':checked') ) {
+			//alert('Seleccionado Dolares');
+			var tipo_moneda = "dolares";
+		}
+		//
+		if($('#chkColones').is(':checked') ) {
+			//alert('Seleccionado Colones');
+			var tipo_moneda = "colones";
+		}
 			// Ejecutar Informe
-				varenviar = "/acomtus/php_libs/reportes/reporte_ingreso_diario.php?fecha_inicio="+fecha_inicio+"&fecha_final="+fecha_final;
+				varenviar = "/acomtus/php_libs/reportes/reporte_ingreso_diario.php?fecha_inicio="+fecha_inicio+"&fecha_final="+fecha_final+"&tipo_moneda="+tipo_moneda;
 			// Ejecutar la función abre otra pestaña.
 				AbrirVentana(varenviar);   
 });

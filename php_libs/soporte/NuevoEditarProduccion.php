@@ -758,7 +758,6 @@ if($errorDbConexion == false){
 					$mensajeError = "Edición...";	
 					ListadoAsignadoTemp();
 			break;	
-
 			case 'EditarRegistro':
 				// TABS-1
 					$codigo_produccion = $_REQUEST['codigo_produccion'];
@@ -819,7 +818,35 @@ if($errorDbConexion == false){
 						$mensajeError = 'Talonario Actualizado.';
 				// Ver nuevamente el listado
 					ListadoAsignadoTemp();
-			break;	
+			break;
+			case 'EliminarUltimoRegistroProduccion':
+				// ELIMINAR CODIGO PRODUCCION.
+				$codigo_produccion = $_POST['codigo_produccion'];
+				//
+				$query_s = "SELECT * FROM produccion_asignado_temp WHERE codigo_produccion = '$codigo_produccion' ORDER BY id_ DESC LIMIT 1";
+					// Ejecutamos el query
+					$consulta = $dblink -> query($query_s);
+				//
+					if($consulta -> rowCount() != 0){
+					// obtener el último dato en este caso el Id_
+						while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+						{
+							$codigo_id = trim($listado['id_']);
+							$id_ = trim($listado['id_']);
+							$codigo_produccion_asignado = trim($listado['codigo_produccion_asignado']);
+						// ELIMINAR CODIGO PRODUCCION ASIGNADO.
+						}
+						$query_pa = "DELETE FROM produccion_asignado_temp WHERE codigo_produccion = '$codigo_produccion' and id_ = '$codigo_id'";
+							$count_pa = $dblink -> exec($query_pa);
+						//;
+						$respuestaOK = true;
+						$mensajeError = 'Se ha Eliminado Registro(s).';
+					}else{
+						$mensajeError = 'No se ha eliminado el registro';
+					}
+					//
+					ListadoAsignadoTemp();
+					break; 	
             default:
 				$mensajeError = 'Esta acción no se encuentra disponible';
 			break;
