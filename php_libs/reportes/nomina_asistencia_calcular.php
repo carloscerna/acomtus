@@ -357,7 +357,7 @@ function rellenar($total_dias_quincena){
                         switch ($descripcion_licencia) {
                             case 'ISSS':
                                 // CUANDO PIDE PERMISO POR ENFERMEDAD. Una tanda 8 horas
-                                $salario = $salario + ($horas_licencia * $pago_diario_hora);
+                                //$salario = $salario + ($horas_licencia * $pago_diario_hora);
                                 break;
                             case 'PP':
                                 // PERMISO PERSONAL Una tanda 8 horas
@@ -531,6 +531,7 @@ function rellenar($total_dias_quincena){
                                 switch ($descripcion_jornada) {
                                     case '4H':
                                         // Media Tanda.
+                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         break;
                                     case '1T':

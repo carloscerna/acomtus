@@ -154,7 +154,7 @@ function FancyTable($header)
     $pdf->SetXY(10,60);
 //  Encabezando.
     // armando el Query. PARA LA TABLA CATALOGO RUTA.
-    $query = "SELECT fecha, total_dolares, total_colones, to_char(fecha, 'dy') as nombre_dia, extract('day' from fecha) as numero_dia
+    $query = "SELECT fecha, round(total_dolares) as total_dolares, round(total_colones) as total_colones, to_char(fecha, 'dy') as nombre_dia, extract('day' from fecha) as numero_dia
              FROM produccion_diaria WHERE fecha >= '$fecha_inicio' and fecha <= '$fecha_final' ORDER BY fecha";
     // crear varialbes array();
         $fecha_a = array(); $total_dolares_a = array(); $total_colones_a = array(); $salto_linea = 0; $dia_numero = 0; $yy = 60; $xx = 10; $y_linea = 0; $yyy = 0;
@@ -185,7 +185,7 @@ function FancyTable($header)
 //print count($fecha_a);
                 for($jji=0;$jji<count($fecha_a);$jji++){
                         // armar texto
-                        $direccion = utf8_decode($nombresDias2[$nombre_dia[$jji]]) . " " . $numero_dia[$jji] . "\n" . $simbolo_moneda . number_format($print_tipo_moneda[$jji],2,".",",");
+                        $direccion = utf8_decode($nombresDias2[$nombre_dia[$jji]]) . " " . $numero_dia[$jji] . "\n" . $simbolo_moneda . number_format($print_tipo_moneda[$jji],0,".",",");
                     if($salto_linea == 3){
                         $pdf->SetXY($xx,$yy);
                         $pdf->MultiCell($w[0],$h[0],$direccion,'LRTB','C',$fill);

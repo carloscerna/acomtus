@@ -55,8 +55,8 @@ if($errorDbConexion == false){
 					while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
 					{
                         $fecha = cambiaf_a_normal(trim($listado['fecha']));
-                        $dolares = number_format(trim($listado['total_dolares']),2,".",",");
-                        $colones = number_format(trim($listado['total_colones']),2,".",",");
+                        $dolares = number_format(trim($listado['total_dolares']),0,".",",");
+                        $colones = number_format(trim($listado['total_colones']),0,".",",");
                         
                         $contenidoOK .= "<tr>
                         <td $estilo_c>$fecha
