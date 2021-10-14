@@ -310,8 +310,8 @@ function rellenar($total_dias_quincena){
     // crear las matrices para el calculo del salario
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
     $salario = 0; $asuetos = 0; $extra = 0; $boni = 0; $total_tiempo_extra = 0; $total = 0; $pago_diario_hora = round($pago_diario / 8,4); $asueto = 0; $horas_jornadas = 0;
-        // DECLARACI{ON DE AMTRICES}
-        $descripcion_jornada_a = array();
+     // DECLARACI{ON DE AMTRICES}
+        $descripcion_jornada_a_P1 = array(); $descripcion_jornada_a_P2 = array();
     $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
     // SEGUNDO BLOQUE DE LINEAS PARA EL NOMBRE Y NUMERO DEL DIA.
     for($j=0;$j<=$total_dias_quincena-1;$j++){
@@ -356,8 +356,12 @@ function rellenar($total_dias_quincena){
                     //
                         $pdf->Cell($w[3],6,$descripcion_licencia,'1',0,'C',$fill);
                         $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
-                    // matriz
-                    $descripcion_jornada_a[] = trim($row['descripcion_licencia']);
+                    // matriz seleccionar cual semana llenar.
+                        if($j <= 6){
+                            $descripcion_jornada_a_P1[] = trim($row['descripcion_licencia']);
+                        }else{
+                            $descripcion_jornada_a_P2[] = trim($row['descripcion_licencia']);
+                        }
                         // CALCULO DEL SALARIO CUANDO HAY PERMISOS
                         switch ($descripcion_licencia) {
                             case 'ISSS':
@@ -495,8 +499,12 @@ function rellenar($total_dias_quincena){
                     }
                     // REVISAR Y CALCULAR SI LA FECHA PERTENECIA A UN DÍA DE ASUETO
                         $fecha_partial = explode("-",$fecha_asistencia);
-                    // matriz
-                    $descripcion_jornada_a[] = trim($row['descripcion_jornada']);
+                    // matriz seleccionar cual semana llenar.
+                    if($j <= 6){
+                        $descripcion_jornada_a_P1[] = trim($row['descripcion_jornada']);
+                    }else{
+                        $descripcion_jornada_a_P2[] = trim($row['descripcion_jornada']);
+                    }
                     //
                         $asueto = false;
                         //print_r($fecha_partial);
@@ -573,33 +581,16 @@ function rellenar($total_dias_quincena){
         $pdf->Cell($w[3],6,'','L',0,'C',$fill);
         $pdf->SetFillColor(233, 224, 222);
     // calcular por semana;
-    $salario = 0;
-        $prev = '';
-        $results = [];
-        $j = 0;
-        $semana = 0;
-        foreach ($descripcion_jornada_a as $i => $v) {
-            if ($v != $prev) {
-                $j = $i;
-                $results[$j] = 1;
-                $prev = $v;
-            }
-            else {
-                $results[$j]++;
-            }
-           // semana de 0 a 6
-               if($semana == 6){
-                //print "<br>Hola";
-                $semana = 0;
-                // PRIMERO SIETE DIAS DE LA QUINCENA
-                foreach ($results as $k => $v) {
-                    echo "$descripcion_jornada_a[$k] : $v <br>";
+        $salario = 0;
+    //  PRIMEROS 7 DIAS, array de 0 a 6
+        foreach (array_count_values($descripcion_jornada_a_P1) as $k => $v) {
+            echo "$k = $v<br>";
                         // calcular el salario CON DESCRIPCION JORNADA
-                        switch ($descripcion_jornada_a[$k]) {
+                        switch ($k) {
                             case '4H':
                                 // Media Tanda.
-                                $salario = $salario + (4 * $pago_diario_hora);
-                                $salario = $salario + (4 * $pago_diario_hora);
+                                $salario = $salario + (4 * $pago_diario_hora) * $v;
+                                $salario = $salario + (4 * $pago_diario_hora) * $v;
                                 break;
                             case '1T':
                                 // Una tanda 8 horas
@@ -607,36 +598,48 @@ function rellenar($total_dias_quincena){
                                 break;
                             case '1.5T':
                                 /// una tanda 8 horas m{as 4 horas extras}
-                                    $salario = $salario + (8 * $pago_diario_hora);
-                                    $extra = $extra + (4 * $pago_diario_hora);
+                                    $salario = $salario + (8 * $pago_diario_hora) * $v;
+                                    $extra = $extra + (4 * $pago_diario_hora) * $v;
                                     $total_tiempo_extra =  $extra;
                                 break;
-                            default:
-                                # code...
-                                break;
                         }
-                }       // fin del forearch
-            //
-                $prev = '';
-                $results = [];
-                $j = 0;
-        
-            }else{
-                $semana++;
-                }
-        }
-            print "<br> ULTIMOS VALORES";
-            // PRIMERO SIETE DIAS DE LA QUINCENA
-              foreach ($results as $k => $v) {
-                  echo "$descripcion_jornada_a[$k] : $v <br>";
-              }
+        }   // fin del foreach.
+            //  PRIMEROS 7 DIAS, array de 7 a ...
+            foreach (array_count_values($descripcion_jornada_a_P2) as $k => $v) {
+                echo "$k = $v<br>";
+                            // calcular el salario CON DESCRIPCION JORNADA
+                            switch ($k) {
+                                case '4H':
+                                    // Media Tanda.
+                                    $salario = $salario + (4 * $pago_diario_hora) * $v;
+                                    $salario = $salario + (4 * $pago_diario_hora) * $v;
+                                    break;
+                                case '1T':
+                                    // Una tanda 8 horas
+                                    $salario = $salario + ((8 * $pago_diario_hora) * $v);
+                                    break;
+                                case '1.5T':
+                                    /// una tanda 8 horas m{as 4 horas extras}
+                                        $salario = $salario + (8 * $pago_diario_hora) * $v;
+                                        $extra = $extra + (4 * $pago_diario_hora) * $v;
+                                        $total_tiempo_extra =  $extra;
+                                    break;
+                            }
+            }   // fin del foreach.
+        // VALARION A LA HORA DE DESCUENTO, CASTIGO, DESCANSO, ISSS, FALTA, SEPTIMO, ETC.
 
-                // Imprimir valores
+
+                //Imprimir valores
                 print "<br> Salario: " . $salario;
                 print "<br> Horas: " . $horas_jornada;
                 print "<br> pago diario: " . $pago_diario;
+                //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
+                $total_salario = $salario + $total_tiempo_extra + $asuetos;
+                print "<br> Total Tiempo Extra: " . $total_tiempo_extra;
                 print "<br>";
-                print_r($descripcion_jornada_a);  exit;    
+                print_r($descripcion_jornada_a_P1);
+                print "<br>";
+                print_r($descripcion_jornada_a_P2);  exit;    
     // TERCER BLOQUE DE LINEAS PARA.
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
     for($j=0;$j<=5;$j++){
