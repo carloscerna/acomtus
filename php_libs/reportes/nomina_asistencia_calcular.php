@@ -15,6 +15,7 @@
      $RutaText = $_REQUEST["RutaText"];
      $DepartamentoEmpresa = $_REQUEST["DepartamentoEmpresa"];
      $DepartamentoEmpresaText = $_REQUEST["DepartamentoText"];
+     $Calcular = $_REQUEST["chkCalcular"];
      $db_link = $dblink;
      $total_dias_quincena = 0;
      $reporte_trabajo = "";
@@ -305,7 +306,7 @@ function rellenar_datos($linea){
 }
 
 function rellenar($total_dias_quincena){
-    global $pdf, $fill, $w, $codigo, $fecha_periodo, $dblink, $pago_diario;
+    global $pdf, $fill, $w, $codigo, $fecha_periodo, $dblink, $pago_diario, $Calcular;
     //
     // crear las matrices para el calculo del salario
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
@@ -581,7 +582,7 @@ function rellenar($total_dias_quincena){
         $pdf->Cell($w[3],6,'','L',0,'C',$fill);
         $pdf->SetFillColor(233, 224, 222);
     // calcular por semana;
-        $salario = 0;
+     /*   $salario = 0;
     //  PRIMEROS 7 DIAS, array de 0 a 6
         foreach (array_count_values($descripcion_jornada_a_P1) as $k => $v) {
             echo "$k = $v<br>";
@@ -628,7 +629,7 @@ function rellenar($total_dias_quincena){
             }   // fin del foreach.
         // VALARION A LA HORA DE DESCUENTO, CASTIGO, DESCANSO, ISSS, FALTA, SEPTIMO, ETC.
 
-
+/*
                 //Imprimir valores
                 print "<br> Salario: " . $salario;
                 print "<br> Horas: " . $horas_jornada;
@@ -640,43 +641,80 @@ function rellenar($total_dias_quincena){
                 print_r($descripcion_jornada_a_P1);
                 print "<br>";
                 print_r($descripcion_jornada_a_P2);  exit;    
-    // TERCER BLOQUE DE LINEAS PARA.
+  */
+                // TERCER BLOQUE DE LINEAS PARA.
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
-    for($j=0;$j<=5;$j++){
-        switch ($j) {
-            case '0':
-                # PRESENTAR SALARIO
-                $salario_pantalla = number_format($salario,2,'.',',');
-                $pdf->Cell($w[1],6,'$' . $salario_pantalla,'1',0,'C',$fill);
-                break;
-            case '1':
-                # PRESENTAR ASUETOS
-                $asueto_pantalla = number_format($asuetos,2,'.',',');
-                $pdf->Cell($w[1],6,$asueto_pantalla,'1',0,'C',$fill);
-                break;
-            case '2':
-                # PRESENTAR EXTRA
-                $extra_pantalla = number_format($extra,2,'.',',');
-                $pdf->Cell($w[1],6,'$' . $extra_pantalla,'1',0,'C',$fill);
-                break;
-            case '3':
-                # PRESENTAR BONI
-                //$pdf->Cell($w[1],6,'','1',0,'C',$fill);
-                break;
-            case '4':
-                # PRESENTAR TOTAL TIEMPO EXTRA
-                $total_tiempo_extra_pantalla = number_format($total_tiempo_extra,2,'.',',');
-                $pdf->Cell($w[1],6,'$' . $total_tiempo_extra_pantalla,'1',0,'C',$fill);
-                break;
-            case '5':
-                # PRESENTAR TOTAL SALARIO
-                $total_salario_pantalla = number_format($total_salario,2,'.',',');
-                $pdf->Cell($w[1],6,'$' . $total_salario_pantalla,'1',0,'C',$fill);
-                break;
-            default:
-                # code...
-                $pdf->Cell($w[1],6,'','1',0,'C',$fill);
-                break;
+    // VERIFICAR SI SE DESEA CALCULAR
+    if($Calcular == "si"){
+        for($j=0;$j<=5;$j++){
+            switch ($j) {
+                case '0':
+                    # PRESENTAR SALARIO
+                    $salario_pantalla = number_format($salario,2,'.',',');
+                    $pdf->Cell($w[1],6,'$' . $salario_pantalla,'1',0,'C',$fill);
+                    break;
+                case '1':
+                    # PRESENTAR ASUETOS
+                    $asueto_pantalla = number_format($asuetos,2,'.',',');
+                    $pdf->Cell($w[1],6,$asueto_pantalla,'1',0,'C',$fill);
+                    break;
+                case '2':
+                    # PRESENTAR EXTRA
+                    $extra_pantalla = number_format($extra,2,'.',',');
+                    $pdf->Cell($w[1],6,'$' . $extra_pantalla,'1',0,'C',$fill);
+                    break;
+                case '3':
+                    # PRESENTAR BONI
+                    //$pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                    break;
+                case '4':
+                    # PRESENTAR TOTAL TIEMPO EXTRA
+                    $total_tiempo_extra_pantalla = number_format($total_tiempo_extra,2,'.',',');
+                    $pdf->Cell($w[1],6,'$' . $total_tiempo_extra_pantalla,'1',0,'C',$fill);
+                    break;
+                case '5':
+                    # PRESENTAR TOTAL SALARIO
+                    $total_salario_pantalla = number_format($total_salario,2,'.',',');
+                    $pdf->Cell($w[1],6,'$' . $total_salario_pantalla,'1',0,'C',$fill);
+                    break;
+                default:
+                    # code...
+                    $pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                    break;
+            }
+        }
+    }else{
+        for($j=0;$j<=5;$j++){
+            switch ($j) {
+                case '0':
+                    # PRESENTAR SALARIO
+                    $pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                    break;
+                case '1':
+                    # PRESENTAR ASUETOS
+                    $pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                    break;
+                case '2':
+                    # PRESENTAR EXTRA
+                    $pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                    break;
+                case '3':
+                    # PRESENTAR BONI
+                    //$pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                    break;
+                case '4':
+                    # PRESENTAR TOTAL TIEMPO EXTRA
+                    $pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                    break;
+                case '5':
+                    # PRESENTAR TOTAL SALARIO
+                    $pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                    break;
+                default:
+                    # code...
+                    $pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                    break;
+            }
         }
     }
     // SALTO DE LINEA Y FILL.

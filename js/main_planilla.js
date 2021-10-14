@@ -78,6 +78,12 @@ $("#goCalcularPlanilla").on('click', function (e) {
 	fechaMes = $("#lstFechaMes").val();
 	fechaAnn = $("#lstFechaAño").val();
 	quincena = $("#lstQuincena").val();
+	if($('#chkCalcular').is(':checked') ) {
+		//alert('Seleccionado Dolares');
+		var calcular = "no";
+	}else{
+		var calcular = "si";
+	}
 	// LstDepartmaentoEmpresa
 	DepartamentoEmpresa = $("#lstDepartamentoEmpresa").val();
 	value_d = $("#lstDepartamentoEmpresa option:selected");
@@ -90,10 +96,10 @@ $("#goCalcularPlanilla").on('click', function (e) {
 		// Cìdog 02 corresponde a los motoristas
 		if(DepartamentoEmpresa == '02'){
 			// Ejecutar Informe
-				varenviar = "/acomtus/php_libs/reportes/nomina_asistencia_calcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText;
+				varenviar = "/acomtus/php_libs/reportes/nomina_asistencia_calcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&chkCalcular="+calcular;
 			}else{
 			// Ejecutar Informe
-				varenviar = "/acomtus/php_libs/reportes/nomina_asistencia_calcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText;
+				varenviar = "/acomtus/php_libs/reportes/nomina_asistencia_calcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText+"&chkCalcular="+calcular;
 			}
 		AbrirVentana(varenviar);   
 });
