@@ -30,6 +30,8 @@ $(document).ready(function(){
 			listar_ruta();
 			listar_ann(year);
 			listar_departamento_cargo();	// Departamentos que existen en la Empresa.
+
+			$("#lstFechaMes").prop('selectedIndex', mes);
 });		
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,6 +44,11 @@ var month = ("0" + (now.getMonth() + 1)).slice(-2);
 var year = now.getFullYear();
 
 today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+// PARA SELECCIONA REL MES ACTUAL.
+const d = new Date();
+var mes = d.getMonth();
+//alert(mes);
+
 ///////////////////////////////////////////////////////////////////////////////
 // CUANDO CAMBIA LA FECHA. BUSCAR LA PRODUCCIÓN EN LA TABLA
 /// EVENTOS JQUERY IMPRIMIR TODA LA PRODUCCIÓN O POR RANGO.
