@@ -311,7 +311,7 @@ function rellenar($total_dias_quincena){
     //
     // crear las matrices para el calculo del salario
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
-    $salario = 0; $asuetos = 0; $extra = 0; $boni = 0; $total_tiempo_extra = 0; $total = 0; $pago_diario_hora = round($pago_diario / 8,4); $asueto = 0; $horas_jornadas = 0;
+    $salario = 0; $asuetos = 0; $extra = 0; $boni = 0; $total_tiempo_extra = 0; $total = 0; $pago_diario_hora = round($pago_diario / 8,5); $asueto = 0; $horas_jornadas = 0;
      // DECLARACI{ON DE AMTRICES}
         $fecha_descanso = array(); $descripcion_jornada_a_P2 = array(); $fecha_inicio_adb = array();
     $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
