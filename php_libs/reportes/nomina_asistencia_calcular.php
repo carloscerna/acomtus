@@ -643,7 +643,7 @@ if($DepartamentoEmpresa == '02')
                                  case 'F':
                                      // CUANDO SEA FALTA QUE ACCIÓN REALIZAR
                                     $salario = $salario - (24 * $pago_diario_hora);
-                                    $total_salario =  $salario + $extra;
+                                    //$total_salario =  $salario + $extra;
                                      break;
                                  case 'C':
                                      // CUANDO SEA CASTIGO QUE ACCIÓN REALIZAR
@@ -651,6 +651,8 @@ if($DepartamentoEmpresa == '02')
                                  }   // LAZO SWICTH...
                          } // LAZO IF...;
                      }   // LAZO WHILE
+                     //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
+                     $total_salario = $salario + $total_tiempo_extra + $asuetos;
                  }   // LAZO IF....
      } // LAZO FOR.
 }else{
@@ -726,6 +728,8 @@ if($DepartamentoEmpresa == '02')
                                  }   // LAZO SWICTH...
                          } // LAZO IF...
                      }   // LAZO WHILE
+                        //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
+                        $total_salario = $salario + $total_tiempo_extra + $asuetos;
                  }   // LAZO IF....
      } // LAZO FOR.
 }   // lazo if para saber como buscar la fecha de descanso.
