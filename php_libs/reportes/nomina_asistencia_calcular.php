@@ -24,6 +24,10 @@
      $horas_jornada = 0;
      $total_lineas = 1;
      $fecha_inicio_adb = array();
+     // Nocturnidad.
+     $NocturnaValorUnitario = 0.57;
+     $NocturnaCantidad = 0;
+     $NocturnaValor = 0;
         //  imprimir datos del bachillerato.
         //
 	    // Establecer formato para la fecha.
@@ -156,7 +160,7 @@ function Footer()
 //Tabla coloreada
 function FancyTable($header)
 {
-    global $nombreDia_a, $numeroDia_a, $InicioFinDia;
+    global $nombreDia_a, $numeroDia_a, $InicioFinDia, $DepartamentoEmpresa;
     //Colores, ancho de línea y fuente en negrita
     $this->SetFillColor(255,255,255);
     $this->SetTextColor(0);
@@ -164,7 +168,7 @@ function FancyTable($header)
     $this->SetLineWidth(.3);
     $this->SetFont('','B');
     //Cabecera
-    $w=array(5,13,75,5.66); //determina el ancho de las columnas
+    $w=array(5,13,75,6,14,7,13,7,3); //determina el ancho de las columnas
     $w1=array(5.66); //determina el ancho de las columnas
     
 
@@ -172,18 +176,37 @@ function FancyTable($header)
     for($i=0;$i<count($header);$i++){
         $this->Cell($w[$i],7,utf8_decode($header[$i]),1,0,'C',1);   // crea encabezado apartir del header fancy
     }
-        // Coloca las lineas de los cuadros.
-            $this->SetFillColor(255,255,255);
-            for($j=$InicioFinDia;$j<=(count($nombreDia_a))-1;$j++){
-                $this->Cell($w1[0],7,$nombreDia_a[$j],'1',0,'C',1);
+        // Coloca las lineas de los cuadros. los 15 d{ias de la semana}
+        $this->SetFillColor(255,255,255);
+        for($j=$InicioFinDia;$j<=(count($nombreDia_a))-1;$j++){
+            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                $this->Cell($w[3],7,$nombreDia_a[$j],'1',0,'C',1);
+            }else{
+                $this->Cell($w[7],7,$nombreDia_a[$j],'1',0,'C',1);
             }
+        }
             // ESPACIO PARA EL TERCER BLOQUE
-            $this->Cell($w[3],7,'','L',0,'C',1);
+            $this->Cell($w[8],7,'','L',0,'C',1);
             //
             $this->SetFillColor(255);
-            $header2=array('','','','Total','');
-            for($j=0;$j<count($header2);$j++){
-                $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRT',0,'C',1);
+            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                $this->SetFont('Arial','',5);
+                $header2=array('','','','Nocturno','Total','');
+                $this->SetFont('Arial','',9);
+                // recrrorer matriz
+                for($j=0;$j<count($header2);$j++){
+                    if($j== 3){
+                        $this->Cell($w[4],7,utf8_decode($header2[$j]),'LRTB',0,'C',1);
+                    }else{
+                        $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRT',0,'C',1);    
+                    }
+                }
+            }else{
+                $header2=array('','','','Total','');
+                // recrrorer matriz
+                for($j=0;$j<count($header2);$j++){
+                        $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRT',0,'C',1);    
+                }
             }
 
               $this->Ln();  /// salto de linea
@@ -194,16 +217,35 @@ function FancyTable($header)
 
             $this->SetFillColor(255,255,255);
             for($j=$InicioFinDia;$j<=count($nombreDia_a)-1;$j++){
-                $this->Cell($w1[0],7,$numeroDia_a[$j],'1',0,'C',1);
+                if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                    $this->Cell($w[3],7,$numeroDia_a[$j],'1',0,'C',1);
+                }else{
+                    $this->Cell($w[7],7,$numeroDia_a[$j],'1',0,'C',1);
+                }
             }
     //                $this->Ln();  /// salto de linea
     // ESPACIO PARA EL TERCER BLOQUE
-            $this->Cell($w[3],7,'','L',0,'C',1);
+            $this->Cell($w[8],7,'','L',0,'C',1);
             //
             $this->SetFillColor(255);
-            $header2=array('Salario','Asuetos','Extra','Extra','TOTAL');
-            for($j=0;$j<count($header2);$j++){
-                $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRB',0,'C',1);
+            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                $this->SetFont('Arial','',5);
+                $header2=array('Salario','Asuetos','Extra','C','V','Extra','TOTAL');
+                $this->SetFont('Arial','',9);
+                    // recrrorer matriz
+                    for($j=0;$j<count($header2);$j++){
+                        if($j == 3 || $j == 4){
+                            $this->Cell($w[5],7,utf8_decode($header2[$j]),'LRBT',0,'C',1);
+                        }else{
+                            $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRB',0,'C',1);
+                        }
+                    }
+            }else{
+                $header2=array('Salario','Asuetos','Extra','Extra','TOTAL');
+                // recrrorer matriz
+                for($j=0;$j<count($header2);$j++){
+                        $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRB',0,'C',1);
+                }
             }
             $this->Ln();  /// salto de linea
     //Restauración de colores y fuentes
@@ -219,7 +261,7 @@ function FancyTable($header)
     $pdf=new PDF('L','mm','Letter');
     $data = array();
     #Establecemos los márgenes izquierda, arriba y derecha:
-    $pdf->SetMargins(15, 15, 5);
+    $pdf->SetMargins(5, 15, 5);
     #Establecemos el margen inferior: 
     $pdf->SetAutoPageBreak(true,10);
 //Títulos de las columnas
@@ -235,7 +277,7 @@ function FancyTable($header)
     $pdf->SetFont('Arial','',9); // I : Italica; U: Normal;
 
     $pdf->FancyTable($header); // Solo carge el encabezado de la tabla porque medaba error el cargas los datos desde la consulta.
-    $w=array(5,13,75,5.66); //determina el ancho de las columnas
+    $w=array(5,13,75,6,14,7,13,7,3); //determina el ancho de las columnas
     $w1=array(5.66); //determina el ancho de las columnas
 
     // ARMAR LA CONSULTA
@@ -307,7 +349,7 @@ function rellenar_datos($linea){
 }
 
 function rellenar($total_dias_quincena){
-    global $pdf, $fill, $w, $codigo, $fecha_periodo, $dblink, $pago_diario, $Calcular, $nombresDias, $DepartamentoEmpresa;
+    global $pdf, $fill, $w, $codigo, $fecha_periodo, $dblink, $pago_diario, $Calcular, $nombresDias, $DepartamentoEmpresa, $NocturnaCantidad, $NocturnaValor, $NocturnaValorUnitario;
     //
     // crear las matrices para el calculo del salario
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
@@ -566,7 +608,11 @@ function rellenar($total_dias_quincena){
             }   // FIN DEL WHILE QUE BUSCA SI HAY REGISTRO GUARDADOS DE CADA EMPLEADO.
         }else{
             // rellenar con valores según consulta.
-            $pdf->Cell($w[3],6,'','1',0,'C',$fill);
+            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                $pdf->Cell($w[3],6,'','1',0,'C',$fill);
+            }else{
+                $pdf->Cell($w[7],6,'','1',0,'C',$fill);
+            }
         }   // FIN DEL WHILE QUE BUSCA SI HAY REGISTRO GUARDADOS.
      
         //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
@@ -575,7 +621,7 @@ function rellenar($total_dias_quincena){
 
     // ESPACIO PARA EL TERCER, se asigna una separación para las columnas.
         $pdf->SetFillColor(255,255,255);
-        $pdf->Cell($w[3],6,'','L',0,'C',$fill);
+        $pdf->Cell($w[8],6,'','L',0,'C',$fill);
         $pdf->SetFillColor(233, 224, 222);
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  proceso para el descuento.
@@ -737,7 +783,7 @@ if($DepartamentoEmpresa == '02')
 /////////////////////////////////////////////////////////////////////////////////////////////////////////        
     // VERIFICAR SI SE DESEA CALCULAR, que aparezca impreso los salarios,extras etc.
     if($Calcular == "si"){
-        for($j=0;$j<=5;$j++){
+        for($j=0;$j<=6;$j++){
             switch ($j) {
                 case '0':
                     # PRESENTAR SALARIO
@@ -755,15 +801,25 @@ if($DepartamentoEmpresa == '02')
                     $pdf->Cell($w[1],6,'$' . $extra_pantalla,'1',0,'C',$fill);
                     break;
                 case '3':
-                    # PRESENTAR BONI
-                    //$pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                    # PRESENTAR Cantidad de días Nocturna
+                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                        $pdf->Cell($w[5],6,$NocturnaCantidad,'1',0,'C',$fill);
+                    }
                     break;
                 case '4':
+                    # PRESENTAR Valor $$ de días Nocturna
+                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                        $NocturnaValor = round($NocturnaCantidad * $NocturnaValorUnitario,2);
+                        $SalidaPantallaNocturnaValor = number_format($NocturnaValor,2,'.',',');
+                        $pdf->Cell($w[5],6,$SalidaPantallaNocturnaValor,'1',0,'C',$fill);
+                    }
+                    break;
+                case '5':
                     # PRESENTAR TOTAL TIEMPO EXTRA
                     $total_tiempo_extra_pantalla = number_format($total_tiempo_extra,2,'.',',');
                     $pdf->Cell($w[1],6,'$' . $total_tiempo_extra_pantalla,'1',0,'C',$fill);
                     break;
-                case '5':
+                case '6':
                     # PRESENTAR TOTAL SALARIO
                     $total_salario_pantalla = number_format($total_salario,2,'.',',');
                     $pdf->Cell($w[1],6,'$' . $total_salario_pantalla,'1',0,'C',$fill);
@@ -775,7 +831,7 @@ if($DepartamentoEmpresa == '02')
             }
         }
     }else{
-        for($j=0;$j<=5;$j++){
+        for($j=0;$j<=6;$j++){
             switch ($j) {
                 case '0':
                     # PRESENTAR SALARIO
@@ -790,14 +846,22 @@ if($DepartamentoEmpresa == '02')
                     $pdf->Cell($w[1],6,'','1',0,'C',$fill);
                     break;
                 case '3':
-                    # PRESENTAR BONI
-                    //$pdf->Cell($w[1],6,'','1',0,'C',$fill);
+                    # PRESENTAR Cantidad de días Nocturna
+                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                        $pdf->Cell($w[5],6,'','1',0,'C',$fill);
+                    }
                     break;
                 case '4':
+                    # PRESENTAR Valor $$ de días Nocturna
+                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                        $pdf->Cell($w[5],6,'','1',0,'C',$fill);
+                    }
+                    break;
+                case '5':
                     # PRESENTAR TOTAL TIEMPO EXTRA
                     $pdf->Cell($w[1],6,'','1',0,'C',$fill);
                     break;
-                case '5':
+                case '6':
                     # PRESENTAR TOTAL SALARIO
                     $pdf->Cell($w[1],6,'','1',0,'C',$fill);
                     break;

@@ -198,7 +198,41 @@
                       <label for="lstJornadaAsueto">Por</label>
                       <select class="custom-select" name="lstJornadaAsueto" id="lstJornadaAsueto"></select>      
                     </div>
-                  </div>                  
+                  </div>        
+                  
+                  <!-- DEFINIR CUANDO SE HAYA SELECCIONADO 4H Y PREGUNTAR SI HIZO TIEMPO EXTRA -->
+                      <!-- SELECT CATALOGO JORNADA EXTRA RADIOS-->
+                      <div class="form-group" id="JornadaExtra" style="display: none;">
+                        <div>
+                          <label class="form-check-label text-info" for="">
+                            Jornada Extra en 4 horas
+                          </label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="RadiosE" id="JornadaExtraSi" value="si">
+                          <label class="form-check-label text-info" for="JornadaExtraSi">
+                            Si
+                          </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="RadiosE" id="JornadaExtraNo" value="no" checked>
+                          <label class="form-check-label" for="JornadaExtraNo">
+                            No
+                          </label>
+                        </div>
+                      </div>
+              <!-- SELECT CATALOGO JORNADA 4 extra-->
+                  <div class="form-group" id="JornadaExtra4Horas" style="display: none;">
+                    <label class="form-check-label text-info" for="JornadaExtra4">
+                    </label>
+                    <span class="badge badge-primary" id="TextExtra4Descripcion"></span>
+                  <!-- BLOQUE PARA LA JORNADA POR ASUENTO-->
+                  <div class="border border-info rounded p-3">
+                    <label for="lstJornadaExtraCuatroHoras">Por</label>
+                    <select class="custom-select" name="lstJornadaExtraCuatroHoras" id="lstJornadaExtraCuatroHoras"></select>      
+                  </div>
+                </div>
               </div> <!-- /.card-body -->
                   <!-- /.CARD  footer -->
                     <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">

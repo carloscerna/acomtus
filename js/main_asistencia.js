@@ -91,8 +91,40 @@ $("#Jornada, #Permiso").change(function () {
 	}
 });
 ///////////////////////////////////////////////////////////////////////////////	  
+// SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL JORNAA 4 HORAS.
+///////////////////////////////////////////////////////////////////////////////	  
+$("#JornadaExtraSi, #JornadaExtraNo").change(function () {
+	if ($("#JornadaExtraSi").is(":checked")) {
+		$('#JornadaExtra4Horas').show();
+		listar_jornada_cuatro_horas(2);
+	}
+	else if ($("#JornadaExtraNo").is(":checked")) {
+		$('#JornadaExtra4Horas').hide();
+	}
+});
+///////////////////////////////////////////////////////////////////////////////	  
 // SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL MOTORISTA.
 ///////////////////////////////////////////////////////////////////////////////	  
+// BUSCA PARA COLOCAR VISIBLE EL EXTRA DE 4 HORAS
+$("#lstJornada").change(function () {
+	var miselect=$("#lstJornada");
+
+	$("#lstJornada option:selected").each(function () {
+			// ELEJIR EL VALOR DEL SELECT
+			elegido=$(this).val();
+			// SE HA SELECCIONADO TRABAJÓ EN VACACIÓN
+			if(elegido == '1'){
+				// VOLVER A COLOCAR EN VALOR "si"
+		//
+				$("#JornadaExtra").show();
+
+				listar_jornada_cuatro_horas(2);
+			}else{
+				$("#JornadaExtra").hide();
+				$("#JornadaExtra4Horas").hide();
+			}
+		});
+});
 // CUANDO SE ENCUENTRA EL CAMBIO DEL DEPARTAMENTO EN LA EMPRESA
 $("#lstTipoLicencia").change(function () {
 	var miselect=$("#lstTipoLicencia");
@@ -282,6 +314,28 @@ function buscar_personal(codigo_personal){
 ////////////////////////////////////////////////////////////
 function listar_jornada(codigo_jornada){
     var miselect=$("#lstJornada");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                if(codigo_jornada == data[i].codigo){
+						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+                }else{
+					if(i==1){
+						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+					}else{
+						miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+					}
+                }
+            }
+    }, "json");    
+}
+//LISTAR JORNADA 4 HORAS
+function listar_jornada_cuatro_horas(codigo_jornada){
+    var miselect=$("#lstJornadaExtraCuatroHoras");
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     

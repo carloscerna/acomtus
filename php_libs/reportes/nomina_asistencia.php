@@ -155,7 +155,7 @@ function FancyTable($header)
     $this->SetLineWidth(.3);
     $this->SetFont('','B');
     //Cabecera
-    $w=array(5,13,75,6,14,7); //determina el ancho de las columnas
+    $w=array(5,13,75,6,14,7,13,7,3); //determina el ancho de las columnas
     $w1=array(5.66,10); //determina el ancho de las columnas
     
 
@@ -163,30 +163,37 @@ function FancyTable($header)
     for($i=0;$i<count($header);$i++){
         $this->Cell($w[$i],7,utf8_decode($header[$i]),1,0,'C',1);   // crea encabezado apartir del header fancy
     }
-        // Coloca las lineas de los cuadros.
+        // Coloca las lineas de los cuadros. los 15 d{ias de la semana}
             $this->SetFillColor(255,255,255);
             for($j=$InicioFinDia;$j<=(count($nombreDia_a))-1;$j++){
-                $this->Cell($w[3],7,$nombreDia_a[$j],'1',0,'C',1);
+                if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                    $this->Cell($w[3],7,$nombreDia_a[$j],'1',0,'C',1);
+                }else{
+                    $this->Cell($w[7],7,$nombreDia_a[$j],'1',0,'C',1);
+                }
             }
             // ESPACIO PARA EL TERCER BLOQUE
-            $this->Cell($w[3],7,'','L',0,'C',1);
+            $this->Cell($w[8],7,'','L',0,'C',1);
             //
             $this->SetFillColor(255);
-            if($DepartamentoEmpresa == '09'){
+            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
                 $this->SetFont('Arial','',5);
                 $header2=array('','','','Nocturno','Total','');
                 $this->SetFont('Arial','',9);
+                // recrrorer matriz
+                for($j=0;$j<count($header2);$j++){
+                    if($j== 3){
+                        $this->Cell($w[4],7,utf8_decode($header2[$j]),'LRTB',0,'C',1);
+                    }else{
+                        $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRT',0,'C',1);    
+                    }
+                }
             }else{
                 $header2=array('','','','Total','');
-            }
-            // recrrorer matriz
-            for($j=0;$j<count($header2);$j++){
-                if($j== 3){
-                    $this->Cell($w[4],7,utf8_decode($header2[$j]),'LRTB',0,'C',1);
-                }else{
-                    $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRT',0,'C',1);    
+                // recrrorer matriz
+                for($j=0;$j<count($header2);$j++){
+                        $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRT',0,'C',1);    
                 }
-                
             }
 
               $this->Ln();  /// salto de linea
@@ -197,31 +204,37 @@ function FancyTable($header)
 
             $this->SetFillColor(255,255,255);
             for($j=$InicioFinDia;$j<=count($nombreDia_a)-1;$j++){
-                $this->Cell($w[3],7,$numeroDia_a[$j],'1',0,'C',1);
+                if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                    $this->Cell($w[3],7,$numeroDia_a[$j],'1',0,'C',1);
+                }else{
+                    $this->Cell($w[7],7,$numeroDia_a[$j],'1',0,'C',1);
+                }
             }
     //                $this->Ln();  /// salto de linea
     // ESPACIO PARA EL TERCER BLOQUE
-            $this->Cell($w[3],7,'','L',0,'C',1);
-            //
+            $this->Cell($w[8],7,'','L',0,'C',1);
+    // ULTIMO BLOQUE SALARIO ASUETOS EXTRA TOTAL EXTRA, TOTAL.
             $this->SetFillColor(255);
-            if($DepartamentoEmpresa == '09'){
+            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
                 $this->SetFont('Arial','',5);
                 $header2=array('Salario','Asuetos','Extra','C','V','Extra','TOTAL');
                 $this->SetFont('Arial','',9);
-
-                
+                    // recrrorer matriz
+                    for($j=0;$j<count($header2);$j++){
+                        if($j == 3 || $j == 4){
+                            $this->Cell($w[5],7,utf8_decode($header2[$j]),'LRBT',0,'C',1);
+                        }else{
+                            $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRB',0,'C',1);
+                        }
+                    }
             }else{
                 $header2=array('Salario','Asuetos','Extra','Extra','TOTAL');
-            }
-            // recrrorer matriz
-            
-            for($j=0;$j<count($header2);$j++){
-                if($j == 3 || $j == 4){
-                    $this->Cell($w[5],7,utf8_decode($header2[$j]),'LRB',0,'C',1);
-                }else{
-                    $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRB',0,'C',1);
+                // recrrorer matriz
+                for($j=0;$j<count($header2);$j++){
+                        $this->Cell($w[1],7,utf8_decode($header2[$j]),'LRB',0,'C',1);
                 }
             }
+
             $this->Ln();  /// salto de linea
     //Restauración de colores y fuentes
     $this->SetFillColor(233, 224, 222);
@@ -252,7 +265,7 @@ function FancyTable($header)
     $pdf->SetFont('Arial','',9); // I : Italica; U: Normal;
 
     $pdf->FancyTable($header); // Solo carge el encabezado de la tabla porque medaba error el cargas los datos desde la consulta.
-    $w=array(5,13,75,6,14,7); //determina el ancho de las columnas
+    $w=array(5,13,75,6,14,7,13,7,3); //determina el ancho de las columnas
     $w1=array(5.66); //determina el ancho de las columnas
 
     // ARMAR LA CONSULTA
@@ -316,22 +329,33 @@ function rellenar_datos($linea){
 }
 
 function rellenar($total_dias_quincena){
-    global $pdf, $fill, $w;
+    global $pdf, $fill, $w, $DepartamentoEmpresa;
 
     // SEGUNDO BLOQUE DE LINEAS PARA EL NOMBRE Y NUMERO DEL DIA.
     for($j=0;$j<=$total_dias_quincena-1;$j++){
-        $pdf->Cell($w[3],6,'','1',0,'C',$fill);
+        if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+            $pdf->Cell($w[3],6,'','1',0,'C',$fill);
+        }else{
+            $pdf->Cell($w[7],6,'','1',0,'C',$fill);
+        }
+        
     }
     // ESPACIO PARA EL TERCER 
         $pdf->SetFillColor(255,255,255);
-            $pdf->Cell($w[3],6,'','L',0,'C',$fill);
+            $pdf->Cell($w[8],6,'','L',0,'C',$fill);
         $pdf->SetFillColor(233, 224, 222);
-    // TERCER BLOQUE DE LINEAS PARA.
-    for($j=0;$j<=6;$j++){
-        if($j == 3 || $j == 4){
-            $pdf->Cell($w[5],6,'','1',0,'C',$fill);
-        }else{
-            $pdf->Cell($w[1],6,'','1',0,'C',$fill);
+    // TERCER BLOQUE DE LINEAS PARA. SALARIO, EXTRA TOTAL EXTRA TOTAL NOCTGURNIDAD
+    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+        for($j=0;$j<=6;$j++){
+            if($j == 3 || $j == 4){
+                $pdf->Cell($w[5],6,'','1',0,'C',$fill);
+            }else{
+                $pdf->Cell($w[1],6,'','1',0,'C',$fill);
+            }
+        }
+    }else{
+        for($j=0;$j<=4;$j++){
+                $pdf->Cell($w[6],6,'','1',0,'C',$fill);
         }
     }
     // SALTO DE LINEA Y FILL.
