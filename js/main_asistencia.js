@@ -34,6 +34,9 @@ $(document).ready(function(){
 							$("#FechaAsistencia").attr("readonly",true);
 						}
 			}
+	// ELIMINAR UN ITEM DE LSTJORNADA
+//	$("#campo_select_remove").find("option[value='opcion_1']").remove();  
+
 });		
 ///////////////////////////////////////////////////////////////////////////////
 /// EVENTOS JQUERY Y BOTON NUEVO REGISTRO. CALCULO Y OTROS
