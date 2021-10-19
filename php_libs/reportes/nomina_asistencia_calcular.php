@@ -23,6 +23,7 @@
      $pago_diario = 0;
      $horas_jornada = 0;
      $total_lineas = 1;
+     $contar_4H = 1;
      $fecha_inicio_adb = array();
      // Nocturnidad.
      $NocturnaValorUnitario = 0.57;
@@ -277,7 +278,11 @@ function FancyTable($header)
     $pdf->SetFont('Arial','',9); // I : Italica; U: Normal;
 
     $pdf->FancyTable($header); // Solo carge el encabezado de la tabla porque medaba error el cargas los datos desde la consulta.
-    $w=array(5,13,75,6,14,7,13,7,3); //determina el ancho de las columnas
+    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+        $w=array(5,13,75,6,14,7,13,7,3); //determina el ancho de las columnas
+    }else{
+        $w=array(5,13,75,7,14,7,13,7,3); //determina el ancho de las columnas
+    }
     $w1=array(5.66); //determina el ancho de las columnas
 
     // ARMAR LA CONSULTA
@@ -349,7 +354,7 @@ function rellenar_datos($linea){
 }
 
 function rellenar($total_dias_quincena){
-    global $pdf, $fill, $w, $codigo, $fecha_periodo, $dblink, $pago_diario, $Calcular, $nombresDias, $DepartamentoEmpresa, $NocturnaCantidad, $NocturnaValor, $NocturnaValorUnitario;
+    global $pdf, $fill, $w, $codigo, $fecha_periodo, $dblink, $pago_diario, $Calcular, $nombresDias, $DepartamentoEmpresa, $NocturnaCantidad, $NocturnaValor, $NocturnaValorUnitario, $contar_4H;
     //
     // crear las matrices para el calculo del salario
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
@@ -362,7 +367,7 @@ function rellenar($total_dias_quincena){
 
         // armanr query para buscar si existe la fecha en el perido seleccionar en la tabla personal asisitencia.
             $query_asistencia = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
-                                    pa.codigo_jornada_descanso,
+                                    pa.codigo_jornada_descanso, pa.codigo_jornada_e_4h, pa.codigo_jornada_nocturna,
                                     cat_j.descripcion as descripcion_jornada, cat_j.horas,
                                     cat_lp.descripcion as descripcion_licencia, cat_lp.horas as horas_licencia
                             FROM personal_asistencia pa 
@@ -380,6 +385,7 @@ function rellenar($total_dias_quincena){
                 $codigo_jornada_asueto = trim($row['codigo_jornada_asueto']);
                 $codigo_jornada_vacaciones = trim($row['codigo_jornada_vacaciones']);
                 $codigo_jornada_descanso = trim($row['codigo_jornada_descanso']);
+                $codigo_jornada_extra_4H = trim($row['codigo_jornada_e_4h']);
                 $descripcion_jornada = trim($row['descripcion_jornada']);
                 $fecha_db = trim($row['fecha']);
                 $fechats = strtotime($fecha_db); //fecha en yyyy-mm-dd
@@ -585,9 +591,67 @@ function rellenar($total_dias_quincena){
                                 // calcular el salario CON DESCRIPCION JORNADA
                                 switch ($descripcion_jornada) {
                                     case '4H':
-                                        // Media Tanda.
-                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
-                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                        if($contar_4H == 0){
+                                            // Media Tanda.
+                                            $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                            $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                            // contador de cuantas veces 4h en una semana.
+                                            $contar_4H++;
+                                        }else{
+                                            $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                            // contador de cuantas veces 4h en una semana.
+                                            $contar_4H++;
+                                        }
+                                            // CUANDO SEA TRABAJO DESCANSO QUE ACCIÓN REALIZAR
+                                            //$salario = $salario + ($horas_licencia * $pago_diario_hora);
+                                            // ARMAR LA CONSULTA PARA REVISAR SI TRABAJÓ EN VACACIÓN
+                                            $query_jv = "SELECT * FROM catalogo_jornada WHERE id_ = '$codigo_jornada_extra_4H'";
+                                            $consulta_jv = $dblink -> query($query_jv);
+                                            // validar si existen archivos en la consulta segun la fecha.
+                                            // Verificar si existen registros.
+                                            if($consulta_jv -> rowCount() != 0){
+                                                while($row = $consulta_jv -> fetch(PDO::FETCH_BOTH))
+                                                {
+                                                    $horas_jornadas = trim($row['horas']);
+                                                    $descripcion_e_4h = trim($row['descripcion']);
+                                                }        
+                                                    // CALCULO DEL SALARIO CUANDO HAY PERMISOS
+                                                    switch ($codigo_jornada_extra_4H) {
+                                                        case '1':   // 4 horas
+                                                            //  impimir DESCRIPCION DEL DESCANSO
+                                                            $x = $pdf->GetX() -5 ; $y = $pdf->GetY() + 5.5;
+                                                            $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
+                                                                $pdf->RotatedText($x,$y,$descripcion_e_4h,0);
+                                                            $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+                                                            // CUANDO PIDE PERMISO POR ENFERMEDAD. Una tanda 4 horas
+                                                            $extra = $extra + ($horas_jornadas * $pago_diario_hora);
+                                                            $total_tiempo_extra =  $extra;
+                                                            break;
+                                                        case '2':   // 1 tanda
+                                                            //  impimir DESCRIPCION DEL DESCANSO
+                                                            $x = $pdf->GetX() -5 ; $y = $pdf->GetY() + 5.5;
+                                                            $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
+                                                                $pdf->RotatedText($x,$y,$descripcion_e_4h,0);
+                                                            $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+                                                            // PERMISO PERSONAL Una tanda 8 horas
+                                                            $extra = $extra + ($horas_jornadas * $pago_diario_hora);
+                                                            $total_tiempo_extra =  $extra;
+                                                            break;
+                                                        case '3':   //1 tanda y media
+                                                            //  impimir DESCRIPCION DEL DESCANSO
+                                                            $x = $pdf->GetX() -5 ; $y = $pdf->GetY() + 5.5;
+                                                            $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
+                                                            $pdf->RotatedText($x,$y,$descripcion_e_4h,0);
+                                                            $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+                                                            // PERMISO PERSONAL Una tanda 12 horas
+                                                            $extra = $extra + ($horas_jornadas * $pago_diario_hora);
+                                                            $total_tiempo_extra =  $extra;
+                                                            break;
+                                                        default:
+                                                            # code...
+                                                            break;
+                                                        }
+                                            }
                                         break;
                                     case '1T':
                                         // Una tanda 8 horas
@@ -765,12 +829,12 @@ if($DepartamentoEmpresa == '02')
                              switch ($descripcion_licencia) {
                                  case 'F':
                                      // CUANDO SEA FALTA QUE ACCIÓN REALIZAR
-                                    $salario = $salario - (24 * $pago_diario_hora);
+                                    $salario = $salario - (16 * $pago_diario_hora);
 
                                      break;
                                  case 'C':
                                      // CUANDO SEA CASTIGO QUE ACCIÓN REALIZAR
-                                     $salario = $salario - (24 * $pago_diario_hora);
+                                     $salario = $salario - (16 * $pago_diario_hora);
                                  }   // LAZO SWICTH...
                          } // LAZO IF...
                      }   // LAZO WHILE

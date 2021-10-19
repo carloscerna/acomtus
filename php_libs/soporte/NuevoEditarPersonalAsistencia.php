@@ -142,6 +142,15 @@ if($errorDbConexion == false){
 				$boolean_vacaciones = trim($_POST['BooleanTV']);
 				$boolean_descanso = trim($_POST['BooleanDescanso']) ;
 				$codigo_perfil = trim($_POST['codigo_perfil']);
+				$boolean_RadiosE = trim($_POST['RadiosE']);
+
+				// CALULAR CUANDO SEA EXTRA EL 4 HORAS.
+				if($boolean_RadiosE == "si"){
+					$codigo_jornada_4_extra = trim($_POST['lstJornadaExtraCuatroHoras']);
+				}else{
+					$codigo_jornada_4_extra = '4';
+				}
+				
 				// VALIDAR VALORES PARA TIPO LICENCIA JORNADA.
 				if($tipolicenciacheck == "on"){
 					$codigo_tipo_licencia = trim($_POST['lstTipoLicencia']);
@@ -211,7 +220,8 @@ if($errorDbConexion == false){
 													codigo_jornada_asueto = '$codigo_jornada_asueto',
 													codigo_personal_encargado = '$codigo_personal_usuario',
 													codigo_jornada_vacaciones = '$codigo_jornada_vacaciones',
-													codigo_jornada_descanso = '$codigo_jornada_descanso'
+													codigo_jornada_descanso = '$codigo_jornada_descanso',
+													codigo_jornada_e_4h = '$codigo_jornada_4_extra'
 														WHERE id_ = '$id_'
 											";
 								// Ejecutamos el Query.
@@ -236,8 +246,8 @@ if($errorDbConexion == false){
 												break;
 										}
 								// GUARDAR DATOS SIN VALIDAR
-									$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso) 
-													VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario', '$codigo_jornada_vacaciones', '$codigo_jornada_descanso')";
+									$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso, codigo_jornada_e_4h) 
+													VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario', '$codigo_jornada_vacaciones', '$codigo_jornada_descanso','$codigo_jornada_4_extra')";
 								// Ejecutamos el Query.
 									$consulta = $dblink -> query($query);
 								// Linea de mensajes.
@@ -267,8 +277,8 @@ if($errorDbConexion == false){
 									break;
 							}
 						// GUARDAR DATOS SIN VALIDAR
-							$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso) 
-											VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario','$codigo_jornada_vacaciones', '$codigo_jornada_descanso')";
+							$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso, codigo_jornada_e_4h) 
+											VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario','$codigo_jornada_vacaciones', '$codigo_jornada_descanso','$codigo_jornada_4_extra')";
 						// Ejecutamos el Query.
 							$consulta = $dblink -> query($query);
 						// Linea de mensajes.

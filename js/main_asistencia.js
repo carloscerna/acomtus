@@ -122,6 +122,9 @@ $("#lstJornada").change(function () {
 			}else{
 				$("#JornadaExtra").hide();
 				$("#JornadaExtra4Horas").hide();
+				// Activar y bloquear Permiso y seleccionar un item.
+				$("#JornadaExtraSi").prop("checked", false);
+				$("#JornadaExtraNo").prop("checked", true);
 			}
 		});
 });
@@ -234,6 +237,12 @@ $("#goEnviar").on('click', function(){
 						$("#JornadaDescanso").hide();
 						$("input:radio[value='Jornada']").prop('checked',false);
 						$("input:radio[value='Permiso']").prop('checked',false);  
+						//
+						$("#JornadaExtra").hide();
+						$("#JornadaExtra4Horas").hide();
+						// Activar y bloquear Permiso y seleccionar un item.
+						$("#JornadaExtraSi").prop("checked", false);
+						$("#JornadaExtraNo").prop("checked", true);
 						// limpiar el control de la foto
 						$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
 						// focus
