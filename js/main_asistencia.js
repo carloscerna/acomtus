@@ -34,9 +34,6 @@ $(document).ready(function(){
 							$("#FechaAsistencia").attr("readonly",true);
 						}
 			}
-	// ELIMINAR UN ITEM DE LSTJORNADA
-//	$("#campo_select_remove").find("option[value='opcion_1']").remove();  
-
 });		
 ///////////////////////////////////////////////////////////////////////////////
 /// EVENTOS JQUERY Y BOTON NUEVO REGISTRO. CALCULO Y OTROS
@@ -79,6 +76,8 @@ $("#Jornada, #Permiso").change(function () {
 		$("#BooleanTV").val('no');
 		$("#BooleanDescanso").val('no');
 		listar_jornada();
+		// ELIMINAR UN ITEM DE LSTJORNADA
+		$("#lstJornada option[value='0H']").remove();
 	}
 	else if ($("#Permiso").is(":checked")) {
 		$('#DivPermisos').show();
@@ -96,10 +95,12 @@ $("#Jornada, #Permiso").change(function () {
 ///////////////////////////////////////////////////////////////////////////////	  
 // SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL JORNAA 4 HORAS.
 ///////////////////////////////////////////////////////////////////////////////	  
-$("#JornadaExtraSi, #JornadaExtraNo").change(function () {
+/*$("#JornadaExtraSi, #JornadaExtraNo").change(function () {
 	if ($("#JornadaExtraSi").is(":checked")) {
 		$('#JornadaExtra4Horas').show();
 		listar_jornada_cuatro_horas(2);
+		// ELIMINAR UN ITEM DE LSTJORNADA
+		$("#lstJornada option[value='0H']").remove();
 	}
 	else if ($("#JornadaExtraNo").is(":checked")) {
 		$('#JornadaExtra4Horas').hide();
@@ -109,7 +110,7 @@ $("#JornadaExtraSi, #JornadaExtraNo").change(function () {
 // SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL MOTORISTA.
 ///////////////////////////////////////////////////////////////////////////////	  
 // BUSCA PARA COLOCAR VISIBLE EL EXTRA DE 4 HORAS
-$("#lstJornada").change(function () {
+/*$("#lstJornada").change(function () {
 	var miselect=$("#lstJornada");
 
 	$("#lstJornada option:selected").each(function () {
@@ -130,7 +131,7 @@ $("#lstJornada").change(function () {
 				$("#JornadaExtraNo").prop("checked", true);
 			}
 		});
-});
+});*/
 // CUANDO SE ENCUENTRA EL CAMBIO DEL DEPARTAMENTO EN LA EMPRESA
 $("#lstTipoLicencia").change(function () {
 	var miselect=$("#lstTipoLicencia");
@@ -202,13 +203,20 @@ $("#goEnviar").on('click', function(){
 		submitHandler: function(){	
 		var str = $('#formAsistencia').serialize();
 		//alert(str);
-							// casilla de verificación revisar el valor.
-							var TipoLicenciaChecks = "off";
-							if ($("#Permiso").is(':checked')) {
-								//
-									TipoLicenciaChecks = "on";
-							}
-							//alert(TipoLicenciaChecks);
+			// casilla de verificación revisar el valor.
+			var TipoLicenciaChecks = "off";
+			if ($("#Permiso").is(':checked')) {
+				//
+					TipoLicenciaChecks = "on";
+			}
+			//alert(TipoLicenciaChecks);
+			// casilla de verificación revisar el valor.
+			var chkNocturnidad = "no";
+			if ($("#chkNocturnidad").is(':checked')) {
+				//
+				chkNocturnidad = "si";
+			}
+			//alert(TipoLicenciaChecks);
 		///////////////////////////////////////////////////////////////			
 		// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
 		///////////////////////////////////////////////////////////////
@@ -220,7 +228,7 @@ $("#goEnviar").on('click', function(){
 				type: "POST",
 				dataType: "json",
 				url:"php_libs/soporte/NuevoEditarPersonalAsistencia.php",
-				data:str + "&tipochecks=" + TipoLicenciaChecks + "&id=" + Math.random(),
+				data:str + "&tipochecks=" + TipoLicenciaChecks + "&Nocturnidad=" + chkNocturnidad + "&id=" + Math.random(),
 				success: function(response){
 					// Validar mensaje de error
 					if(response.respuesta == false){
@@ -246,6 +254,7 @@ $("#goEnviar").on('click', function(){
 						// Activar y bloquear Permiso y seleccionar un item.
 						$("#JornadaExtraSi").prop("checked", false);
 						$("#JornadaExtraNo").prop("checked", true);
+						$("#chkNocturnidad").prop("checked", false);
 						// limpiar el control de la foto
 						$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
 						// focus
@@ -289,6 +298,12 @@ function buscar_personal(codigo_personal){
 					}else{
 						$(".card-img-top").attr("src", "../acomtus/img/fotos/" + data[0].url_foto);	
 					}
+				// presar CHECK BOX NOCTURNIDAD.
+				if(data[0].codigo_departamento_empresa == "08"){
+					$("#NocturnidadSiNo").show();
+				}else{
+					$("#NocturnidadSiNo").hide();
+				}
 				// VALIDAR SI EL D{IA SELECCIONADO ES DE ASUETO O NO
 					if(data[0].asueto == "si"){
 						$("#BooleanAsueto").val(data[0].asueto);
@@ -333,15 +348,21 @@ function listar_jornada(codigo_jornada){
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
-                if(codigo_jornada == data[i].codigo){
+				// VALIDAR CODIGO JORNADA IGUAL A 0H
+				if(data[i].codigo == '4' || data[i].codigo == '5'){
+
+				}else{
+					if(codigo_jornada == data[i].codigo){
 						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
-                }else{
-					if(i==1){
-						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
-					}else{
-						miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+              		  }else{
+						if(i==1){
+							miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+						}else{
+							miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+						}
 					}
-                }
+				}
+               
             }
     }, "json");    
 }
@@ -380,15 +401,20 @@ function listar_jornada_descanso(codigo_jornada){
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
-                if(codigo_jornada == data[i].codigo){
-						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
-                }else{
-					if(i==1){
+				// VALIDAR CODIGO JORNADA IGUAL A 0H
+				if(data[i].codigo == '4' || data[i].codigo == '5'){
+
+				}else{
+					if(codigo_jornada == data[i].codigo){
 						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
 					}else{
-						miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+						if(i==1){
+							miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+						}else{
+							miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+						}
 					}
-                }
+				}
             }
     }, "json");    
 }
@@ -401,15 +427,20 @@ function listar_jornada_vacacion(codigo_jornada){
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
-                if(codigo_jornada == data[i].codigo){
+				// VALIDAR CODIGO JORNADA IGUAL A 0H
+				if(data[i].codigo == '4' || data[i].codigo == '5'){
+
+				}else{
+					if(codigo_jornada == data[i].codigo){
 						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
-                }else{
-					if(i==1){
-						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
-					}else{
-						miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+               		 }else{
+						if(i==1){
+							miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+						}else{
+							miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
 					}
                 }
+				}
             }
     }, "json");    
 }
@@ -424,6 +455,12 @@ function listar_jornada_asueto(codigo_jornada){
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
+				// VALIDAR CODIGO JORNADA IGUAL A 0H
+				if(data[i].codigo == '4' || data[i].codigo == '5'){
+
+					}else{
+
+				}
                 if(codigo_jornada == data[i].codigo){
 						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
                 }else{

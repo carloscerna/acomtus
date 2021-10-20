@@ -180,7 +180,7 @@ function FancyTable($header)
         // Coloca las lineas de los cuadros. los 15 d{ias de la semana}
         $this->SetFillColor(255,255,255);
         for($j=$InicioFinDia;$j<=(count($nombreDia_a))-1;$j++){
-            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08' || $DepartamentoEmpresa  == '05'){
                 $this->Cell($w[3],7,$nombreDia_a[$j],'1',0,'C',1);
             }else{
                 $this->Cell($w[7],7,$nombreDia_a[$j],'1',0,'C',1);
@@ -190,8 +190,7 @@ function FancyTable($header)
             $this->Cell($w[8],7,'','L',0,'C',1);
             //
             $this->SetFillColor(255);
-            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
-                $this->SetFont('Arial','',5);
+            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08' || $DepartamentoEmpresa  == '05'){                $this->SetFont('Arial','',5);
                 $header2=array('','','','Nocturno','Total','');
                 $this->SetFont('Arial','',9);
                 // recrrorer matriz
@@ -218,8 +217,8 @@ function FancyTable($header)
 
             $this->SetFillColor(255,255,255);
             for($j=$InicioFinDia;$j<=count($nombreDia_a)-1;$j++){
-                if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
-                    $this->Cell($w[3],7,$numeroDia_a[$j],'1',0,'C',1);
+                if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08' || $DepartamentoEmpresa  == '05'){ 
+                                       $this->Cell($w[3],7,$numeroDia_a[$j],'1',0,'C',1);
                 }else{
                     $this->Cell($w[7],7,$numeroDia_a[$j],'1',0,'C',1);
                 }
@@ -229,8 +228,8 @@ function FancyTable($header)
             $this->Cell($w[8],7,'','L',0,'C',1);
             //
             $this->SetFillColor(255);
-            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
-                $this->SetFont('Arial','',5);
+            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08' || $DepartamentoEmpresa  == '05'){
+                                $this->SetFont('Arial','',5);
                 $header2=array('Salario','Asuetos','Extra','C','V','Extra','TOTAL');
                 $this->SetFont('Arial','',9);
                     // recrrorer matriz
@@ -278,7 +277,7 @@ function FancyTable($header)
     $pdf->SetFont('Arial','',9); // I : Italica; U: Normal;
 
     $pdf->FancyTable($header); // Solo carge el encabezado de la tabla porque medaba error el cargas los datos desde la consulta.
-    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08' || $DepartamentoEmpresa  == '05'){
         $w=array(5,13,75,6,14,7,13,7,3); //determina el ancho de las columnas
     }else{
         $w=array(5,13,75,7,14,7,13,7,3); //determina el ancho de las columnas
@@ -302,6 +301,8 @@ function FancyTable($header)
     $fill=false; $i=1; $m = 0; $f = 0; $suma = 0;
         while($row = $consulta -> fetch(PDO::FETCH_BOTH))
             {
+                // Variables 
+                $NocturnaCantidad = 0;
             // variable para verificar que tipo de permiso o días trabajados.
             $codigo = $row['codigo'];
             $pago_diario = round($row['pago_diario'],2);
@@ -366,12 +367,14 @@ function rellenar($total_dias_quincena){
     for($j=0;$j<=$total_dias_quincena-1;$j++){
 
         // armanr query para buscar si existe la fecha en el perido seleccionar en la tabla personal asisitencia.
-            $query_asistencia = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
+          $query_asistencia = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
                                     pa.codigo_jornada_descanso, pa.codigo_jornada_e_4h, pa.codigo_jornada_nocturna,
                                     cat_j.descripcion as descripcion_jornada, cat_j.horas,
+                                    cat_jn.descripcion as descripcion_jornada_nocturna,
                                     cat_lp.descripcion as descripcion_licencia, cat_lp.horas as horas_licencia
                             FROM personal_asistencia pa 
                             INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = pa.codigo_jornada
+                            INNER JOIN catalogo_jornada cat_jn ON cat_jn.id_ = pa.codigo_jornada_nocturna 
                             INNER JOIN catalogo_tipo_licencia_o_permiso cat_lp ON cat_lp.id_ = pa.codigo_tipo_licencia
                              WHERE pa.codigo_personal = '$codigo' and pa.fecha = '$fecha_periodo[$j]'";
             $consulta_asistencia = $dblink -> query($query_asistencia);
@@ -385,10 +388,12 @@ function rellenar($total_dias_quincena){
                 $codigo_jornada_asueto = trim($row['codigo_jornada_asueto']);
                 $codigo_jornada_vacaciones = trim($row['codigo_jornada_vacaciones']);
                 $codigo_jornada_descanso = trim($row['codigo_jornada_descanso']);
+                $codigo_jornada_nocturna = trim($row['codigo_jornada_nocturna']);
                 $codigo_jornada_extra_4H = trim($row['codigo_jornada_e_4h']);
                 $descripcion_jornada = trim($row['descripcion_jornada']);
+                $descripcion_jornada_nocturna = trim($row['descripcion_jornada_nocturna']);
                 $fecha_db = trim($row['fecha']);
-                $fechats = strtotime($fecha_db); //fecha en yyyy-mm-dd
+                $fechats = strtotime($fecha_db); //fecha en yyyy-mm-dd_
                 //$NombreDiasArray[] = $nombresDias[date('w', $fechats)];
                 $horas_jornada = trim($row['horas']);
                 $horas_licencia = trim($row['horas_licencia']);
@@ -545,7 +550,7 @@ function rellenar($total_dias_quincena){
                             $pdf->RotatedText($x,$y,'.',0);
                         $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
                     }else{
-                        $pdf->Cell($w[3],6,$descripcion_jornada,'1',0,'C',$fill);    
+                            $pdf->Cell($w[3],6,$descripcion_jornada,'1',0,'C',$fill);    
                     }
                     // REVISAR Y CALCULAR SI LA FECHA PERTENECIA A UN DÍA DE ASUETO
                         $fecha_partial = explode("-",$fecha_asistencia);
@@ -591,17 +596,17 @@ function rellenar($total_dias_quincena){
                                 // calcular el salario CON DESCRIPCION JORNADA
                                 switch ($descripcion_jornada) {
                                     case '4H':
-                                        if($contar_4H == 0){
+                                     //   if($contar_4H == 0){
                                             // Media Tanda.
                                             $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                             $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                             // contador de cuantas veces 4h en una semana.
-                                            $contar_4H++;
+                                  /*          $contar_4H++;
                                         }else{
                                             $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                             // contador de cuantas veces 4h en una semana.
                                             $contar_4H++;
-                                        }
+                                        }*/
                                             // CUANDO SEA TRABAJO DESCANSO QUE ACCIÓN REALIZAR
                                             //$salario = $salario + ($horas_licencia * $pago_diario_hora);
                                             // ARMAR LA CONSULTA PARA REVISAR SI TRABAJÓ EN VACACIÓN
@@ -667,12 +672,23 @@ function rellenar($total_dias_quincena){
                                         # code...
                                         break;
                                 }
+                                    // CALCULO DEL SALARIO CUANDO HAY PERMISOS
+                                    switch ($codigo_jornada_nocturna) {
+                                        case '5':
+                                            //  impimir DESCRIPCION DEL DESCANSO
+                                            $x = $pdf->GetX() -5 ; $y = $pdf->GetY() + 5.5;
+                                            $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
+                                                $pdf->RotatedText($x,$y,$descripcion_jornada_nocturna,0);
+                                            $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+                                                $NocturnaCantidad++;
+                                        break;
+                                        }
                             }   // CONDICIÓN DEL DIA DE ASUETO.
                 }   // FIN DEL IF DESCRIPCION JORNADA
             }   // FIN DEL WHILE QUE BUSCA SI HAY REGISTRO GUARDADOS DE CADA EMPLEADO.
         }else{
             // rellenar con valores según consulta.
-            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+            if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08' || $DepartamentoEmpresa  == '05'){
                 $pdf->Cell($w[3],6,'','1',0,'C',$fill);
             }else{
                 $pdf->Cell($w[7],6,'','1',0,'C',$fill);
@@ -681,6 +697,8 @@ function rellenar($total_dias_quincena){
      
         //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
             $total_salario = $salario + $total_tiempo_extra + $asuetos;
+        //  NOCTURNIDAD
+           // $NocturnaValor = $NocturnaValorUnitario * $NocturnaCantidad;
     }
 
     // ESPACIO PARA EL TERCER, se asigna una separación para las columnas.
@@ -752,12 +770,12 @@ if($DepartamentoEmpresa == '02')
                              switch ($descripcion_licencia) {
                                  case 'F':
                                      // CUANDO SEA FALTA QUE ACCIÓN REALIZAR
-                                    $salario = $salario - (24 * $pago_diario_hora);
+                                    $salario = $salario - (8 * $pago_diario_hora);
                                     //$total_salario =  $salario + $extra;
                                      break;
                                  case 'C':
                                      // CUANDO SEA CASTIGO QUE ACCIÓN REALIZAR
-                                     $salario = $salario - (24 * $pago_diario_hora);
+                                     $salario = $salario - (8 * $pago_diario_hora);
                                  }   // LAZO SWICTH...
                          } // LAZO IF...;
                      }   // LAZO WHILE
@@ -829,12 +847,12 @@ if($DepartamentoEmpresa == '02')
                              switch ($descripcion_licencia) {
                                  case 'F':
                                      // CUANDO SEA FALTA QUE ACCIÓN REALIZAR
-                                    $salario = $salario - (16 * $pago_diario_hora);
+                                    $salario = $salario - (8 * $pago_diario_hora);
 
                                      break;
                                  case 'C':
                                      // CUANDO SEA CASTIGO QUE ACCIÓN REALIZAR
-                                     $salario = $salario - (16 * $pago_diario_hora);
+                                   $salario = $salario - (8 * $pago_diario_hora);
                                  }   // LAZO SWICTH...
                          } // LAZO IF...
                      }   // LAZO WHILE
@@ -866,13 +884,13 @@ if($DepartamentoEmpresa == '02')
                     break;
                 case '3':
                     # PRESENTAR Cantidad de días Nocturna
-                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08' || $DepartamentoEmpresa  == '05'){
                         $pdf->Cell($w[5],6,$NocturnaCantidad,'1',0,'C',$fill);
                     }
                     break;
                 case '4':
                     # PRESENTAR Valor $$ de días Nocturna
-                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08' || $DepartamentoEmpresa  == '05'){
                         $NocturnaValor = round($NocturnaCantidad * $NocturnaValorUnitario,2);
                         $SalidaPantallaNocturnaValor = number_format($NocturnaValor,2,'.',',');
                         $pdf->Cell($w[5],6,$SalidaPantallaNocturnaValor,'1',0,'C',$fill);
@@ -911,13 +929,13 @@ if($DepartamentoEmpresa == '02')
                     break;
                 case '3':
                     # PRESENTAR Cantidad de días Nocturna
-                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08' || $DepartamentoEmpresa  == '05'){
                         $pdf->Cell($w[5],6,'','1',0,'C',$fill);
                     }
                     break;
                 case '4':
                     # PRESENTAR Valor $$ de días Nocturna
-                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08'){
+                    if($DepartamentoEmpresa == '09' || $DepartamentoEmpresa  == '08' || $DepartamentoEmpresa  == '05'){
                         $pdf->Cell($w[5],6,'','1',0,'C',$fill);
                     }
                     break;

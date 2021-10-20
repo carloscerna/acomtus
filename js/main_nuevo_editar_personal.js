@@ -292,10 +292,18 @@ $('#ActivarEditarCodigo').click(function () {
                                 $("#txtcodigo").val("");
 								$("#txtcodigo").focus();
                            }                                                
-                                
 				}, "json");
 			}
 		});
+//////////////////////////////////////////////////
+		// funcionalidad del botón salario
+		///////////////////////////////////////////////////
+        
+        $("#Salario").on('keyup', function (e) {
+            var keycode = e.keyCode || e.which;
+                var calcular_pago_diario = parseInt(this.value) / 30;
+                $("#PagoDiario").val(calcular_pago_diario.toFixed(2));
+        });
 }); // fin de la funcion principal ************************************/
 		
 // Pasar foco cuando seleccionar un encargado.

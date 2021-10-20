@@ -49,7 +49,7 @@ if($errorDbConexion == false){
 				$fecha = trim($_POST['fecha']);
 				// Armamos el query.
 				$query = "SELECT p.id_personal, p.codigo, TRIM(p.nombres) as nombre, TRIM(p.apellidos) as apellido, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado,
-							p.foto, p.codigo_genero
+							p.foto, p.codigo_genero, p.codigo_departamento_empresa
                          		FROM personal p WHERE codigo = '$codigo_personal'";
 				// Ejecutamos el Query.
 				$consulta = $dblink -> query($query);
@@ -63,6 +63,7 @@ if($errorDbConexion == false){
                         // Nombres de los campos de la tabla.
                             $id_ = trim($listado['id_personal']);
 							$codigo = trim($listado['codigo']);
+							$codigo_departamento_empresa = trim($listado['codigo_departamento_empresa']);
 							$nombre_personal = trim($listado['nombre_empleado']);
 							$url_foto = trim($listado['foto']);
 							$codigo_genero = trim($listado['codigo_genero']);
@@ -70,6 +71,7 @@ if($errorDbConexion == false){
 						// Rellenando la array.
 							$datos[$fila_array]["id_"] = $id_;
 							$datos[$fila_array]["codigo"] = $codigo;
+							$datos[$fila_array]["codigo_departamento_empresa"] = $codigo_departamento_empresa;
 							$datos[$fila_array]["nombre_empleado"] = $nombre_personal;
 							$datos[$fila_array]["codigo_genero"] = $codigo_genero;
 							$datos[$fila_array]["url_foto"] = $url_foto;
@@ -138,6 +140,7 @@ if($errorDbConexion == false){
 				$codigo_personal_usuario = trim($_POST['codigo_personal_usuario']);
 				$fecha = trim($_POST['FechaAsistencia']);
 				$tipolicenciacheck = trim($_POST['tipochecks']);
+				$BooleanNocturnidad = trim($_POST['Nocturnidad']);
 				$boolean_asueto = trim($_POST['BooleanAsueto']);
 				$boolean_vacaciones = trim($_POST['BooleanTV']);
 				$boolean_descanso = trim($_POST['BooleanDescanso']) ;
@@ -150,7 +153,12 @@ if($errorDbConexion == false){
 				}else{
 					$codigo_jornada_4_extra = '4';
 				}
-				
+				// GUARDAR NOCTURNIDAD.
+				if($BooleanNocturnidad == "si"){
+					$codigo_jornada_nocturnidad = '5';
+				}else{
+					$codigo_jornada_nocturnidad = '4';
+				}
 				// VALIDAR VALORES PARA TIPO LICENCIA JORNADA.
 				if($tipolicenciacheck == "on"){
 					$codigo_tipo_licencia = trim($_POST['lstTipoLicencia']);
@@ -199,38 +207,38 @@ if($errorDbConexion == false){
 						break;
 				}
 				// 	VERIFICAR QUE TIPO DE USUARIO DESEA MODIFICAR EL REGISTRO DEL PUNTEADO.
-				// SOLO EL ADMINISTRADOR, GERSION PERSONAL Y RECURSOS HUMANOS PUEDEN MODIFICARLO
-					if($codigo_perfil == '01' || $codigo_perfil == '02' || $codigo_perfil == '05'){
-						// BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
-						$query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha'";
-						// Ejecutamos el Query.
-							$consulta_b = $dblink -> query($query_buscar);
-							// Validar si hay registros.
-							if($consulta_b -> rowCount() != 0){
-								// convertimos el objeto
-								while($listado_b = $consulta_b -> fetch(PDO::FETCH_BOTH))
-									{
-									// Nombres de los campos de la tabla.
-										$id_ = trim($listado_b['id_']);
-									}
-								//$mensajeError = "El Código Empleado ya fue Ingresado...";
-									 $query_update = "UPDATE personal_asistencia SET
-													codigo_jornada = '$codigo_jornada',
-													codigo_tipo_licencia = '$codigo_tipo_licencia',
-													codigo_jornada_asueto = '$codigo_jornada_asueto',
-													codigo_personal_encargado = '$codigo_personal_usuario',
-													codigo_jornada_vacaciones = '$codigo_jornada_vacaciones',
-													codigo_jornada_descanso = '$codigo_jornada_descanso',
-													codigo_jornada_e_4h = '$codigo_jornada_4_extra'
-														WHERE id_ = '$id_'
-											";
-								// Ejecutamos el Query.
-									$consulta_update = $dblink -> query($query_update);
-								//
-									$respuestaOK = true;
-									$mensajeError = "Se ha Actualizado el registro correctamente";
-									$contenidoOK = '';
-									break;
+				if($codigo_perfil == '01' || $codigo_perfil == '02' || $codigo_perfil == '05'){
+					// BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
+					$query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha'";
+					// Ejecutamos el Query.
+						$consulta_b = $dblink -> query($query_buscar);
+						// Validar si hay registros.
+						if($consulta_b -> rowCount() != 0){
+							// convertimos el objeto
+							while($listado_b = $consulta_b -> fetch(PDO::FETCH_BOTH))
+								{
+								// Nombres de los campos de la tabla.
+									$id_ = trim($listado_b['id_']);
+								}
+							//$mensajeError = "El Código Empleado ya fue Ingresado...";
+								 $query_update = "UPDATE personal_asistencia SET
+												codigo_jornada = '$codigo_jornada',
+												codigo_tipo_licencia = '$codigo_tipo_licencia',
+												codigo_jornada_asueto = '$codigo_jornada_asueto',
+												codigo_personal_encargado = '$codigo_personal_usuario',
+												codigo_jornada_vacaciones = '$codigo_jornada_vacaciones',
+												codigo_jornada_descanso = '$codigo_jornada_descanso',
+												codigo_jornada_e_4h = '$codigo_jornada_4_extra',
+												codigo_jornada_nocturna = '$codigo_jornada_nocturnidad'
+													WHERE id_ = '$id_'
+										";
+							// Ejecutamos el Query.
+								$consulta_update = $dblink -> query($query_update);
+							//
+								$respuestaOK = true;
+								$mensajeError = "Se ha Actualizado el registro correctamente";
+								$contenidoOK = '';
+								break;
 							}else{
 								// SI NO EXISTE AGREGARLO
 								//
@@ -246,43 +254,42 @@ if($errorDbConexion == false){
 												break;
 										}
 								// GUARDAR DATOS SIN VALIDAR
-									$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso, codigo_jornada_e_4h) 
-													VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario', '$codigo_jornada_vacaciones', '$codigo_jornada_descanso','$codigo_jornada_4_extra')";
+									$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso, codigo_jornada_e_4h, codigo_jornada_nocturna) 
+													VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario', '$codigo_jornada_vacaciones', '$codigo_jornada_descanso','$codigo_jornada_4_extra', '$codigo_jornada_nocturnidad')";
 								// Ejecutamos el Query.
 									$consulta = $dblink -> query($query);
 								// Linea de mensajes.
 
-								///////////////////////////////////////////////////////////////////////////////////////
-								// VALIDAR SI SE GUARDO BIEN LA INFORMACI{ON.}
-								if($consulta == true){
-									$respuestaOK = true;
-									$mensajeError = "Se ha Guardado el registro correctamente";
-									$contenidoOK = '';
+									///////////////////////////////////////////////////////////////////////////////////////
+									// VALIDAR SI SE GUARDO BIEN LA INFORMACI{ON.}
+									if($consulta == true){
+										$respuestaOK = true;
+										$mensajeError = "Se ha Guardado el registro correctamente";
+										$contenidoOK = '';
+									}
+									else{
+										$respuestaOK = false;
+										$mensajeError = "No se puede guardar el registro en la base de datos ";
+									}
+										break;
 								}
-								else{
-									$respuestaOK = false;
-									$mensajeError = "No se puede guardar el registro en la base de datos ";
+						}else{
+							// CUANDO NO ES EL ADMINISTRADOR U OTROS
+							// BUSCAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
+							$query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha'";
+							// Ejecutamos el Query.
+								$consulta_b = $dblink -> query($query_buscar);
+								// Validar si hay registros.
+								if($consulta_b -> rowCount() != 0){
+									$mensajeError = "El Código Empleado ya fue Ingresado...";
+										break;
 								}
-									break;
-							}
-					}else{
-						// CUANDO NO ES EL ADMINISTRADOR U OTROS
-						// BUSCAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
-						$query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha'";
-						// Ejecutamos el Query.
-							$consulta_b = $dblink -> query($query_buscar);
-							// Validar si hay registros.
-							if($consulta_b -> rowCount() != 0){
-								$mensajeError = "El Código Empleado ya fue Ingresado...";
-									break;
-							}
-						// GUARDAR DATOS SIN VALIDAR
-							$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso, codigo_jornada_e_4h) 
-											VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario','$codigo_jornada_vacaciones', '$codigo_jornada_descanso','$codigo_jornada_4_extra')";
-						// Ejecutamos el Query.
-							$consulta = $dblink -> query($query);
-						// Linea de mensajes.
-
+							// GUARDAR DATOS SIN VALIDAR
+								$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso, codigo_jornada_e_4h, codigo_jornada_nocturna) 
+												VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario','$codigo_jornada_vacaciones', '$codigo_jornada_descanso','$codigo_jornada_4_extra','$codigo_jornada_nocturnidad')";
+							// Ejecutamos el Query.
+								$consulta = $dblink -> query($query);
+							// Linea de mensajes.
 						///////////////////////////////////////////////////////////////////////////////////////
 						// VALIDAR SI SE GUARDO BIEN LA INFORMACI{ON.}
 						if($consulta == true){
