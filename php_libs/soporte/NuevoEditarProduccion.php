@@ -800,7 +800,7 @@ if($errorDbConexion == false){
 			case 'ActualizarTalonario':
 				// id_ de la asignacion.
 				$IdEditarTiquete = trim($_POST['IdEditarTiqueteDesde']);
-				$tiquete_desde = intval(trim($_POST['TiqueteDesde']));
+				$tiquete_desde = intval(str_replace(",","",$_POST['TiqueteDesde']));
 				$codigo_produccion = trim($_POST['codigo_produccion']);
 				$costo = trim($_POST['CantidadTiqueteAsignado']);
 				$cantidad_asignado = preg_replace("/[$,]/","",trim($_POST['CantidadTiqueteAsignado']));

@@ -482,7 +482,7 @@ $('#goUltimoControles').on('click', function(){
 ///////////////////////////////////////////////////////
 // Validar Formulario, para posteriormente Guardar o Modificarlo.
  //////////////////////////////////////////////////////
-	$('#formUsers').validate({
+$('#formUsers').validate({
 		ignore:"",
 		rules:{
                 lstSerie: {required: true},
@@ -1054,7 +1054,7 @@ function LimpiarCampos(){
 ///////////////////////////////////////////////////////////
 // Convertir a mayúsculas cuando abandone el input.
 ////////////////////////////////////////////////////////////
-   function conMayusculas(field)
+function conMayusculas(field)
    {
         field.value = field.value.toUpperCase();
    }
@@ -1172,7 +1172,8 @@ function listar_serie_tiquete(){
             }
     }, "json");    
 }    
-    function AbrirVentana(url)
+    
+function AbrirVentana(url)
     {
         window.open(url, '_blank');
         return false;
