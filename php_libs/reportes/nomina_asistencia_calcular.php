@@ -894,6 +894,9 @@ if($DepartamentoEmpresa == '02')
                         $NocturnaValor = round($NocturnaCantidad * $NocturnaValorUnitario,2);
                         $SalidaPantallaNocturnaValor = number_format($NocturnaValor,2,'.',',');
                         $pdf->Cell($w[5],6,$SalidaPantallaNocturnaValor,'1',0,'C',$fill);
+                        // Recalcular total tiempo extra y total salario
+                        $total_tiempo_extra = $total_tiempo_extra + $NocturnaValor;
+                        $total_salario = $total_salario + $total_tiempo_extra;
                     }
                     break;
                 case '5':
