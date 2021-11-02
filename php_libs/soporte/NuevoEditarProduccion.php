@@ -445,7 +445,7 @@ if($errorDbConexion == false){
 				//**** */
 				# RECORRER LA TABLA PRODUCCION ASIGNADO TEMP.
 				//****** */
-					$query_temp = "SELECT * FROM produccion_asignado_temp WHERE codigo_produccion = '$codigo_produccion' and codigo_personal = '$codigo_personal' ORDER BY id_";
+					$query_temp = "SELECT tiquete_desde, tiquete_hasta, total, cantidad, codigo_inventario_tiquete, codigo_personal FROM produccion_asignado_temp WHERE codigo_produccion = '$codigo_produccion' and codigo_personal = '$codigo_personal' ORDER BY id_";
 				// Ejecutamos el query
 					$resultadoQuery_temp = $dblink -> query($query_temp);
 					while($listado_temp = $resultadoQuery_temp -> fetch(PDO::FETCH_BOTH))
@@ -459,9 +459,8 @@ if($errorDbConexion == false){
 
 							# VERIFICAR ANTES DE GUARDAR EN PRODUCCION ASIGNADO.
 							$query_ = "SELECT * FROM produccion_asignado
-							WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado'
-							and codigo_inventario_tiquete = '$codigo_inventario_tiquete' ORDER BY fecha ASC
-						";
+								WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado'
+									and codigo_inventario_tiquete = '$codigo_inventario_tiquete' ORDER BY fecha ASC";
 					// Ejecutamos el query
 						$consulta_ = $dblink -> query($query_);								
 					// Validar si hay registros.
