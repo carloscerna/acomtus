@@ -8,6 +8,9 @@
     include($path_root."/acomtus/php_libs/fpdf/fpdf.php");
 // cambiar a utf-8.
     header("Content-Type: text/html; charset=UTF-8");
+// COLOCAR UN LIMITE A LA MEMORIA PARA LA CREACIÓN DE LA HOJA DE CÁLCULO.
+    set_time_limit(0);
+    ini_set("memory_limit","1024M");
 // variables y consulta a la tabla.
 	// VALORES DEL POST
         $fecha = trim($_REQUEST['fecha']);
