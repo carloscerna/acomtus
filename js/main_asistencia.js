@@ -21,6 +21,7 @@ $(document).ready(function(){
 				$("#PantallaPrincipalApagado").hide();
 				$("#FechaAsistencia").attr("readonly",false);
 			}else{
+
 					//	VALIDAR LA HORA QUE PUEDA GUARDAR DE 7:00 A.M. A 5:30 P.M.
 						var h = $("#SoloHora").val();
 						if(h > 17){
@@ -33,6 +34,7 @@ $(document).ready(function(){
 							$("#PantallaPrincipalApagado").hide();
 							$("#FechaAsistencia").attr("readonly",true);
 						}
+						$("#FechaAsistencia").attr("readonly",false);
 			}
 });		
 ///////////////////////////////////////////////////////////////////////////////
