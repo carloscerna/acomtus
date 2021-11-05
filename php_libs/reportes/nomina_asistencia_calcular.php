@@ -434,7 +434,7 @@ function rellenar($total_dias_quincena){
                                 break;
                             case 'V':
                                 // CUANDO SEA VACACION QUE ACCIÓN REALIZAR
-                                $salario = $salario + ($horas_licencia * $pago_diario_hora);
+                                //s$salario = $salario + ($horas_licencia * $pago_diario_hora);
                                 break;
                             case 'TV':
                                 // CUANDO SEA TRABAJO VACACION QUE ACCIÓN REALIZAR
@@ -572,6 +572,11 @@ function rellenar($total_dias_quincena){
                                 // CALCULO DEL SALARIO CUANDO HAY PERMISOS
                                 switch ($codigo_jornada_asueto) {
                                     case '1':   // 4 horas
+                                        //  impimir DESCRIPCION DEL DESCANSO
+                                        $x = $pdf->GetX() -5 ; $y = $pdf->GetY() + 5.5;
+                                        $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
+                                            $pdf->RotatedText($x,$y,'4h',0);
+                                        $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
                                         // CUANDO PIDE PERMISO POR ENFERMEDAD. Una tanda 4 horas
                                         $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);

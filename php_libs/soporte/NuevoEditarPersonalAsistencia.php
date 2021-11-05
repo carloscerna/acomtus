@@ -207,7 +207,7 @@ if($errorDbConexion == false){
 						break;
 				}
 				// 	VERIFICAR QUE TIPO DE USUARIO DESEA MODIFICAR EL REGISTRO DEL PUNTEADO.
-				if($codigo_perfil == '01' || $codigo_perfil == '02' || $codigo_perfil == '05'){
+				if($codigo_perfil == '01' || $codigo_perfil == '02' || $codigo_perfil == '05' || $codigo_perfil == '07' || $codigo_perfil == '09' || $codigo_perfil == '10' || $codigo_perfil == '11'){
 					// BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
 					$query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha'";
 					// Ejecutamos el Query.
