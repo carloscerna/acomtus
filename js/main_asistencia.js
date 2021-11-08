@@ -15,8 +15,13 @@ $(document).ready(function(){
 		$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
 	// VALIDAR CUANDO EL CODIGO DEL PERFIL DEL USUARIO SEA IGUAL A 
 	// 01, 02 o 05
+	// 07 jefe de linea
+	// 08 Revisadores
+	// 09 Vigilantes
+	// 10 Aseo
+	// 11 Mantenimiento
 		var codigo_perfil = $("#codigo_perfil").val();
-			if(codigo_perfil == '01' || codigo_perfil == '02' || codigo_perfil == '05'){
+			if(codigo_perfil == '01' || codigo_perfil == '02' || codigo_perfil == '05' || codigo_perfil == '07' || codigo_perfil == '08' || codigo_perfil == '09' || codigo_perfil == '10' || codigo_perfil == '11'){
 				$("#PantallaPrincipal").show();
 				$("#PantallaPrincipalApagado").hide();
 				$("#FechaAsistencia").attr("readonly",false);
@@ -253,6 +258,7 @@ $("#goEnviar").on('click', function(){
 						//
 						$("#JornadaExtra").hide();
 						$("#JornadaExtra4Horas").hide();
+						$("#JornadaAsueto").hide();
 						// Activar y bloquear Permiso y seleccionar un item.
 						$("#JornadaExtraSi").prop("checked", false);
 						$("#JornadaExtraNo").prop("checked", true);
@@ -316,7 +322,7 @@ function buscar_personal(codigo_personal){
 						$("#Jornada").prop("checked", true);
 						$('#DivJornada').show();
 						listar_jornada(2);
-						$("#Permiso").prop("disabled", true);
+						$("#Permiso").prop("disabled", false);
 						$("#lstJornada").prop("readonly", true);
 					}else{
 						$("#TextAsuetoDescripcion").text("");

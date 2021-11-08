@@ -438,7 +438,7 @@ function rellenar($total_dias_quincena){
                                 break;
                             case 'TV':
                                 // CUANDO SEA TRABAJO VACACION QUE ACCIÓN REALIZAR
-                                $salario = $salario + ($horas_licencia * $pago_diario_hora);
+                                //$salario = $salario + ($horas_licencia * $pago_diario_hora);
                                 // ARMAR LA CONSULTA PARA REVISAR SI TRABAJÓ EN VACACIÓN
                                 $query_jv = "SELECT * FROM catalogo_jornada WHERE id_ = '$codigo_jornada_vacaciones'";
                                 $consulta_jv = $dblink -> query($query_jv);
@@ -542,21 +542,11 @@ function rellenar($total_dias_quincena){
                 }else{
                     // CUANDO SEA IGUAL SOLO A  CODIGO DE LA JORNADA
                     $pdf->SetTextColor(0);
-                    // VALIDAR EL FORMATO O PRESENTACI{ON DE LA DESCRIPCION LICENCIA}
-                    if($descripcion_jornada == '1T'){
-                        $pdf->SetFont('Arial','B',20); // I : Italica; U: Normal;
-                            $pdf->Cell($w[3],6,'','LTR',0,'C',$fill);
-                            $x = $pdf->GetX() -4 ; $y = $pdf->GetY() + 3.5;
-                            $pdf->RotatedText($x,$y,'.',0);
-                        $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
-                    }else{
-                            $pdf->Cell($w[3],6,$descripcion_jornada,'1',0,'C',$fill);    
-                    }
+                    //
                     // REVISAR Y CALCULAR SI LA FECHA PERTENECIA A UN DÍA DE ASUETO
-                        $fecha_partial = explode("-",$fecha_asistencia);
+                    $fecha_partial = explode("-",$fecha_asistencia);
                     // matriz seleccionar cual semana llenar.
                             $fecha_inicio_adb[] = $fecha_db;
-                      //  }
                     //
                         $asueto = false;
                         //print_r($fecha_partial);
@@ -566,6 +556,21 @@ function rellenar($total_dias_quincena){
                            $query_asueto = "SELECT * FROM catalogo_asuetos WHERE mes = '$asueto_mes' and dia = '$asueto_dia'";
                             // EJECUTAR LA CONSULTA
                             $consulta_asueto = $dblink -> query($query_asueto);
+                            if($consulta_asueto -> rowCount() != 0){
+                                $pdf->Cell($w[3],6,'A','1',0,'C',$fill);   
+                             }else{ 
+                             // VALIDAR EL FORMATO O PRESENTACI{ON DE LA DESCRIPCION LICENCIA}
+                                if($descripcion_jornada == '1T'){
+                                    $pdf->SetFont('Arial','B',20); // I : Italica; U: Normal;
+                                        $pdf->Cell($w[3],6,'','LTR',0,'C',$fill);
+                                        $x = $pdf->GetX() -4 ; $y = $pdf->GetY() + 3.5;
+                                        $pdf->RotatedText($x,$y,'.',0);
+                                    $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+                                }else{
+                                    $pdf->Cell($w[3],6,$descripcion_jornada,'1',0,'C',$fill);    
+                                }
+                            }   // find ela primera consulta sobre el asueto
+                            // segunda condición del asueto para realizar calculos.
                             if($consulta_asueto -> rowCount() != 0){
                                 // Es asueto
                                 $asueto = true;
@@ -578,17 +583,34 @@ function rellenar($total_dias_quincena){
                                             $pdf->RotatedText($x,$y,'4h',0);
                                         $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
                                         // CUANDO PIDE PERMISO POR ENFERMEDAD. Una tanda 4 horas
-                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                       //$salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         break;
                                     case '2':   // 1 tanda
                                         // PERMISO PERSONAL Una tanda 8 horas
-                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                         //  impimir DESCRIPCION DEL DESCANSO
+                                         $x = $pdf->GetX() -5 ; $y = $pdf->GetY() + 5.5;
+                                         $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
+                                             $pdf->RotatedText($x,$y,'1T',0);
+                                         $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+                                        //$salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         break;
                                     case '3':   //1 tanda y media
+                                         //  impimir DESCRIPCION DEL DESCANSO
+                                         $x = $pdf->GetX() -5 ; $y = $pdf->GetY() + 5.5;
+                                         $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
+                                             $pdf->RotatedText($x,$y,'1.5T',0);
+                                         $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
                                         // PERMISO PERSONAL Una tanda 12 horas
-                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                        //$salario = $salario + (8 * $pago_diario_hora);
+                                        $extra = $extra + (4 * $pago_diario_hora);
+                                        $total_tiempo_extra =  $extra;
+                                       // $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                        $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
+                                        break;
+                                    case '4':
+                                      //  $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         break;
                                     default:
@@ -606,7 +628,7 @@ function rellenar($total_dias_quincena){
                                             $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                             $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                             // contador de cuantas veces 4h en una semana.
-                                  /*          $contar_4H++;
+                                         /*          $contar_4H++;
                                         }else{
                                             $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                             // contador de cuantas veces 4h en una semana.
