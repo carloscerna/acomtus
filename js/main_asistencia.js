@@ -102,7 +102,7 @@ $("#Jornada, #Permiso").change(function () {
 ///////////////////////////////////////////////////////////////////////////////	  
 // SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL JORNAA 4 HORAS.
 ///////////////////////////////////////////////////////////////////////////////	  
-/*$("#JornadaExtraSi, #JornadaExtraNo").change(function () {
+$("#JornadaExtraSi, #JornadaExtraNo").change(function () {
 	if ($("#JornadaExtraSi").is(":checked")) {
 		$('#JornadaExtra4Horas').show();
 		listar_jornada_cuatro_horas(2);
@@ -117,7 +117,7 @@ $("#Jornada, #Permiso").change(function () {
 // SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL MOTORISTA.
 ///////////////////////////////////////////////////////////////////////////////	  
 // BUSCA PARA COLOCAR VISIBLE EL EXTRA DE 4 HORAS
-/*$("#lstJornada").change(function () {
+$("#lstJornada").change(function () {
 	var miselect=$("#lstJornada");
 
 	$("#lstJornada option:selected").each(function () {
@@ -138,7 +138,7 @@ $("#Jornada, #Permiso").change(function () {
 				$("#JornadaExtraNo").prop("checked", true);
 			}
 		});
-});*/
+});
 // CUANDO SE ENCUENTRA EL CAMBIO DEL DEPARTAMENTO EN LA EMPRESA
 $("#lstTipoLicencia").change(function () {
 	var miselect=$("#lstTipoLicencia");

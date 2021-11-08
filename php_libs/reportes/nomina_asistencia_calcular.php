@@ -651,7 +651,7 @@ function rellenar($total_dias_quincena){
                                                     switch ($codigo_jornada_extra_4H) {
                                                         case '1':   // 4 horas
                                                             //  impimir DESCRIPCION DEL DESCANSO
-                                                            $x = $pdf->GetX() -5 ; $y = $pdf->GetY() + 5.5;
+                                                            $x = $pdf->GetX() -2 ; $y = $pdf->GetY() + 5.5;
                                                             $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
                                                                 $pdf->RotatedText($x,$y,$descripcion_e_4h,0);
                                                             $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
@@ -661,7 +661,7 @@ function rellenar($total_dias_quincena){
                                                             break;
                                                         case '2':   // 1 tanda
                                                             //  impimir DESCRIPCION DEL DESCANSO
-                                                            $x = $pdf->GetX() -5 ; $y = $pdf->GetY() + 5.5;
+                                                            $x = $pdf->GetX() -2 ; $y = $pdf->GetY() + 5.5;
                                                             $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
                                                                 $pdf->RotatedText($x,$y,$descripcion_e_4h,0);
                                                             $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
@@ -671,7 +671,7 @@ function rellenar($total_dias_quincena){
                                                             break;
                                                         case '3':   //1 tanda y media
                                                             //  impimir DESCRIPCION DEL DESCANSO
-                                                            $x = $pdf->GetX() -5 ; $y = $pdf->GetY() + 5.5;
+                                                            $x = $pdf->GetX() -2 ; $y = $pdf->GetY() + 5.5;
                                                             $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
                                                             $pdf->RotatedText($x,$y,$descripcion_e_4h,0);
                                                             $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
