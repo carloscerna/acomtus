@@ -5,9 +5,22 @@
 {% block javascripts %}
  <!-- JS SCRIPT  -->
  <script type="text/JavaScript" src="js/main_layout_index.js"></script>
+
 <!-- DEINIR EL AJAX START- STOP Y ERROR -->
 <script>
   $(document).ready(function () { 
+    // DETEERMINA EL TAMAÑO DE LA PANTALLA     
+      if (screen.width < 1024) {
+        //document.write ("Pequeña") 
+        $("#PantallaSize").val("Pantalla: Pequeña");
+      }else if(screen.width < 1280) {
+        $("#PantallaSize").val("Pantalla: Mediana");
+        //document.write ("Mediana") 
+      }else{
+        $("#PantallaSize").val("Pantalla: Grande");
+        //document.write ("Grande")
+      }
+            
     /*$(document).ajaxStart(function () {
          $('#myModal').modal('show');
      });*/
@@ -31,6 +44,8 @@
         <div class="row mb-2">
           <div class="col-sm-6">
             <h1 class="m-0 text-bold">{{ nombre_institucion }}</h1>
+            <!-- verifica el tamaño de la pantalla -->
+              <input type="text" id="PantallaSize" name="PantallaSize">
           </div><!-- /.col -->
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
