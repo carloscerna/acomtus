@@ -1109,7 +1109,7 @@ function listar_serie(codigo_inventario_tiquete){
     $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
         function(data) {
             miselect.empty();
-            miselect.append('<option value="">Seleccionar...</option>');
+            miselect.append('<option value="">0-Seleccionar...</option>');
             for (var i=0; i<data.length; i++) {
                 if(codigo_inventario_tiquete == data[i].codigo){
                     miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].tiquete_color + " - " + data[i].precio_publico + '</option>');
@@ -1164,7 +1164,7 @@ function listar_serie_tiquete(){
     $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
         function(data) {
             miselect.empty();
-            miselect.append('<option value="">Seleccionar...</option>');
+            miselect.append('<option value="">0-Seleccionar...</option>');
             for (var i=0; i<data.length; i++) {
                     miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color + " - " + data[i].precio_publico + '</option>');
                     //$('#PrecioPublico').val(data[0].precio_publico);
