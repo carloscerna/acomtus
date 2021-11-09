@@ -360,6 +360,7 @@ function rellenar($total_dias_quincena){
     // crear las matrices para el calculo del salario
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
     $salario = 0; $asuetos = 0; $extra = 0; $boni = 0; $total_tiempo_extra = 0; $total = 0; $pago_diario_hora = round($pago_diario / 8,5); $asueto = 0; $horas_jornadas = 0;
+    $total_horas_jornada = 0;
      // DECLARACI{ON DE AMTRICES}
         $fecha_descanso = array(); $descripcion_jornada_a_P2 = array(); $fecha_inicio_adb = array();
     $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
@@ -585,7 +586,7 @@ function rellenar($total_dias_quincena){
                                         // CUANDO PIDE PERMISO POR ENFERMEDAD. Una tanda 4 horas
                                        //$salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
-                                        $extra = $extra + (4 * $pago_diario_hora);
+                                        $extra = $extra + ($horas_jornada * $pago_diario_hora);
                                         $total_tiempo_extra =  $extra;
                                         break;
                                     case '2':   // 1 tanda
@@ -597,8 +598,7 @@ function rellenar($total_dias_quincena){
                                          $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
                                         //$salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
-                                        $extra = $extra + (4 * $pago_diario_hora);
-                                        $total_tiempo_extra =  $extra;
+                                        $extra = $extra + ($horas_jornada * $pago_diario_hora);                                        $total_tiempo_extra =  $extra;
                                         break;
                                     case '3':   //1 tanda y media
                                          //  impimir DESCRIPCION DEL DESCANSO
@@ -740,7 +740,7 @@ function rellenar($total_dias_quincena){
 //  proceso para el descuento.
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // si es motorista catalogo_departamento-empresa 02
-if($DepartamentoEmpresa == '02')
+if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
 {
     $primerDias = array(); $ultimoDias = array(); $BuscarFechaInicio = array(); $BuscarFechaFin = array(); $ll = 0;
     foreach ($fecha_descanso as $fecha_dd) {
@@ -791,6 +791,8 @@ if($DepartamentoEmpresa == '02')
                          $codigo_jornada_descanso = trim($rows['codigo_jornada_descanso']);
                          $descripcion_jornada = trim($rows['descripcion_jornada']);
                          $horas_jornada = trim($rows['horas']);
+                        // hOras
+                        $total_horas_jornada = $total_horas_jornada + $horas_jornada;
                          $horas_licencia = trim($rows['horas_licencia']);
                          $codigo_tipo_licencia = trim($rows['codigo_tipo_licencia']);
                          $descripcion_licencia = trim($rows['descripcion_licencia']);
@@ -853,7 +855,8 @@ if($DepartamentoEmpresa == '02')
                      FROM personal_asistencia pa 
                      INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = pa.codigo_jornada
                      INNER JOIN catalogo_tipo_licencia_o_permiso cat_lp ON cat_lp.id_ = pa.codigo_tipo_licencia
-                     WHERE pa.codigo_personal = '$codigo' and pa.fecha >= '$BuscarFechaInicio[$bb]' and pa.fecha <= '$BuscarFechaFin[$bb]'";
+                     WHERE pa.codigo_personal = '$codigo' and pa.fecha >= '$BuscarFechaInicio[$bb]' and pa.fecha <= '$BuscarFechaFin[$bb]'
+                     ORDER BY pa.fecha";
              $consulta_asistencia_buscar_db = $dblink -> query($query_asistencia_buscar_db);
              // validar si existen archivos en la consulta segun la fecha.
              $cantidad_registros = $consulta_asistencia_buscar_db -> rowCount();
@@ -868,6 +871,8 @@ if($DepartamentoEmpresa == '02')
                          $codigo_jornada_descanso = trim($rows['codigo_jornada_descanso']);
                          $descripcion_jornada = trim($rows['descripcion_jornada']);
                          $horas_jornada = trim($rows['horas']);
+                         // hOras
+                         //$total_horas_jornada = $total_horas_jornada + $horas_jornada;
                          $horas_licencia = trim($rows['horas_licencia']);
                          $codigo_tipo_licencia = trim($rows['codigo_tipo_licencia']);
                          $descripcion_licencia = trim($rows['descripcion_licencia']);
@@ -988,6 +993,7 @@ if($DepartamentoEmpresa == '02')
             }
         }
     }
+    //$pdf->Cell($w[1],6,$total_horas_jornada,'1',0,'C',$fill);
     // SALTO DE LINEA Y FILL.
     $pdf->Ln();   
     // SET TAMAÑO DE LETRA
