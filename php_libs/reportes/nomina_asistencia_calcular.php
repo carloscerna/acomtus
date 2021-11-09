@@ -585,6 +585,8 @@ function rellenar($total_dias_quincena){
                                         // CUANDO PIDE PERMISO POR ENFERMEDAD. Una tanda 4 horas
                                        //$salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
+                                        $extra = $extra + (4 * $pago_diario_hora);
+                                        $total_tiempo_extra =  $extra;
                                         break;
                                     case '2':   // 1 tanda
                                         // PERMISO PERSONAL Una tanda 8 horas
@@ -595,6 +597,8 @@ function rellenar($total_dias_quincena){
                                          $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
                                         //$salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
+                                        $extra = $extra + (4 * $pago_diario_hora);
+                                        $total_tiempo_extra =  $extra;
                                         break;
                                     case '3':   //1 tanda y media
                                          //  impimir DESCRIPCION DEL DESCANSO
