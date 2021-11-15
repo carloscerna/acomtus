@@ -596,9 +596,10 @@ function rellenar($total_dias_quincena){
                                          $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
                                              $pdf->RotatedText($x,$y,'1T',0);
                                          $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
-                                        //$salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
-                                        $extra = $extra + ($horas_jornada * $pago_diario_hora);                                        $total_tiempo_extra =  $extra;
+                                        $extra = $extra + ($horas_jornada * $pago_diario_hora);                                        
+                                        $total_tiempo_extra =  $extra;
                                         break;
                                     case '3':   //1 tanda y media
                                          //  impimir DESCRIPCION DEL DESCANSO
@@ -614,11 +615,12 @@ function rellenar($total_dias_quincena){
                                         $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         break;
                                     case '4':
-                                      //  $salario = $salario + ($horas_jornada * $pago_diario_hora);
-                                        $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
+                                       $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                        //$asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         break;
                                     default:
                                         # code...
+                                        $asuetos = 0;
                                         break;
                                     }
                             }else{
