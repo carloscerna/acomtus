@@ -30,6 +30,8 @@ $arreglo = array();
 $datos = array();
 $fila_array = 0;
 $fila = 0;
+$NoGuardado = 0;
+$QueryLista = "";
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);
 // Incluimos el archivo de funciones y conexi�n a la base de datos
@@ -476,7 +478,8 @@ if($errorDbConexion == false){
 							// Da resultado cuanod ya existe el talonario con estatus '03.
 							if($consulta_pa1 -> rowCount() != 0){        
 								# NO GUARDAR
-
+								$NoGuardado++;
+								$QueryLista .= $query_prueba;
 
 							}else{
 								# otra pregunta....
@@ -576,7 +579,8 @@ if($errorDbConexion == false){
 									if($consulta_pa1 -> rowCount() != 0){        
 										# NO GUARDAR
 
-
+										$NoGuardado = $NoGuardado + 1;
+										$QueryLista .= $query_prueba;
 									}else{
 										# otra pregunta....
 											$query_prueba2 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
@@ -870,7 +874,9 @@ else{
 			"id_produccion" => $IdProduccionOK,
 			"totalIngreso" => $totalIngresoOKPantalla,
 			"cantidad_tiquete" => $cantidadTiqueteOK,
-			"CantidadTalonarios" => $fila);
+			"CantidadTalonarios" => $fila,
+			"NoGuardado" => $NoGuardado,
+			"QueryLista" => $QueryLista);
 		echo json_encode($salidaJson);
 	}
 
