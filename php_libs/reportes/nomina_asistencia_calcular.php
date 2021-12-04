@@ -596,7 +596,7 @@ function rellenar($total_dias_quincena){
                                          $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
                                              $pdf->RotatedText($x,$y,'1T',0);
                                          $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
-                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                       // $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         $extra = $extra + ($horas_jornada * $pago_diario_hora);                                        
                                         $total_tiempo_extra =  $extra;
