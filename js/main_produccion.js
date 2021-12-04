@@ -380,7 +380,16 @@ $('#goBuscarProduccionDevolucion').on( 'click', function () {
 				// DAR VALOR A LA FECHA. DESACTIVAR
 					$("#FechaProduccionCreacion").prop("disabled",true);
 				// MOSTRAR FIELD SET FECHA NUEVA
-					$("#FieldsetFechaNueva").show();
+				// casilla de verificación revisar el valor.
+					if ($("#RadioFecha").is(':checked')) {
+						$("#FieldsetFechaNueva").show();
+						$("#FieldsetRutaNueva").hide();
+					}
+					if ($("#RadioRuta").is(':checked')) {
+						$("#FieldsetFechaNueva").hide();
+						$("#FieldsetRutaNueva").show();
+						listar_ruta();
+					}
 				// Activar botón guardar!
 					$("#goGuardarDevolucion").prop("disabled", false);
 			}                
@@ -674,7 +683,7 @@ $('#goGuardarDevolucion').on( 'click', function () {
 	ignore:"",
 	rules:{
 			FechaProduccionCreacion: {required: true},
-			FechaProduccionDevolucion: {required: true},
+			//FechaProduccionDevolucion: {required: true},
 			},
 			errorElement: "em",
 			errorPlacement: function ( error, element ) {
@@ -723,6 +732,7 @@ $('#goGuardarDevolucion').on( 'click', function () {
 	
 				fila = fila + 1;            
 		  });
+
 		// ejecutar Ajax.. ACTUALIZA5 INDICADORES DE MATRICULA.
 		  $.ajax({
 				beforeSend: function(){  
@@ -743,26 +753,6 @@ $('#goGuardarDevolucion').on( 'click', function () {
 					}                
 			   }                     
 		  });
-
-
-			/*$.ajax({
-				cache: false,
-				type: "POST",
-				dataType: "json",
-				url:"php_libs/soporte/ProduccionBuscar.php",
-				data:str + "&id=" + Math.random(),
-				success: function(response){
-					// Validar mensaje de error
-					if(response.respuesta == true){
-						toastr["success"](response.mensaje, "Sistema");
-						$("#FechaProduccionCreacion").focus().select();
-					}
-					if(response.respuesta == false){
-						toastr["error"](response.mensaje, "Sistema");
-						$("#FechaProduccionCreacion").focus().select();
-					}
-				},
-			});*/
 		},
 });
 
@@ -884,6 +874,15 @@ function CambiarFechaProduccion() {
 
             fila = fila + 1;            
       });
+
+		// casilla de verificación revisar el valor.
+			if ($("#RadioFecha").is(':checked')) {
+				var cambioFechaRuta = "si";
+			}
+			if ($("#RadioRuta").is(':checked')) {
+				var cambioFechaRuta = "no";
+				var codigo_ruta = $("#lstRuta").val();
+			}
 	// ejecutar Ajax.. ACTUALIZA5 INDICADORES DE MATRICULA.
       $.ajax({
 			beforeSend: function(){  
@@ -895,7 +894,7 @@ function CambiarFechaProduccion() {
            url:"php_libs/soporte/ProduccionBuscar.php",                     
            data: {                     
 				accion_buscar: accionAsignacion, FechaProduccionCreacion: fecha_produccion, FechaProduccionDevolucion: fecha_nueva,
-				fila: fila, calcular_val: calcular_val_, calcular_chk: calcular_chk_,
+				fila: fila, calcular_val: calcular_val_, calcular_chk: calcular_chk_, cambioFechaRuta: cambioFechaRuta, lstRuta:codigo_ruta,
                 },                     
            success: function(response) {                     
 				if (response.respuesta === true) {                     
@@ -1006,3 +1005,23 @@ function PasarFoco()
                  screen.fadeOut();
              });
      }
+// TODAS LAS TABLAS VAN HA ESTAR EN PRODUCCIONBUSCAR.*******************
+// FUNCION LISTAR TABLA catalogo_ruta
+////////////////////////////////////////////////////////////
+function listar_ruta(codigo_ruta){
+    var miselect=$("#lstRuta");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarRuta'},
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                if(codigo_ruta == data[i].codigo){
+                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+                }else{
+                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+                }
+            }
+    }, "json");    
+}

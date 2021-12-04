@@ -21,6 +21,7 @@ $respuestaOK = false;
 $codigo_produccion = 0;
 $mensajeError = ":(";
 $contenidoOK = "";
+$contenidoOKNoGuardados = "";
 $totalIngresoOK = 0;
 $totalIngresoOKPantalla = 0;
 $IdProduccionOK = 0;
@@ -481,6 +482,22 @@ if($errorDbConexion == false){
 								$NoGuardado++;
 								$QueryLista .= $query_prueba;
 
+								while($listado_pa1 = $consulta_pa1 -> fetch(PDO::FETCH_BOTH))
+								{
+									$fecha = $listado_pa1['fecha'];
+									$codigo_produccion_no_guardado = $listado_pa1['codigo_produccion'];
+									$tiquete_desde = $listado_pa1['tiquete_desde'];
+									$tiquete_hasta = $listado_pa1['tiquete_hasta'];
+									$codigo_estatus = $listado_pa1['codigo_estatus'];
+
+									$contenidoOKNoGuardados .= "<tr>
+									<td>$fecha
+									<td>$codigo_produccion_no_guardado
+									<td>$tiquete_desde
+									<td>$tiquete_hasta
+									<td>$codigo_estatus"
+									;
+								}
 							}else{
 								# otra pregunta....
 									$query_prueba2 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
@@ -581,6 +598,23 @@ if($errorDbConexion == false){
 
 										$NoGuardado = $NoGuardado + 1;
 										$QueryLista .= $query_prueba;
+										
+										while($listado_pa1 = $consulta_pa1 -> fetch(PDO::FETCH_BOTH))
+										{
+											$fecha = $listado_pa1['fecha'];
+											$codigo_produccion_no_guardado = $listado_pa1['codigo_produccion'];
+											$tiquete_desde = $listado_pa1['tiquete_desde'];
+											$tiquete_hasta = $listado_pa1['tiquete_hasta'];
+											$codigo_estatus = $listado_pa1['codigo_estatus'];
+
+											$contenidoOKNoGuardados .= "<tr>
+											<td>$fecha
+											<td>$codigo_produccion_no_guardado
+											<td>$tiquete_desde
+											<td>$tiquete_hasta
+											<td>$codigo_estatus"
+											;
+										}
 									}else{
 										# otra pregunta....
 											$query_prueba2 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
@@ -871,6 +905,7 @@ else{
 		$salidaJson = array("respuesta" => $respuestaOK,
 			"mensaje" => $mensajeError,
 			"contenido" => $contenidoOK,
+			"contenidoNoGuardado" => $contenidoOKNoGuardados,
 			"id_produccion" => $IdProduccionOK,
 			"totalIngreso" => $totalIngresoOKPantalla,
 			"cantidad_tiquete" => $cantidadTiqueteOK,

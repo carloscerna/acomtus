@@ -242,80 +242,81 @@ if($errorDbConexion == false){
                 $calcular_chk[] = $_POST['calcular_chk'];
                 $id_produccion[] = $_POST['calcular_val'];
                 $fecha_produccion = trim($_POST['FechaProduccionCreacion']);
-                $fecha_nueva = trim($_POST['FechaProduccionDevolucion']);
-                //$codigo_produccion = trim($_POST['IdProduccionDevolucion']);
-               // $codigo_produccion = trim($_POST['NumeroCorrelativoDevolucion']);
-                //$codigo_produccion_asignacion = array(  );
-                // 	validar la fecha de la producción.
-                    $fechas = explode("-",$fecha_produccion);
-                    $dia = $fechas[2];
-                    $mes = $fechas[1];
-                    $ann = $fechas[0];
-                //
-                if(checkdate($mes, $dia, $ann)){
-                //echo "fecha valida";
-                }else{
-                //echo "fecha no válida";
-                    $mensajeError = "Fecha No Válida $dia . $mes . $ann";
-                        break;
-                }
-                // LAS FECHAS NO PUEDEN SER IGUALES.
-                    if($fecha_produccion == $fecha_nueva){
-                        $mensajeError = "Las fechas no pueden ser iguales";
-                        break;
-                    }
-                // CRÇEAR CONSULTA EN PRODUCCION DEVOLUCION ANTES DE GUARDAR.
-                // PARA NO REPETIR LA PRIMERA FECHA DE CREACIÓN.
-                    $query_fecha = "SELECT * FROM produccion_devolucion where fecha = '$fecha_produccion' and codigo_produccion = '$codigo_produccion'";
-                // Ejecutamos el Query.
-                    $consulta = $dblink -> query($query_fecha);
-				// Validar si hay registros.
-				if($consulta -> rowCount() != 0){
-					$respuestaOK = false;
-                    $mensajeError = "La Fecha de la Producción ha sido Modificada.";
-                    break;
-				}
-				else{
-                    //FOR
-                // recorrer matriz con los datos del chk (val y true)
-                $fila = $fila - 1;
-				// recorrer la array para extraer los datos.
-				    for($i=0;$i<=$fila;$i++){
-                        // Asignar valor a varinbles que las respectivas tablas.
-                            $codigo_produccion = $id_produccion[0][$i];
-                            $chk_ = $calcular_chk[0][$i];
-                        if($chk_ == 'true')
-                        {
-                        // CREAR CONSULTA PARA GUARDAR LA NUEVA FECHA EN PRODUCCIÓN DEVOLUCIÓN.
-                            $query_i = "INSERT INTO produccion_devolucion (codigo_produccion, fecha, codigo_estatus) VALUES ('$codigo_produccion','$fecha_produccion','$codigo_estatus[4]')";
-                        // Ejecutamos el Query.
-                            $consulta = $dblink -> query($query_i);
-                        // ACTULIZAR LA FECHA ANTIGUA CON LA NUEVA FECHA PRODUCCIÓN EN LA TABLA PRODUCCIÓN Y PRODUCCIÓN ASIGNACION Y CORRELATIVO.
-                            $query_u_p = "UPDATE produccion SET fecha = '$fecha_nueva' WHERE id_ = '$codigo_produccion' and fecha = '$fecha_produccion'";
-                        // Ejecutamos el Query.
-                            $consulta = $dblink -> query($query_u_p);
-                        // produccion asignacion.
-                            // obtener el dato de codigo produccion asignacion.
-                            $query = "SELECT * FROM produccion_asignado WHERE codigo_produccion = '$codigo_produccion' and fecha = '$fecha_produccion'";
-                            $consulta = $dblink -> query($query);
-                            // Recorriendo la Tabla con PDO::
-                            while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-                            {
-                            // Nombres de los campos de la tabla.
-                                $codigo_produccion_asignacion[] = trim($listado['id_']);
-                            }
-                        // produccion asignacion.
-                            $query_u_a = "UPDATE produccion_asignado SET fecha = '$fecha_nueva' WHERE codigo_produccion = '$codigo_produccion' and fecha = '$fecha_produccion'";
-                        // Ejecutamos el Query.
-                            $consulta = $dblink -> query($query_u_a);
-                        // actulizar fcha en la tabla produccion _correlativo.
-                            /*for ($ij=0; $ij < count($codigo_produccion_asignacion) ; $ij++) { 
-                                $query_u_c = "UPDATE produccion_correlativo SET fecha = '$fecha_nueva' WHERE codigo_produccion_asignacion = '$codigo_produccion_asignacion[$ij]' and fecha = '$fecha_produccion'";
-                                // Ejecutamos el Query.
-                                    $consulta = $dblink -> query($query_u_c);
-                            }*/
-                        // IF VERDADERO DEL CHECKBOX
+                if(isset($_POST['FechaProduccionDevolucion'])){$fecha_nueva = trim($_POST['FechaProduccionDevolucion']);}
+                $cambioFechaRuta = trim($_POST['cambioFechaRuta']);
+                if(isset($_POST['lstRuta'])){$nuevaRutaCodigo = $_POST['lstRuta'];}
+
+                ///
+                //  VALIDAR SI QUIERO CAMBIAR FECHA O RUTA
+                ///
+                if($cambioFechaRuta == "si"){
+                        // 	validar la fecha de la producción.
+                        $fechas = explode("-",$fecha_produccion);
+                        $dia = $fechas[2];
+                        $mes = $fechas[1];
+                        $ann = $fechas[0];
+                        //
+                        if(checkdate($mes, $dia, $ann)){
+                        //echo "fecha valida";
+                        }else{
+                        //echo "fecha no válida";
+                        $mensajeError = "Fecha No Válida $dia . $mes . $ann";
+                            break;
                         }
+                        // LAS FECHAS NO PUEDEN SER IGUALES.
+                        if($fecha_produccion == $fecha_nueva){
+                            $mensajeError = "Las fechas no pueden ser iguales";
+                            break;
+                        }
+                        // CRÇEAR CONSULTA EN PRODUCCION DEVOLUCION ANTES DE GUARDAR.
+                        // PARA NO REPETIR LA PRIMERA FECHA DE CREACIÓN.
+                        $query_fecha = "SELECT * FROM produccion_devolucion where fecha = '$fecha_produccion' and codigo_produccion = '$codigo_produccion'";
+                        // Ejecutamos el Query.
+                        $consulta = $dblink -> query($query_fecha);
+                        // Validar si hay registros.
+                        if($consulta -> rowCount() != 0){
+                            $respuestaOK = false;
+                            $mensajeError = "La Fecha de la Producción ha sido Modificada.";
+                            break;
+                        }
+                        else{
+                        //FOR
+                        // recorrer matriz con los datos del chk (val y true)
+                        $fila = $fila - 1;
+                        // recorrer la array para extraer los datos.
+                        for($i=0;$i<=$fila;$i++){
+                            // Asignar valor a varinbles que las respectivas tablas.
+                                $codigo_produccion = $id_produccion[0][$i];
+                                $chk_ = $calcular_chk[0][$i];
+                            if($chk_ == 'true')
+                            {
+                            // CREAR CONSULTA PARA GUARDAR LA NUEVA FECHA EN PRODUCCIÓN DEVOLUCIÓN.
+                                $query_i = "INSERT INTO produccion_devolucion (codigo_produccion, fecha, codigo_estatus) VALUES ('$codigo_produccion','$fecha_produccion','$codigo_estatus[4]')";
+                            // Ejecutamos el Query.
+                                $consulta = $dblink -> query($query_i);
+                            // ACTULIZAR LA FECHA ANTIGUA CON LA NUEVA FECHA PRODUCCIÓN EN LA TABLA PRODUCCIÓN Y PRODUCCIÓN ASIGNACION Y CORRELATIVO.
+                                $query_u_p = "UPDATE produccion SET fecha = '$fecha_nueva' WHERE id_ = '$codigo_produccion' and fecha = '$fecha_produccion'";
+                            // Ejecutamos el Query.
+                                $consulta = $dblink -> query($query_u_p);
+                            // produccion asignacion.
+                                // obtener el dato de codigo produccion asignacion.
+                                $query = "SELECT * FROM produccion_asignado WHERE codigo_produccion = '$codigo_produccion' and fecha = '$fecha_produccion'";
+                                $consulta = $dblink -> query($query);
+                                // Recorriendo la Tabla con PDO::
+                                while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+                                {
+                                // Nombres de los campos de la tabla.
+                                    $codigo_produccion_asignacion[] = trim($listado['id_']);
+                                }
+                            // produccion asignacion.
+                                $query_u_a = "UPDATE produccion_asignado SET fecha = '$fecha_nueva' WHERE codigo_produccion = '$codigo_produccion' and fecha = '$fecha_produccion'";
+                            // Ejecutamos el Query.
+                                $consulta = $dblink -> query($query_u_a);
+
+                            // IF VERDADERO DEL CHECKBOX
+                            }
+                }
+               
                     }
                     // END-FOR
 					$respuestaOK = true;
@@ -325,7 +326,35 @@ if($errorDbConexion == false){
                    // Mostrar nuevamente los valores de la tabla según fecha.
                     $fecha = $fecha_produccion;
                         BuscarProduccionDevolucion();
-				}      
+				}else{
+                    //
+                    // CAMBIAR EL CODIGO DE LA RUTA
+                    //
+                    //FOR
+                        // recorrer matriz con los datos del chk (val y true)
+                        $fila = $fila - 1;
+                        // recorrer la array para extraer los datos.
+                        for($i=0;$i<=$fila;$i++){
+                            // Asignar valor a varinbles que las respectivas tablas.
+                                $codigo_produccion = $id_produccion[0][$i];
+                                $chk_ = $calcular_chk[0][$i];
+                            if($chk_ == 'true')
+                            {
+                                // ACTULIZAR LA FECHA ANTIGUA CON LA NUEVA FECHA PRODUCCIÓN EN LA TABLA PRODUCCIÓN Y PRODUCCIÓN ASIGNACION Y CORRELATIVO.
+                                $query_u_p = "UPDATE produccion SET codigo_ruta = '$nuevaRutaCodigo' WHERE id_ = '$codigo_produccion' and fecha = '$fecha_produccion'";
+                                // Ejecutamos el Query.
+                                    $consulta = $dblink -> query($query_u_p);
+                            }
+                        } // FIN DEL FOR, EN EL CASO DE CAMBIO DE RUTA
+                        // END-FOR
+					$respuestaOK = true;
+					$contenidoOK = '';
+                    $mensajeError =  'Ruta Actualizada.';
+                    
+                   // Mostrar nuevamente los valores de la tabla según fecha.
+                    $fecha = $fecha_produccion;
+                        BuscarProduccionDevolucion();
+                }      
 			break;
             ///////////////////////////////////
             // ESTAS OPCIONES SE PODRÁN UTLIZAR EN CUALQUIER PARTE

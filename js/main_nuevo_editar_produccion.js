@@ -342,7 +342,7 @@ $("#DesdeAsignado").on('keyup', function (e) {
                 ///////////////////////////////////////////////////////////////
                 $.ajax({
                     beforeSend: function(){
-                        //$('#myModal').modal('show');
+                        $('#listadoNoGuardadosOk').empty();
                     },
                     cache: false,
                     type: "POST",
@@ -350,13 +350,18 @@ $("#DesdeAsignado").on('keyup', function (e) {
                     url:"php_libs/soporte/NuevoEditarProduccion.php",
                     data: "NumeroCorrelativo=" + codigo_produccion + "&accion=" + accion + "&codigo_tiquete_color=" + codigo_tiquete_color + "&codigo_ruta="+ codigo_ruta + "&codigo_jornada="+ codigo_jornada + "&codigo_serie="+ codigo_serie +  "&FechaProduccion=" + fecha + "&codigo_personal=" + codigo_personal + "&id=" + Math.random(),
                     success: function(response){
+                        // validar NoGuarado
+                            if(response.NoGuardado > 0){
+                                $('#listadoNoGuardadosOk').append(response.contenidoNoGuardado);
+                                toastr["warning"]("Talonarios No se Guardaron!!!", "Sistema");
+
+                            }else{
+                            }
                         // Validar mensaje de error
                         if(response.respuesta == true){
-                           // NuevoRegistro();
-                           //$('#myModal').modal('hide');
+                        
                         }
                         if(response.respuesta == false){
-                            //$('#myModal').modal('hide');
                          }
                     },
                 });

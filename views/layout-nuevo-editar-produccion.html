@@ -394,6 +394,36 @@ document.querySelectorAll('select').forEach((input) => {
           </div> <!-- /.card  CARD-SUCCESS-->
      </form> <!-- fin del form -->            
     </section> <!-- SECTION CONTENT-->
+
+    <section>
+      <!-- CONTENDRÁ LA TABLA-->
+      <div class="col col-md-12 col-lg-6 col-xl-6"> <!-- COL SECUNDARIO -->
+        <fieldset id="FieldsetTabla">
+          <legend>Tabla | Talonarios No Guardados</legend>
+            <table id="listadoNoGuardados" class="table display responsive nowrap" style="width: 100%;">
+              <thead>
+                  <tr>
+                    <th style="text-align: center;">Fecha</th>
+                    <th style="text-align: right;">N.° Control</th>
+                    <th style="text-align: right;">Desde</th>
+                    <th style="text-align: right;">Hasta</th>
+                    <th style="text-align: right;">Estatus</th>
+                  </tr>                
+              </thead>
+                <tbody id="listadoNoGuardadosOk">
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th style="text-align: center;">Fecha</th>
+                    <th style="text-align: right;">N.° Control</th>
+                    <th style="text-align: right;">Desde</th>
+                    <th style="text-align: right;">Hasta</th>
+                    <th style="text-align: right;">Estatus</th>
+                  </tr>
+                </tfoot>
+            </table>
+          </fieldset>
+    </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->
 
 

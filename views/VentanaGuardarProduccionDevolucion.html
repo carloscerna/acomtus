@@ -5,7 +5,7 @@
 <div class="modal-dialog modal-lg">
 	<div class="modal-content">
 		<div class="modal-header modal-header-info">
-			<h6 class="modal-title" id=""><span class="fa fa-save"></span><label> ¿Guardar Nueva Fecha Producción?</label></h6>
+			<h6 class="modal-title" id=""><span class="fa fa-save"></span><label> ¿Guardar Nueva Fecha Producción o Cambiar Ruta? </label></h6>
 			<button class="close" data-dismiss="modal" aria-label="Cerrar" id="VentanaGuardarProduccionDevolucion">
 				<span aria-hidden="true">&times;</span>
 			</button>
@@ -31,7 +31,21 @@
 									<div style='text-align:center;'><i class="fal fa-times"></i></div>  
 								</button>
 							</div>
-						</div> <!-- DIV SECUNDARIO 
+						</div>  
+
+							<div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="RadioFecha" id="RadioFecha" value="si" checked>
+                          <label class="form-check-label text-info" for="RadioFecha">
+                            Fecha
+                          </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="RadioFecha" id="RadioRuta" value="si">
+                          <label class="form-check-label" for="RadioRuta">
+                            Ruta
+                          </label>
+                        </div>
+						<!--
 						<div class="col col-md-12 col-lg-6 col-xl-6">
 							<div class="input-group">
 								<span class="input-group-text text-bold">N.º Control</span>
@@ -52,8 +66,20 @@
 										</div>
 									</div>
 								</div>
-
                             </fieldset>
+
+							<fieldset id="FieldsetRutaNueva" style="display: none;">
+								<legend> Producción | Ruta Nueva</legend>
+								<div class="row">
+									<div class="col col-md-12 col-lg-12 col-xl-12">
+										<div class="input-group">
+											<span class="input-group-text">Ruta</span>
+											<select class="custom-select" name="lstRuta" id="lstRuta"></select>
+										</div>
+									</div>
+								</div>
+                            </fieldset>
+
 
                             <fieldset id="FieldsetTabla">
                                 <legend> Producción | Control de Ingresos - Devoluciones</legend>
