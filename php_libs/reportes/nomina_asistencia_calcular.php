@@ -487,6 +487,7 @@ function rellenar($total_dias_quincena){
                             case 'TD':
                                 // CUANDO SEA TRABAJO DESCANSO QUE ACCIÓN REALIZAR
                                 $salario = $salario + ($horas_licencia * $pago_diario_hora);
+                                $fecha_descanso[] = $fecha_db;
                                 // ARMAR LA CONSULTA PARA REVISAR SI TRABAJÓ EN VACACIÓN
                                 $query_jv = "SELECT * FROM catalogo_jornada WHERE id_ = '$codigo_jornada_descanso'";
                                 $consulta_jv = $dblink -> query($query_jv);
@@ -633,15 +634,6 @@ function rellenar($total_dias_quincena){
                                             // Media Tanda.
                                             $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                             $salario = $salario + ($horas_jornada * $pago_diario_hora);
-                                            // contador de cuantas veces 4h en una semana.
-                                         /*          $contar_4H++;
-                                        }else{
-                                            $salario = $salario + ($horas_jornada * $pago_diario_hora);
-                                            // contador de cuantas veces 4h en una semana.
-                                            $contar_4H++;
-                                        }*/
-                                            // CUANDO SEA TRABAJO DESCANSO QUE ACCIÓN REALIZAR
-                                            //$salario = $salario + ($horas_licencia * $pago_diario_hora);
                                             // ARMAR LA CONSULTA PARA REVISAR SI TRABAJÓ EN VACACIÓN
                                             $query_jv = "SELECT * FROM catalogo_jornada WHERE id_ = '$codigo_jornada_extra_4H'";
                                             $consulta_jv = $dblink -> query($query_jv);
@@ -745,6 +737,7 @@ function rellenar($total_dias_quincena){
 if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
 {
     $primerDias = array(); $ultimoDias = array(); $BuscarFechaInicio = array(); $BuscarFechaFin = array(); $ll = 0;
+    $conteo_4h = 0;
     foreach ($fecha_descanso as $fecha_dd) {
         $fecha_actual =$fecha_dd;
         if($ll == 0){
@@ -767,11 +760,15 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
     // pasar valores unico a nuevas matrices para posterioremente buscar en dbf.
    $BuscarFechaInicio = array_merge(array_unique($primerDias));
    $BuscarFechaFin = array_merge(array_unique($ultimoDias));
+   /*print_r($BuscarFechaInicio);
+   print "<br>";
+   print_r($BuscarFechaFin);
+   exit;*/
  // recorrer la matriz con la fecha inicio y fin
      for ($bb=0; $bb < count($BuscarFechaInicio) ; $bb++) { 
          //print "Fecha Inicio: ". $BuscarFechaInicio[$bb] . " Fecha fin: " . $BuscarFechaFin[$bb];
          // armanr query para buscar si existe la fecha en el perido seleccionar en la tabla personal asisitencia.
-          $query_asistencia_buscar_db = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
+        $query_asistencia_buscar_db = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
                  pa.codigo_jornada_descanso,
                  cat_j.descripcion as descripcion_jornada, cat_j.horas,
                  cat_lp.descripcion as descripcion_licencia, cat_lp.horas as horas_licencia
@@ -813,9 +810,20 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
                                      $salario = $salario - (8 * $pago_diario_hora);
                                  }   // LAZO SWICTH...
                          } // LAZO IF...;
+                                // 
+                                if($descripcion_jornada == "4H"){
+                                    $conteo_4h++;
+                                // CALCULO DEL SALARIO CUANDO hay mas de 4 jornadas de trabajo
+                                    if($conteo_4h >= 2){
+                                        
+                                        $salario = $salario - (4 * $pago_diario_hora);
+                                    }
+                            } // LAZO IF...;
                      }   // LAZO WHILE
                      //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
                      $total_salario = $salario + $total_tiempo_extra + $asuetos;
+                     // regrear la variable conteo a 0
+                        $conteo_4h = 0;
                  }   // LAZO IF....
      } // LAZO FOR.
 }else{
@@ -933,8 +941,9 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
                         $SalidaPantallaNocturnaValor = number_format($NocturnaValor,2,'.',',');
                         $pdf->Cell($w[5],6,$SalidaPantallaNocturnaValor,'1',0,'C',$fill);
                         // Recalcular total tiempo extra y total salario
-                        $total_tiempo_extra = $total_tiempo_extra + $NocturnaValor;
-                        $total_salario = $total_salario + $total_tiempo_extra;
+                        //$total_tiempo_extra = $total_tiempo_extra + $NocturnaValor;
+                        //$total_salario = $total_salario + $total_tiempo_extra;
+                        $total_salario = $total_salario + $NocturnaValor;
                     }
                     break;
                 case '5':
