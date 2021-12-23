@@ -287,10 +287,10 @@ function FancyTable($header)
     // ARMAR LA CONSULTA
     // DE ACUERDO AL CODIGO DEL DEPARTAMENTO EMPRESA
     if($DepartamentoEmpresa == '02'){
-       $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario 
+       $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario, salario 
         FROM personal WHERE codigo_ruta = '$ruta' and codigo_estatus = '01' ORDER BY codigo";
     }else{
-       $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario 
+       $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario, salario 
         FROM personal WHERE codigo_departamento_empresa = '$DepartamentoEmpresa' and codigo_estatus = '01' ORDER BY codigo";
     }
     // EJECUTAR LA CONSULTA
@@ -305,7 +305,7 @@ function FancyTable($header)
                 $NocturnaCantidad = 0;
             // variable para verificar que tipo de permiso o días trabajados.
             $codigo = $row['codigo'];
-            $pago_diario = round($row['pago_diario'],2);
+            $pago_diario = round($row['salario'] / 30,10);
             //
             $pdf->Cell($w[0],6,$i,'LR',0,'C',$fill);        // núermo correlativo
             $pdf->Cell($w[1],6,utf8_decode(trim($row['codigo'])),'LR',0,'L',$fill); // codigo empleado
@@ -359,7 +359,7 @@ function rellenar($total_dias_quincena){
     //
     // crear las matrices para el calculo del salario
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
-    $salario = 0; $asuetos = 0; $extra = 0; $boni = 0; $total_tiempo_extra = 0; $total = 0; $pago_diario_hora = round($pago_diario / 8,5); $asueto = 0; $horas_jornadas = 0;
+    $salario = 0; $asuetos = 0; $extra = 0; $boni = 0; $total_tiempo_extra = 0; $total = 0; $pago_diario_hora = round($pago_diario / 8,10); $asueto = 0; $horas_jornadas = 0;
     $total_horas_jornada = 0;
      // DECLARACI{ON DE AMTRICES}
         $fecha_descanso = array(); $descripcion_jornada_a_P2 = array(); $fecha_inicio_adb = array();
@@ -737,7 +737,7 @@ function rellenar($total_dias_quincena){
 if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
 {
     $primerDias = array(); $ultimoDias = array(); $BuscarFechaInicio = array(); $BuscarFechaFin = array(); $ll = 0;
-    $conteo_4h = 0;
+    $conteo_4h = 0; $descuento = 0;
     foreach ($fecha_descanso as $fecha_dd) {
         $fecha_actual =$fecha_dd;
         if($ll == 0){
@@ -779,6 +779,8 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
              $consulta_asistencia_buscar_db = $dblink -> query($query_asistencia_buscar_db);
              // validar si existen archivos en la consulta segun la fecha.
              $cantidad_registros = $consulta_asistencia_buscar_db -> rowCount();
+            // regrear la variable conteo a 0
+                $conteo_4h = 0; $descuento = 0;
              // Verificar si existen registros.
                  if($consulta_asistencia_buscar_db -> rowCount() != 0 and $cantidad_registros == 7){
                      while($rows = $consulta_asistencia_buscar_db -> fetch(PDO::FETCH_BOTH))
@@ -816,15 +818,27 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
                                 // CALCULO DEL SALARIO CUANDO hay mas de 4 jornadas de trabajo
                                     if($conteo_4h >= 2){
                                         
-                                        $salario = $salario - (4 * $pago_diario_hora);
+                                        $descuento = $descuento + (4 * $pago_diario_hora);
                                     }
                             } // LAZO IF...;
                      }   // LAZO WHILE
                      //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
-                     $total_salario = $salario + $total_tiempo_extra + $asuetos;
-                     // regrear la variable conteo a 0
-                        $conteo_4h = 0;
+                     $salario = $salario - $descuento;
+                     $total_salario = ($salario + $total_tiempo_extra + $asuetos);
                  }   // LAZO IF....
+                 if($codigo == '075001'){
+                     print $descuento;
+                     print "<br>";
+                     print $conteo_4h;
+                     print "<br>";
+                     print $salario;
+                     print "<br>";
+                     print $total_salario;
+                     print "Pago diario: <br>";
+                     print $pago_diario_hora;
+                     exit;
+                 }
+
      } // LAZO FOR.
 }else{
  // Array que contiene el nombre del d{ia. apartir de la fecha}
