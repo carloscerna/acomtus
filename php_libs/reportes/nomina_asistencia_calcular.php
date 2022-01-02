@@ -86,7 +86,8 @@ foreach($periodo as $date){
     $nombreMes = $nombresMeses[$date->format("n")];
     $numeroDia = $date->format("j");
     $numeroDiaDosDigitos = $date->format("d");
-    $anyo = $date->format("Y");
+    $anyo = $fecha_ann;
+    //$anyo = $date->format("Y");
     // mostramos los datos
     //echo $nombreDia.' '.$numeroDia.' de '.$nombreMes.' de '.$anyo.'<br>';
     //$fecha_periodo[] = $numeroDia.'-'.$nombreMes.'-'.$anyo;
