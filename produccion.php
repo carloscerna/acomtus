@@ -21,7 +21,7 @@ if(empty($_SESSION['userNombre']))
                 //Salida: Viernes 24 de Febrero del 2012		
 		//Crear una línea. Fecha.
 		$dia = strftime("%d");		// El Día.
-        $mes = date('n');     // El Mes.
+        $mes = date('m');     // El Mes.
 		$año = strftime("%Y");		// El Año.
         
         $fecha = $año ."-".$mes."-".$dia;
