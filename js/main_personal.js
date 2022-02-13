@@ -135,6 +135,8 @@ $(tbody).on("click","a.FianzasPrestamos",function(){
 	accion = "BuscarFianzasPrestamos";	// variable global
 		window.location.href = 'editar_Fianzas_Prestamos.php?id_personal='+id_+"&accion="+accion;
 });
+
+ 
 	///////////////////////////////////////////////////////////////////////////////
 //	FUNCION que al dar clic buscar el registro para posterior mente abri una
 // ventana modal. ELIMINAR REGISTRO
@@ -212,6 +214,15 @@ $('#goNuevoUser').on( 'click', function () {
 		id_ = 0;
 			window.location.href = 'editar_Nuevo_Personal.php?id='+id_+"&accion="+accion;
 });	  
+///////////////////////////////////////////////////////////////////////////////
+//	FUNCION que al dar clic buscar el registro para posterior mente abri una
+// ventana modal. GIANZAS Y PRESTAMOS IMPORTAR.
+///////////////////////////////////////////////////////////////////////////////	  
+$('#goFianzasPrestamosImportar').on( 'click', function () {
+	accion = "FianzasPrestamosImportar";	// variable global
+	id_ = 0;
+		window.location.href = 'fianzas_prestamos_importar.php?';
+});	
 });	// final de FUNCTION.
 
 function AbrirVentana(url)

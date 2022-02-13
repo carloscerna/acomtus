@@ -67,15 +67,20 @@
   <div class="col-md-12">
     <div class="card m-auto">
       <div class="card-header bg-gradient-navy">
-        <h3 class="card-title"><i class="fas fa-user-friends nav-icon"></i> Personal</h3>
+
           <!-- /.INPUT PARA EL MENU CONTEXTUAL   -->
           <input type="hidden" id="MenuContextual" value='{{ codigo_perfil }}'>
           <!-- /.card-tools -->
 
-        <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
-          </button>
-        </div>
+          <div class="row">
+            <div class="col-md-8 col-lg-8 col-xl-8">
+              <h3 class="card-title "><span class="fal fa-users"></span> Personal</h3>
+            </div>
+            
+            <div class="col-md-4 col-lg-4 col-xl-4  d-flex justify-content-end">
+              <button class="btn btn-info" type="button" id="goFianzasPrestamosImportar" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Importar - Fianzas y Prestamos"><span class="fal fa-file-import"></span></button>
+            </div>
+          </div>
         <!-- /.card-tools -->
       </div>
       <!-- /.card-header -->
