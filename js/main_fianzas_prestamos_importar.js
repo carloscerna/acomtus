@@ -19,6 +19,13 @@ $(function(){
 			}, "json");
 		toastr.info("Directorio Actualizado.");
 	});		
+// GO GUARDAR PARA ALMACENAR DATOS FINALES EN LA TABLA FIANZAS O PRESTAMO
+$('#goGuardar').on('click',function(){
+	// Elminar mensaje de Actualizar Archivo.
+	$('#MensajeImportar').empty();
+		toastr.info("Guardar");
+});	
+
 // ***************************************************************************************************                
 // LLAMAR AL ARCHIVO IMPORTAR HOJA DE CALCULO PARA QUE ACTUALICE LAS NOTAS SEGÚN PERIODO O TRIMESTRE.                
 // **************************************************************************************************                
@@ -37,7 +44,7 @@ $('body').on('click','#listaArchivosOK a',function (e)
     if($(this).attr('data-accion') == 'goBuscarOk'){
 		// si no ha se seleccionada nada.
 		if(valor_check == undefined){
-			toastr.error(":( Debe Seleccionar Opciones.");
+			toastr.error(":( Debe Seleccionar Opción Fianzas o Prestamos.");
 			return;
 		}
 		// mostra rel modal. que contiene el mensaje del nombre del archivo y mensajes de veririvación o actualización.
@@ -51,11 +58,11 @@ $('body').on('click','#listaArchivosOK a',function (e)
 		*/
 		// ASIGNATURAS PENDIENTES
 		if(valor_check == "Fianzas"){
-			url_archivo = "includes/importar_notas_hoja_calculo.php";
+			url_archivo = "includes/importar_fianzas_prestamos_hoja_calculo.php";
 		}
 		//
 		if(valor_check == "Prestamos"){
-			url_archivo = "includes/importar_notas_hoja_calculo.php";
+			url_archivo = "includes/importar_fianzas_prestamos_hoja_calculo.php";
 		}
 		/*
 		 *VERIFICAR ARCHIVOS ANTES DE INICAR LA ACTUALIZACIÓN.
