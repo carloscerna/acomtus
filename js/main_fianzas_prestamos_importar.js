@@ -34,7 +34,7 @@ $('body').on('click','#listaArchivosOK a',function (e)
 	var nombre_archivo = $(this).parent().parent().children('td:eq(0)').text();                       
    // condicionar si existe selecciona periodo o trimestre.                      
    // Al seleccionar dentro de la tabla.
-    if($(this).attr('data-accion') == 'goActualizarOk'){
+    if($(this).attr('data-accion') == 'goBuscarOk'){
 		// si no ha se seleccionada nada.
 		if(valor_check == undefined){
 			toastr.error(":( Debe Seleccionar Opciones.");
@@ -43,7 +43,7 @@ $('body').on('click','#listaArchivosOK a',function (e)
 		// mostra rel modal. que contiene el mensaje del nombre del archivo y mensajes de veririvación o actualización.
 		$('#myModal').modal('show');
 		// valores a la consola
-			console.log("valor: " + valor_check + " Archivo: " + nombre_archivo + " Modalidad: " + modalidad + " Grado: " + grado + " Periodo: " + periodo);
+			console.log("valor: " + valor_check + " Archivo: " + nombre_archivo);
 			$("label[for='NombreArchivo']").text(nombre_archivo);
 			$("label[for='VerificarActualizar']").text("Verificando...");
 		/*/
@@ -60,13 +60,13 @@ $('body').on('click','#listaArchivosOK a',function (e)
 		/*
 		 *VERIFICAR ARCHIVOS ANTES DE INICAR LA ACTUALIZACIÓN.
 		 */
-		if(valor_check == "Calculo" || valor_check == "Promedios" || valor_check == "Actualizar"){
+		if(valor_check == "Fianzas" || valor_check == "Prestamos"){
 			$.ajax({
 				cache: false,		
 				type: "POST",		
 				dataType: "json",		
 				url: "includes/verificar_importar_notas_hoja_calculo.php",		
-				data: "nombre_archivo_=" + nombre_archivo + "&periodo_=" + periodo + "&valor_check=" + valor_check+ "&grado=" + grado + "&modalidad=" + modalidad + "&id="+Math.random(),		
+				data: "nombre_archivo_=" + nombre_archivo + "&valor_check=" + valor_check + "&id=" +Math.random(),		
 				success: function(data){		
 				// validar		
 					if (data[0].registro == "No_registro") {		
@@ -88,13 +88,16 @@ $('body').on('click','#listaArchivosOK a',function (e)
 								type: "POST",		
 								dataType: "json",		
 								url: url_archivo,		
-								data: "nombre_archivo_=" + nombre_archivo + "&periodo_=" + periodo + "&valor_check=" + valor_check + "&grado=" + grado + "&modalidad=" + modalidad + "&id=" + Math.random(),		
-								success: function(data){		
+								data: "nombre_archivo_=" + nombre_archivo + "&valor_check=" + valor_check  + "&id=" + Math.random(),		
+								success: function(response){		
 								// validar		
-									if (data[0].registro == "Si_registro") {		
+									if (response.respuesta == true) {		
 										toastr.success("Hoja de Calculo Actualizada.");
 										$('#MensajeImportar').empty();
-                                        $('#MensajeImportar').append("<label 'class=text-black bg-default'>Archivo Actualizado: "+data[0].nombre_archivo+"</label>");
+                                        $('#MensajeImportar').append("<label 'class=text-black bg-default'>Archivo Actualizado: "+response.nombre_archivo+"</label>");
+
+										$("#listaContenidoOk").empty();
+										$("#listaContenidoOk").append(response.contenido);
 									}		
 								},		
 								error:function(){		
