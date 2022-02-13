@@ -21,6 +21,13 @@ $(function(){
 	});		
 // GO GUARDAR PARA ALMACENAR DATOS FINALES EN LA TABLA FIANZAS O PRESTAMO
 $('#goGuardar').on('click',function(){
+	// Validar si está seleccionada Fianza y Prestamos
+
+	// Validar si la Tabla fianzas_prestamos_importar tiene datos.
+
+	// Validar el contenido de la hoja de calculo Fianzas y Prestamos
+
+	
 	// Elminar mensaje de Actualizar Archivo.
 	$('#MensajeImportar').empty();
 		toastr.info("Guardar");

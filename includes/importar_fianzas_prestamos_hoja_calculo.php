@@ -12,6 +12,7 @@ include($path_root."/acomtus/includes/funciones.php");
 	$codigo_institucion = $_SESSION['codigo_institucion'];
 	$ruta = '../files/' . $codigo_institucion . "/" . trim($_REQUEST["nombre_archivo_"]);
 	  $nombre_archivo = trim($_REQUEST["nombre_archivo_"]);
+      $descripcion_fianza_o_prestamo = trim($_REQUEST["valor_check"]);
 // variable de la conexi�n dbf.
     $db_link = $dblink;
 // Inicializando el array
@@ -64,7 +65,8 @@ include($path_root."/acomtus/includes/funciones.php");
 //	codigo de la asignatura. modalidad, docente
    $fila = 2; $num = 1;
 			  while($objPHPExcel->getActiveSheet()->getCell("C".$fila)->getValue() != "")
-			   {	
+			   {
+                  $descripcion = $objPHPExcel->getActiveSheet()->getCell("B".$fila)->getFormattedValue();	
 				  $fecha = $objPHPExcel->getActiveSheet()->getCell("C".$fila)->getFormattedValue();
                   $referencia = $objPHPExcel->getActiveSheet()->getCell("D".$fila)->getValue();
                   $jornal = $objPHPExcel->getActiveSheet()->getCell("E".$fila)->getValue();
@@ -76,21 +78,11 @@ include($path_root."/acomtus/includes/funciones.php");
                   $codigo = $objPHPExcel->getActiveSheet()->getCell("J".$fila)->getValue();
                   // CONDICIONAR QUE JOURNAL SOLO SEA PRJ.
                   if($jornal == "PRJ"){
-                      /*
-                        // PREGUNTAR SI EL ARCHIVO YA ESTA GUARDADO SEGUN FECHA Y CODIGO.
-                            $query_buscar_fecha = "SELECT * FROM fianzas_prestamos_importar WHERE fecha = '$fecha' and codigo = '$codigo'";
-                        // Ejecutamos el Query.
-                            $consulta_buscar = $dblink -> query($query_buscar_fecha);
-                            // Validar si hay registros.
-                            if($consulta_buscar -> rowCount() != 0){
-                            }
-                            else{*/
-                                // Query cuando son notas num�ricas.
-                                    $query_guardar = "INSERT INTO fianzas_prestamos_importar (fecha, codigo, nombre, referencia, jornal, debito, credito)
-                                        VALUES ('$fecha', '$codigo', '$nombre', '$referencia', '$jornal', '$debito', '$credito')";												 
-                                // ejecutamos el query de la nota final. 
-                                    $result = $db_link -> query($query_guardar);
-                        //    }
+                    // Query cuando son notas num�ricas.
+                        $query_guardar = "INSERT INTO fianzas_prestamos_importar (fecha, codigo, nombre, referencia, jornal, debito, credito, descripcion)
+                            VALUES ('$fecha', '$codigo', '$nombre', '$referencia', '$jornal', '$debito', '$credito', '$descripcion')";												 
+                    // ejecutamos el query de la nota final. 
+                        $result = $db_link -> query($query_guardar);
                   }
 				// INCREMENTAR I PARA LA COLUMNA de excel.
 					$fila++; $num++;
