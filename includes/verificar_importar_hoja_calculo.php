@@ -42,23 +42,41 @@ include($path_root."/acomtus/includes/mainFunctions_conexion.php");
    $numero_de_hoja = 0;
    $objPHPExcel->setActiveSheetIndex($numero_de_hoja);
    $celda_j1 = $objPHPExcel->getActiveSheet()->getCell("J1")->getValue();
+   $descripcion_b1 = $objPHPExcel->getActiveSheet()->getCell("B2")->getValue();
+   $datos[$fila_array]["registro"] = 'Si_registro';
+
    /*
    /* CONCIONAR QUE TIPO DE VALOR TIENE QUE TENER A1.
    */
-   // sON LOS ARCHIVOS QUE TIENE VARIAS ASIGNATURAS Y CALCULA EL PROMEDIO.
-       if($valor_check === "Fianzas" || $valor_check === "Prestamos"){
+  // TEXTO PARA EL ARCHIVO DE FIANZAS ++++ Depósito para Accidentes++++++
+  // TEXTO PARA EL ARCHIVO DE PRESTAMOS +++++ Préstamos a Empleados +++++
+   // SON LOS ARCHIVOS QUE CONTIENEN UNA PALABRA EN ESPECÍFICO.
+   // FIANZAS
+       if($valor_check == "Fianzas" && trim($descripcion_b1) == ("Depósito para Accidentes")){
           if($celda_j1 != "Employee ID"){
             $datos[$fila_array]["registro"] = 'No_registro';
+            $datos[$fila_array]["mensaje"] = $valor_check;
             $fila_array++;
             $datos[$fila_array]["registro"] = $celda_j1;
             // Enviando la matriz con Json.
-              echo json_encode($datos);
-              return;
-         } 
+              //echo json_encode($datos);
+              //return;
+         }
+        }else if($valor_check == "Prestamos" && trim($descripcion_b1) == ("Préstamos a Empleados")){
+        if($celda_j1 != "Employee ID"){
+          $datos[$fila_array]["registro"] = 'No_registro';
+          $datos[$fila_array]["mensaje"] = $valor_check;
+          $fila_array++;
+          $datos[$fila_array]["registro"] = $celda_j1;
+          // Enviando la matriz con Json.
+            //echo json_encode($datos);
+            //return;
        }
-    // fin del proceso.
-	// condicion para determinar si es de primer ciclo.
-    $datos[$fila_array]["registro"] = 'Si_registro';
-// Enviando la matriz con Json.
-    echo json_encode($datos);
+      }else{
+        $datos[$fila_array]["registro"] = 'No_registro';
+        $datos[$fila_array]["mensaje"] = $valor_check;
+        $fila_array++;
+        $datos[$fila_array]["registro"] = $celda_j1;
+      }
+              echo json_encode($datos);
 ?>

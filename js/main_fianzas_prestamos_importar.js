@@ -21,8 +21,19 @@ $(function(){
 	});		
 // GO GUARDAR PARA ALMACENAR DATOS FINALES EN LA TABLA FIANZAS O PRESTAMO
 $('#goGuardar').on('click',function(){
+	// Validar la descripcion que no esté vacía.
+		var descripcion = $("#txtdescripcion").val();
+		if($("#txtdescripcion").val().trim().length < 1){
+			toastr["error"]("Descripción está vacía.", "Sistema");
+			return;				
+		}
 	// Validar si está seleccionada Fianza y Prestamos
+	valor_check = $('input:radio[name=customHoja]:checked').val();
 
+	if(valor_check == undefined){
+		toastr.error(":( Debe Seleccionar Opción Fianzas o Prestamos.");
+		return;
+	}
 	// Validar si la Tabla fianzas_prestamos_importar tiene datos.
 
 	// Validar el contenido de la hoja de calculo Fianzas y Prestamos
@@ -63,7 +74,7 @@ $('body').on('click','#listaArchivosOK a',function (e)
 		/*/
 			CAMBIAR LA URL DEL ARCHIVO
 		*/
-		// ASIGNATURAS PENDIENTES
+		// importar fianzas y prestamos
 		if(valor_check == "Fianzas"){
 			url_archivo = "includes/importar_fianzas_prestamos_hoja_calculo.php";
 		}
@@ -79,12 +90,13 @@ $('body').on('click','#listaArchivosOK a',function (e)
 				cache: false,		
 				type: "POST",		
 				dataType: "json",		
-				url: "includes/verificar_importar_notas_hoja_calculo.php",		
+				url: "includes/verificar_importar_hoja_calculo.php",		
 				data: "nombre_archivo_=" + nombre_archivo + "&valor_check=" + valor_check + "&id=" +Math.random(),		
 				success: function(data){		
 				// validar		
 					if (data[0].registro == "No_registro") {		
-						toastr.error("Archivo Incorrecto...");
+						$("#listaContenidoOk").empty();
+						toastr.error("Archivo Incorrecto para " + data[0].mensaje);
 						url_archivo_data = false;
 						return;
 					}
