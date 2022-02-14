@@ -35,7 +35,29 @@ $('#goGuardar').on('click',function(){
 		return;
 	}
 	// Validar si la Tabla fianzas_prestamos_importar tiene datos.
+	// Comenzar el proceso del AJAX PARA REVISAR SI LA TABLA FIANZAS_PRESTAMOS_IMPORTAR TIENE DATOS CORRECTOS PARA ACTUALIZAR.
+		url_archivo = "php_libs/soporte/FianzasPrestamosImportar.php";
+		$.ajax({
+			cache: false,		
+			type: "POST",		
+			dataType: "json",		
+			url: url_archivo,		
+			data: "nombre_archivo_=" + nombre_archivo + "&valor_check=" + valor_check  + "&id=" + Math.random(),		
+			success: function(response){		
+			// validar		
+				if (response.respuesta == true) {		
+					toastr.success("Hoja de Calculo Actualizada.");
+					$('#MensajeImportar').empty();
+					$('#MensajeImportar').append("<label 'class=text-black bg-default'>Archivo Actualizado: "+response.nombre_archivo+"</label>");
 
+					$("#listaContenidoOk").empty();
+					$("#listaContenidoOk").append(response.contenido);
+				}		
+			},		
+			error:function(){		
+				toastr.error(":(");		
+			}		
+		}); // Cierre de Ajax. QUE TIENE EL NOMBRE DEL ARCHIVO A ACTUALIZAR.
 	// Validar el contenido de la hoja de calculo Fianzas y Prestamos
 
 	
