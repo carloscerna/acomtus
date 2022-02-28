@@ -29,11 +29,20 @@ $('#goGuardar').on('click',function(){
 		}
 	// Validar si está seleccionada Fianza y Prestamos
 	valor_check = $('input:radio[name=customHoja]:checked').val();
+		if(valor_check == "Fianzas"){
+			var descripcion = $("#txtdescripcion").val();
+			var agregarFianzaPrestamo = "AgregarFianzas";
+		}
 
+		if(valor_check == "Prestamos"){
+			var agregarFianzaPrestamo = "AgregarPrestamos";
+		}
 	if(valor_check == undefined){
 		toastr.error(":( Debe Seleccionar Opción Fianzas o Prestamos.");
 		return;
-	}
+	}	
+
+
 	// Validar si la Tabla fianzas_prestamos_importar tiene datos.
 	// Comenzar el proceso del AJAX PARA REVISAR SI LA TABLA FIANZAS_PRESTAMOS_IMPORTAR TIENE DATOS CORRECTOS PARA ACTUALIZAR.
 		url_archivo = "php_libs/soporte/FianzasPrestamosImportar.php";
@@ -42,17 +51,19 @@ $('#goGuardar').on('click',function(){
 			type: "POST",		
 			dataType: "json",		
 			url: url_archivo,		
-			data: "nombre_archivo_=" + nombre_archivo + "&valor_check=" + valor_check  + "&id=" + Math.random(),		
+			data: "valor_check=" + valor_check  + "&accionFianzaPrestamo=" + agregarFianzaPrestamo + "&descripcion=" + descripcion + "&id=" + Math.random(),		
 			success: function(response){		
 			// validar		
 				if (response.respuesta == true) {		
 					toastr.success("Hoja de Calculo Actualizada.");
 					$('#MensajeImportar').empty();
-					$('#MensajeImportar').append("<label 'class=text-black bg-default'>Archivo Actualizado: "+response.nombre_archivo+"</label>");
+					$('#MensajeImportar').append("<label 'class=text-black bg-default'>Archivo Actualizado: "+response.contenido+"</label>");
 
 					$("#listaContenidoOk").empty();
-					$("#listaContenidoOk").append(response.contenido);
-				}		
+
+					// Elminar mensaje de Actualizar Archivo.
+						toastr.info(response.mensaje);
+					}		
 			},		
 			error:function(){		
 				toastr.error(":(");		
@@ -60,10 +71,6 @@ $('#goGuardar').on('click',function(){
 		}); // Cierre de Ajax. QUE TIENE EL NOMBRE DEL ARCHIVO A ACTUALIZAR.
 	// Validar el contenido de la hoja de calculo Fianzas y Prestamos
 
-	
-	// Elminar mensaje de Actualizar Archivo.
-	$('#MensajeImportar').empty();
-		toastr.info("Guardar");
 });	
 
 // ***************************************************************************************************                
