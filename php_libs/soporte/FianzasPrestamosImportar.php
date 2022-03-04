@@ -64,13 +64,6 @@ if($errorDbConexion == false){
 						$mensajeError = "Se ha Actualizado el registro correctamente";
 						$contenidoOK = 'FIANZA ACTUALIZADA.';
 				}
-				
-
-				/*$tabla_array = array('fianzas');
-				$campos_array = array('id_fianza', 'fecha',  'fianza', 'devolucion', 'descripcion', 'codigo');
-				$data_accion = array('txtFecha','FianzaPrestamo','DevolucionDescuento','Descripcion','CodigoPersonal');
-					AgregarFianzaPrestamo($tabla_array,$campos_array,$data_accion);
-					*/
 			break;
 			
 			case 'AgregarPrestamos':		

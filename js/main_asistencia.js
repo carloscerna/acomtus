@@ -307,7 +307,7 @@ function buscar_personal(codigo_personal){
 						$(".card-img-top").attr("src", "../acomtus/img/fotos/" + data[0].url_foto);	
 					}
 				// presar CHECK BOX NOCTURNIDAD.
-				if(data[0].codigo_departamento_empresa == "08"){
+				if(data[0].codigo_departamento_empresa == "08" || data[0].codigo_departamento_empresa == "09"){
 					$("#NocturnidadSiNo").show();
 				}else{
 					$("#NocturnidadSiNo").hide();
