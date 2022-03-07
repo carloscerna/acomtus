@@ -54,7 +54,22 @@ $('#goGuardar').on('click',function(){
 	if(valor_check == undefined){
 		toastr.error(":( Debe Seleccionar Opción Fianzas o Prestamos.");
 		return;
-	}	
+	}
+	// LEER EL VALOR DE LA TABLA ACTUAL CHECKBO BOX 
+// Información de la Página 1.                               
+var $objCuerpoTabla=$("#listadoContenido").children().prev().parent();          
+var checkbox_ = []; 
+		  
+var fila = 0;          
+// recorre el contenido de la tabla.
+	$objCuerpoTabla.find("tbody tr").each(function(){
+		// checkbox
+		var chk =$(this).find('td').eq(0).find('input[type="checkbox"]').is(':checked');
+		console.log(chk);
+		// dar valor a las arrays.
+			checkbox_[fila] = chk;            
+				fila = fila + 1;            
+	});
 	// Validar si la Tabla fianzas_prestamos_importar tiene datos.
 	// Comenzar el proceso del AJAX PARA REVISAR SI LA TABLA FIANZAS_PRESTAMOS_IMPORTAR TIENE DATOS CORRECTOS PARA ACTUALIZAR.
 		url_archivo = "php_libs/soporte/FianzasPrestamosImportar.php";
@@ -66,7 +81,7 @@ $('#goGuardar').on('click',function(){
 			type: "POST",		
 			dataType: "json",		
 			url: url_archivo,		
-			data: "valor_check=" + valor_check  + "&accionFianzaPrestamo=" + agregarFianzaPrestamo + "&descripcion=" + descripcion + "&id=" + Math.random(),		
+			data: "valor_check=" + valor_check  + "&accionFianzaPrestamo=" + agregarFianzaPrestamo + "&descripcion=" + descripcion + "&checkbox=" + checkbox_ + "&id=" + Math.random() + "&fila=" + fila,		
 			success: function(response){		
 				// validar GUARDAR REGISTROS
 				if (response.respuesta == true) {		

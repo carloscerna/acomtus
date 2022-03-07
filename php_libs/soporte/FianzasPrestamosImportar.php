@@ -37,6 +37,14 @@ if($errorDbConexion == false){
 			case 'AgregarFianzas':	
 				// DESCRIPCION
 					$descripcion = htmlspecialchars(trim($_POST['descripcion']),ENT_QUOTES,'UTF-8');
+					$checkbox[] = explode(",", $_POST['checkbox']);
+					$fila = $_POST['fila'];
+					$fila_ = 0;
+					$check_v = array();
+					for ($i=0; $i <$fila ; $i++) { 
+						$check_v[] = $checkbox[0][$i];
+						//print $check_v[$i] . " v $i <br>";
+					}
 				// RECORRER LA TABLA DE LOS DATOS A IMPORTAR
 					$query_leer = "SELECT * FROM fianzas_prestamos_importar";
 				// Ejecutamos el Query.
@@ -47,7 +55,6 @@ if($errorDbConexion == false){
 					$respuestaOK = true;
 					$mensajeError = "Se ha Actualizado el registro correctamente";
 					$contenidoOK = 'FIANZA ACTUALIZADA.';
-						$num = 0;
 					// convertimos el objeto
 					while($listado = $consulta_leer -> fetch(PDO::FETCH_BOTH))
 					{
@@ -65,17 +72,26 @@ if($errorDbConexion == false){
 									$consulta_buscar = $dblink -> query($query_buscar);
 										// Validar si hay registros.
 											if($consulta_buscar -> rowCount() != 0){
-												// Actualizar registro
-													$query_update = "UPDATE fianzas SET fianza = '$fianza', devolucion = '$devolucion', descripcion = '$descripcion'
-																	WHERE codigo = '$codigo' and fecha = '$fecha'";
-												// Ejecutar query insertar
-													$resultadoQueryUpdate = $dblink -> query($query_update);    
+												// Evauar si el checkbox está activo
+													if($check_v[$fila_] == 'false'){
+														// no va ser nada...
+													}else{
+														// Actualizar registro
+														$query_update = "UPDATE fianzas SET fianza = '$fianza', devolucion = '$devolucion', descripcion = '$descripcion'
+														WHERE codigo = '$codigo' and fecha = '$fecha'";
+														// Ejecutar query insertar
+														$resultadoQueryUpdate = $dblink -> query($query_update);    
+
+													}
+												
 											}else{
 												// Agregar Registro
 													$query_insertar = "INSERT INTO fianzas (fecha, codigo, fianza, devolucion, descripcion) VALUES ('$fecha','$codigo','$fianza','$devolucion','$descripcion')";
 												// Ejecutar query insertar
 													$resultadoQuery = $dblink -> query($query_insertar);    
 											}
+					// VARIABLE DE LA MATRIZ CHECKBOX FILA
+						$fila_ = $fila_ + 1;
 					}
 				}else{
 					// SI LA TABLA ESTA VACIA DE FIANZAS PRESTAMOS IMPORTAR.
