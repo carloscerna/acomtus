@@ -8,6 +8,9 @@ clearstatcache();
 header("Content-Type: text/html;charset=iso-8859-1");
 // Insertar y actualizar tabla de usuarios
 sleep(0);
+// COLOCAR UN LIMITE A LA MEMORIA PARA LA CREACIÓN DE LA HOJA DE CÁLCULO.
+set_time_limit(0);
+ini_set("memory_limit","1024M");
 // Inicializamos variables de mensajes y JSON
 $respuestaOK = false;
 $mensajeError = ":(";
@@ -33,16 +36,18 @@ if($errorDbConexion == false){
 		switch ($_POST['accion']) {
 			case 'AgregarFianzas':	
 				// DESCRIPCION
-					$descripcion = $_REQUEST["descripcion"];
+					$descripcion = htmlspecialchars(trim($_POST['descripcion']),ENT_QUOTES,'UTF-8');
 				// RECORRER LA TABLA DE LOS DATOS A IMPORTAR
 					$query_leer = "SELECT * FROM fianzas_prestamos_importar";
-					
-					// Ejecutamos el Query.
-				$consulta_leer = $dblink -> query($query_leer);
+				// Ejecutamos el Query.
+					$consulta_leer = $dblink -> query($query_leer);
 				// Validar si hay registros.
 				if($consulta_leer -> rowCount() != 0){
+					// Respusta y mensaje		
 					$respuestaOK = true;
-					$num = 0;
+					$mensajeError = "Se ha Actualizado el registro correctamente";
+					$contenidoOK = 'FIANZA ACTUALIZADA.';
+						$num = 0;
 					// convertimos el objeto
 					while($listado = $consulta_leer -> fetch(PDO::FETCH_BOTH))
 					{
@@ -53,24 +58,43 @@ if($errorDbConexion == false){
 							$codigo = trim($listado['codigo']);	
 							$fecha = trim($listado['fecha']);
 							//$descripcion = trim($listado['descripcion']);
-
-						// Almacenar el registro
-							$query_insertar = "INSERT INTO fianzas (fecha, codigo, fianza, devolucion, descripcion) VALUES ('$fecha','$codigo','$fianza','$devolucion','$descripcion')";
-						// Ejecutar query insertar
-							$resultadoQuery = $dblink -> query($query_insertar);    
+							/////////////////////////////////////////////////////////////////////////////////////////////////////ç
+							// VERIFICAR SI EL REGISTRO YA EXISTE.
+							/////////////////////////////////////////////////////////////////////////////////////////////////////
+								$query_buscar = "SELECT * FROM fianzas WHERE codigo = '$codigo' and fecha = '$fecha'";	
+									$consulta_buscar = $dblink -> query($query_buscar);
+										// Validar si hay registros.
+											if($consulta_buscar -> rowCount() != 0){
+												// Actualizar registro
+													$query_update = "UPDATE fianzas SET fianza = '$fianza', devolucion = '$devolucion', descripcion = '$descripcion'
+																	WHERE codigo = '$codigo' and fecha = '$fecha'";
+												// Ejecutar query insertar
+													$resultadoQueryUpdate = $dblink -> query($query_update);    
+											}else{
+												// Agregar Registro
+													$query_insertar = "INSERT INTO fianzas (fecha, codigo, fianza, devolucion, descripcion) VALUES ('$fecha','$codigo','$fianza','$devolucion','$descripcion')";
+												// Ejecutar query insertar
+													$resultadoQuery = $dblink -> query($query_insertar);    
+											}
 					}
-					// Respusta y mensaje		
-						$respuestaOK = true;
-						$mensajeError = "Se ha Actualizado el registro correctamente";
-						$contenidoOK = 'FIANZA ACTUALIZADA.';
+				}else{
+					// SI LA TABLA ESTA VACIA DE FIANZAS PRESTAMOS IMPORTAR.
+					$respuestaOK = false;
+					$mensajeError = "La Tabla Importar Fianzas y Prestamos está vacía.";
+					$contenidoOK = '<tr><td>No hay Registros...</tr></td>';
 				}
 			break;
 			
-			case 'AgregarPrestamos':		
-				$tabla_array = array('prestamos');
-				$campos_array = array('id_prestamos', 'fecha',  'prestamos', 'descuentos', 'descripcion', 'codigo');
-				$data_accion = array('txtFecha','FianzaPrestamo','DevolucionDescuento','Descripcion','CodigoPersonal');
-					AgregarFianzaPrestamo($tabla_array,$campos_array,$data_accion);
+			case 'BorrarRegistrosTabla':		
+				// RECORRER LA TABLA DE LOS DATOS A IMPORTAR
+				$query_borrar = "DELETE FROM fianzas_prestamos_importar";
+					
+				// Ejecutamos el Query.
+					$consulta_borrar = $dblink -> query($query_borrar);
+				// 
+					$respuestaOK = true;
+					$mensajeError = "";
+					$contenidoOK = '';
 			break;
 
             default:
@@ -96,61 +120,4 @@ else{
 			"contenido" => $contenidoOK);
 		echo json_encode($salidaJson);
 	}
-
-/* FUCION PARA AGREGAR O GUADAR INFORMACIÓN EN FIANZAS Y PRESTAMOS */
-function AgregarFianzaPrestamo($tabla_array,$campos_array,$data_accion){
-	global $dblink, $respuestaOK, $mensajeError, $contenidoOK;
-	// VALORES DEL POST
-		$fecha = trim($_POST[$data_accion[0]]);
-		$descripcion = htmlspecialchars(trim($_POST[$data_accion[1]]));
-		$fianzaprestamo = trim($_POST[$data_accion[2]]);
-		$devoluciondescuento = trim($_POST[$data_accion[3]]);
-		$codigo = substr(trim($_POST[$data_accion[4]]),9,5);
-		//$codigo = substr(trim($_POST[$data_accion[4]]),9,5);
-		// Query
-		$query = "INSERT INTO $tabla_array[0] ($campos_array[1],$campos_array[2],$campos_array[3],$campos_array[4],$campos_array[5])
-				VALUES ('$fecha','$descripcion','$fianzaprestamo','$devoluciondescuento','$codigo')";
-			// Ejecutamos el query
-				$resultadoQuery = $dblink -> query($query);              
-				///////////////////////////////////////////////////////////////////////////////////////
-				///////////////////////////////////////////////////////////////////////////////////////
-			if($resultadoQuery == true){
-				$respuestaOK = true;
-				$mensajeError = "Se ha agregado el registro correctamente";
-				$contenidoOK = '';
-			}
-			else{
-				$mensajeError = "No se puede guardar el registro en la base de datos ".$query;
-			}
-}
-/* FUNCION PARA EDITAR O ACTULIZAR INFORMACIÓN EN FIANZAS Y PRESTAMOS */
-function ActualizarFianzaPrestamo($tabla_array,$campos_array,$data_accion){
-	global $dblink, $respuestaOK, $mensajeError, $contenidoOK;
-		// VALORES DEL POST
-		$id_ = trim($_POST[$data_accion[4]]);
-		$fecha = trim($_POST[$data_accion[0]]);
-		$fianzaprestamo = trim($_POST[$data_accion[1]]);
-		$devoluciondescuento = trim($_POST[$data_accion[2]]);
-		$descripcion = htmlspecialchars(trim($_POST[$data_accion[3]]));
-
-		// QUERY UPDATE.
-			$query_usuario = sprintf("UPDATE $tabla_array[0] SET $campos_array[1] = '%s', $campos_array[2] = '%s', $campos_array[3] = '%s', $campos_array[4] = '%s'
-				WHERE $campos_array[0] = %d",
-				$fecha, $fianzaprestamo, $devoluciondescuento, $descripcion, 
-				$id_);	
-
-			// Ejecutamos el query guardar los datos en la tabla alumno..
-			$resultadoQuery = $dblink -> query($query_usuario);				
-			
-		if($resultadoQuery == true){
-			$respuestaOK = true;
-			$mensajeError = "Se ha Actualizado el registro correctamente";
-			$contenidoOK = $query_usuario;
-		}
-		else{
-			$mensajeError = "No se puede Actualizar el registro en la base de datos ";
-			$contenidoOK = $query_usuario;
-		}
-}
-
 ?>

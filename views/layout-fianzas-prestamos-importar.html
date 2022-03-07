@@ -36,6 +36,27 @@
               $('#listaArchivosOK').append(data[fila].archivo);                                  
       }                                  
 			}, "json");
+      // Validar si la Tabla fianzas_prestamos_importar tiene datos.
+      // Comenzar el proceso del AJAX PARA REVISAR SI LA TABLA FIANZAS_PRESTAMOS_IMPORTAR TIENE DATOS CORRECTOS PARA ACTUALIZAR.
+        url_archivo = "php_libs/soporte/FianzasPrestamosImportar.php";
+        $.ajax({
+          cache: false,		
+          type: "POST",		
+          dataType: "json",		
+          url: url_archivo,		
+          data: "accionFianzaPrestamo=BorrarRegistrosTabla" + "&id=" + Math.random(),		
+          success: function(response){		
+          // validar		
+            if (response.respuesta == true) {		
+                $('#MensajeImportar').empty();
+                $("#listaContenidoOk").empty();
+              }		
+          },		
+
+          error:function(){		
+            toastr.error(":(");		
+          }		
+        }); // Cierre de Ajax. QUE TIENE EL NOMBRE DEL ARCHIVO A ACTUALIZAR.
 	});
 </script>
 <!-- JS del file-input -->
@@ -314,7 +335,7 @@ $(document).ready(function() {
                             <table id="listadoContenido" class="table table-striped table-bordered table-hover table-condensed">
                               <thead>
                                 <tr>
-                                  <th></th>
+                                  <th><input type=checkbox name="checkBoxAll" id="checkBoxAll" data-toggle=tooltip data-placement=top title='Marcar/Desmarcar Todo'></th>
                                   <th>id</th>
                                   <th>Fecha</th>
                                   <th>Código</th>

@@ -18,7 +18,21 @@ $(function(){
 					}                                  
 			}, "json");
 		toastr.info("Directorio Actualizado.");
-	});		
+	});
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ACTIVAR Y DESACTIVAR CHECKBOX DE LA TABLA.
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	$("#checkBoxAll").on("change", function () {
+		$("#listadoContenido tbody input[type='checkbox'].case").prop("checked", this.checked);
+	});
+	
+	$("#listadoContenido tbody").on("change", "input[type='checkbox'].case", function () {
+	  if ($("#listadoContenido tbody input[type='checkbox'].case").length == $("#listadoContenido tbody input[type='checkbox'].case:checked").length) {
+		  $("#checkBoxAll").prop("checked", true);
+	  } else {
+		  $("#checkBoxAll").prop("checked", false);
+	  }
+	 });		
 // GO GUARDAR PARA ALMACENAR DATOS FINALES EN LA TABLA FIANZAS O PRESTAMO
 $('#goGuardar').on('click',function(){
 	// Validar la descripcion que no esté vacía.
@@ -41,11 +55,12 @@ $('#goGuardar').on('click',function(){
 		toastr.error(":( Debe Seleccionar Opción Fianzas o Prestamos.");
 		return;
 	}	
-
-
 	// Validar si la Tabla fianzas_prestamos_importar tiene datos.
 	// Comenzar el proceso del AJAX PARA REVISAR SI LA TABLA FIANZAS_PRESTAMOS_IMPORTAR TIENE DATOS CORRECTOS PARA ACTUALIZAR.
 		url_archivo = "php_libs/soporte/FianzasPrestamosImportar.php";
+				// mostra rel modal. que contiene el mensaje del nombre del archivo y mensajes de veririvación o actualización.
+				$('#myModal').modal('show');
+				$("label[for='NombreArchivo']").text(agregarFianzaPrestamo);
 		$.ajax({
 			cache: false,		
 			type: "POST",		
@@ -53,24 +68,30 @@ $('#goGuardar').on('click',function(){
 			url: url_archivo,		
 			data: "valor_check=" + valor_check  + "&accionFianzaPrestamo=" + agregarFianzaPrestamo + "&descripcion=" + descripcion + "&id=" + Math.random(),		
 			success: function(response){		
-			// validar		
+				// validar GUARDAR REGISTROS
 				if (response.respuesta == true) {		
-					toastr.success("Hoja de Calculo Actualizada.");
+					toastr["error"](response.mensaje, "Sistema");
 					$('#MensajeImportar').empty();
 					$('#MensajeImportar').append("<label 'class=text-black bg-default'>Archivo Actualizado: "+response.contenido+"</label>");
 
 					$("#listaContenidoOk").empty();
 
 					// Elminar mensaje de Actualizar Archivo.
-						toastr.info(response.mensaje);
+					toastr["info"](response.mensaje, "Sistema");
 					}		
+					if (response.respuesta == false) {		
+						toastr["error"](response.mensaje, "Sistema");
+						$('#MensajeImportar').empty();
+						//$('#MensajeImportar').append("<label 'class=text-black bg-default'>Archivo Actualizado: "+response.contenido+"</label>");
+	
+						$("#listaContenidoOk").empty();
+						$("#listaContenidoOk").append(response.contenido);
+					}
 			},		
 			error:function(){		
 				toastr.error(":(");		
 			}		
 		}); // Cierre de Ajax. QUE TIENE EL NOMBRE DEL ARCHIVO A ACTUALIZAR.
-	// Validar el contenido de la hoja de calculo Fianzas y Prestamos
-
 });	
 
 // ***************************************************************************************************                
@@ -147,10 +168,18 @@ $('body').on('click','#listaArchivosOK a',function (e)
 								success: function(response){		
 								// validar		
 									if (response.respuesta == true) {		
-										toastr.success("Hoja de Calculo Actualizada.");
+										toastr["info"](response.mensaje, "Sistema");
 										$('#MensajeImportar').empty();
                                         $('#MensajeImportar').append("<label 'class=text-black bg-default'>Archivo Actualizado: "+response.nombre_archivo+"</label>");
 
+										$("#listaContenidoOk").empty();
+										$("#listaContenidoOk").append(response.contenido);
+									}
+									if (response.respuesta == false) {		
+										toastr["error"](response.mensaje, "Sistema");
+										$('#MensajeImportar').empty();
+										//$('#MensajeImportar').append("<label 'class=text-black bg-default'>Archivo Actualizado: "+response.contenido+"</label>");
+					
 										$("#listaContenidoOk").empty();
 										$("#listaContenidoOk").append(response.contenido);
 									}		

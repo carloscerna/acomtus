@@ -106,7 +106,7 @@ include($path_root."/acomtus/includes/funciones.php");
                             $credito = trim($listado['credito']);						// id_						0
 
                             $contenidoOK .= "<tr>
-                            <td>
+                            <td><input type=checkbox name=chk$id_ id=chk$id_ value=checked>'
 							<td>$id_
                             <td>$fecha
                             <td>$codigo
