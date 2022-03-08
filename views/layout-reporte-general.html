@@ -602,8 +602,6 @@
     </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->
 
-<!-- plantilla que contiene el . -->
-{% include 'VentanaBuscarPorTiquete.html' %}
 
 <div id="loading-screen" style="display:none">
   <img src="img/spinning-circles.svg">
@@ -611,6 +609,10 @@
     <label for="LblDescripcion" class="">Por Favor Espere...</label>
   </h3>
 </div>
+
+<!-- plantilla que contiene el . -->
+{% include 'VentanaBuscarPorTiquete.html' %}
+
 {% endblock %}
 
 {% block loginUser %}

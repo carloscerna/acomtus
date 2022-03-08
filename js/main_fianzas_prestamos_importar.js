@@ -74,7 +74,6 @@ var fila = 0;
 	// Comenzar el proceso del AJAX PARA REVISAR SI LA TABLA FIANZAS_PRESTAMOS_IMPORTAR TIENE DATOS CORRECTOS PARA ACTUALIZAR.
 		url_archivo = "php_libs/soporte/FianzasPrestamosImportar.php";
 				// mostra rel modal. que contiene el mensaje del nombre del archivo y mensajes de veririvación o actualización.
-				$('#myModal').modal('show');
 				$("label[for='NombreArchivo']").text(agregarFianzaPrestamo);
 		$.ajax({
 			cache: false,		
@@ -131,7 +130,6 @@ $('body').on('click','#listaArchivosOK a',function (e)
 			return;
 		}
 		// mostra rel modal. que contiene el mensaje del nombre del archivo y mensajes de veririvación o actualización.
-		$('#myModal').modal('show');
 		// valores a la consola
 			console.log("valor: " + valor_check + " Archivo: " + nombre_archivo);
 			$("label[for='NombreArchivo']").text(nombre_archivo);
@@ -241,4 +239,16 @@ $('body').on('click','#listaArchivosOK a',function (e)
 						}, "json");
 			       }                                             	
 });
+
 });
+
+      // Mensaje de Carga de Ajax.
+      function configureLoadingScreen(screen){
+		$(document)
+			.ajaxStart(function () {
+				screen.fadeIn();
+			})
+			.ajaxStop(function () {
+				screen.fadeOut();
+			});
+	}
