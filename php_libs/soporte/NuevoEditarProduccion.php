@@ -514,8 +514,8 @@ if($errorDbConexion == false){
 									}else{
 										## EVALUAR SI HAY COLA.
 										##
-											# otra pregunta....
-											$query_prueba3 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+											# otra pregunta.... CUANDO EL CODIGO ES IGUAL A VENDIDO PERO TIENE COLA
+										print	$query_prueba3 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
 												and codigo_estatus = '05' and procesado = 'true' and tiquete_cola <> 0 ORDER BY fecha DESC LIMIT 1";
 											// Ejecutamos el query
 												$consulta_pa3 = $dblink -> query($query_prueba3);    
@@ -573,12 +573,17 @@ if($errorDbConexion == false){
 							$hasta_asignado = $listado_temp['tiquete_hasta'];
 							$total = $listado_temp['total'];
 							$cantidad = $listado_temp['cantidad'];
+							$codigo_produccion_asignado = $listado_temp['codigo_produccion_asignado'];
 							$codigo_inventario_tiquete = $listado_temp['codigo_inventario_tiquete'];
 	
 							# VERIFICAR ANTES DE GUARDAR EN PRODUCCION ASIGNADO.
-								$query_ = "SELECT * FROM produccion_asignado
+								/*$query_ = "SELECT * FROM produccion_asignado
 									WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado'
 									and codigo_inventario_tiquete = '$codigo_inventario_tiquete' ORDER BY fecha ASC
+								";*/
+								$query_ = "SELECT * FROM produccion_asignado
+									WHERE  id_ = '$codigo_produccion_asignado'
+									and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
 								";
 							// Ejecutamos el query
 								$consulta_ = $dblink -> query($query_);								
@@ -588,33 +593,20 @@ if($errorDbConexion == false){
 									# si está procesado y 03 - > Entregado ól. 04 -> Devolución.
 									/*$query_prueba = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
 									and codigo_estatus >= '03' and codigo_estatus <= '04' and procesado = 'true' ORDER BY fecha DESC LIMIT 1";*/
-									$query_prueba = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
-										and codigo_estatus = '03' and procesado = 'false' ORDER BY fecha DESC LIMIT 1";
+									/*$query_prueba = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+										and codigo_estatus = '03' and procesado = 'false' ORDER BY fecha DESC LIMIT 1";*/
+										$query_prueba = "SELECT * from produccion_asignado WHERE id_ = '$codigo_produccion_asignado'
+										and codigo_estatus = '03' and procesado = 'false'";
 									// Ejecutamos el query
 									$consulta_pa1 = $dblink -> query($query_prueba);
 									// Da resultado cuanod ya existe el talonario con estatus '03.
 									if($consulta_pa1 -> rowCount() != 0){        
-										# NO GUARDAR
-
-										$NoGuardado = $NoGuardado + 1;
-										$QueryLista .= $query_prueba;
-										
-										while($listado_pa1 = $consulta_pa1 -> fetch(PDO::FETCH_BOTH))
-										{
-											$fecha = $listado_pa1['fecha'];
-											$codigo_produccion_no_guardado = $listado_pa1['codigo_produccion'];
-											$tiquete_desde = $listado_pa1['tiquete_desde'];
-											$tiquete_hasta = $listado_pa1['tiquete_hasta'];
-											$codigo_estatus = $listado_pa1['codigo_estatus'];
-
-											$contenidoOKNoGuardados .= "<tr>
-											<td>$fecha
-											<td>$codigo_produccion_no_guardado
-											<td>$tiquete_desde
-											<td>$tiquete_hasta
-											<td>$codigo_estatus"
-											;
-										}
+										# ACTUALIZAR EL REGISTRO ESTE O NO ESTE ODIFICADO.
+											$update_query = "UPDATE produccion_asignado SET tiquete_desde = '$desde_asignado', total = '$total', cantidad = '$cantidad'
+												 WHERE id_ = '$codigo_produccion_asignado'
+												";
+										// Ejecutamos el query
+											$QueryUpdate = $dblink -> query($update_query);
 									}else{
 										# otra pregunta....
 											$query_prueba2 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'

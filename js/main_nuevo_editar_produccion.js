@@ -230,6 +230,10 @@ $("#DesdeAsignadoPartial01").on('keyup', function (e) {
                                         toastr["success"](response.mensaje, "Sistema");
                                     //
                                         $('#listadoAsignacionOk').append(response.contenido);
+                                    // cambiar el valor del ingreso.
+                                    $("label[for='LblIngreso']").text('Total Entregado $ ' + response.totalIngreso);
+                                    $("label[for='LblCantidad']").text('Total Tiquete: ' + response.cantidad_tiquete);
+                                    $("label[for='LblCantidadTalonarios']").text('Total Talonarios: ' + response.CantidadTalonarios);
                                 }
                                 if(response.respuesta == false){
                                 // Pasar foco.
@@ -275,7 +279,7 @@ $("#DesdeAsignado").on('keyup', function (e) {
                             if (response.respuesta === true) {                     
                                 toastr["info"](response.mensaje, "Sistema");
                                 $('#listadoAsignacionOk').append(response.contenido);
-                                                        // cambiar el valor del ingreso.
+                            // cambiar el valor del ingreso.
                                 $("label[for='LblIngreso']").text('Total Entregado $ ' + response.totalIngreso);
                                 $("label[for='LblCantidad']").text('Total Tiquete: ' + response.cantidad_tiquete);
                                 $("label[for='LblCantidadTalonarios']").text('Total Talonarios: ' + response.CantidadTalonarios);
@@ -1177,7 +1181,18 @@ function listar_serie_tiquete(){
             }
     }, "json");    
 }    
-    
+
+// Mensaje de Carga de Ajax.
+function configureLoadingScreen(screen){
+    $(document)
+        .ajaxStart(function () {
+            screen.fadeIn();
+        })
+        .ajaxStop(function () {
+            screen.fadeOut();
+        });
+}
+
 function AbrirVentana(url)
     {
         window.open(url, '_blank');

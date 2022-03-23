@@ -3,6 +3,7 @@
 {% extends 'default_layout.html' %}
 
 {% block extraCSS %}
+<link href="css/styles-loading.css" rel="stylesheet">
 <style>
 /* mensajes de error para el validate de los form de input*/
  input.error {
@@ -164,6 +165,14 @@ document.querySelectorAll('select').forEach((input) => {
      
  });*/
  </script>
+
+ <!-- DEINIR EL AJAX START- STOP Y ERROR -->
+<script>
+  $(document).ready(function () { 
+   var screen = $('#loading-screen');
+     configureLoadingScreen(screen);
+   })
+</script>
 {% endblock %}
 
 {% block contenidos %}
@@ -433,6 +442,8 @@ document.querySelectorAll('select').forEach((input) => {
 <!-- plantilla que contiene el . -->
 {% include 'VentanaBuscarPorTiquete.html' %}
 
+<!-- Loading Screen -->
+{% include 'loading-screen.html' %}
 
 {% endblock %}
 
