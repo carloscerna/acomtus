@@ -19,6 +19,7 @@ $lista = "";
 $arreglo = array();
 $datos = array();
 $fila_array = 0;
+$NumeroFilas = 0;
 $codigo_personal = "";
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);    
@@ -85,10 +86,15 @@ if($errorDbConexion == false){
 													}
 												
 											}else{
-												// Agregar Registro
-													$query_insertar = "INSERT INTO fianzas (fecha, codigo, fianza, devolucion, descripcion) VALUES ('$fecha','$codigo','$fianza','$devolucion','$descripcion')";
-												// Ejecutar query insertar
-													$resultadoQuery = $dblink -> query($query_insertar);    
+													// Evauar si el checkbox está activo
+													if($check_v[$fila_] == 'false'){
+														// no va ser nada...
+													}else{
+													// Agregar Registro
+														$query_insertar = "INSERT INTO fianzas (fecha, codigo, fianza, devolucion, descripcion) VALUES ('$fecha','$codigo','$fianza','$devolucion','$descripcion')";
+													// Ejecutar query insertar
+														$resultadoQuery = $dblink -> query($query_insertar);    
+													}
 											}
 					// VARIABLE DE LA MATRIZ CHECKBOX FILA
 						$fila_ = $fila_ + 1;
@@ -120,7 +126,7 @@ if($errorDbConexion == false){
 					// Respusta y mensaje		
 					$respuestaOK = true;
 					$mensajeError = "Se ha Actualizado el registro correctamente";
-					$contenidoOK = 'FIANZA ACTUALIZADA.';
+					$contenidoOK = 'PRESTAMO ACTUALIZADA.';
 					// convertimos el objeto
 					while($listado = $consulta_leer -> fetch(PDO::FETCH_BOTH))
 					{
@@ -203,7 +209,8 @@ else{
 		// Armamos array para convertir a JSON
 		$salidaJson = array("respuesta" => $respuestaOK,
 			"mensaje" => $mensajeError,
-			"contenido" => $contenidoOK);
+			"contenido" => $contenidoOK,
+			"NumeroRegistros" => $NumeroFilas);
 		echo json_encode($salidaJson);
 	}
 ?>

@@ -126,5 +126,7 @@ include($path_root."/acomtus/includes/funciones.php");
 $salidaJson = array("respuesta" => $respuestaOK,
     "mensaje" => $mensajeError,
     "contenido" => $contenidoOK,
-    "nombre_archivo" => $nombre_archivo);
+    "nombre_archivo" => $nombre_archivo,
+    "CantidadRegistros" => $num
+);
 echo json_encode($salidaJson);?>

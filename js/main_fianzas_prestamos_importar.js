@@ -187,6 +187,8 @@ $('body').on('click','#listaArchivosOK a',function (e)
 
 										$("#listaContenidoOk").empty();
 										$("#listaContenidoOk").append(response.contenido);
+										//
+										$("label[for='CantidadRegistros']").text("Cantidad de Registros -->> " + response.CantidadRegistros);
 									}
 									if (response.respuesta == false) {		
 										toastr["error"](response.mensaje, "Sistema");
