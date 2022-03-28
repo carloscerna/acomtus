@@ -1183,7 +1183,7 @@ function listar_serie_tiquete(){
 }    
 
 // Mensaje de Carga de Ajax.
-function configureLoadingScreen(screen){
+/*function configureLoadingScreen(screen){
     $(document)
         .ajaxStart(function () {
             screen.fadeIn();
@@ -1191,7 +1191,7 @@ function configureLoadingScreen(screen){
         .ajaxStop(function () {
             screen.fadeOut();
         });
-}
+}*/
 
 function AbrirVentana(url)
     {
