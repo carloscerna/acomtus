@@ -63,7 +63,7 @@ include($path_root."/acomtus/includes/funciones.php");
 // Ejecutamos el Query.
     $consulta_borrar = $dblink -> query($query_borrar);
 //	codigo de la asignatura. modalidad, docente
-   $fila = 2; $num = 1;
+   $fila = 2; $num = 0;
 			  while($objPHPExcel->getActiveSheet()->getCell("C".$fila)->getValue() != "")
 			   {
                   $descripcion = $objPHPExcel->getActiveSheet()->getCell("B".$fila)->getFormattedValue();	
@@ -78,6 +78,8 @@ include($path_root."/acomtus/includes/funciones.php");
                   $codigo = $objPHPExcel->getActiveSheet()->getCell("J".$fila)->getValue();
                   // CONDICIONAR QUE JOURNAL SOLO SEA PRJ.
                   if($jornal == "PRJ"){
+                      // contar registros 
+                      $num++;
                     // Query cuando son notas num�ricas.
                         $query_guardar = "INSERT INTO fianzas_prestamos_importar (fecha, codigo, nombre, referencia, jornal, debito, credito, descripcion)
                             VALUES ('$fecha', '$codigo', '$nombre', '$referencia', '$jornal', '$debito', '$credito', '$descripcion')";												 
@@ -85,7 +87,7 @@ include($path_root."/acomtus/includes/funciones.php");
                         $result = $db_link -> query($query_guardar);
                   }
 				// INCREMENTAR I PARA LA COLUMNA de excel.
-					$fila++; $num++;
+					$fila++; 
 				}
                 // Leer la información guardada.
                 $query_buscar = "SELECT * FROM fianzas_prestamos_importar";
