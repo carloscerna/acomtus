@@ -300,14 +300,16 @@ function AgregarFianzaPrestamo($tabla_array,$campos_array,$data_accion){
 	global $dblink, $respuestaOK, $mensajeError, $contenidoOK;
 	// VALORES DEL POST
 		$fecha = trim($_POST[$data_accion[0]]);
-		$descripcion = htmlspecialchars(trim($_POST[$data_accion[1]]));
-		$fianzaprestamo = trim($_POST[$data_accion[2]]);
-		$devoluciondescuento = trim($_POST[$data_accion[3]]);
+		$fianzaprestamo = trim($_POST[$data_accion[1]]);
+		$devoluciondescuento = trim($_POST[$data_accion[2]]);
+		$descripcion = htmlspecialchars(trim($_POST[$data_accion[3]]));
 		$codigo = substr(trim($_POST[$data_accion[4]]),9,5);
-		//$codigo = substr(trim($_POST[$data_accion[4]]),9,5);
+		// quitar , y convertir a formato double.
+		$fianzaprestamo = (double) str_replace(",","", $fianzaprestamo);
+		$devoluciondescuento = (double) str_replace(",","", $devoluciondescuento);
 		// Query
 		$query = "INSERT INTO $tabla_array[0] ($campos_array[1],$campos_array[2],$campos_array[3],$campos_array[4],$campos_array[5])
-				VALUES ('$fecha','$descripcion','$fianzaprestamo','$devoluciondescuento','$codigo')";
+				VALUES ('$fecha','$fianzaprestamo','$devoluciondescuento','$descripcion','$codigo')";
 			// Ejecutamos el query
 				$resultadoQuery = $dblink -> query($query);              
 				///////////////////////////////////////////////////////////////////////////////////////
@@ -330,7 +332,9 @@ function ActualizarFianzaPrestamo($tabla_array,$campos_array,$data_accion){
 		$fianzaprestamo = trim($_POST[$data_accion[1]]);
 		$devoluciondescuento = trim($_POST[$data_accion[2]]);
 		$descripcion = htmlspecialchars(trim($_POST[$data_accion[3]]));
-
+		// quitar , y convertir a formato double.
+			$fianzaprestamo = (double) str_replace(",","", $fianzaprestamo);
+			$devoluciondescuento = (double) str_replace(",","", $devoluciondescuento);
 		// QUERY UPDATE.
 			$query_usuario = sprintf("UPDATE $tabla_array[0] SET $campos_array[1] = '%s', $campos_array[2] = '%s', $campos_array[3] = '%s', $campos_array[4] = '%s'
 				WHERE $campos_array[0] = %d",
