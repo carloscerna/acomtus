@@ -586,8 +586,8 @@ function rellenar($total_dias_quincena){
                                             $pdf->RotatedText($x,$y,'4h',0);
                                         $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
                                         // CUANDO PIDE PERMISO POR ENFERMEDAD. Una tanda 4 horas
-                                       //$salario = $salario + ($horas_jornada * $pago_diario_hora);
-                                        $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
+                                       $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                        //$asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         $extra = $extra + ($horas_jornada * $pago_diario_hora);
                                         $total_tiempo_extra =  $extra;
                                         break;
@@ -598,8 +598,8 @@ function rellenar($total_dias_quincena){
                                          $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
                                              $pdf->RotatedText($x,$y,'1T',0);
                                          $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
-                                       // $salario = $salario + ($horas_jornada * $pago_diario_hora);
-                                        $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
+                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                       // $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         $extra = $extra + ($horas_jornada * $pago_diario_hora);                                        
                                         $total_tiempo_extra =  $extra;
                                         break;
@@ -610,11 +610,11 @@ function rellenar($total_dias_quincena){
                                              $pdf->RotatedText($x,$y,'1.5T',0);
                                          $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
                                         // PERMISO PERSONAL Una tanda 12 horas
-                                        //$salario = $salario + (8 * $pago_diario_hora);
-                                        $extra = $extra + (4 * $pago_diario_hora);
+                                        $salario = $salario + (8 * $pago_diario_hora);
+                                        $extra = $extra + (12 * $pago_diario_hora);
                                         $total_tiempo_extra =  $extra;
                                        // $salario = $salario + ($horas_jornada * $pago_diario_hora);
-                                        $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
+                                        //$asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         break;
                                     case '4':
                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
@@ -633,8 +633,8 @@ function rellenar($total_dias_quincena){
                                     case '4H':
                                      //   if($contar_4H == 0){
                                             // Media Tanda.
-                                            $salario = $salario + ($horas_jornada * $pago_diario_hora);
-                                            $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                           // $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                            //$salario = $salario + ($horas_jornada * $pago_diario_hora);
                                             // ARMAR LA CONSULTA PARA REVISAR SI TRABAJÓ EN VACACIÓN
                                             $query_jv = "SELECT * FROM catalogo_jornada WHERE id_ = '$codigo_jornada_extra_4H'";
                                             $consulta_jv = $dblink -> query($query_jv);
@@ -725,7 +725,7 @@ function rellenar($total_dias_quincena){
             $total_salario = $salario + $total_tiempo_extra + $asuetos;
         //  NOCTURNIDAD
            // $NocturnaValor = $NocturnaValorUnitario * $NocturnaCantidad;
-    }
+    }   //FOR TOTAL DIAS QUINCENA
 
     // ESPACIO PARA EL TERCER, se asigna una separación para las columnas.
         $pdf->SetFillColor(255,255,255);
@@ -816,10 +816,18 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
                                 // 
                                 if($descripcion_jornada == "4H"){
                                     $conteo_4h++;
-                                // CALCULO DEL SALARIO CUANDO hay mas de 4 jornadas de trabajo
-                                    if($conteo_4h >= 2){
-                                        
-                                        $descuento = $descuento + (4 * $pago_diario_hora);
+
+                                    switch ($conteo_4h) {
+                                        case '1':
+                                            $salario = $salario + (8 * $pago_diario_hora);
+                                            # code...
+                                            break;
+                                            case (($conteo_4h >= 3) && ($conteo_4h <= 7)):
+                                                $descuento = $descuento + (4 * $pago_diario_hora);
+                                                    break;
+                                        default:
+                                            # code...
+                                            break;
                                     }
                             } // LAZO IF...;
                      }   // LAZO WHILE
@@ -827,7 +835,7 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
                      $salario = $salario - $descuento;
                      $total_salario = ($salario + $total_tiempo_extra + $asuetos);
                  }   // LAZO IF....
-                 if($codigo == '075001'){
+                 if($codigo == '019014'){
                      print $descuento;
                      print "<br>";
                      print $conteo_4h;
@@ -884,7 +892,9 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
                      ORDER BY pa.fecha";
              $consulta_asistencia_buscar_db = $dblink -> query($query_asistencia_buscar_db);
              // validar si existen archivos en la consulta segun la fecha.
-             $cantidad_registros = $consulta_asistencia_buscar_db -> rowCount();
+                $cantidad_registros = $consulta_asistencia_buscar_db -> rowCount();
+            // regrear la variable conteo a 0
+                $conteo_4h = 0; $descuento = 0;
              // Verificar si existen registros.
                  if($consulta_asistencia_buscar_db -> rowCount() != 0 and $cantidad_registros == 7){
                      while($rows = $consulta_asistencia_buscar_db -> fetch(PDO::FETCH_BOTH))
@@ -916,6 +926,23 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
                                    $salario = $salario - (8 * $pago_diario_hora);
                                  }   // LAZO SWICTH...
                          } // LAZO IF...
+                         // 
+                         if($descripcion_jornada == "4H"){
+                            $conteo_4h++;
+
+                            switch ($conteo_4h) {
+                                case '1':
+                                    $salario = $salario + (8 * $pago_diario_hora);
+                                    # code...
+                                    break;
+                                case (($conteo_4h >= 3) && ($conteo_4h <= 7)):
+                                        $descuento = $descuento + (4 * $pago_diario_hora);
+                                            break;
+                                default:
+                                    # code...
+                                    break;
+                            }
+                    } // LAZO IF...;
                      }   // LAZO WHILE
                         //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
                         $total_salario = $salario + $total_tiempo_extra + $asuetos;

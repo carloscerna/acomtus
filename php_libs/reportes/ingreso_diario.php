@@ -187,13 +187,13 @@ function FancyTable($header)
     $pdf->SetXY(10,60);
 //  Encabezando.
     //$pdf->FancyTable($header); // Solo carge el encabezado de la tabla porque medaba error el cargas los datos desde la consulta.		
-//  DATOS NECESARIOS PARA CATALOGO RUTA
+    //  DATOS NECESARIOS PARA CATALOGO RUTA
     // armando el Query. PARA LA TABLA CATALOGO RUTA.
     $query = "SELECT id_ruta, codigo, descripcion FROM catalogo_ruta ORDER BY codigo";
     // Ejecutamos el Query.
-    $consulta = $dblink -> query($query);
+    $consulta_ruta = $dblink -> query($query);
     // crear matriz
-    while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+    while($listado = $consulta_ruta -> fetch(PDO::FETCH_BOTH))
     {
         // VARIABLES DE LA CONSULTA CATALOGO RUTA.
         $codigo_ruta = $listado['id_ruta'];
@@ -220,19 +220,166 @@ function FancyTable($header)
                     // Validar si hay registros.
                     if($consulta_v -> rowCount() != 0)
                     {
-                        // OBTENER LA CANTIDAD DE TIQUETES VENDIDOS.
-                        // recorrer los registros
+                        // SI CODIGO RUTA ES IGUAL A COBRADORES.
+                        if($codigo_ruta == 10){
+                            
+                            // OBTENER LA CANTIDAD DE TIQUETES VENDIDOS.
+                                // consulta.
+                                $query_vv = "SELECT * FROM produccion where codigo_estatus = '02' and fecha = '$fecha' and codigo_ruta = '$codigo_ruta'";
+                                $consulta_vv = $dblink -> query($query_vv);
+                                while($listado_vv = $consulta_vv -> fetch(PDO::FETCH_BOTH))
+                                {
+                                    $codigo_produccion_vv[] = $listado_vv['id_'];
+                                //    print "<br>";
+                                }
+                                   // print_r($codigo_produccion_vv);
+
+                                $query_c = "SELECT p.id_ AS id_produccion, p.fecha, p.codigo_inventario_tiquete, p.codigo_personal, p.fecha, p.codigo_ruta,
+                                    cat_ts.descripcion as nombre_serie,
+                                    pa.id_ as id_produccion_asignado, pa.tiquete_desde, pa.tiquete_hasta, pa.total, pa.cantidad, pa.codigo_inventario_tiquete as codigo_serie_id,
+                                    it.precio_publico, 
+                                    cat_r.descripcion as nombre_ruta,
+                                    cat_j.id_ as id_jornada
+                                        FROM produccion p
+                                        INNER JOIN produccion_asignado pa ON pa.codigo_produccion = p.id_
+                                        INNER JOIN inventario_tiquete it ON it.id_ = pa.codigo_inventario_tiquete
+                                        INNER JOIN catalogo_tiquete_serie cat_ts ON cat_ts.id_ = it.codigo_serie
+                                        INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = p.codigo_jornada
+                                        INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = p.codigo_ruta
+                                            WHERE p.codigo_estatus = '02' and p.id_ = '$codigo_produccion_vv[0]'
+                                                ORDER BY pa.id_, p.codigo_inventario_tiquete";
+
+                                    // Validar si hay registros.ç
+                                    $consulta_serie = $dblink -> query($query_c);      
+                                        if($consulta_serie -> rowCount() != 0){
+                                            $nombre_serie_ = array(); $nombre_serie_contar_valores = array();
+                                            while($listado_serie = $consulta_serie -> fetch(PDO::FETCH_BOTH))
+                                            {
+                                                $nombre_serie_[] = trim($listado_serie['codigo_serie_id']);
+                                                $nombre_ruta = trim($listado_serie['nombre_ruta']);
+                                        //     $codigo_produccion_[] = $listado_serie['id_produccion'];
+                                            }
+                                        }
+                                        // unica array
+                                        $nombre_serie_unique = array_unique($nombre_serie_);
+                                        $nombre_serie_contar_valores = array_count_values($nombre_serie_);
+                                        //	print_r($nombre_serie_contar_valores);}
+                                    /* print_r($nombre_serie_unique);
+                                        print "<br>";
+                                        print_r($codigo_produccion_vv);
+                                        print "<br>";*/
+                                        //
+                                // VARIABLES DE COLUMNA, FILA Y TOTAL INGRESO OK
+                                    $totalIngresoOK = 0; $totalserie = 0; $tiquete_vendido_cc = 0;
+                                    $tiquete_vendido_cobradores = array(); $total_vendido_cobradores = array(); $total_ingreso_cobradores = array(); $cantidad_buses_cobradores = array();
+                                    $precio_publico_cobradores = 0; $total_por_ruta_cobradores = 0; $total_por_tiquete_cobradores = 0;
+                            //
+
+                           // print_r($codigo_produccion_);
+                            for ($jj=0; $jj < count($codigo_produccion_vv); $jj++) { 
+                                if(count($nombre_serie_unique) > 1 && $nombre_ruta == 'Cobradores'){
+                                    foreach($nombre_serie_unique as $key=>$value) {
+                                         $query_vendidos_04 = "SELECT pa.total, pa.codigo_inventario_tiquete, count(pa.id_) as cantidad_buses, sum(pa.total) as total_ingreso, sum(pa.cantidad) as tiquete_vendido,
+                                        it.precio_publico
+                                        FROM produccion_asignado pa
+                                        INNER JOIN inventario_tiquete it ON pa.codigo_inventario_tiquete = it.id_
+                                        WHERE pa.codigo_produccion = $codigo_produccion_vv[$jj] and pa.codigo_estatus = '05' and pa.codigo_inventario_tiquete = '$value'
+                                            GROUP BY pa.codigo_inventario_tiquete, pa.total, it.precio_publico";
+
+                                        $consulta_vendidos_04 = $dblink -> query($query_vendidos_04);
+                                        if($consulta_vendidos_04 -> rowCount() != 0){
+                                            // recorrer los registros
+                                            while($listado_vendidos_04 = $consulta_vendidos_04 -> fetch(PDO::FETCH_BOTH))
+                                            {
+                                                // VARIABLES DE LA CONSULTA CATALOGO RUTA.
+                                                $tiquete_vendido_cobradores[] = $listado_vendidos_04['tiquete_vendido'];
+                                                $total_ingreso_cobradores[] = $listado_vendidos_04['total_ingreso'];
+                                                //$cantidad_buses_cobradores[] = $listado_vendidos_04['cantidad_buses'];
+                                                $precio_publico_cobradores = $listado_vendidos_04['precio_publico'];
+                                            }
+                                        }
+
+                                        //  Detectar el precio del tiquete
+                                        switch ($precio_publico_cobradores) {
+                                            case '0.20':
+                                                $resumen_pasajes_020[] = array_sum($tiquete_vendido_cobradores); 
+                                                break;
+                                            case '0.25':
+                                                $resumen_pasajes_025[] = array_sum($tiquete_vendido_cobradores); 
+                                                break;
+                                            case '0.35':
+                                                $resumen_pasajes_035[] = array_sum($tiquete_vendido_cobradores); 
+                                                break;
+                                            }
+                                            // SUMAS
+                                            $total_por_ruta_cobradores = $total_por_ruta_cobradores + array_sum($total_ingreso_cobradores);
+                                            $total_por_tiquete_cobradores = $total_por_tiquete_cobradores + array_sum($tiquete_vendido_cobradores);
+                                            //$total_unidades_cobradores = $total_unidades_cobradores + $cantidad_buses_cobradores;
+                                            // A Pantalla
+                                            $pdf->SetX(10);
+                                            $fila++;
+                                            /// IMPRIMIR A PANTALLA. el encabezado una sola vez.
+                                            if($fila == 1){
+                                                // Encabezado
+                                                $pdf->FancyTable($header);  
+                                                // convertir a . y ,
+                                                $total_ingreso = array_sum($total_ingreso_cobradores);
+                                                $ingresos = number_format($total_ingreso,2,'.',',');
+                                                // A pantalla
+                                                $pdf->Cell($w[0],$h[0],$descripcion_ruta,0,0,'L',$fill);    // Nombre ruta
+                                                $pdf->Cell($w[1],$h[0],array_sum($tiquete_vendido_cobradores),0,0,'C',$fill);                   // pasajes
+                                                $pdf->Cell($w[2],$h[0],$precio_publico_cobradores,0,0,'C',$fill);      // Precio Publico
+                                                $pdf->Cell($w[3],$h[0],number_format(array_sum($total_ingreso_cobradores),2,'.',','),0,0,'R',$fill);       // Ingresos
+                                                $pdf->Cell($w[4],$h[0],count($codigo_produccion_vv),0,0,'C',$fill);      // Cantidad Buses
+                                                $tiquete_vendido_cobradores = array(); $total_vendido_cobradores = array(); $total_ingreso_cobradores = array(); $cantidad_buses_cobradores = array();
+                                            }else{
+                                                // CUANDO EXISTA MÁS DE UN PRECIO
+                                                $total_ingreso = array_sum($total_ingreso_cobradores);
+                                                $pdf->Cell($w[0],$h[0],'',0,0,'C',$fill);                   // Nombre ruta
+                                                $pdf->Cell($w[1],$h[0],array_sum($tiquete_vendido_cobradores),0,0,'C',$fill);                   // pasajes
+                                                $pdf->Cell($w[2],$h[0],$precio_publico_cobradores,0,0,'C',$fill);      // Precio Publico
+                                                $pdf->Cell($w[3],$h[0],number_format(array_sum($total_ingreso_cobradores),2,'.',','),0,0,'R',$fill);       // Ingresos
+                                                $pdf->Cell($w[4],$h[0],'',0,0,'C',$fill);      // Cantidad Buses
+                                                //$pdf->Cell($w[4],$h[0],count($codigo_produccion_vv),0,0,'C',$fill);      // Cantidad Buses
+                                                $tiquete_vendido_cobradores = array(); $total_vendido_cobradores = array(); $total_ingreso_cobradores = array(); $cantidad_buses_cobradores = array();
+                                            }
+                                                //$pdf->Cell($w[2],$h[0],''.$query_v,0,0,'C',$fill);
+                                                    $pdf->ln();   
+                                    } //FIN DEL FOR EEACH  
+                                    // Imprimir subtotales.
+                                        if($total_por_ruta_cobradores > 0)
+                                        {
+                                            $pdf->SetX(10);
+                                            $pdf->Cell($w[0],$h[0],'',0,0,'L',$fill);
+                                            $pdf->SetFont('Arial','B',9); // I : Italica; U: Normal;
+                                                $pdf->Cell($w[1],$h[0],'Total Ruta: ' . $descripcion_ruta,0,0,'R',$fill);
+                                            $pdf->SetFont('Arial','',11); // I : Italica; U: Normal;
+
+                                            $pdf->Cell($w[2],$h[0],'',0,0,'C',$fill);
+                                            $pdf->Cell($w[3],$h[0],'$ '.number_format($total_por_ruta_cobradores,2,'.',','),'TB',0,'R',$fill);
+                                            $pdf->Cell($w[4],$h[0],'',0,1,'C',$fill);
+                                            $pdf->ln();
+                                            // TOTALES GENERALES
+                                            $total_general_ingresos = $total_general_ingresos + $total_por_ruta_cobradores;
+                                            $total_tiquetes_vendidos = $total_tiquetes_vendidos + $total_por_tiquete_cobradores;
+                                        }  
+                                } // IF SI NOMBRE RUTA ES IGUAL A COBRADORES
+                            }   //FOR CODIGO-PRODUCCION MATRIZ
+                            
+                        }else{
+                            // OBTENER LA CANTIDAD DE TIQUETES VENDIDOS.
+                            // recorrer los registros
                             $codigo_produccion_ = array();
                             while($listado_codigo_produccion = $consulta_v -> fetch(PDO::FETCH_BOTH))
                             {
                                 // VARIABLES DE LA CONSULTA CATALOGO RUTA.
                                 $codigo_produccion_[] = $listado_codigo_produccion['id_'];
                             }
-                            // CANTIDAD DE TIQUETES VENDIDOS CON CODIGO '04'
+                            // CANTIDAD DE TIQUETES VENDIDOS CON CODIGO '05'
                             $tiquete_vendido = 0; $total_vendido = 0;
                             for ($Xh=0; $Xh < count($codigo_produccion_); $Xh++)
                             {
-                                $query_vendidos_04 = "select sum(cantidad) as tiquete_vendido from produccion_asignado where codigo_produccion = $codigo_produccion_[$Xh] and codigo_estatus = '05'";
+                                $query_vendidos_04 = "SELECT sum(cantidad) as tiquete_vendido FROM produccion_asignado WHERE codigo_produccion = $codigo_produccion_[$Xh] and codigo_estatus = '05'";
                                 $consulta_vendidos_04 = $dblink -> query($query_vendidos_04);
                                     // recorrer los registros
                                     while($listado_vendidos_04 = $consulta_vendidos_04 -> fetch(PDO::FETCH_BOTH))
@@ -241,11 +388,11 @@ function FancyTable($header)
                                         $tiquete_vendido = $listado_vendidos_04['tiquete_vendido'];
                                         $total_vendido = $total_vendido + $tiquete_vendido;
                                     }
-                            }   // CANTIDAD DE TIQUETES VENDIDOS CON CODIGO '04'
+                            }   // CANTIDAD DE TIQUETES VENDIDOS CON CODIGO '05'
                             /******************************************************************************************************************************** /*/
                             for ($Xxh=0; $Xxh < count($codigo_produccion_); $Xxh++)
                             {
-                                $query_vendidos_05 = "select sum(cantidad) as tiquete_vendido from produccion_asignado where codigo_produccion = $codigo_produccion_[$Xxh] and codigo_estatus = '04' and tiquete_cola > 0";
+                                $query_vendidos_05 = "SELECT sum(cantidad) as tiquete_vendido FROM produccion_asignado WHERE codigo_produccion = $codigo_produccion_[$Xxh] and codigo_estatus = '04' and tiquete_cola > 0";
                                 $consulta_vendidos_05 = $dblink -> query($query_vendidos_05);
                                     // recorrer los registros
                                     while($listado_vendidos_05 = $consulta_vendidos_05 -> fetch(PDO::FETCH_BOTH))
@@ -270,9 +417,9 @@ function FancyTable($header)
                                         # code...
                                         break;
                                     }  
-                        // OBTENER EL INGRESO DE LA RUTA y CATNIDAD DE VUELTAS.
-                        $query_ingreso = "SELECT sum(total_ingreso) as total_ingreso, count(id_) as cantidad_buses FROM produccion where codigo_estatus = '02' and fecha = '$fecha' and codigo_ruta = '$codigo_ruta' and codigo_tiquete_color = '$codigo_tiquete_color'";
-                        $consulta_ingreso = $dblink -> query($query_ingreso);
+                                    // OBTENER EL INGRESO DE LA RUTA y CATNIDAD DE VUELTAS.
+                            $query_ingreso = "SELECT sum(total_ingreso) as total_ingreso, count(id_) as cantidad_buses FROM produccion where codigo_estatus = '02' and fecha = '$fecha' and codigo_ruta = '$codigo_ruta' and codigo_tiquete_color = '$codigo_tiquete_color'";
+                            $consulta_ingreso = $dblink -> query($query_ingreso);
                             // recorrer los registros
                             while($listado_ingreso = $consulta_ingreso -> fetch(PDO::FETCH_BOTH))
                             {
@@ -308,6 +455,8 @@ function FancyTable($header)
                                 }
                                     //$pdf->Cell($w[2],$h[0],''.$query_v,0,0,'C',$fill);
                                         $pdf->ln();   
+                            
+                        } // IF QUE CONDICIONA SI LA RUTA SON LOS COBRADORES.
                     } 
             } // WHILE DE CATALOGO TIQUETE COLOR
                 // Imprimir subtotales.

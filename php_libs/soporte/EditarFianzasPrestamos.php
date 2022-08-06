@@ -301,8 +301,8 @@ function AgregarFianzaPrestamo($tabla_array,$campos_array,$data_accion){
 	// VALORES DEL POST
 		$fecha = trim($_POST[$data_accion[0]]);
 		$descripcion = htmlspecialchars(trim($_POST[$data_accion[1]]));
-		$fianzaprestamo = trim($_POST[$data_accion[2]]);
-		$devoluciondescuento = trim($_POST[$data_accion[3]]);
+		$fianzaprestamo = (int) (trim($_POST[$data_accion[2]]));
+		$devoluciondescuento = (trim($_POST[$data_accion[3]]));
 		$codigo = substr(trim($_POST[$data_accion[4]]),9,5);
 		//$codigo = substr(trim($_POST[$data_accion[4]]),9,5);
 		// Query
@@ -327,8 +327,8 @@ function ActualizarFianzaPrestamo($tabla_array,$campos_array,$data_accion){
 		// VALORES DEL POST
 		$id_ = trim($_POST[$data_accion[4]]);
 		$fecha = trim($_POST[$data_accion[0]]);
-		$fianzaprestamo = trim($_POST[$data_accion[1]]);
-		$devoluciondescuento = trim($_POST[$data_accion[2]]);
+		$fianzaprestamo = convertir_a_numero(trim($_POST[$data_accion[1]]));
+		$devoluciondescuento = convertir_a_numero(trim($_POST[$data_accion[2]]));
 		$descripcion = htmlspecialchars(trim($_POST[$data_accion[3]]));
 
 		// QUERY UPDATE.
