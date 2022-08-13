@@ -272,7 +272,8 @@ function FancyTable($header)
                                 // VARIABLES DE COLUMNA, FILA Y TOTAL INGRESO OK
                                     $totalIngresoOK = 0; $totalserie = 0; $tiquete_vendido_cc = 0;
                                     $tiquete_vendido_cobradores = array(); $total_vendido_cobradores = array(); $total_ingreso_cobradores = array(); $cantidad_buses_cobradores = array();
-                                    $precio_publico_cobradores = 0; $total_por_ruta_cobradores = 0; $total_por_tiquete_cobradores = 0;
+                                    $precio_publico_cobradores = array(); $total_por_ruta_cobradores = 0; $total_por_tiquete_cobradores = 0; 
+                                    $tiquete_ = array();
                             //
 
                            // print_r($codigo_produccion_);
@@ -295,77 +296,92 @@ function FancyTable($header)
                                                 $tiquete_vendido_cobradores[] = $listado_vendidos_04['tiquete_vendido'];
                                                 $total_ingreso_cobradores[] = $listado_vendidos_04['total_ingreso'];
                                                 //$cantidad_buses_cobradores[] = $listado_vendidos_04['cantidad_buses'];
-                                                $precio_publico_cobradores = $listado_vendidos_04['precio_publico'];
+                                                $precio_publico_cobradores[] = $listado_vendidos_04['precio_publico'];
+                                                $encabezado_precio_publico[] = $listado_vendidos_04['precio_publico'];
+                                                $tiquete_[]["vendido"] = $listado_vendidos_04['tiquete_vendido'];
+                                                $tiquete_[]["ingreso"] = $listado_vendidos_04['total_ingreso'];
+                                                $tiquete_[]["precio"] = $listado_vendidos_04['precio_publico'];
                                             }
                                         }
 
-                                        //  Detectar el precio del tiquete
-                                        switch ($precio_publico_cobradores) {
-                                            case '0.20':
-                                                $resumen_pasajes_020[] = array_sum($tiquete_vendido_cobradores); 
-                                                break;
-                                            case '0.25':
-                                                $resumen_pasajes_025[] = array_sum($tiquete_vendido_cobradores); 
-                                                break;
-                                            case '0.35':
-                                                $resumen_pasajes_035[] = array_sum($tiquete_vendido_cobradores); 
-                                                break;
-                                            }
-                                            // SUMAS
-                                            $total_por_ruta_cobradores = $total_por_ruta_cobradores + array_sum($total_ingreso_cobradores);
-                                            $total_por_tiquete_cobradores = $total_por_tiquete_cobradores + array_sum($tiquete_vendido_cobradores);
-                                            //$total_unidades_cobradores = $total_unidades_cobradores + $cantidad_buses_cobradores;
-                                            // A Pantalla
-                                            $pdf->SetX(10);
-                                            $fila++;
-                                            /// IMPRIMIR A PANTALLA. el encabezado una sola vez.
-                                            if($fila == 1){
-                                                // Encabezado
-                                                $pdf->FancyTable($header);  
-                                                // convertir a . y ,
-                                                $total_ingreso = array_sum($total_ingreso_cobradores);
-                                                $ingresos = number_format($total_ingreso,2,'.',',');
-                                                // A pantalla
-                                                $pdf->Cell($w[0],$h[0],$descripcion_ruta,0,0,'L',$fill);    // Nombre ruta
-                                                $pdf->Cell($w[1],$h[0],array_sum($tiquete_vendido_cobradores),0,0,'C',$fill);                   // pasajes
-                                                $pdf->Cell($w[2],$h[0],$precio_publico_cobradores,0,0,'C',$fill);      // Precio Publico
-                                                $pdf->Cell($w[3],$h[0],number_format(array_sum($total_ingreso_cobradores),2,'.',','),0,0,'R',$fill);       // Ingresos
-                                                $pdf->Cell($w[4],$h[0],count($codigo_produccion_vv),0,0,'C',$fill);      // Cantidad Buses
-                                                $tiquete_vendido_cobradores = array(); $total_vendido_cobradores = array(); $total_ingreso_cobradores = array(); $cantidad_buses_cobradores = array();
-                                            }else{
-                                                // CUANDO EXISTA MÁS DE UN PRECIO
-                                                $total_ingreso = array_sum($total_ingreso_cobradores);
-                                                $pdf->Cell($w[0],$h[0],'',0,0,'C',$fill);                   // Nombre ruta
-                                                $pdf->Cell($w[1],$h[0],array_sum($tiquete_vendido_cobradores),0,0,'C',$fill);                   // pasajes
-                                                $pdf->Cell($w[2],$h[0],$precio_publico_cobradores,0,0,'C',$fill);      // Precio Publico
-                                                $pdf->Cell($w[3],$h[0],number_format(array_sum($total_ingreso_cobradores),2,'.',','),0,0,'R',$fill);       // Ingresos
-                                                $pdf->Cell($w[4],$h[0],'',0,0,'C',$fill);      // Cantidad Buses
-                                                //$pdf->Cell($w[4],$h[0],count($codigo_produccion_vv),0,0,'C',$fill);      // Cantidad Buses
-                                                $tiquete_vendido_cobradores = array(); $total_vendido_cobradores = array(); $total_ingreso_cobradores = array(); $cantidad_buses_cobradores = array();
-                                            }
-                                                //$pdf->Cell($w[2],$h[0],''.$query_v,0,0,'C',$fill);
-                                                    $pdf->ln();   
+                                       
                                     } //FIN DEL FOR EEACH  
-                                    // Imprimir subtotales.
-                                        if($total_por_ruta_cobradores > 0)
-                                        {
-                                            $pdf->SetX(10);
-                                            $pdf->Cell($w[0],$h[0],'',0,0,'L',$fill);
-                                            $pdf->SetFont('Arial','B',9); // I : Italica; U: Normal;
-                                                $pdf->Cell($w[1],$h[0],'Total Ruta: ' . $descripcion_ruta,0,0,'R',$fill);
-                                            $pdf->SetFont('Arial','',11); // I : Italica; U: Normal;
 
-                                            $pdf->Cell($w[2],$h[0],'',0,0,'C',$fill);
-                                            $pdf->Cell($w[3],$h[0],'$ '.number_format($total_por_ruta_cobradores,2,'.',','),'TB',0,'R',$fill);
-                                            $pdf->Cell($w[4],$h[0],'',0,1,'C',$fill);
-                                            $pdf->ln();
-                                            // TOTALES GENERALES
-                                            $total_general_ingresos = $total_general_ingresos + $total_por_ruta_cobradores;
-                                            $total_tiquetes_vendidos = $total_tiquetes_vendidos + $total_por_tiquete_cobradores;
-                                        }  
                                 } // IF SI NOMBRE RUTA ES IGUAL A COBRADORES
+                                                                    
+         
                             }   //FOR CODIGO-PRODUCCION MATRIZ
+                            //
                             
+                            print_r($tiquete_['vendido']);
+                            exit;
+                            for ($jjh=0; $jjh < count($precio_publico_cobradores); $jjh++) { 
+                                //  Detectar el precio del tiquete
+                                switch ($precio_publico_cobradores[$jjh]) {
+                                    case '0.20':
+                                        $resumen_pasajes_020[] = array_sum($tiquete_vendido_cobradores); 
+                                        break;
+                                    case '0.25':
+                                        $resumen_pasajes_025[] = array_sum($tiquete_vendido_cobradores); 
+                                        break;
+                                    case '0.35':
+                                        $resumen_pasajes_035[] = array_sum($tiquete_vendido_cobradores); 
+                                        break;
+                                    }
+                                    // SUMAS
+                                    $total_por_ruta_cobradores = $total_por_ruta_cobradores + array_sum($total_ingreso_cobradores);
+                                    $total_por_tiquete_cobradores = $total_por_tiquete_cobradores + array_sum($tiquete_vendido_cobradores);
+                                    //$total_unidades_cobradores = $total_unidades_cobradores + $cantidad_buses_cobradores;
+                                // A Pantalla
+                                $pdf->SetX(10);
+                                $fila++;
+                                /// IMPRIMIR A PANTALLA. el encabezado una sola vez.
+                                if($fila == 1){
+                                    // Encabezado
+                                    $pdf->FancyTable($header);  
+                                    // convertir a . y ,
+                                    $total_ingreso = array_sum($total_ingreso_cobradores);
+                                    $ingresos = number_format($total_ingreso,2,'.',',');
+                                    // A pantalla
+
+                                    $pdf->Cell($w[0],$h[0],$descripcion_ruta,0,0,'L',$fill);    // Nombre ruta
+                                    $pdf->Cell($w[1],$h[0],array_sum($tiquete_vendido_cobradores),0,0,'C',$fill);                   // pasajes
+                                    $pdf->Cell($w[2],$h[0],$precio_publico_cobradores,0,0,'C',$fill);      // Precio Publico
+                                    $pdf->Cell($w[3],$h[0],number_format(array_sum($total_ingreso_cobradores),2,'.',','),0,0,'R',$fill);       // Ingresos
+                                    $pdf->Cell($w[4],$h[0],count($codigo_produccion_vv),0,0,'C',$fill);      // Cantidad Buses
+                                    $tiquete_vendido_cobradores = array(); $total_vendido_cobradores = array(); $total_ingreso_cobradores = array(); $cantidad_buses_cobradores = array();
+                                }else{
+                                    // CUANDO EXISTA MÁS DE UN PRECIO
+                                    $total_ingreso = array_sum($total_ingreso_cobradores);
+                                    $pdf->Cell($w[0],$h[0],'',0,0,'C',$fill);                   // Nombre ruta
+                                    $pdf->Cell($w[1],$h[0],array_sum($tiquete_vendido_cobradores),0,0,'C',$fill);                   // pasajes
+                                    $pdf->Cell($w[2],$h[0],$precio_publico_cobradores,0,0,'C',$fill);      // Precio Publico
+                                    $pdf->Cell($w[3],$h[0],number_format(array_sum($total_ingreso_cobradores),2,'.',','),0,0,'R',$fill);       // Ingresos
+                                    $pdf->Cell($w[4],$h[0],'',0,0,'C',$fill);      // Cantidad Buses
+                                    //$pdf->Cell($w[4],$h[0],count($codigo_produccion_vv),0,0,'C',$fill);      // Cantidad Buses
+                                    $tiquete_vendido_cobradores = array(); $total_vendido_cobradores = array(); $total_ingreso_cobradores = array(); $cantidad_buses_cobradores = array();
+                                }
+                                    //$pdf->Cell($w[2],$h[0],''.$query_v,0,0,'C',$fill);
+                                        $pdf->ln();   
+                            }
+                                
+                                    // Imprimir subtotales.
+                                    if($total_por_ruta_cobradores > 0)
+                                    {
+                                        $pdf->SetX(10);
+                                        $pdf->Cell($w[0],$h[0],'',0,0,'L',$fill);
+                                        $pdf->SetFont('Arial','B',9); // I : Italica; U: Normal;
+                                            $pdf->Cell($w[1],$h[0],'Total Ruta: ' . $descripcion_ruta,0,0,'R',$fill);
+                                        $pdf->SetFont('Arial','',11); // I : Italica; U: Normal;
+
+                                        $pdf->Cell($w[2],$h[0],'',0,0,'C',$fill);
+                                        $pdf->Cell($w[3],$h[0],'$ '.number_format($total_por_ruta_cobradores,2,'.',','),'TB',0,'R',$fill);
+                                        $pdf->Cell($w[4],$h[0],'',0,1,'C',$fill);
+                                        $pdf->ln();
+                                        // TOTALES GENERALES
+                                        $total_general_ingresos = $total_general_ingresos + $total_por_ruta_cobradores;
+                                        $total_tiquetes_vendidos = $total_tiquetes_vendidos + $total_por_tiquete_cobradores;
+                                    }                     
                         }else{
                             // OBTENER LA CANTIDAD DE TIQUETES VENDIDOS.
                             // recorrer los registros

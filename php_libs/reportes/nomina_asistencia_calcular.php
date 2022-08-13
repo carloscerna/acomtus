@@ -288,7 +288,7 @@ function FancyTable($header)
     // ARMAR LA CONSULTA
     // DE ACUERDO AL CODIGO DEL DEPARTAMENTO EMPRESA
     if($DepartamentoEmpresa == '02'){
-       $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario, salario 
+      $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario, salario 
         FROM personal WHERE codigo_ruta = '$ruta' and codigo_estatus = '01' ORDER BY codigo";
     }else{
        $query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, pago_diario, salario 
@@ -304,13 +304,16 @@ function FancyTable($header)
             {
                 // Variables 
                 $NocturnaCantidad = 0;
-            // variable para verificar que tipo de permiso o días trabajados.
-            $codigo = $row['codigo'];
-            $pago_diario = round($row['salario'] / 30,10);
-            //
-            $pdf->Cell($w[0],6,$i,'LR',0,'C',$fill);        // núermo correlativo
-            $pdf->Cell($w[1],6,utf8_decode(trim($row['codigo'])),'LR',0,'L',$fill); // codigo empleado
-            $pdf->Cell($w[2],6,utf8_decode(trim($row['nombre_completo'])),'LR',0,'L',$fill); // Nombre + apellido_materno + apellido_paterno
+                // variable para verificar que tipo de permiso o días trabajados.
+                $codigo = trim($row['codigo']);
+                $nombre_completo = utf8_decode(trim($row['nombre_completo']));
+                $pago_mensual = ($row['salario']);
+                $pago_diario = round($row['salario'] / 30,10);
+                $pago_diario_hora = round($pago_diario / 8,10); 
+                //
+                $pdf->Cell($w[0],6,$i,'LR',0,'C',$fill);        // núermo correlativo
+                $pdf->Cell($w[1],6,$codigo,'LR',0,'L',$fill); // codigo empleado
+                $pdf->Cell($w[2],6,$nombre_completo,'LR',0,'L',$fill); // Nombre + apellido_materno + apellido_paterno
             // Rellenar los cuadros segun el numero de dias.
                 rellenar($total_dias_quincena);
             // VALIDAR EL RELLENAR $I.
@@ -356,18 +359,22 @@ function rellenar_datos($linea){
 }
 
 function rellenar($total_dias_quincena){
-    global $pdf, $fill, $w, $codigo, $fecha_periodo, $dblink, $pago_diario, $Calcular, $nombresDias, $DepartamentoEmpresa, $NocturnaCantidad, $NocturnaValor, $NocturnaValorUnitario, $contar_4H;
+    global $pago_mensual, $pago_diario_hora, $nombre_completo, $pdf, $fill, $w, $codigo, $fecha_periodo, $dblink, $pago_diario, $Calcular, $nombresDias, $DepartamentoEmpresa, $NocturnaCantidad, $NocturnaValor, $NocturnaValorUnitario, $contar_4H;
     //
     // crear las matrices para el calculo del salario
     // presentar el calculo de SALARIO + ((ASUETOS, EXTRA, BONI) = TOTAL TIEMPO EXTRA) = TOTAL.
-    $salario = 0; $asuetos = 0; $extra = 0; $boni = 0; $total_tiempo_extra = 0; $total = 0; $pago_diario_hora = round($pago_diario / 8,10); $asueto = 0; $horas_jornadas = 0;
-    $total_horas_jornada = 0;
+        $salario = 0;
+        $asuetos = 0; 
+        $extra = 0; 
+        $total_tiempo_extra = 0; 
+        //$pago_diario_hora = round($pago_diario / 8,10); 
+        $horas_jornadas = 0;
+        $total_horas_jornada = 0;
      // DECLARACI{ON DE AMTRICES}
         $fecha_descanso = array(); $descripcion_jornada_a_P2 = array(); $fecha_inicio_adb = array();
-    $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+            $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
     // SEGUNDO BLOQUE DE LINEAS PARA EL NOMBRE Y NUMERO DEL DIA.
     for($j=0;$j<=$total_dias_quincena-1;$j++){
-
         // armanr query para buscar si existe la fecha en el perido seleccionar en la tabla personal asisitencia.
           $query_asistencia = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
                                     pa.codigo_jornada_descanso, pa.codigo_jornada_e_4h, pa.codigo_jornada_nocturna,
@@ -543,7 +550,9 @@ function rellenar($total_dias_quincena){
                                 break;
                             }                        
                 }else{
+                    //
                     // CUANDO SEA IGUAL SOLO A  CODIGO DE LA JORNADA
+                    //
                     $pdf->SetTextColor(0);
                     //
                     // REVISAR Y CALCULAR SI LA FECHA PERTENECIA A UN DÍA DE ASUETO
@@ -575,6 +584,11 @@ function rellenar($total_dias_quincena){
                             }   // find ela primera consulta sobre el asueto
                             // segunda condición del asueto para realizar calculos.
                             if($consulta_asueto -> rowCount() != 0){
+                                //
+                                // PAGO DIARIO NORMAL DEL ASUETO
+                                    $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                //
+                                //
                                 // Es asueto
                                 $asueto = true;
                                 // CALCULO DEL SALARIO CUANDO HAY PERMISOS
@@ -586,7 +600,7 @@ function rellenar($total_dias_quincena){
                                             $pdf->RotatedText($x,$y,'4h',0);
                                         $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
                                         // CUANDO PIDE PERMISO POR ENFERMEDAD. Una tanda 4 horas
-                                       $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                       //$salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         //$asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         $extra = $extra + ($horas_jornada * $pago_diario_hora);
                                         $total_tiempo_extra =  $extra;
@@ -598,7 +612,7 @@ function rellenar($total_dias_quincena){
                                          $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
                                              $pdf->RotatedText($x,$y,'1T',0);
                                          $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
-                                        $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                        //$salario = $salario + ($horas_jornada * $pago_diario_hora);
                                        // $asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         $extra = $extra + ($horas_jornada * $pago_diario_hora);                                        
                                         $total_tiempo_extra =  $extra;
@@ -610,14 +624,14 @@ function rellenar($total_dias_quincena){
                                              $pdf->RotatedText($x,$y,'1.5T',0);
                                          $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
                                         // PERMISO PERSONAL Una tanda 12 horas
-                                        $salario = $salario + (8 * $pago_diario_hora);
+                                        //$salario = $salario + (8 * $pago_diario_hora);
                                         $extra = $extra + (12 * $pago_diario_hora);
                                         $total_tiempo_extra =  $extra;
                                        // $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         //$asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         break;
-                                    case '4':
-                                       $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                    case '4': // CUANDO NO EXISTE HORAS EXTRAS CON ASUETO
+                                      //$salario = $salario + ($horas_jornada * $pago_diario_hora);
                                         //$asuetos = $asuetos + ($horas_jornada * $pago_diario_hora);
                                         break;
                                     default:
@@ -625,16 +639,19 @@ function rellenar($total_dias_quincena){
                                         $asuetos = 0;
                                         break;
                                     }
+
                             }else{
+                                //////////////////////////////////////////////////////////////////////////////////////////////////////
                                 // CUANDO EL DIA NO ES ASUETO.
+                                //////////////////////////////////////////////////////////////////////////////////////////////////////
                                 $asueto = false;
                                 // calcular el salario CON DESCRIPCION JORNADA
                                 switch ($descripcion_jornada) {
                                     case '4H':
                                      //   if($contar_4H == 0){
                                             // Media Tanda.
-                                           // $salario = $salario + ($horas_jornada * $pago_diario_hora);
-                                            //$salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                            $salario = $salario + ($horas_jornada * $pago_diario_hora);
+                                            $salario = $salario + ($horas_jornada * $pago_diario_hora);
                                             // ARMAR LA CONSULTA PARA REVISAR SI TRABAJÓ EN VACACIÓN
                                             $query_jv = "SELECT * FROM catalogo_jornada WHERE id_ = '$codigo_jornada_extra_4H'";
                                             $consulta_jv = $dblink -> query($query_jv);
@@ -711,6 +728,7 @@ function rellenar($total_dias_quincena){
                                         }
                             }   // CONDICIÓN DEL DIA DE ASUETO.
                 }   // FIN DEL IF DESCRIPCION JORNADA
+
             }   // FIN DEL WHILE QUE BUSCA SI HAY REGISTRO GUARDADOS DE CADA EMPLEADO.
         }else{
             // rellenar con valores según consulta.
@@ -720,7 +738,7 @@ function rellenar($total_dias_quincena){
                 $pdf->Cell($w[7],6,'','1',0,'C',$fill);
             }
         }   // FIN DEL WHILE QUE BUSCA SI HAY REGISTRO GUARDADOS.
-     
+
         //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
             $total_salario = $salario + $total_tiempo_extra + $asuetos;
         //  NOCTURNIDAD
@@ -732,7 +750,9 @@ function rellenar($total_dias_quincena){
         $pdf->Cell($w[8],6,'','L',0,'C',$fill);
         $pdf->SetFillColor(233, 224, 222);
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  proceso para el descuento.
+//
+//  PROCESO PARA EL DESCUENTO
+//
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // si es motorista catalogo_departamento-empresa 02
 if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
@@ -769,14 +789,14 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
      for ($bb=0; $bb < count($BuscarFechaInicio) ; $bb++) { 
          //print "Fecha Inicio: ". $BuscarFechaInicio[$bb] . " Fecha fin: " . $BuscarFechaFin[$bb];
          // armanr query para buscar si existe la fecha en el perido seleccionar en la tabla personal asisitencia.
-        $query_asistencia_buscar_db = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
+            $query_asistencia_buscar_db = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
                  pa.codigo_jornada_descanso,
                  cat_j.descripcion as descripcion_jornada, cat_j.horas,
                  cat_lp.descripcion as descripcion_licencia, cat_lp.horas as horas_licencia
                      FROM personal_asistencia pa 
                      INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = pa.codigo_jornada
                      INNER JOIN catalogo_tipo_licencia_o_permiso cat_lp ON cat_lp.id_ = pa.codigo_tipo_licencia
-                     WHERE pa.codigo_personal = '$codigo' and pa.fecha >= '$BuscarFechaInicio[$bb]' and pa.fecha <= '$BuscarFechaFin[$bb]'";
+                     WHERE pa.codigo_personal = '$codigo' and pa.fecha >= '$BuscarFechaInicio[$bb]' and pa.fecha <= '$BuscarFechaFin[$bb]' order by pa.fecha";
              $consulta_asistencia_buscar_db = $dblink -> query($query_asistencia_buscar_db);
              // validar si existen archivos en la consulta segun la fecha.
              $cantidad_registros = $consulta_asistencia_buscar_db -> rowCount();
@@ -819,7 +839,7 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
 
                                     switch ($conteo_4h) {
                                         case '1':
-                                            $salario = $salario + (8 * $pago_diario_hora);
+                                           // $salario = $salario + (8 * $pago_diario_hora);
                                             # code...
                                             break;
                                             case (($conteo_4h >= 3) && ($conteo_4h <= 7)):
@@ -835,16 +855,20 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
                      $salario = $salario - $descuento;
                      $total_salario = ($salario + $total_tiempo_extra + $asuetos);
                  }   // LAZO IF....
-                 if($codigo == '019014'){
-                     print $descuento;
-                     print "<br>";
-                     print $conteo_4h;
-                     print "<br>";
-                     print $salario;
-                     print "<br>";
-                     print $total_salario;
-                     print "Pago diario: <br>";
-                     print $pago_diario_hora;
+
+                 if($codigo == '0011311'){
+                    print "<br>Codigo: " . $codigo;
+                    print "<br>Nombre Completo: " . $nombre_completo;
+                    print "<br>Pago mensual: " . $pago_mensual;
+                    print "<br>Pago diario: $ " . $pago_diario_hora;
+                    print "<br>Descuento: $ " . $descuento;
+                     print "<br>conteo 4h # " . $conteo_4h;
+                     print "<br>Salario: $ " . $salario;
+                     print "<br>Tiempo Extra: $ ". $total_tiempo_extra;
+                     print "<br>Total Salario: $ " . $total_salario;
+                     
+                     print "<br>Consulta: <br>";
+                     print  $query_asistencia_buscar_db;
                      exit;
                  }
 
@@ -881,7 +905,7 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
      for ($bb=0; $bb < count($BuscarFechaInicio) ; $bb++) { 
          //print "Fecha Inicio: ". $BuscarFechaInicio[$bb] . " Fecha fin: " . $BuscarFechaFin[$bb];
          // armanr query para buscar si existe la fecha en el perido seleccionar en la tabla personal asisitencia.
-          $query_asistencia_buscar_db = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
+         $query_asistencia_buscar_db = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
                  pa.codigo_jornada_descanso,
                  cat_j.descripcion as descripcion_jornada, cat_j.horas,
                  cat_lp.descripcion as descripcion_licencia, cat_lp.horas as horas_licencia
@@ -1003,7 +1027,7 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
                     $pdf->Cell($w[1],6,'','1',0,'C',$fill);
                     break;
             }
-        }
+         }
     }else{
         for($j=0;$j<=6;$j++){
             switch ($j) {
