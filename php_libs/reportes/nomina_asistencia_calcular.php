@@ -856,7 +856,7 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
                      $total_salario = ($salario + $total_tiempo_extra + $asuetos);
                  }   // LAZO IF....
 
-                 if($codigo == '0011311'){
+                 if($codigo == '00120'){
                     print "<br>Codigo: " . $codigo;
                     print "<br>Nombre Completo: " . $nombre_completo;
                     print "<br>Pago mensual: " . $pago_mensual;
@@ -956,7 +956,7 @@ if($DepartamentoEmpresa == '02' || $DepartamentoEmpresa == '04')
 
                             switch ($conteo_4h) {
                                 case '1':
-                                    $salario = $salario + (8 * $pago_diario_hora);
+                                   // $salario = $salario + (8 * $pago_diario_hora);
                                     # code...
                                     break;
                                 case (($conteo_4h >= 3) && ($conteo_4h <= 7)):
