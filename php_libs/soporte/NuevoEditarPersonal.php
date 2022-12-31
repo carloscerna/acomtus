@@ -397,7 +397,7 @@ if($errorDbConexion == false){
 			case 'EliminarRegistro':
 				// Armamos el query
 				// pendiente de crear....
-				$query = "DELETE FROM  WHERE id_ = $_POST[id_user]";
+				$query = "DELETE FROM personal WHERE id_personal = $_POST[id_user]";
 
 				// Ejecutamos el query
 					$count = $dblink -> exec($query);

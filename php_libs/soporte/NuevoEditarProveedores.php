@@ -130,33 +130,26 @@ if($errorDbConexion == false){
 			break;
 		
 			case 'EliminarRegistro':
-				$nombre = trim($_POST['nombre']);
-				// COMPARAR QUE ELUSUARIO ROOT NO PUEDA SER ELIMINADO.
-				if($nombre == 'root'){
-					$mensajeError = "El Usuario <b> root </b> no se puede Eliminar";
-						break;
-				}
-				// Armamos el query
-				$query = "DELETE FROM usuarios WHERE id_usuario = $_POST[id_user]";
-
-				// Ejecutamos el query
-				//	$count = $dblink -> exec($query);
-				
-				// Validamos que se haya actualizado el registro
-				if($count != 0){
+				$id_proveedor = $_POST["id_proveedor"];
+				// buscar si el codigo proveedor no existe en la talba INVENTARIO TIQUETE.
+					$query_buscar_inventario = "SELECT * FROM inventario_tiquete WHERE codigo_proveedor = '$id_proveedor'";
+						// Ejecutamos el Query.
+					$consulta = $dblink -> query($query_buscar_inventario);
+					// Validar si hay registros.
+				if($consulta -> rowCount() != 0){
+					$mensajeError = 'No se ha eliminado el registro hay datos en la Tabla Inventario.';
+					$contenidoOK = $query_buscar_inventario;
+				}else{
+					// Armamos el query
+					$query = "DELETE FROM proveedores WHERE id_ = $id_proveedor";
+					// Ejecutamos el query
+						$count = $dblink -> exec($query);
 					$respuestaOK = true;
 					$mensajeError = 'Se ha Eliminado '.$count.' Registro(s).';
 
-					$contenidoOK = '';
-
-				}else{
-					$mensajeError = 'No se ha eliminado el registro';
+					$contenidoOK = $query_buscar_inventario;
 				}
 			break;
-
-            
-            
-			
             default:
 				$mensajeError = 'Esta acción no se encuentra disponible';
 			break;

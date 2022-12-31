@@ -134,8 +134,8 @@ var obtener_data_editar = function(tbody, tabla){
 				cache: false,
 				type: "POST",
 				dataType: "json",
-				url:"php_libs/soporte/.php",
-				data: "id_user=" + id_ + "&accion=" + accion + "&nombre=" + nombre,
+				url:"php_libs/soporte/NuevoEditarProveedores.php",
+				data: "id_proveedor=" + id_ + "&accion=" + accion + "&nombre=" + nombre,
 				success: function(response){
 					// Validar mensaje de error proporcionado por el response. contenido.
 					if(response.respuesta == false){
@@ -143,7 +143,7 @@ var obtener_data_editar = function(tbody, tabla){
 					}
 					else{
 						toastr["success"](response.mensaje, "Sistema");
-							window.location.href = 'usuarios.php';
+							window.location.href = 'proveedores.php';
 						}               
 				},
 			});

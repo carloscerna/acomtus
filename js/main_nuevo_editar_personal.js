@@ -240,7 +240,7 @@ var NuevoRegistro = function(){
 		            	}
 		            	else{
                             toastr["success"](response.mensaje, "Sistema");
-							//window.location.href = 'estudiantes.php';
+							    window.location.href = 'personal.php';
                             }               
 		            },
 		        });
