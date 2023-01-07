@@ -835,17 +835,36 @@ if($errorDbConexion == false){
 				$cantidad_asignado = preg_replace("/[$,]/","",trim($_POST['CantidadTiqueteAsignado']));
 				$total = preg_replace("/[$,]/","",trim($_POST['TotalAsignado']));
 				$total = trim($_POST['TotalAsignado']);
-				// query actualizar
-					$query = "UPDATE produccion_asignado_temp 
-								SET tiquete_desde = '$tiquete_desde',
-									cantidad = '$cantidad_asignado',
-									total = '$total' 
-								WHERE id_ = '$IdEditarTiquete'";
-				// Ejecutamos el query
-					$resultadoQuery = $dblink -> query($query);              
-						$respuestaOK = true;
-						$mensajeError = 'Talonario Actualizado.';
-				// Ver nuevamente el listado
+				$id_produccion_asignacion = trim($_POST['IdProduccionAsignado']);
+				// Verificar si talonario Inicial es diferente alnuevo. o sea < o mayor que Hasta.
+					$query_consultar = "SELECT * from produccion_asignado WHERE id_ = '$id_produccion_asignacion'";
+					// Ejecutamos el Query.
+					$consulta = $dblink -> query($query_consultar);
+					while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+					{
+                        // Nombres de los campos de la tabla.
+                            $tiquete_desde_asignado = trim($listado['tiquete_desde']);
+							$tiquete_hasta = trim($listado['tiquete_hasta']);
+					}
+				// condicion tiquete desde < tiquete desde asignado
+					if($tiquete_desde < $tiquete_desde_asignado){
+						$mensajeError = 'El Tiquete no puede ser Menor.';
+					}else if($tiquete_desde > $tiquete_hasta){
+						$mensajeError = 'El Tiquete no puede ser Mayor.';
+					}else{
+						// query actualizar
+						$query = "UPDATE produccion_asignado_temp 
+						SET tiquete_desde = '$tiquete_desde',
+							cantidad = '$cantidad_asignado',
+							total = '$total' 
+						WHERE id_ = '$IdEditarTiquete'";
+						// Ejecutamos el query
+							$resultadoQuery = $dblink -> query($query);              
+								$respuestaOK = true;
+								$mensajeError = 'Talonario Actualizado.';
+						// Ver nuevamente el listado
+					}
+
 					ListadoAsignadoTemp();
 			break;
 			case 'EliminarUltimoRegistroProduccion':
@@ -944,7 +963,7 @@ function ListadoAsignadoTemp(){
 			// Calcular Cantidad Tiqeute.
 			$cantidadTiqueteOK = $cantidadTiqueteOK + $cantidad;
 			//
-			$todos = $id_pro_a . "#" . $pa_codigo_produccion . "#" . $tiquete_desde . "#" . $tiquete_hasta . "#" . $fecha . "#" . $cantidad . "#" . $total;                // Variables que pasa  a la tabla.s
+			$todos = $id_pro_a . "#" . $pa_codigo_produccion . "#" . $tiquete_desde . "#" . $tiquete_hasta . "#" . $fecha . "#" . $cantidad . "#" . $total . "#" . $codigo_produccion_asignado;                // Variables que pasa  a la tabla.s
 			//
 			$contenidoOK .= "<tr> 
 			<td $estilo_l><a data-accion=EditarAsignacion data-toggle=tooltip data-placement=left title='Modificar Talonario' href='$todos'><i class='far fa-money-check-edit-alt'></i></a>

@@ -200,6 +200,7 @@ $("#DesdeAsignadoPartial01").on('keyup', function (e) {
                     TotalAsignado = $("#TotalAsignado").val();
                     TiqueHasta = $("#HastaAsignado").val();
                     TiqueteDesde = this.value;
+                    TiqueteDesdeInicial = $("#DesdeAsignadoPartial02").val();
                         // VALIDAR EL VALOR.VALUE NO SEA MAYOR QUE GLOBAL DESDE Y GLOBAL HASTA
                     if(this.value < parseInt(GlobalDesdeM)){
                         toastr["warning"]("Desde es MENOR", "Sistema");
@@ -217,7 +218,7 @@ $("#DesdeAsignadoPartial01").on('keyup', function (e) {
                             type: "POST",
                             dataType: "json",
                             url:"php_libs/soporte/NuevoEditarProduccion.php",
-                            data: "TotalAsignado=" + TotalAsignado + "&CantidadTiqueteAsignado=" + CantidadTiqueteAsignado + "&TiqueteHasta=" + TiqueteHasta + "&IdEditarTiqueteDesde=" + IdEditarTiqueteDesde + "&accion_buscar=" + 'ActualizarTalonario' + "&TiqueteDesde=" + TiqueteDesde + "&iid="  + Math.random() + "&codigo_produccion=" + codigo_produccion,
+                            data: "TotalAsignado=" + TotalAsignado + "&CantidadTiqueteAsignado=" + CantidadTiqueteAsignado + "&TiqueteHasta=" + TiqueteHasta + "&IdEditarTiqueteDesde=" + IdEditarTiqueteDesde + "&accion_buscar=" + 'ActualizarTalonario' + "&TiqueteDesde=" + TiqueteDesde + "&iid="  + Math.random() + "&codigo_produccion=" + codigo_produccion + "&IdProduccionAsignado=" + TiqueteDesdeInicial,
                             success: function(response){
                                 // Validar mensaje de error
                                 if(response.respuesta == true){
@@ -241,6 +242,14 @@ $("#DesdeAsignadoPartial01").on('keyup', function (e) {
                                 //
                                     $("#DesdeAsignado").show();
                                     $("#DesdeAsignado").focus().select();
+                                    //
+                                    toastr["info"](response.mensaje, "Sistema");
+                                    //
+                                        $('#listadoAsignacionOk').append(response.contenido);
+                                    // cambiar el valor del ingreso.
+                                    $("label[for='LblIngreso']").text('Total Entregado $ ' + response.totalIngreso);
+                                    $("label[for='LblCantidad']").text('Total Tiquete: ' + response.cantidad_tiquete);
+                                    $("label[for='LblCantidadTalonarios']").text('Total Talonarios: ' + response.CantidadTalonarios);
                                 }
                             },
                         });
@@ -730,11 +739,14 @@ $('body').on('click','#listadoAsignacion a',function (e){
 		$("#CodigoProduccion").val(partial[1]);
 		// pasar valores AL PARTIAL.
 			var partial_desde = partial[2];
+            var partial_hasta = partial[3];
+            var partial_id_asignacion = partial[7];
 			var partial_1 = partial_desde.substr(partial_desde.length-2);
 			var partial_2 = partial_desde.length - 2;	// le quito siempre dos al numero total de caracteres.
 			var partial_3 = partial_desde.substr(0, partial_2);
         // convertir a number.
             partial_desde = Number(partial_desde);
+            partial_hasta = Number(partial_hasta);
 			partial_1 = Number(partial_1);
 			partial_2 = Number(partial_2);
 			partial_3 = Number(partial_3);
@@ -753,6 +765,7 @@ $('body').on('click','#listadoAsignacion a',function (e){
             $("#Partial").show();
         //
 			$("#DesdeAsignadoPartial01").val(partial_desde);	// los primero digitos del 0 al length - 2
+            $("#DesdeAsignadoPartial02").val(partial_id_asignacion);	// los primero digitos del 0 al length - 2
         //
             $("#DesdeAsignadoPartial01").focus().select();
         //
