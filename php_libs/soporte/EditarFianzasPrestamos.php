@@ -300,14 +300,16 @@ function AgregarFianzaPrestamo($tabla_array,$campos_array,$data_accion){
 	global $dblink, $respuestaOK, $mensajeError, $contenidoOK;
 	// VALORES DEL POST
 		$fecha = trim($_POST[$data_accion[0]]);
-		$descripcion = htmlspecialchars(trim($_POST[$data_accion[1]]));
-		$fianzaprestamo = trim($_POST[$data_accion[2]]);
-		$devoluciondescuento = trim($_POST[$data_accion[3]]);
+		$descripcion = htmlspecialchars(trim($_POST[$data_accion[3]]));
+		$fianzaprestamos = (str_replace("$","",$_POST[$data_accion[1]]));
+		$fianzaprestamo = (str_replace(",","",$fianzaprestamos));
+		$devoluciondescuentos = (str_replace("$","",$_POST[$data_accion[2]]));
+		$devoluciondescuento = (str_replace(",","",$devoluciondescuentos));
 		$codigo = substr(trim($_POST[$data_accion[4]]),9,5);
 		//$codigo = substr(trim($_POST[$data_accion[4]]),9,5);
 		// Query
 		$query = "INSERT INTO $tabla_array[0] ($campos_array[1],$campos_array[2],$campos_array[3],$campos_array[4],$campos_array[5])
-				VALUES ('$fecha','$descripcion','$fianzaprestamo','$devoluciondescuento','$codigo')";
+				VALUES ('$fecha','$fianzaprestamo','$devoluciondescuento','$descripcion','$codigo')";
 			// Ejecutamos el query
 				$resultadoQuery = $dblink -> query($query);              
 				///////////////////////////////////////////////////////////////////////////////////////
@@ -318,7 +320,7 @@ function AgregarFianzaPrestamo($tabla_array,$campos_array,$data_accion){
 				$contenidoOK = '';
 			}
 			else{
-				$mensajeError = "No se puede guardar el registro en la base de datos ".$query;
+				$mensajeError = "No se puede guardar el registro en la base de datos: ".$query;
 			}
 }
 /* FUNCION PARA EDITAR O ACTULIZAR INFORMACIÓN EN FIANZAS Y PRESTAMOS */
@@ -327,8 +329,10 @@ function ActualizarFianzaPrestamo($tabla_array,$campos_array,$data_accion){
 		// VALORES DEL POST
 		$id_ = trim($_POST[$data_accion[4]]);
 		$fecha = trim($_POST[$data_accion[0]]);
-		$fianzaprestamo = trim($_POST[$data_accion[1]]);
-		$devoluciondescuento = trim($_POST[$data_accion[2]]);
+		$fianzaprestamos = (str_replace("$","",$_POST[$data_accion[1]]));
+		$fianzaprestamo = (str_replace(",","",$fianzaprestamos));
+		$devoluciondescuento = (str_replace("$","",$_POST[$data_accion[2]]));
+		$devoluciondescuento = (str_replace(",","",$devoluciondescuento));
 		$descripcion = htmlspecialchars(trim($_POST[$data_accion[3]]));
 
 		// QUERY UPDATE.
