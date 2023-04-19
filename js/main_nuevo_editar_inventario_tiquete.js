@@ -127,6 +127,7 @@ var NuevoRegistro = function(){
 		            	}
 		            	else{
                             toastr["success"](response.mensaje, "Sistema");
+                            window.location.href = 'inventario_tiquete.php';
                             }               
 		            },
 		        });
