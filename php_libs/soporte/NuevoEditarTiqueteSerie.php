@@ -196,6 +196,7 @@ if($errorDbConexion == false){
 				$costo = str_replace("$","",$costo);
 				$total = trim($_POST['txtTotal']);
 				$total = str_replace("$","",$total);
+				$total = str_replace(",","",$total);
 				$precio_publico = $_POST['txtPrecioPublico'];
 				$precio_publico = str_replace("$","",$precio_publico);
                 // validar la existencia inicial
