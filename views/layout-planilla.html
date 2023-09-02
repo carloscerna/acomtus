@@ -5,20 +5,17 @@
 {% block extraCSS %}
 <style>
 /* mensajes de error para el validate de los form de input*/
-input.error {
+  input.error {
       border-color: #f00 !important;
   }
-  
   small.required {
       color:#f00;
   }
-    
   /* when not active use specificity to override the !important on border-(color) */
   .nav-tabs .nav-link:not(.active) {
       border-color: transparent !important;
   }
-  
-  </style>
+</style>
 {% endblock %}
 
 {% block javascripts %}
@@ -45,21 +42,18 @@ input.error {
         </div>
       </div><!-- /.container-fluid -->
     </section>
-
   <!-- Small boxes (Stat box) -->
   <section class="col col-sm-12 col-md-12 col-lg-8 col-xl-6 m-auto" id="PantallaPrincipal">
     <div class="card m-auto">
       <div class="card-header bg-gradient-navy">
-
         <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+          <button type="button" class="btn btn-tool" data-card-widget="collapse" aria-label="Mins"><i class="fas fa-minus"></i>
           </button>
         </div>
-        
         <div class="row">
           <div class="col-md-12 col-lg-12 col-xl-12">
               <h3 class="card-title"><i class="far fa-file-invoice-dollar"></i>
-               Planilla | Reporte de Trabajo</h3>
+                Planilla | Reporte de Trabajo</h3>
           </div>
         </div>
         <!-- /.card-tools -->
@@ -68,13 +62,13 @@ input.error {
       <div class="card-body">
         <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
         <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
-          <input type="hidden" id="MenuTab" va  lue='{{ codigo_perfil }}'>         
+          <input type="hidden" id="MenuTab" value="{{ codigo_perfil }}">         
                 <div class="row" id="DivSoloPlanilla">
                   <div class="col col-md-12 col-lg-12 col-xl-12">
                     <!-- SELECT CATALOGO JORNADA -->
                     <div class="form-group">
                       <label for="Mes">Mes</label>
-                      <select class="custom-select" name="lstFechaMes" id="lstFechaMes">
+                      <select class="custom-select" name="lstFechaMes" id="lstFechaMes" aria-label="lstrFechaMes">
                         <option value="01">Enero</option>
                         <option value="02">Febrero</option>
                         <option value="03">Marzo</option>
@@ -92,18 +86,17 @@ input.error {
                     <!-- AÑO ACTUAL-->
                     <div class="form-group">
                       <label class="año">Año</label>
-                      <select class="custom-select" name="lstFechaAño" id="lstFechaAño"></select>                                      
+                      <select class="custom-select" name="lstFechaAño" id="lstFechaAño" aria-label="lstFechaAño"></select>                                      
                     </div>
                     <!-- QUINCENA-->
                     <div class="form-group">
                     <label for="Quincena">Quincena</label>
-                        <select class="custom-select" name="lstQuincena" id="lstQuincena">
+                        <select class="custom-select" name="lstQuincena" id="lstQuincena" aria-label="lstQuincena">
                         <option value="Q1" selected>Primera</option>
                         <option value="Q2">Segunda</option>
                       </select>    
                     </div>
                     <!-- DEPARTAMENTO-->
-
                     <div class="form-group">
                       <label for="lstDepartamentoEmpresa">Departamento en la Empresa</label>
                       <select class="custom-select" name="lstDepartamentoEmpresa" id="lstDepartamentoEmpresa"></select>    
@@ -111,7 +104,8 @@ input.error {
                     <!-- RUTA - APARACERA CUANDO EN DEPARTAMENTO SE SELECCIONE MOTORISTAS-->
                     <div class="form-group" id="DivRuta" style="display: none;">
                       <label for="Ruta">Ruta</label>
-                      <select class="custom-select" name="lstRuta" id="lstRuta"></select>    
+                      <select class="custom-select" name="lstRuta" id="lstRuta"></select>
+                      <label for="CodigoRutaResponsable" class="text-primary"></label>    
                     </div>
               </div>
                 </div>
@@ -120,13 +114,13 @@ input.error {
         <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
           <div class="d-flex justify-content-between">
             <!-- Botón Crear Planilla -->
-            <button class='btn btn-success btn-lg' id="goCrearPlanilla" data-toggle="tooltip" data-placement="left" title="Crear"> 
-              <div style='text-align:center;'><i class="fad fa-clipboard-list"></i></div>  
+            <button class="btn btn-success btn-lg" id="goCrearPlanilla" data-toggle="tooltip" data-placement="left" title="Crear" type="button"> 
+              <div style="text-align:center;"><i class="fad fa-clipboard-list"></i></div>  
             </button>
 
             <!-- Botón Crear Planilla -->
-            <button class='btn btn-primary btn-lg' id="goCalcularPlanilla" data-toggle="tooltip" data-placement="left" title="Calcular"> 
-              <div style='text-align:center;'><i class="fal fa-clipboard-list-check"></i></div>  
+            <button class="btn btn-primary btn-lg" id="goCalcularPlanilla" data-toggle="tooltip" data-placement="left" title="Calcular"> 
+              <div style="text-align:center;"><i class="fal fa-clipboard-list-check"></i></div>  
             </button>
           </div>
               <!-- SELECCIONAR con o sin calculos           -->

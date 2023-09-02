@@ -13,103 +13,133 @@ $(function(){ // iNICIO DEL fUNCTION.
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
 ///////////////////////////////////////////////////////////////////////////////
 $(document).ready(function(){
-		//
-		// configurar el Select2
-		$('#lstPersonal').select2({
-			theme: "bootstrap4"
-		});
-		// configurar el Select2
-		$('#lstPersonalPorMotorista').select2({
-			theme: "bootstrap4"
-		});
-
-		if($('#MenuTab').val() == '06'){
-			$("#DivSoloParaContabilidad").hide();
-		}
-		//
-			listar_ruta();
-			listar_ann(year);
-			listar_departamento_cargo();	// Departamentos que existen en la Empresa.
-
+	// CSS NONE;
+	$("#CodigoRutaResponsable").css("display", "none");
+	// configurar el Select2
+	$('#lstPersonal').select2({
+		theme: "bootstrap4"
+	});
+	// configurar el Select2
+	$('#lstPersonalPorMotorista').select2({
+		theme: "bootstrap4"
+	});
+	// 
+	if($('#MenuTab').val() == '06'){
+		$("#DivSoloParaContabilidad").hide();
+	}
+	//
+		listar_ruta();
+		listar_ann(year);
+		listar_departamento_cargo();	// Departamentos que existen en la Empresa.
 			$("#lstFechaMes").prop('selectedIndex', mes);
+	// onchange de lstruta Y lstDepartamentoEmpresa
+		$("#lstRuta").change(function ()
+		{
+			$("#CodigoRutaResponsable").css("display", "none");
+		});
+	// Parametros para el lstruta.
+	$("#lstRuta").change(function ()
+	{
+		//
+		$("#CodigoRutaResponsable").css("display", "block");	
+		//
+		$("#lstRuta option:selected").each(function () {
+		codigo_ruta = $(this).val();
+			codigo_cargo=$("#lstDepartamentoEmpresa").val();
+			$.post("includes/cargar_responsable_asistencia.php", { codigo_ruta: codigo_ruta, codigo_cargo: codigo_cargo },
+			function(data){
+				$("label[for=CodigoRutaResponsable]").text(data[0].CodigoRutaResponsable);
+			}, "json");			
+		});
+	});
 });		
-
 ///////////////////////////////////////////////////////////////////////////////
 //	FUNCION LISTAR BUSQUEDA DE LOS REGISTROS
 ///////////////////////////////////////////////////////////////////////////////
 // Escribir la fecha actual.
-var now = new Date();                
-var day = ("0" + now.getDate()).slice(-2);
-var month = ("0" + (now.getMonth() + 1)).slice(-2);
-var year = now.getFullYear();
-
-today = now.getFullYear()+"-"+(month)+"-"+(day) ;
-// PARA SELECCIONA REL MES ACTUAL.
-const d = new Date();
-var mes = d.getMonth();
+	var now = new Date();                
+	var day = ("0" + now.getDate()).slice(-2);
+	var month = ("0" + (now.getMonth() + 1)).slice(-2);
+	var year = now.getFullYear();
+	today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+	// PARA SELECCIONA REL MES ACTUAL.
+	const d = new Date();
+	var mes = d.getMonth();
 //alert(mes);
-
 ///////////////////////////////////////////////////////////////////////////////
 // CUANDO CAMBIA LA FECHA. BUSCAR LA PRODUCCIÓN EN LA TABLA
 /// EVENTOS JQUERY IMPRIMIR TODA LA PRODUCCIÓN O POR RANGO.
 ///////////////////////////////////////////////////////////////////////////////	  
-$("#goCrearPlanilla").on('click', function (e) {
+	$("#goCrearPlanilla").on('click', function (e) {
+			// Limpiar datos
+			fechaMes = $("#lstFechaMes").val();
+			fechaAnn = $("#lstFechaAño").val();
+			quincena = $("#lstQuincena").val();
+			// LstDepartmaentoEmpresa
+			DepartamentoEmpresa = $("#lstDepartamentoEmpresa").val();
+			value_d = $("#lstDepartamentoEmpresa option:selected");
+			DepartamentoText = value_d.text();
+			persona_responsable = $("label[for=CodigoRutaResponsable]").html();
+			// lstruta
+			ruta = $("#lstRuta").val();
+			value = $("#lstRuta option:selected");
+			RutaText = value.text();
+			// validar lstRuta == 00
+			codigo_ruta = $("#lstRuta").val();
+			if(codigo_ruta == "00" && DepartamentoEmpresa == "02"){
+				toastr["error"]("Debe seleccionar una ruta.", "Sistema");
+				return
+			}
+			//Validar que información llevara el informe 
+			// Cìdog 02 corresponde a los motoristas
+			if(DepartamentoEmpresa == '02'){
+			// Ejecutar Informe
+				varenviar = "/acomtus/php_libs/reportes/nomina_asistencia.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&persona_responsable="+persona_responsable;
+			}else{
+			// Ejecutar Informe
+				varenviar = "/acomtus/php_libs/reportes/nomina_asistencia.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText;
+			}
+			// Ejecutar la función abre otra pestaña.
+				AbrirVentana(varenviar);   
+	});
+///////////////////////////////////////////////////////////////////////////////	  
+	$("#goCalcularPlanilla").on('click', function (e) {
 		// Limpiar datos
 		fechaMes = $("#lstFechaMes").val();
 		fechaAnn = $("#lstFechaAño").val();
 		quincena = $("#lstQuincena").val();
+		if($('#chkCalcular').is(':checked') ) {
+			//alert('Seleccionado Dolares');
+			var calcular = "no";
+		}else{
+			var calcular = "si";
+		}
 		// LstDepartmaentoEmpresa
 		DepartamentoEmpresa = $("#lstDepartamentoEmpresa").val();
 		value_d = $("#lstDepartamentoEmpresa option:selected");
 		DepartamentoText = value_d.text();
+		persona_responsable = $("label[for=CodigoRutaResponsable]").html();
 		// lstruta
 		ruta = $("#lstRuta").val();
-		value = $("#lstRuta option:selected");
-		RutaText = value.text();
-
-		//Validar que información llevara el informe 
-		// Cìdog 02 corresponde a los motoristas
-		if(DepartamentoEmpresa == '02'){
-		// Ejecutar Informe
-			varenviar = "/acomtus/php_libs/reportes/nomina_asistencia.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText;
-		}else{
-		// Ejecutar Informe
-			varenviar = "/acomtus/php_libs/reportes/nomina_asistencia.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText;
+		var value = $("#lstRuta option:selected");
+		var RutaText = value.text();
+		// validar lstRuta == 00
+		codigo_ruta = $("#lstRuta").val();
+		if(codigo_ruta == "00" && DepartamentoEmpresa == "02"){
+			toastr["error"]("Debe seleccionar una ruta.", "Sistema");
+			return
 		}
-		// Ejecutar la función abre otra pestaña.
+			//Validar que información llevara el informe 
+			// Cìdog 02 corresponde a los motoristas
+			if(DepartamentoEmpresa == '02'){
+				// Ejecutar Informe
+					varenviar = "/acomtus/php_libs/reportes/nomina_asistencia_calcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&chkCalcular="+calcular+"&persona_responsable="+persona_responsable;
+				}else{
+				// Ejecutar Informe
+					varenviar = "/acomtus/php_libs/reportes/nomina_asistencia_calcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText+"&chkCalcular="+calcular;
+				}
 			AbrirVentana(varenviar);   
-  });
-///////////////////////////////////////////////////////////////////////////////	  
-$("#goCalcularPlanilla").on('click', function (e) {
-	// Limpiar datos
-	fechaMes = $("#lstFechaMes").val();
-	fechaAnn = $("#lstFechaAño").val();
-	quincena = $("#lstQuincena").val();
-	if($('#chkCalcular').is(':checked') ) {
-		//alert('Seleccionado Dolares');
-		var calcular = "no";
-	}else{
-		var calcular = "si";
-	}
-	// LstDepartmaentoEmpresa
-	DepartamentoEmpresa = $("#lstDepartamentoEmpresa").val();
-	value_d = $("#lstDepartamentoEmpresa option:selected");
-	DepartamentoText = value_d.text();
-	// lstruta
-	ruta = $("#lstRuta").val();
-	var value = $("#lstRuta option:selected");
-	var RutaText = value.text();
-		//Validar que información llevara el informe 
-		// Cìdog 02 corresponde a los motoristas
-		if(DepartamentoEmpresa == '02'){
-			// Ejecutar Informe
-				varenviar = "/acomtus/php_libs/reportes/nomina_asistencia_calcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&chkCalcular="+calcular;
-			}else{
-			// Ejecutar Informe
-				varenviar = "/acomtus/php_libs/reportes/nomina_asistencia_calcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText+"&chkCalcular="+calcular;
-			}
-		AbrirVentana(varenviar);   
-});
+	});
 // CUANDO SE ENCUENTRA EL CAMBIO DEL DEPARTAMENTO EN LA EMPRESA
 	$("#lstDepartamentoEmpresa").change(function () {
 		var miselect=$("#lstDepartamentoEmpresa");
@@ -126,72 +156,67 @@ $("#goCalcularPlanilla").on('click', function (e) {
 ///////////////////////////////////////////////////////
 // Validar Formulario, para la busqueda de un registro por codigo del motorista.
  //////////////////////////////////////////////////////
- $('#form').validate({
-	ignore:"",
-	rules:{
-			lstPersonalPorMotorista: {required: true},
-			},
-			errorElement: "em",
-			errorPlacement: function ( error, element ) {
-				// Add the `invalid-feedback` class to the error element
-				error.addClass( "invalid-feedback" );
-				if ( element.prop( "type" ) === "checkbox" ) {
-					error.insertAfter( element.next( "label" ) );
-				} else {
-					error.insertAfter( element );
-				}
-			},
-				highlight: function ( element, errorClass, validClass ) {
-							$( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
-						},
-				unhighlight: function (element, errorClass, validClass) {
-							$( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
-						},
-				invalidHandler: function() {
-					setTimeout(function() {
-						toastr.error("Faltan Datos...");
-				});            
-			},
-		submitHandler: function(){	
-		var str = $('#formBuscarPorMotorista').serialize();
-		// VALIDAR CONDICIÓN DE CONTRASEÑA.
-		//if($('#chkcambiopassword').is(":checked")) {chkcambiopassword = 'yes';}else{chkcambiopassword = 'no';}                        
-		fecha = $("#FechaProduccion").val();
-		//alert(str);
-		///////////////////////////////////////////////////////////////			
-		// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
-		///////////////////////////////////////////////////////////////
-			$.ajax({
-				beforeSend: function(){
-					$('#listadoPorMotoristaOk').empty();
+	$('#form').validate({
+		ignore:"",
+		rules:{
+				lstPersonalPorMotorista: {required: true},
 				},
-				cache: false,
-				type: "POST",
-				dataType: "json",
-				url:"php_libs/soporte/ReporteGeneral.php",
-				data:str + "&id=" + Math.random() + "&fecha=" + fecha,
-				success: function(response){
-					// Validar mensaje de error
-					if(response.respuesta == false){
-						toastr["error"](response.mensaje, "Sistema");
+				errorElement: "em",
+				errorPlacement: function ( error, element ) {
+					// Add the `invalid-feedback` class to the error element
+					error.addClass( "invalid-feedback" );
+					if ( element.prop( "type" ) === "checkbox" ) {
+						error.insertAfter( element.next( "label" ) );
+					} else {
+						error.insertAfter( element );
 					}
-					else{
-						toastr["success"](response.mensaje, "Sistema");
-						$("label[for='LblProduccionesTotalPorMotorista']").text('Cantidad Tiquetes Vendidos ' + response.cantidadTiquete);
-						$("label[for='LblProduccionesTotalIngresoPorMotorista']").text('Total Ingresos $ ' + response.totalIngreso);
-						//
-						$('#listadoPorMotoristaOk').append(response.contenido);
-						}               
 				},
-			});
-		},
-});
+					highlight: function ( element, errorClass, validClass ) {
+								$( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+							},
+					unhighlight: function (element, errorClass, validClass) {
+								$( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+							},
+					invalidHandler: function() {
+						setTimeout(function() {
+							toastr.error("Faltan Datos...");
+					});            
+				},
+			submitHandler: function(){	
+			var str = $('#formBuscarPorMotorista').serialize();
+			// VALIDAR CONDICIÓN DE CONTRASEÑA.
+			fecha = $("#FechaProduccion").val();
+			//alert(str);
 
-
-
+			///////////////////////////////////////////////////////////////			
+			// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
+			///////////////////////////////////////////////////////////////
+				$.ajax({
+					beforeSend: function(){
+						$('#listadoPorMotoristaOk').empty();
+					},
+					cache: false,
+					type: "POST",
+					dataType: "json",
+					url:"php_libs/soporte/ReporteGeneral.php",
+					data:str + "&id=" + Math.random() + "&fecha=" + fecha,
+					success: function(response){
+						// Validar mensaje de error
+						if(response.respuesta == false){
+							toastr["error"](response.mensaje, "Sistema");
+						}
+						else{
+							toastr["success"](response.mensaje, "Sistema");
+							$("label[for='LblProduccionesTotalPorMotorista']").text('Cantidad Tiquetes Vendidos ' + response.cantidadTiquete);
+							$("label[for='LblProduccionesTotalIngresoPorMotorista']").text('Total Ingresos $ ' + response.totalIngreso);
+							//
+							$('#listadoPorMotoristaOk').append(response.contenido);
+							}               
+					},
+				});
+			},
+	});
 });	// final de FUNCTION.
-
-
 // ABRE OTRA PESTAÑA	
 function AbrirVentana(url)
 {
@@ -216,6 +241,7 @@ function listar_ruta(codigo_ruta){
     $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarRuta'},
         function(data) {
             miselect.empty();
+			miselect.append("<option value='00'>Seleccionar...</option>");
             for (var i=0; i<data.length; i++) {
                 if(codigo_ruta == data[i].codigo){
                     miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
