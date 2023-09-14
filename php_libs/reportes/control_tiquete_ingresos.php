@@ -108,6 +108,12 @@ if($consulta_serie -> rowCount() != 0){
         $nombre_serie_[] = trim($listado_serie['codigo_serie_id']);
 		$nombre_ruta = trim($listado_serie['nombre_ruta']);
     }
+}else{
+	$pdf->cell($w[0],$h[2],mb_convert_encoding("El Nº de Control No existe.","ISO-8859-1"),0,1,'L');
+	// Salida del pdf.
+	$modo = 'I'; // Envia al navegador (I), Descarga el archivo (D), Guardar el fichero en un local(F).
+	$print_nombre = trim($codigo_produccion) . '.pdf';
+	$pdf->Output($print_nombre,$modo);
 }
 // unica array
 	$nombre_serie_unique = array_unique($nombre_serie_);

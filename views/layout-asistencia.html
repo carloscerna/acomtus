@@ -5,10 +5,9 @@
 {% block extraCSS %}
 <style>
   /* mensajes de error para el validate de los form de input*/
-   input.error {
+  input.error {
       border-color: #f00 !important;
   }
-  
   small.required {
       color:#f00;
   }
@@ -23,7 +22,6 @@
       var h = 0;
       startTime();
       function startTime(){
-
           var today = new Date();
           h = today.getHours();
           var m = today.getMinutes();
@@ -33,28 +31,22 @@
           h = twelve_hour_time(h);
           m = checkTime(m);
           s = checkTime(s);
-
           $("#HoraActual").text(h + ":" + m + ":" + s +" "+AM_or_PM);
           setTimeout("startTime()", 1000);
       }
-
       function checkTime(i){
-
           if(i < 10){
               i = "0" + i;// add zero in front of numbers < 10
           }
           return i;
       }
-
       // CONVERT TO 12 HOUR TIME. SET AM OR PM
       function twelve_hour_time(h){
-
           if(h > 12){
               h = h - 12;
               AM_or_PM = " PM";
           }
           return h;
-
       }
     </script>
 {% endblock %}
@@ -89,21 +81,22 @@
       <!-- FORM PRINCIPAL -->
       <form action="" method="post" id="formAsistencia" name="formAsistencia" role="form" enctype="multipart/form-data">
             <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
-            <input type="hidden" id="id_user" name="id_" value = ''>            
-            <input type="hidden" id="accion" name="accion" value = 'GuardarAsistencia'>            
+            <input type="hidden" id="id_user" name="id_" value = "">            
+            <input type="hidden" id="accion" name="accion" value = "GuardarAsistencia">            
             <!-- BOLLEAN PARA LOS DIFERETNES DATOS ASUETO, VACACIONES, DESCANSO-->
             <input type="hidden" id="BooleanAsueto" name="BooleanAsueto" value = "no">
             <input type="hidden" id="BooleanTV" name="BooleanTV" value = "no">
             <input type="hidden" id="BooleanDescanso" name="BooleanDescanso" value = "no">
             <!-- INFORMACIÓN DEL USUARIO CON SU PERFIL-->
-            <input type="hidden" id="codigo_perfil" name="codigo_perfil" value = {{ codigo_perfil }}>
-            <input type="hidden" id="codigo_personal_usuario" name="codigo_personal_usuario" value = {{ codigo_personal }}>
+            <input type="hidden" id="codigo_perfil" name="codigo_perfil" value = "{{ codigo_perfil }}" aria-label="CodigoPerfil">
+            <input type="hidden" id="codigo_personal_usuario" name="codigo_personal_usuario" value = "{{ codigo_personal }}" aria-label="CodigoPersonalUsuario">
+            <input type="hidden" id="codigo_departamento_empresa" name="codigo_departamento_empresa" value = "{{ CodigoDepartamentoEmpresa }}" aria-label="CodigoDepartamentoEmpresa">
             <!-- APERTURA DEL CARD-->
               <div class="card m-auto">
                 <div class="card-header bg-gradient-navy">
                   <div class="card-tools">
                     <span class="badge badge-primary" id="HoraActual"></span>
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" aria-labelledby="HOraActual" title="Hora"><i class="fas fa-minus"></i>
                     </button>
                   </div>        
                     <div class="row">
@@ -116,7 +109,7 @@
                 <!-- /.card-header -->
                 <div class="card-body">
                 <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
-                 <input type="hidden" id="MenuTab" value='{{ codigo_perfil }}'>  
+                 <input type="hidden" id="MenuTab" value="{{ codigo_perfil }}">  
                 <!-- Fecha de la Asistencia -->       
                     <div class="form-group">
                       <label for="FechaAsistencia">Fecha:</label>
@@ -130,10 +123,10 @@
                                 <a href="#" class="btn btn-info" id="goBuscarPersonalAsistencia"><i class="fas fa-search"></i> Buscar</a>
                         </div>
                         <!-- TEXTO DEL NOMBRE DEL EMPLEADO-->
-                        <input type="text" class="form-control text-bold"  id="NombrePersonal" name="NombrePersonal" readonly required>
+                        <input type="text" class="form-control text-bold"  id="NombrePersonal" name="NombrePersonal" readonly required aria-label="NombrePersonal">
                         <!-- IMAGEN DEL EMPLEADO-->
                           <div class="img-thumbnail d-block mx-auto" style="width: 14rem;">
-                            <img class="card-img-top img-thumbnail rounded mx-auto d-block" id="Imagen" src="">
+                            <img class="card-img-top img-thumbnail rounded mx-auto d-block" id="Imagen" src="#" alt="Imagen">
                           </div>
                   </div>
                   <!-- SELECT CATALOGO JORNADA -->

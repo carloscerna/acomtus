@@ -70,16 +70,17 @@ if($errorDbConexion == false){					// Validar conexión con la base de datos
 					/* **************************************************************************************************/
 					// SI E SUN PERFIL DIFERENTE A ROOT.
 					// armar la consulta.
-						$query = "SELECT u.nombre, u.id_usuario, u.base_de_datos, u.codigo_perfil, u.password, u.codigo_personal, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) as nombre_personal,
-						u.codigo_institucion,
+						$query = "SELECT u.nombre, u.id_usuario, u.base_de_datos, u.codigo_perfil, u.password, u.codigo_personal, u.codigo_institucion,
+						btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) as nombre_personal,
+						u.codigo_departamento_empresa,
 						cat_perfil.descripcion as nombre_perfil
-						FROM usuarios u
-						INNER JOIN personal p ON p.codigo = u.codigo_personal
-						INNER JOIN catalogo_perfil cat_perfil ON cat_perfil.codigo = u.codigo_perfil
-						WHERE u.nombre= '$nombre' LIMIT 1";
+							FROM usuarios u
+								INNER JOIN personal p ON p.codigo = u.codigo_personal
+								INNER JOIN catalogo_perfil cat_perfil ON cat_perfil.codigo = u.codigo_perfil
+									WHERE u.nombre= '$nombre' LIMIT 1";
 					// Ejecutamos el Query.
 						$consulta = $dblink -> query($query);
-
+					//
 					if($consulta -> rowCount() != 0){
 						$respuestaOK = true;
 						$contenidoOK ="";
@@ -97,6 +98,7 @@ if($errorDbConexion == false){					// Validar conexión con la base de datos
 								$_SESSION['codigo_perfil'] = trim($listado['codigo_perfil']);
 								$_SESSION['codigo_personal'] = trim($listado['codigo_personal']);
 								$_SESSION['nombre_personal'] = (trim($listado['nombre_personal']));
+								$_SESSION['CodigoDepartamentoEmpresa'] = (trim($listado['codigo_departamento_empresa']));
 								$_SESSION['nombre_perfil'] = (trim($listado['nombre_perfil']));
 								$_SESSION['nombre_institucion'] = 'ROOT';
 								$_SESSION['codigo_institucion'] = (trim($listado['codigo_institucion']));;
@@ -108,7 +110,6 @@ if($errorDbConexion == false){					// Validar conexión con la base de datos
 									exit;
 							}
 						}
-						
 						// Conectarse a la nueva base de datos.
 							// ruta de los archivos con su carpeta
 								$path_root=trim($_SERVER['DOCUMENT_ROOT']);

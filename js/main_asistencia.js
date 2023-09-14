@@ -275,22 +275,21 @@ $("#goEnviar").on('click', function(){
 
 
 });	// final de FUNCTION.
-
-
 // ABRE OTRA PESTAÑA	
 function AbrirVentana(url)
 {
     window.open(url, '_blank');
     return false;
 }
-
 ////////////////////////////////////////////////////////////
 // FUNCION LISTAR TABLA perosnal solo motoristas
 ////////////////////////////////////////////////////////////
 function buscar_personal(codigo_personal){
     var codigo_personal = $("#CodigoPersonal").val();
 	var fecha_ = $("#FechaAsistencia").val();
-    $.post("php_libs/soporte/NuevoEditarPersonalAsistencia.php", {accion_buscar: 'BuscarPersonalCodigo', codigo_personal: codigo_personal, fecha: fecha_},
+	var CodigoDepartamentoEmpresa = $("#codigo_departamento_empresa").val();
+    $.post("php_libs/soporte/NuevoEditarPersonalAsistencia.php", {
+		accion_buscar: 'BuscarPersonalCodigo', codigo_personal: codigo_personal, fecha: fecha_, codigo_departamento_empresa: CodigoDepartamentoEmpresa},
         function(data) {
 			if(data[0].respuestaOK == true){
 				var nombre_empleado = data[0].nombre_empleado;

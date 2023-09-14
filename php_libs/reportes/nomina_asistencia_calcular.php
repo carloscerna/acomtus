@@ -42,6 +42,8 @@ TABLA: catalogo_departamento_empresa
     $contar_4H = 1;
     $fecha_inicio_adb = array();
     $DescripcionJornada = array();
+    $codigo_produccion = 0;
+    $link = "/acomtus/php_libs/reportes/control_tiquete_ingresos.php?codigo_produccion=" . $codigo_produccion;
 // Nocturnidad.
     $NocturnaValorUnitario = 0.57;
     $NocturnaCantidad = 0;
@@ -151,7 +153,7 @@ class PDF extends FPDF
 //Cabecera de página
 function Header()
 {
-    global $reporte_trabajo, $reporte_ruta, $reporte_persona_responsable;
+    global $reporte_trabajo, $reporte_ruta, $reporte_persona_responsable, $DepartamentoEmpresa, $NombresCodigoDE;
     //Logo
     $img = $_SERVER['DOCUMENT_ROOT'].'/acomtus/img/'.$_SESSION['logo_uno'];
     $this->Image($img,5,4,24,24);
@@ -172,10 +174,12 @@ function Header()
     $this->SetX(30);
     $this->Cell(180,6,mb_convert_encoding("Responsable del Punteo: " . $reporte_persona_responsable,"ISO-8859-1"),0,0,"L",false);
     $this->Cell(4,6,"",0,0,"L",false);
-    $this->SetFillColor(240,252,192);   // CORAL CLARO
-        $this->Cell(6,6,"",1,0,"L",true);
-    $this->SetFillColor(255,255,255);
-    $this->Cell(15,6,"Sin Control",0,1,"L",false);
+    if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"]){
+        $this->SetFillColor(233,150,122);   // CORAL CLARO
+            $this->Cell(6,6,"",1,0,"L",true);
+        $this->SetFillColor(233,150,122);   //RGB(233,150,122)
+            $this->Cell(15,6,mb_convert_encoding("Sin Nº Control","ISO-8859-1"),0,1,"L",false);
+    }
     // Posición en donde va iniciar el texto.
     $this->SetY(25);
 }
@@ -310,11 +314,11 @@ function FancyTable($header)
 //Títulos de las columnas
     $header=array('Nº','Código','Empleado');
     $pdf->AliasNbPages();
-    $pdf->SetFont('Arial','',12);
+    $pdf->SetFont('Arial','',9);
     $pdf->AddPage();
 // Aqui mandamos texto a imprimir o al documento.
 // Definimos el tipo de fuente, estilo y tamaño.
-    $pdf->SetFont('Arial','B',13); // I : Italica; U: Normal;
+    $pdf->SetFont('Arial','B',9); // I : Italica; U: Normal;
     $pdf->ln();
 // Definimos el tipo de fuente, estilo y tamaño.
     $pdf->SetFont('Arial','',9); // I : Italica; U: Normal;
@@ -379,12 +383,14 @@ exit;
                     $salario["Extra15T"] = $pago_diario_extra_1_5T;
                     $salario["Nominal"] = 0;
                     $salario["Extra"] = 0;
+                    $salario["TotalExtra"] = 0;
+                    $salario["Total"] = 0;
                     $salario["SalarioQuincena"] = round($total_dias_quincena * $pago_diario,2);
                 // DATOS AL INFORME
                     $pdf->Cell($w[0],6,$i,1,0,'C',$fill);        // núermo correlativo
                     $pdf->Cell($w[1],6,$codigo,1,0,'L',$fill);   // codigo empleado
                     $pdf->SetFont('Arial','',8);
-                        $pdf->Cell($w[2],6,$nombre_completo . ' -$ ' . $salario['Mensual'] . ' - ' . $total_dias_quincena,1,0,'L',$fill); // Nombre + apellido_materno + apellido_paterno
+                        $pdf->Cell($w[2],6,$nombre_completo . ' -$ ' . $salario['Mensual'] . ' - ' . $total_dias_quincena,1,0,'L',$fill); // Nombre, Salario Nominal y días.
                     $pdf->SetFont('Arial','',9);
                 // Rellenar los cuadros segun el numero de dias. CALCULANDO DIAS COMPLETOS, MEDIO TIEMPO, ISSS, VACACIONES.
                     rellenar($total_dias_quincena);
@@ -437,7 +443,7 @@ function rellenar_datos($linea){
 function rellenar($total_dias_quincena){
     // VARIABLES GLOBALES
         global $dblink, $pdf, $salario, $w, $fill, $fecha_periodo_inicio, $fecha_periodo_fin, $codigo,
-            $DepartamentoEmpresa, $NombresCodigoDE, $fillFecha;
+            $DepartamentoEmpresa, $NombresCodigoDE, $fillFecha, $codigo_produccion, $link;
     // VARIABLES LOCALES
         $CodigoNombreJornada = array(); $ValoresCount = array();
      // DECLARACI{ON DE AMTRICES}
@@ -531,38 +537,85 @@ function rellenar($total_dias_quincena){
                                     }
                                 break;
                             default:
-                                $pdf->Cell($w[3],6,$Jornada,'1',0,'C',$fillFecha);   // CUALQUIER VALOR DE LA JORNADA
+                                if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"]){
+                                    $link = "/acomtus/php_libs/reportes/control_tiquete_ingresos.php?codigo_produccion=" . $codigo_produccion;
+                                    $pdf->Cell($w[3],6,$Jornada,'1',0,'C',$fillFecha, $link);   // CUALQUIER VALOR DE LA JORNADA
+                                }else{
+                                    $pdf->Cell($w[3],6,$Jornada,'1',0,'C',$fillFecha);   // CUALQUIER VALOR DE LA JORNADA
+                                }
                                     // Revisar si hay jornada Extra TRABAJO EN 4H
-                                    $JornadaCodigoExtra = $CodigoNombreJornada["DescripcionExtra4H"][$fila_array];
-                                    JornadaExtra4H($JornadaCodigoExtra);
-                                break;
-                            }
-                            // 
-                            // BUSCAR SI TIENE NOCTURNIDAD. (N)
-                                $JornadaNocturnidad = $CodigoNombreJornada["DescripcionNocturna"][$fila_array]; // VARIABLES CUANDO ES DIFERENTE DE 1T. (1 TANDA)
-                                JornadaExtraNocturnidad($JornadaNocturnidad);
-
+                                        $JornadaCodigoExtra = $CodigoNombreJornada["DescripcionExtra4H"][$fila_array];
+                                        JornadaExtra4H($JornadaCodigoExtra);
+                            break;
+                        }
+                        // 
+                        // BUSCAR SI TIENE NOCTURNIDAD. (N)
+                            $JornadaNocturnidad = $CodigoNombreJornada["DescripcionNocturna"][$fila_array]; // VARIABLES CUANDO ES DIFERENTE DE 1T. (1 TANDA)
+                            JornadaExtraNocturnidad($JornadaNocturnidad);
                         // fila_array
                             $fila_array++;
                     }
                     /// RELLENAR CON VALRIOS IS HACEN FALTA
                     $columnas = $total_dias_quincena - count($CodigoNombreJornada['DescripcionJornada']);
                     CuadrosFaltantes($columnas);
-                    // CALCULO DE LA JORNADA
-                   // $ValoresCount['TotalDescripcionJornada'] = array_count_values($CodigoNombreJornada['DescripcionJornada']);
+                    // CALCULO DE LA JORNADA DESPUES DE 8 HORAS DE TRABAJO (1.5T)
+                        $ValoresCount['CantidadDescripcionJornada'] = array_count_values($CodigoNombreJornada['DescripcionJornada']);
+                        $ValoresCount['CantidadDescripcionDescanso'] = array_count_values($CodigoNombreJornada['DescripcionDescanso']);
+                        $ValoresCount['CantidadDescripcion4H'] = array_count_values($CodigoNombreJornada['DescripcionExtra4H']);
                     //
-                   // foreach ($ValoresCount['TotalDescripcionJornada'] as $Jornada => $cantidad) {
-                    //  print "Para el $Jornada asistencia $cantidad -";
-                    //    $salario["Salario"][] = $cantidad * $salario["PorDia"];
-                   // }
-
+                        //print_r($ValoresCount);
+                        //exit;
+                    // BUSCAR LA CANTIDAD DE 1.5T PARA OBTENER EL EXTRA. DE UNA JORNADA NORMAL.
+                        foreach ($ValoresCount['CantidadDescripcion4H'] as $Jornada => $cantidad) {
+                            if($Jornada == "4H"){
+                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra4H"] * $cantidad);
+                            }
+                            if($Jornada == "1T"){
+                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra1T"] * $cantidad);
+                            }
+                            if($Jornada == "1.5T"){
+                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra15T"] * $cantidad);
+                            }
+                        }
+                    // BUSCAR LA CANTIDAD DE 1T Ó 1.5T PARA OBTENER EL EXTRA. DE UNA JORNADA DE DESCANSO.
+                        foreach ($ValoresCount['CantidadDescripcionJornada'] as $Jornada => $cantidad) {
+                            if($Jornada == "1.5T"){
+                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra4H"] * $cantidad);
+                            }
+                        }
+                    // BUSCAR LA CANTIDAD DE 1T Ó 1.5T PARA OBTENER EL EXTRA. DE UNA JORNADA DE DESCANSO.
+                        foreach ($ValoresCount['CantidadDescripcionDescanso'] as $Jornada => $cantidad) {
+                            if($Jornada == "4H"){
+                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra4H"] * $cantidad);
+                            }
+                            if($Jornada == "1T"){
+                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra1T"] * $cantidad);
+                            }
+                            if($Jornada == "1.5T"){
+                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra15T"] * $cantidad);
+                            }
+                        }
             // IIMPRIR EN PANTALLA SALARIO QUINCENA
                 $pdf->Cell($w[8],7,'','L',0,'C',false);    // ES LA DIVISIÓN ENTRO EL TOTAL DE DIAS Y LOS CALCULOS (SALARIO, ASUETOS, EXTRA, TOTAL-EXTRA, TOTAL)
             # PRESENTAR SALARIO
                 $salario_pantalla = number_format($salario["SalarioQuincena"],2,'.',',');
-                    $pdf->Cell($w[1],6,'$' . $salario_pantalla,'1',0,'C',$fill);
+                    $pdf->Cell($w[1],6,'$' . $salario_pantalla,1,0,'C',$fill);
+            # PRESENTAR ASUETO.1
+                $asueto_pantalla = "";
+                $pdf->Cell($w[1],6,$asueto_pantalla,1,0,'C',$fill);
+            # PRESENTAR SALARIO EXTRA
+                $salario_extra_pantalla = number_format($salario["Extra"],2,'.',',');
+                $pdf->Cell($w[1],6,'$' . $salario_extra_pantalla,1,0,'C',$fill);
+            # PRESENTAR SALARIO TOTAL EXTRA
+                $salario["TotalExtra"] = $salario["Extra"];
+                $salario_total_extra_pantalla = number_format($salario["TotalExtra"],2,'.',',');
+                $pdf->Cell($w[1],6,'$' . $salario_total_extra_pantalla,1,0,'C',$fill);
+            # PRESENTAR SALARIO TOTAL
+                $salario["Total"] = $salario["SalarioQuincena"] + $salario["Extra"] + $salario["TotalExtra"];
+                $salario_total_pantalla = number_format($salario["Total"],2,'.',',');
+                $pdf->Cell($w[1],6,'$' . $salario_total_pantalla,1,0,'C',$fill);
             // linea en blanco
-            $pdf->ln();
+                $pdf->ln();
         } // FIN DEL IF QUE DETERMINA SI HAY REGISTROS.
         else{
             /// RELLENAR CON VALRIOS IS HACEN FALTA
@@ -604,13 +657,29 @@ function CuadrosFaltantes($columnas){
         
 }
 function Punto1T(){
-    global $pdf, $fillFecha, $w;
+    global $pdf, $fillFecha, $w, $codigo_produccion, $DepartamentoEmpresa, $Jornada, $NombresCodigoDE;
+    if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"]){
+        $link = "/acomtus/php_libs/reportes/control_tiquete_ingresos.php?codigo_produccion=" . $codigo_produccion;
     // Establce un punto en media (.) si se establece el valor como una 1T (1 Tanda).
         $pdf->SetFont('Arial','B',20); // I : Italica; U: Normal;
-        $pdf->Cell($w[3],6,'',1,0,'C',$fillFecha);
-        $x = $pdf->GetX() -4 ; $y = $pdf->GetY() + 3.5;
-        $pdf->RotatedText($x,$y,'.',0);
+        $x = $pdf->GetX(); $y = $pdf->GetY();
+        $pdf->Rect($x,$y,7,6,"DF");
+        $pdf->Cell($w[3],3.5,'.',0,0,'C',$fillFecha, $link);        
         $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+    }else{
+        // Establce un punto en media (.) si se establece el valor como una 1T (1 Tanda).
+        $pdf->SetFont('Arial','B',20); // I : Italica; U: Normal;
+        $x = $pdf->GetX(); $y = $pdf->GetY();
+            if($DepartamentoEmpresa == $NombresCodigoDE["Mantenimiento"] ||
+                $DepartamentoEmpresa == $NombresCodigoDE["Vigilancia"]){  // DIFERENCIA EL ANCHO DE LA LINEA SEGUN EL DEPARTAMENTO
+                    $pdf->Rect($x,$y,6,6,"DF");
+            }else{
+                $pdf->Rect($x,$y,7,6,"DF");
+            }
+        $pdf->Cell($w[3],3.5,'.',0,0,'C',$fillFecha);        
+        $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+    }
+
 }
 function JornadaExtra($DescripcionJornadaExtra){
     global $pdf, $x, $y;
@@ -643,22 +712,28 @@ function JornadaExtraNocturnidad($DescripcionJornadaNocturna){
         }
 }
 function VerificarControl($fecha, $codigo_personal){
-    global $pdf, $dblink, $fillFecha, $fill;
+    global $pdf, $dblink, $fillFecha, $fill, $codigo_produccion;
     // Armar consulta para ir a buscar con la fecha y codigo_personal 
         $query_busqueda = "SELECT * from produccion where fecha = '$fecha' and codigo_personal = '$codigo_personal'";
     // EJECUTAR CONSULTA
         $consulta_ = $dblink -> query($query_busqueda);
     // validar si existen archivos en la consulta segun la fecha.
-        $count_asistencia = $consulta_ -> rowCount();
+        $count_asistencia = $consulta_ -> rowCount();        
+    //  
+    while($listado = $consulta_ -> fetch(PDO::FETCH_BOTH))
+    {
+        $codigo_produccion = $listado["id_"];
+    }
     // Verificar si existen registros.
         if($consulta_ -> rowCount() != 0){
             $pdf->SetFillColor(213, 213, 213);    // SIN FONDO rgb(213,213,213)
             $fillFecha = false;
             $fill = true;
         }else{
-            $pdf->SetFillColor(240,252,192);    // CORAL CLARO rgb(240,252,192);
+            $pdf->SetFillColor(233,150,122);    // CORAL CLARO rgb(240,252,192); rgb(233,150,122)
             $fillFecha = true;
             $fill = false;
+            $codigo_produccion = 0;
         }
 }
 

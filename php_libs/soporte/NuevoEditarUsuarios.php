@@ -33,11 +33,11 @@ if($errorDbConexion == false){
 		}
 		// Verificamos las variables de acci�n
 		switch ($_POST['accion']) {
-		case 'BuscarPorId':
-			$id_x = trim($_POST['id_x']);
+			case 'BuscarPorId':
+				$id_x = trim($_POST['id_x']);
 				// Armamos el query.
 				$query = 'SELECT u.id_usuario, TRIM(u.nombre) AS nombre, TRIM(u.password) AS password, u.codigo_perfil, TRIM(u.base_de_datos) AS base_de_datos, TRIM(u.codigo_estatus) AS codigo_estatus,
-								 u.codigo_personal, u.codigo_institucion,
+								u.codigo_personal, u.codigo_institucion, u.codigo_departamento_empresa,
 								cat_est.descripcion as nombre_estatus
 									FROM usuarios u
 										INNER JOIN catalogo_estatus cat_est ON cat_est.codigo = u.codigo_estatus
@@ -59,6 +59,7 @@ if($errorDbConexion == false){
 							$codigo_estatus = trim($listado['codigo_estatus']);
 							$codigo_personal = trim($listado['codigo_personal']);
 							$codigo_institucion = trim($listado['codigo_institucion']);
+							$codigo_departamento_empresa= trim($listado['codigo_departamento_empresa']);
 						// Rellenando la array.
 							$datos[$fila_array]["nombre"] = $nombre;
 							$datos[$fila_array]["password"] = $password;
@@ -66,6 +67,7 @@ if($errorDbConexion == false){
 							$datos[$fila_array]["codigo_estatus"] = $codigo_estatus;
 							$datos[$fila_array]["codigo_personal"] = $codigo_personal;
 							$datos[$fila_array]["codigo_institucion"] = $codigo_institucion;
+							$datos[$fila_array]["codigo_departamento_empresa"] = $codigo_departamento_empresa;
 					}
 					$mensajeError = "Si Registro";
 				}
@@ -75,7 +77,6 @@ if($errorDbConexion == false){
 					$mensajeError =  'No Registro';
 				}
 			break;
-
 			case 'AgregarNuevoUsuario':		
 				// armar variables.
 				// TABS-1
@@ -83,6 +84,7 @@ if($errorDbConexion == false){
 					$password = trim($_POST['Password']);
 					$confirmapassword = trim($_POST['ConfirmaPassword']);
 					$codigo_empresa = trim($_POST['lstempresa']);
+					$codigo_departamento_empresa = trim($_POST['lstDepartamentoEmpresa']);
 					$codigo_perfil = trim($_POST['lstperfil']);
 					$codigo_personal = trim($_POST['lstpersonal']);
 					$codigo_estatus = trim($_POST['lstestatus']);	
@@ -105,8 +107,8 @@ if($errorDbConexion == false){
 										break;
 								}
 					// Query
-					$query = "INSERT INTO usuarios (nombre, password, codigo_perfil, codigo_institucion, codigo_personal, codigo_estatus, base_de_datos)
-						VALUES ('$nombre','$password','$codigo_perfil','$codigo_empresa','$codigo_personal','$codigo_estatus', '$base_de_datos')";
+					$query = "INSERT INTO usuarios (nombre, password, codigo_perfil, codigo_institucion, codigo_personal, codigo_estatus, base_de_datos, codigo_departamento_empresa)
+						VALUES ('$nombre','$password','$codigo_perfil','$codigo_empresa','$codigo_personal','$codigo_estatus', '$base_de_datos','$codigo_departamento_empresa')";
 					// Ejecutamos el query
 						$resultadoQuery = $dblink -> query($query);              
                         ///////////////////////////////////////////////////////////////////////////////////////
@@ -120,10 +122,10 @@ if($errorDbConexion == false){
 						$mensajeError = "No se puede guardar el registro en la base de datos ";
 					}
 			break;
-			
 			case 'EditarRegistro':
 				$nombre = trim($_POST['txtnombres']);
 				$codigo_empresa = trim($_POST['lstempresa']);
+				$codigo_departamento_empresa = trim($_POST['lstDepartamentoEmpresa']);
 				$codigo_perfil = trim($_POST['lstperfil']);
 				$codigo_personal = trim($_POST['lstpersonal']);
 				$codigo_estatus = trim($_POST['lstestatus']);			
@@ -150,9 +152,9 @@ if($errorDbConexion == false){
 						$nombre, $password,  $codigo_perfil, $codigo_empresa, $codigo_personal, $codigo_estatus, $_POST['id_user']);	
 					}else{
 						$query_usuario = sprintf("UPDATE usuarios SET nombre = '%s', codigo_perfil = '%s', codigo_institucion = '%s',
-						codigo_personal = '%s', codigo_estatus = '%s' 
+						codigo_personal = '%s', codigo_estatus = '%s', codigo_departamento_empresa = '%s' 
 						WHERE id_usuario = %d",
-						$nombre, $codigo_perfil, $codigo_empresa, $codigo_personal, $codigo_estatus, $_POST['id_user']);	
+						$nombre, $codigo_perfil, $codigo_empresa, $codigo_personal, $codigo_estatus, $codigo_departamento_empresa, $_POST['id_user']);	
 					}
 						// Ejecutamos el query guardar los datos en la tabla alumno..
 						$resultadoQuery = $dblink -> query($query_usuario);				
@@ -167,7 +169,6 @@ if($errorDbConexion == false){
 						$contenidoOK = $query_usuario;
 					}
 			break;
-		
 			case 'EliminarRegistro':
 				$nombre = trim($_POST['nombre']);
 				// COMPARAR QUE ELUSUARIO ROOT NO PUEDA SER ELIMINADO.
@@ -176,26 +177,18 @@ if($errorDbConexion == false){
 						break;
 				}
 				// Armamos el query
-				$query = "DELETE FROM usuarios WHERE id_usuario = $_POST[id_user]";
-
+					$query = "DELETE FROM usuarios WHERE id_usuario = $_POST[id_user]";
 				// Ejecutamos el query
 					$count = $dblink -> exec($query);
-				
 				// Validamos que se haya actualizado el registro
 				if($count != 0){
 					$respuestaOK = true;
 					$mensajeError = 'Se ha Eliminado '.$count.' Registro(s).';
-
 					$contenidoOK = '';
-
 				}else{
 					$mensajeError = 'No se ha eliminado el registro';
 				}
 			break;
-
-            
-            
-			
             default:
 				$mensajeError = 'Esta acción no se encuentra disponible';
 			break;

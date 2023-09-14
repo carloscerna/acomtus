@@ -45,7 +45,7 @@ var NuevoRegistro = function(){
             PasarFoco();
 };
 //////////////////////////////////////////////////////////////////////////////////
-/* INICIO DE LA FUNCION PARA MOSTRAR LOS DATOS DEL ALUMNO */
+/* INICIO DE LA FUNCION PARA MOSTRAR LOS DATOS DEL empleado */
 //////////////////////////////////////////////////////////////////////////////////
 	var listar = function(){
 		// DETARMINAR QUE SE VA EJECUTAR.	
@@ -62,6 +62,7 @@ var NuevoRegistro = function(){
                     $('#lstempresa').val(data[0].codigo_institucion);
                     $('#lstperfil').val(data[0].codigo_perfil);
                     $('#lstestatus').val(data[0].codigo_estatus);
+                    $('#lstDepartamentoEmpresa').val(data[0].codigo_departamento_empresa);
                     listar_personal(data[0].codigo_personal);
                 // Desactivar contraseñas.
                     $("#Password").prop('disabled', true);
@@ -207,6 +208,21 @@ function listar_empresa(){
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
     $.post("includes/cargar_empresa.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+            }
+    }, "json");    
+}
+// FUNCION LISTAR CATALOGO DEPARTAMENTO EN LA EMPRESA
+////////////////////////////////////////////////////////////
+function listar_departamento_empresa(){
+    var miselect=$("#lstDepartamentoEmpresa");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_departamento_cargo.php",
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {

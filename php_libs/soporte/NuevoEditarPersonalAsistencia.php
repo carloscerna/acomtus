@@ -47,10 +47,12 @@ if($errorDbConexion == false){
 			case 'BuscarPersonalCodigo':
 				$codigo_personal = trim($_POST['codigo_personal']);
 				$fecha = trim($_POST['fecha']);
+				$CodigoDepartamentoEmpresa = trim($_POST['codigo_departamento_empresa']);
 				// Armamos el query.
 				$query = "SELECT p.id_personal, p.codigo, TRIM(p.nombres) as nombre, TRIM(p.apellidos) as apellido, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado,
 							p.foto, p.codigo_genero, p.codigo_departamento_empresa
-                         		FROM personal p WHERE codigo = '$codigo_personal'";
+								FROM personal p 
+									WHERE codigo = '$codigo_personal' and codigo_departamento_empresa = '$CodigoDepartamentoEmpresa'";
 				// Ejecutamos el Query.
 				$consulta = $dblink -> query($query);
 				// Validar si hay registros.
@@ -107,10 +109,10 @@ if($errorDbConexion == false){
 							$datos[$fila_array]["asueto"] = "no";
 						}
 				}
-				else{
+				else{	// verificar si el codigo no es el mismo de la empresa del Usuario que ingresa la asistencia.
 					$contenidoOK = '';
 					$datos[$fila_array]["respuestaOK"] = false;
-					$datos[$fila_array]["mensajeError"] = 'Código No Existe.';
+					$datos[$fila_array]["mensajeError"] = 'Código No Existe o No Pertenece a este Departamento.';
 				}
 			break;
 			case 'BuscarTipoLicencia':

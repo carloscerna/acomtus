@@ -21,7 +21,8 @@ $root = '';
         "nombre_personal" => $_SESSION['nombre_personal'],
         "nombre_perfil" => $_SESSION['nombre_perfil'],
         "codigo_institucion" => $_SESSION['codigo_institucion'],
-        "foto_personal" => $_SESSION['foto_personal']
+        "foto_personal" => $_SESSION['foto_personal'],
+        "CodigoDepartamentoEmpresa" => $_SESSION['CodigoDepartamentoEmpresa'],
     ));
 }
 ?>
