@@ -7,12 +7,24 @@
     $codigo_ruta = $_REQUEST["codigo_ruta"];
     $codigo_cargo = $_REQUEST["codigo_cargo"];
 // armando el Query.
-    $query = "SELECT p.codigo, p.apellidos, p.nombres, p.codigo_cargo, p.codigo_ruta, p.codigo_departamento_empresa,
+    if($codigo_cargo == "02"){
+        $query = "SELECT p.codigo, p.apellidos, p.nombres, p.codigo_cargo, p.codigo_ruta, p.codigo_departamento_empresa,
+        btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) as nombre_personal,
+        cat_cargo.descripcion as descripcion_cargo
+        FROM personal p
+            INNER JOIN catalogo_cargo cat_cargo ON cat_cargo.codigo = p.codigo_cargo
+            INNER JOIN usuarios u ON u.codigo_personal = p.codigo  
+                WHERE p.codigo_estatus = '01' and u.codigo_ruta = '$codigo_ruta'";
+    }else{
+        $query = "SELECT p.codigo, p.apellidos, p.nombres, p.codigo_cargo, p.codigo_ruta, p.codigo_departamento_empresa,
                 btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) as nombre_personal,
                 cat_cargo.descripcion as descripcion_cargo
                 FROM personal p
-                    INNER JOIN catalogo_cargo cat_cargo ON cat_cargo.codigo = p.codigo_cargo  
-                    WHERE p.codigo_estatus = '01' and p.codigo_ruta = '$codigo_ruta' and p.codigo_cargo = '28'";
+                    INNER JOIN catalogo_cargo cat_cargo ON cat_cargo.codigo = p.codigo_cargo
+                    INNER JOIN usuarios u ON u.codigo_personal = p.codigo  
+                        WHERE p.codigo_estatus = '01' and u.codigo_departamento_empresa = '$codigo_cargo'";
+    }
+    
 // Ejecutamos el Query.
     $consulta = $dblink -> query($query);
 // Inicializando el array

@@ -37,7 +37,7 @@ if($errorDbConexion == false){
 				$id_x = trim($_POST['id_x']);
 				// Armamos el query.
 				$query = 'SELECT u.id_usuario, TRIM(u.nombre) AS nombre, TRIM(u.password) AS password, u.codigo_perfil, TRIM(u.base_de_datos) AS base_de_datos, TRIM(u.codigo_estatus) AS codigo_estatus,
-								u.codigo_personal, u.codigo_institucion, u.codigo_departamento_empresa,
+								u.codigo_personal, u.codigo_institucion, u.codigo_departamento_empresa, codigo_ruta,
 								cat_est.descripcion as nombre_estatus
 									FROM usuarios u
 										INNER JOIN catalogo_estatus cat_est ON cat_est.codigo = u.codigo_estatus
@@ -60,6 +60,7 @@ if($errorDbConexion == false){
 							$codigo_personal = trim($listado['codigo_personal']);
 							$codigo_institucion = trim($listado['codigo_institucion']);
 							$codigo_departamento_empresa= trim($listado['codigo_departamento_empresa']);
+							$codigo_ruta= trim($listado['codigo_ruta']);
 						// Rellenando la array.
 							$datos[$fila_array]["nombre"] = $nombre;
 							$datos[$fila_array]["password"] = $password;
@@ -68,6 +69,7 @@ if($errorDbConexion == false){
 							$datos[$fila_array]["codigo_personal"] = $codigo_personal;
 							$datos[$fila_array]["codigo_institucion"] = $codigo_institucion;
 							$datos[$fila_array]["codigo_departamento_empresa"] = $codigo_departamento_empresa;
+							$datos[$fila_array]["codigo_ruta"] = $codigo_ruta;
 					}
 					$mensajeError = "Si Registro";
 				}
@@ -85,6 +87,7 @@ if($errorDbConexion == false){
 					$confirmapassword = trim($_POST['ConfirmaPassword']);
 					$codigo_empresa = trim($_POST['lstempresa']);
 					$codigo_departamento_empresa = trim($_POST['lstDepartamentoEmpresa']);
+					$codigo_ruta = trim($_POST['lstRuta']);
 					$codigo_perfil = trim($_POST['lstperfil']);
 					$codigo_personal = trim($_POST['lstpersonal']);
 					$codigo_estatus = trim($_POST['lstestatus']);	
@@ -107,8 +110,8 @@ if($errorDbConexion == false){
 										break;
 								}
 					// Query
-					$query = "INSERT INTO usuarios (nombre, password, codigo_perfil, codigo_institucion, codigo_personal, codigo_estatus, base_de_datos, codigo_departamento_empresa)
-						VALUES ('$nombre','$password','$codigo_perfil','$codigo_empresa','$codigo_personal','$codigo_estatus', '$base_de_datos','$codigo_departamento_empresa')";
+					$query = "INSERT INTO usuarios (nombre, password, codigo_perfil, codigo_institucion, codigo_personal, codigo_estatus, base_de_datos, codigo_departamento_empresa, codigo_ruta)
+						VALUES ('$nombre','$password','$codigo_perfil','$codigo_empresa','$codigo_personal','$codigo_estatus', '$base_de_datos','$codigo_departamento_empresa','$codigo_ruta')";
 					// Ejecutamos el query
 						$resultadoQuery = $dblink -> query($query);              
                         ///////////////////////////////////////////////////////////////////////////////////////
@@ -126,6 +129,7 @@ if($errorDbConexion == false){
 				$nombre = trim($_POST['txtnombres']);
 				$codigo_empresa = trim($_POST['lstempresa']);
 				$codigo_departamento_empresa = trim($_POST['lstDepartamentoEmpresa']);
+				$codigo_ruta = trim($_POST['lstRuta']);
 				$codigo_perfil = trim($_POST['lstperfil']);
 				$codigo_personal = trim($_POST['lstpersonal']);
 				$codigo_estatus = trim($_POST['lstestatus']);			
@@ -147,14 +151,14 @@ if($errorDbConexion == false){
 					// QUERY UPDATE.
 					if($cambiopassword == "yes"){
 						$query_usuario = sprintf("UPDATE usuarios SET nombre = '%s', password = '%s', codigo_perfil = '%s', codigo_institucion = '%s',
-						codigo_personal = '%s', codigo_estatus = '%s' 
+						codigo_personal = '%s', codigo_estatus = '%s', codigo_departamento_empresa = '%s', codigo_ruta = '%s'  
 						WHERE id_usuario = %d",
-						$nombre, $password,  $codigo_perfil, $codigo_empresa, $codigo_personal, $codigo_estatus, $_POST['id_user']);	
+						$nombre, $password,  $codigo_perfil, $codigo_empresa, $codigo_personal, $codigo_estatus, $codigo_departamento_empresa, $codigo_ruta, $_POST['id_user']);	
 					}else{
 						$query_usuario = sprintf("UPDATE usuarios SET nombre = '%s', codigo_perfil = '%s', codigo_institucion = '%s',
-						codigo_personal = '%s', codigo_estatus = '%s', codigo_departamento_empresa = '%s' 
+						codigo_personal = '%s', codigo_estatus = '%s', codigo_departamento_empresa = '%s', codigo_ruta = '%s' 
 						WHERE id_usuario = %d",
-						$nombre, $codigo_perfil, $codigo_empresa, $codigo_personal, $codigo_estatus, $codigo_departamento_empresa, $_POST['id_user']);	
+						$nombre, $codigo_perfil, $codigo_empresa, $codigo_personal, $codigo_estatus, $codigo_departamento_empresa, $codigo_ruta, $_POST['id_user']);	
 					}
 						// Ejecutamos el query guardar los datos en la tabla alumno..
 						$resultadoQuery = $dblink -> query($query_usuario);				

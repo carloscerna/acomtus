@@ -63,6 +63,7 @@ var NuevoRegistro = function(){
                     $('#lstperfil').val(data[0].codigo_perfil);
                     $('#lstestatus').val(data[0].codigo_estatus);
                     $('#lstDepartamentoEmpresa').val(data[0].codigo_departamento_empresa);
+                    $('#lstRuta').val(data[0].codigo_ruta);
                     listar_personal(data[0].codigo_personal);
                 // Desactivar contraseñas.
                     $("#Password").prop('disabled', true);
@@ -83,8 +84,8 @@ var NuevoRegistro = function(){
                 //lstpersonal: {required: true},
                 lstestatus: {required: true},
                 },
-		        errorElement: "em",
-		        errorPlacement: function ( error, element ) {
+                errorElement: "em",
+                errorPlacement: function ( error, element ) {
 					// Add the `invalid-feedback` class to the error element
 					error.addClass( "invalid-feedback" );
 					if ( element.prop( "type" ) === "checkbox" ) {
@@ -104,7 +105,7 @@ var NuevoRegistro = function(){
                             toastr.error("Faltan Datos...");
 					});            
 				},
-		    submitHandler: function(){	
+            submitHandler: function(){	
             var str = $('#formUsers').serialize();
             // VALIDAR CONDICIÓN DE CONTRASEÑA.
             if($('#chkcambiopassword').is(":checked")) {chkcambiopassword = 'yes';}else{chkcambiopassword = 'no';}                        
@@ -112,23 +113,23 @@ var NuevoRegistro = function(){
 			///////////////////////////////////////////////////////////////			
 			// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
 			///////////////////////////////////////////////////////////////
-		        $.ajax({
-		            cache: false,
-		            type: "POST",
-		            dataType: "json",
-		            url:"php_libs/soporte/NuevoEditarUsuarios.php",
-		            data:str + "&id=" + Math.random() + "&cambiopassword="+chkcambiopassword,
-		            success: function(response){
-		            	// Validar mensaje de error
-		            	if(response.respuesta == false){
-                            toastr["error"](response.mensaje, "Sistema");
-		            	}
-		            	else{
-                            toastr["success"](response.mensaje, "Sistema");
-                            }               
-		            },
-		        });
-		    },
+            $.ajax({
+                cache: false,
+                type: "POST",
+                dataType: "json",
+                url:"php_libs/soporte/NuevoEditarUsuarios.php",
+                data:str + "&id=" + Math.random() + "&cambiopassword="+chkcambiopassword,
+                success: function(response){
+                    // Validar mensaje de error
+                    if(response.respuesta == false){
+                        toastr["error"](response.mensaje, "Sistema");
+                    }
+                    else{
+                        toastr["success"](response.mensaje, "Sistema");
+                        }               
+                },
+            });
+        },
    });
 
 }); // fin de la funcion principal ************************************/
@@ -200,7 +201,7 @@ function listar_personal(codigo_personal){
             }
     }, "json");    
 }
-// FUNCION LISTAR CATALOGO ESTATUS
+// FUNCION LISTAR CATALOGO CARGO EN LA EMPRESA
 ////////////////////////////////////////////////////////////
 function listar_empresa(){
     var miselect=$("#lstempresa");
@@ -223,6 +224,21 @@ function listar_departamento_empresa(){
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
     $.post("includes/cargar_departamento_cargo.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+            }
+    }, "json");    
+}
+// FUNCION LISTAR CATALOGO DEPARTAMENTO EN LA EMPRESA
+////////////////////////////////////////////////////////////
+function listar_ruta(){
+    var miselect=$("#lstRuta");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_ruta.php",
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
