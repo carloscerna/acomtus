@@ -450,7 +450,7 @@ function rellenar($total_dias_quincena){
         //$fecha_descanso = array(); $descripcion_jornada_a_P2 = array(); $fecha_inicio_adb = array();
             $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
     // BLOQUE EXPERIMENTAL, EXTRAER LOS VALORES DE CADA JORNDAD, PERMISO, ETC. Y PASARLOS A UNA MATRIZ ASOCIATIVA.
-        $query_asistencia = "SELECT pa.codigo_personal, pa.fecha, pa.codigo_jornada, cat_j.descripcion as descripcion_jornada, 
+       $query_asistencia = "SELECT pa.codigo_personal, pa.fecha, pa.codigo_jornada, cat_j.descripcion as descripcion_jornada, 
                 pa.codigo_tipo_licencia, cat_lp.descripcion as descripcion_licencia, 
                 pa.codigo_jornada_descanso, cat_jd.descripcion as descripcion_descanso,
                 pa.codigo_jornada_vacaciones,  cat_jv.descripcion as descripcion_vacacion,
@@ -598,8 +598,11 @@ function rellenar($total_dias_quincena){
             // IIMPRIR EN PANTALLA SALARIO QUINCENA
                 $pdf->Cell($w[8],7,'','L',0,'C',false);    // ES LA DIVISIÓN ENTRO EL TOTAL DE DIAS Y LOS CALCULOS (SALARIO, ASUETOS, EXTRA, TOTAL-EXTRA, TOTAL)
             # PRESENTAR SALARIO
-                $salario_pantalla = number_format($salario["SalarioQuincena"],2,'.',',');
-                    $pdf->Cell($w[1],6,'$' . $salario_pantalla,1,0,'C',$fill);
+                // VERIFICAR SI ESTA TODA LA ASISTENCIA COMPLETA, PARA DAR UN BUEN DATO DE SALARIO.
+                        $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - ($salario["PorDia"] * ($total_dias_quincena - $count_asistencia));
+                // SALARIO EN PANTALLA
+                        $salario_pantalla = number_format($salario["SalarioQuincena"],2,'.',',');
+                            $pdf->Cell($w[1],6,'$' . $salario_pantalla,1,0,'C',$fill);
             # PRESENTAR ASUETO.1
                 $asueto_pantalla = "";
                 $pdf->Cell($w[1],6,$asueto_pantalla,1,0,'C',$fill);
