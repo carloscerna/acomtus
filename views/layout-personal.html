@@ -61,17 +61,13 @@
         </div>
       </div><!-- /.container-fluid -->
     </section>
-
-
   <!-- Small boxes (Stat box) -->
   <div class="col-md-12">
     <div class="card m-auto">
       <div class="card-header bg-gradient-navy">
-
           <!-- /.INPUT PARA EL MENU CONTEXTUAL   -->
-          <input type="hidden" id="MenuContextual" value='{{ codigo_perfil }}'>
+          <input type="hidden" id="MenuContextual" value="{{ codigo_perfil }}">
           <!-- /.card-tools -->
-
           <div class="row">
             <div class="col-md-8 col-lg-8 col-xl-8">
               <h3 class="card-title "><span class="fal fa-users"></span> Personal</h3>
@@ -96,7 +92,7 @@
                     </div>
                 </div>
                 <div class="col-lg-2">
-                    <button class="btn btn-success" style="width:100%" data-toggle="tooltip" data-placement="top" title="Nuevo" id = "goNuevoUser">
+                    <button type="button" class="btn btn-success" style="width:100%" data-toggle="tooltip" data-placement="top" title="Nuevo" id = "goNuevoUser">
                       <span class="fas fa-user-plus"> Nuevo Registro</span>
                     </button>
                 </div>

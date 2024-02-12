@@ -6,7 +6,7 @@
 	<div class="modal-content">
 		<div class="modal-header modal-header-info">
 			<h6 class="modal-title" id=""><span class="fa fa-save"></span><label> ¿Guardar Nueva Fecha Producción o Cambiar Ruta? </label></h6>
-			<button class="close" data-dismiss="modal" aria-label="Cerrar" id="VentanaGuardarProduccionDevolucion">
+			<button class="close" data-dismiss="modal" aria-label="Cerrar" id="VentanaGuardarProduccionDevolucionB">
 				<span aria-hidden="true">&times;</span>
 			</button>
 		</div>
@@ -24,20 +24,20 @@
 								<input type="date" id="FechaProduccionCreacion" name="FechaProduccionCreacion" class="form-control" required>
 								
 								<!-- BUSCAR PRODUCCIÓN NACTIVA-->
-								<button class='btn btn-secondary' id="goBuscarProduccionDevolucion" name="goBuscarProduccionDevolucion"> 
-									<div style='text-align:center;'><i class="fa fa-search"></i></div>  
+								<button class="btn btn-secondary" id="goBuscarProduccionDevolucion" name="goBuscarProduccionDevolucion"> 
+									<div style="text-align:center;"><i class="fa fa-search"></i></div>  
 								</button>
-								<button class='btn btn-secondary' id="goBuscarCancelar" name="goBuscarCancelar"> 
-									<div style='text-align:center;'><i class="fal fa-times"></i></div>  
+								<button class="btn btn-secondary" id="goBuscarCancelar" name="goBuscarCancelar"> 
+									<div style="text-align:center;"><i class="fal fa-times"></i></div>  
 								</button>
 							</div>
 						</div>  
 
 							<div class="form-check form-check-inline">
-                          <input class="form-check-input" type="radio" name="RadioFecha" id="RadioFecha" value="si" checked>
-                          <label class="form-check-label text-info" for="RadioFecha">
-                            Fecha
-                          </label>
+								<input class="form-check-input" type="radio" name="RadioFecha" id="RadioFecha" value="si" checked>
+								<label class="form-check-label text-info" for="RadioFecha">
+                            		Fecha
+                          		</label>
                         </div>
                         <div class="form-check form-check-inline">
                           <input class="form-check-input" type="radio" name="RadioFecha" id="RadioRuta" value="si">
@@ -53,7 +53,6 @@
 							</div>
 						  </div>-->
 					</div> <!-- ROW -->
-
 					<div class="row">
 						<div class="col-12 col-md-12 col-lg-12 col-xl-12">
                             <fieldset id="FieldsetFechaNueva" style="display: none;">
@@ -109,15 +108,14 @@
                                           </tfoot>
                                       </table>
                                 </div>
-                                </fieldset>
+                            </fieldset>
 						</div> <!-- DIV SECUNDARIO -->
 					</div> <!-- ROW -->
-
 				</div> <!-- CONTAINER -->
 			</div> <!-- MODAL BODY -->
 				<!-- footer modal -->
 				<div class="modal-footer">
-					<button class="btn btn-default" data-dismiss="modal">Cerrar</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
 					<button class="btn btn-secondary" id="goGuardarDevolucion" type="button" disabled>Guardar</button>
 				</div>
 

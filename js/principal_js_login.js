@@ -28,6 +28,7 @@ $(function(){
 		    submitHandler: function(){
 			 // Serializar los datos, toma todos los Id del formulario con su respectivo valor.
 		        var str = $('#formLogin').serialize();
+				//alert();
 		        $.ajax({
 		            beforeSend: function(){
 		            },

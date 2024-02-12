@@ -54,27 +54,23 @@ $("#goImprimirProduccionCompleta").on('click', function (e) {
    // Información de la Página 1.   IMPRIMIR TODO LA PRODUCCIÓN.                            
    $("#NumeroCorrelativo").val('');
    codigo_produccion = $('#NumeroCorrelativo').val();
-    //var $objCuerpoTabla=$("#listado").children().prev().parent();          
-	//var numero_control_ = []; 
-    //var fila = 0;          
-   // recorre el contenido de la tabla.
-   /*
-      $objCuerpoTabla.find("tbody tr").each(function(){
-		// input text
-			var codigo_produccion = $(this).find('td').eq(8).find("input[name=NControl]").val();     
-		// dar valor a las arrays.
-        	numero_control_[fila] = codigo_produccion;           		 
-        	fila = fila + 1;            
-      });
-	  //*/
 		fecha = $("#FechaProduccion").val();
 		imprimir = "todos";
 		// Ejecutar Informe
-			//varenviar = "/acomtus/php_libs/reportes/control_tiquete_ingresos_todos.php?codigo_produccion="+numero_control_+"&fecha="+fecha;
 			varenviar = "/acomtus/php_libs/reportes/control_tiquete_ingresos_todos.php?codigo_produccion="+codigo_produccion+"&fecha="+fecha;
 		// Ejecutar la función abre otra pestaña.
 			AbrirVentana(varenviar);   
   });
+  ///////////////////////////////////////////////////////////////////////////////	  
+  // 	reportres producción COMPLETA
+  //////////////////////////////////////////////////////////////////////////////
+$("#goImprmirProduccion").on('click', function (e) {
+	fecha = $("#FechaProduccion").val();	  
+	// Ejecutar Informe
+		varenviar = "/acomtus/php_libs/reportes/Produccion/Completa.php?fecha="+fecha;
+	// Ejecutar la función abre otra pestaña.
+		AbrirVentana(varenviar);   
+   });
 ///////////////////////////////////////////////////////////////////////////////	  
 // BLOQUE EXTRAER INFORMACIÓN DEL REGISTROS (PRODUCCION ASIGNADO)
 $('body').on('click','#listado a',function (e){

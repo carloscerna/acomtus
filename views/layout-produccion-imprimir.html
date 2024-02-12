@@ -77,7 +77,7 @@
 
                   
         <div class="row">
-          <div class="col-md-4 col-lg-4 col-xl-4">
+          <div class="col col-md-12">
             <h3 class="card-title"><i class="fad fa-layer-group nav-icon"></i> Producción - Control de Ingresos de Tickets</h3>
           </div>
         </div>
@@ -96,9 +96,9 @@
                         <span class="input-group-text">Fecha</span>
                         <input type="date" id="FechaProduccion" name="FechaProduccion" class="form-control" required autofocus>
                       <!-- Botón Buscar Producción -->
-                      <button class='btn btn-secondary' id="goBuscarProduccion" data-toggle="tooltip" data-placement="left" title="Buscar Controles"><div style='text-align:center;'><i class="fal fa-file-search"></i></div></button>
+                      <button type="button" class="btn btn-secondary" id="goBuscarProduccion" data-toggle="tooltip" data-placement="left" title="Buscar Controles"><div><i class="fal fa-file-search"></i></div></button>
                       <!-- Botón Imprimir Toda La Producción.-->
-                      <button class='btn btn-secondary' id="goImprimirProduccionCompleta" data-toggle="tooltip" data-placement="left" title="Imprimir Controles por Fecha"><div style='text-align:center;'><i class="fal fa-print"></i></div></button>
+                      <button type="button" class="btn btn-secondary" id="goImprimirProduccionCompleta" data-toggle="tooltip" data-placement="left" title="Imprimir Controles por Fecha"><div><i class="fal fa-print"></i></div></button>
                     </div> 
                 </div>
                   <div class="col col-md-12 col-lg-6 col-xl-6">
@@ -112,14 +112,19 @@
             <fieldset id="ProduccionTabla" style="display: none;">
               <legend>Producción</legend>
               <div class="row">
-                <div class="col">
+                <div class="col col-md-6 d-flex justify-content-start p-0">
                   <label for="LblProduccionesTotal" style="padding: 0px; font-size: x-large; color:black; text-align: left;">Total Producciones: </label>
+                </div>
+                <div class="col col-md-6 d-flex justify-content-end p-0">
+                  <button type="button" class="btn btn-dark" id="goImprmirProduccion" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Imprimir Producción">
+                    <span class="fal fa-print-search"></span>
+                  </button>
                 </div>
               </div>
 
               <div class="row">
                 <div class="col">
-                  <table id="listado" class="table display responsive nowrap" style="width: 100%;">
+                  <table id="TablaProduccion" class="table table-stripe table-sm table-hover responsive nowrap" style="width: 100%;">
                     <thead>
                         <tr>
                           <th style="padding: 0px; font-size: large; color:black; text-align: left;"></th>
@@ -149,7 +154,7 @@
                   </table>
                 </div>
               </div>
-              </fieldset>
+            </fieldset>
         </div> <!-- /.card-body -->
       </div>        <!-- /.card-body -->
     </div>      <!-- /.card -->

@@ -9,141 +9,142 @@
         <span class="fad fa-layer-group"></span>
           <label>Producción | Control de Ingresos Tiquete</label>
       </h6>
-			<button class="close" data-dismiss="modal" aria-label="Cerrar" id="VentanaBuscarPorTiquete">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Cerrar" id="VentanaBuscarPorTiquete1">
 				<span aria-hidden="true">&times;</span>
 			</button>
 		</div>
 		<!-- FORMULARIO PRINCIPAL. -->
 		<form  action="" method="post" name="form" id="formVerProduccion" role="form">
-        </form>
+    </form>
 			<div class="modal-body">
 				<div class="container">
 					<div class="row">
-						<div class="col-12 col-md-12 col-lg-12 col-xl-12">
-                            <fieldset id="FieldsetBusquedaTiquete">
-                                <legend> Producción | Busqueda por Tiquete</legend>
-                                    <div class="row">
-                                        <div class="col col-md-12 col-lg-12 col-xl-12">
-                                            <div class="input-group">
-                                                <span class="input-group-text">Serie</span>
-                                                <select class="form-control" name="lstSerieBuscarTiquete" id="lstSerieBuscarTiquete"></select>
-                                              </div>
-                                        </div>
-                                        <div class="col col-md-12 col-lg-12 col-xl-12">
-                                            <div class="input-group">
-                                                <span class="input-group-text fal fa-ticket-alt text-bold"> N.º Tiquete</span>
-                                                <input type="text" class="global_filter form-control font-weight-bold text-green text-right" id="BusquedaNumerotiquete" placeholder="" autofocus autocomplete="off" style="padding: 0px; font-size: large; color:green; text-align: right;">
-                                              </div>
-                                        </div>
-                                    </div>
-                                </fieldset>
+						<div class="col col-md-12">
+              <fieldset id="FieldsetBusquedaTiquete">
+                  <legend> Producción | Busqueda por Tiquete</legend>
+                      <div class="row">
+                          <div class="col col-md-12 col-lg-12 col-xl-12">
+                              <div class="input-group">
+                                  <span class="input-group-text">Serie</span>
+                                  <select class="form-control" name="lstSerieBuscarTiquete" id="lstSerieBuscarTiquete"></select>
+                                </div>
+                          </div>
+                          <div class="col col-md-12 col-lg-12 col-xl-12">
+                              <div class="input-group">
+                                  <span class="input-group-text fal fa-ticket-alt text-bold"> N.º Tiquete</span>
+                                  <input type="text" class="global_filter form-control font-weight-bold text-green text-right" id="BusquedaNumerotiquete" placeholder="" autofocus autocomplete="off" style="padding: 0px; font-size: large; color:green; text-align: right;">
+                                </div>
+                          </div>
+                      </div>
+              </fieldset>
 
-                                <fieldset id="TablaControles">
-                                  <legend> Tiquete en Controles.</legend>
-                                  <div class="table-responsive">
-                                      <table id="listadoTiqueteEnControl" class="table display responsive nowrap" style="width: 100%;">
-                                          <thead>
-                                              <tr>
-                                                  <th></th>
-                                                  <th style="text-align: center;">Fecha</th>
-                                                  <th style="text-align: center;"># Control</th>
-                                                  <th style="text-align: center;">Desde</th>
-                                                  <th style="text-align: center;">Hasta</th>
-                                                  <th style="text-align: center;">Cola</th>
-                                                  <th></th>
-                                              </tr>                
-                                          </thead>
-                                            <tbody id="listadoTiqueteEnControlOk">
-                                            </tbody>
-                                        </table>
+                  <fieldset id="TablaControles">
+                    <legend> Tiquete en Controles.</legend>
+                    <div class="table-responsive">
+                        <table id="listadoTiqueteEnControl" class="table display responsive nowrap" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th style="text-align: center;">Fecha</th>
+                                    <th style="text-align: center;"># Control</th>
+                                    <th style="text-align: center;">Desde</th>
+                                    <th style="text-align: center;">Hasta</th>
+                                    <th style="text-align: center;">Cola</th>
+                                    <th></th>
+                                </tr>                
+                            </thead>
+                              <tbody id="listadoTiqueteEnControlOk">
+                              </tbody>
+                          </table>
+                    </div>
+                  </fieldset>
+
+                  <fieldset id="FieldsetProduccion">
+                      <legend> Producción | N.º de Control</legend>
+                          <div class="row">
+                              <div class="col">
+                                  <div class="input-group">
+                                      <div class="input-group mb-1">
+                                          <div class="input-group-prepend">
+                                            <span class="input-group-text text-bold bg-gradient-gray-dark" id="basic-addon15">N.º Control</span>
+                                          </div>
+                                          <input type="text" class="form-control text-bold text-secondary" id="BusquedaNumeroControl" placeholder="Número Control" aria-label="BusquedaNumeroControl" aria-describedby="basic-addon1" readonly style="padding: 0px; font-size: x-large; color:green; text-align: right;">
+                                        </div>
                                   </div>
-                                </fieldset>
-
-                                <fieldset id="FieldsetProduccion">
-                                    <legend> Producción | N.º de Control</legend>
-                                        <div class="row">
-                                            <div class="col">
-                                                <div class="input-group">
-                                                    <div class="input-group mb-1">
-                                                        <div class="input-group-prepend">
-                                                          <span class="input-group-text text-bold bg-gradient-gray-dark" id="basic-addon1">N.º Control</span>
-                                                        </div>
-                                                        <input type="text" class="form-control text-bold text-secondary" id="BusquedaNumeroControl" placeholder="Número Control" aria-label="BusquedaNumeroControl" aria-describedby="basic-addon1" readonly style="padding: 0px; font-size: x-large; color:green; text-align: right;">
-                                                      </div>
-                                                </div>
-                                                <div class="input-group">
-                                                    <div class="input-group mb-1">
-                                                        <div class="input-group-prepend">
-                                                          <span class="input-group-text bg-gradient-gray-dark" id="basic-addon1">Fecha</span>
-                                                        </div>
-                                                        <input type="text" class="form-control text-bold text-blue" id="BusquedaFechaControl" placeholder="Fecha" aria-label="BusquedaFechaControl" aria-describedby="basic-addon1" readonly>
-                                                      </div>
-                                                </div>
-                                                <div class="input-group">
-                                                    <div class="input-group mb-1">
-                                                        <div class="input-group-prepend">
-                                                          <span class="input-group-text bg-gradient-gray-dark" id="basic-addon1">Motorista</span>
-                                                        </div>
-                                                        <input type="text" class="form-control text-bold text-blue" id="BusquedaPersonalControl" placeholder="Motorista" aria-label="BusquedaPersonalControl" aria-describedby="basic-addon1" readonly>
-                                                      </div>
-                                                </div>
-                                                <div class="input-group">
-                                                    <div class="input-group mb-1">
-                                                        <div class="input-group-prepend">
-                                                          <span class="input-group-text bg-gradient-gray-dark" id="basic-addon1">Ruta</span>
-                                                        </div>
-                                                        <input type="text" class="form-control text-bold text-blue" id="BusquedaRutaControl" placeholder="Ruta" aria-label="BusquedaRutaControl" aria-describedby="basic-addon1" readonly>
-                                                      </div>
-                                                </div>
-                                                <div class="input-group">
-                                                    <div class="input-group mb-1">
-                                                        <div class="input-group-prepend">
-                                                          <span class="input-group-text bg-gradient-gray-dark" id="basic-addon1">Jornada</span>
-                                                        </div>
-                                                        <input type="text" class="form-control text-bold text-blue" id="BusquedaJornadaControl" placeholder="Jornada" aria-label="BusquedaJornadaControl" aria-describedby="basic-addon1" readonly>
-                                                      </div>
-                                                </div>
-                                                <div class="input-group">
-                                                    <div class="input-group mb-1">
-                                                        <div class="input-group-prepend">
-                                                          <span class="input-group-text bg-gradient-gray-dark" id="basic-addon1">Unidad y N.º Placa</span>
-                                                        </div>
-                                                        <input type="text" class="form-control text-bold text-blue" id="BusquedaUnidadPlacaControl" placeholder="Unidad y N.º Placa" aria-label="BusquedaUnidadPlacaControl" aria-describedby="basic-addon1" readonly>
-                                                      </div>
-                                                </div>
-                                                <div class="input-group">
-                                                    <div class="input-group mb-1">
-                                                        <div class="input-group-prepend">
-                                                          <span class="input-group-text bg-gradient-gray-dark" id="basic-addon1">N.º Vueltas</span>
-                                                        </div>
-                                                        <input type="text" class="form-control text-bold text-blue" id="BusquedaNumeroVueltasControl" placeholder="N.º Vueltas" aria-label="BusquedaNumeroVueltasControl" aria-describedby="basic-addon1" readonly>
-                                                      </div>
-                                                </div>
-                                                <div class="input-group">
-                                                    <div class="input-group mb-1">
-                                                        <div class="input-group-prepend">
-                                                          <span class="input-group-text bg-gradient-gray-dark" id="basic-addon1">Total Ingreso $</span>
-                                                        </div>
-                                                        <input type="text" class="form-control text-bold text-blue" id="BusquedaTotalIngresoControl" placeholder="Total Ingreso" aria-label="BusquedaTotalIngresoControl" aria-describedby="basic-addon1" readonly>
-                                                      </div>
-                                                </div>
-                                                <div class="input-group">
-                                                    <div class="input-group mb-1">
-                                                        <div class="input-group-prepend">
-                                                          <span class="input-group-text bg-gradient-gray-dark" id="basic-addon1">Estatus</span>
-                                                        </div>
-                                                        <input type="text" class="form-control text-bold text-blue" id="BusquedaEstatusControl" placeholder="Estatus" aria-label="BusquedaEstatusControl" aria-describedby="basic-addon1" readonly>
-                                                      </div>
-                                                </div>
-                                            </div>
+                                  <div class="input-group">
+                                      <div class="input-group mb-1">
+                                          <div class="input-group-prepend">
+                                            <span class="input-group-text bg-gradient-gray-dark" id="basic-addon1">Fecha</span>
+                                          </div>
+                                          <input type="text" class="form-control text-bold text-blue" id="BusquedaFechaControl" placeholder="Fecha" aria-label="BusquedaFechaControl" aria-describedby="basic-addon1" readonly>
                                         </div>
-                                    </fieldset>
-					</div> <!-- ROW -->
+                                  </div>
+                                  <div class="input-group">
+                                      <div class="input-group mb-1">
+                                          <div class="input-group-prepend">
+                                            <span class="input-group-text bg-gradient-gray-dark" id="basic-addon2">Motorista</span>
+                                          </div>
+                                          <input type="text" class="form-control text-bold text-blue" id="BusquedaPersonalControl" placeholder="Motorista" aria-label="BusquedaPersonalControl" aria-describedby="basic-addon1" readonly>
+                                        </div>
+                                  </div>
+                                  <div class="input-group">
+                                      <div class="input-group mb-1">
+                                          <div class="input-group-prepend">
+                                            <span class="input-group-text bg-gradient-gray-dark" id="basic-addon3">Ruta</span>
+                                          </div>
+                                          <input type="text" class="form-control text-bold text-blue" id="BusquedaRutaControl" placeholder="Ruta" aria-label="BusquedaRutaControl" aria-describedby="basic-addon1" readonly>
+                                        </div>
+                                  </div>
+                                  <div class="input-group">
+                                      <div class="input-group mb-1">
+                                          <div class="input-group-prepend">
+                                            <span class="input-group-text bg-gradient-gray-dark" id="basic-addon4">Jornada</span>
+                                          </div>
+                                          <input type="text" class="form-control text-bold text-blue" id="BusquedaJornadaControl" placeholder="Jornada" aria-label="BusquedaJornadaControl" aria-describedby="basic-addon1" readonly>
+                                        </div>
+                                  </div>
+                                  <div class="input-group">
+                                      <div class="input-group mb-1">
+                                          <div class="input-group-prepend">
+                                            <span class="input-group-text bg-gradient-gray-dark" id="basic-addon5">Unidad y N.º Placa</span>
+                                          </div>
+                                          <input type="text" class="form-control text-bold text-blue" id="BusquedaUnidadPlacaControl" placeholder="Unidad y N.º Placa" aria-label="BusquedaUnidadPlacaControl" aria-describedby="basic-addon1" readonly>
+                                        </div>
+                                  </div>
+                                  <div class="input-group">
+                                      <div class="input-group mb-1">
+                                          <div class="input-group-prepend">
+                                            <span class="input-group-text bg-gradient-gray-dark" id="basic-addon6">N.º Vueltas</span>
+                                          </div>
+                                          <input type="text" class="form-control text-bold text-blue" id="BusquedaNumeroVueltasControl" placeholder="N.º Vueltas" aria-label="BusquedaNumeroVueltasControl" aria-describedby="basic-addon1" readonly>
+                                        </div>
+                                  </div>
+                                  <div class="input-group">
+                                      <div class="input-group mb-1">
+                                          <div class="input-group-prepend">
+                                            <span class="input-group-text bg-gradient-gray-dark" id="basic-addon7">Total Ingreso $</span>
+                                          </div>
+                                          <input type="text" class="form-control text-bold text-blue" id="BusquedaTotalIngresoControl" placeholder="Total Ingreso" aria-label="BusquedaTotalIngresoControl" aria-describedby="basic-addon1" readonly>
+                                        </div>
+                                  </div>
+                                  <div class="input-group">
+                                      <div class="input-group mb-1">
+                                          <div class="input-group-prepend">
+                                            <span class="input-group-text bg-gradient-gray-dark" id="basic-addon8">Estatus</span>
+                                          </div>
+                                          <input type="text" class="form-control text-bold text-blue" id="BusquedaEstatusControl" placeholder="Estatus" aria-label="BusquedaEstatusControl" aria-describedby="basic-addon1" readonly>
+                                        </div>
+                                  </div>
+                              </div>
+                          </div>
+                  </fieldset>
+					  </div> <!-- COL -->
+          </div> <!-- ROW -->
 				</div> <!-- CONTAINER -->
 			</div> <!-- MODAL BODY -->
 				<!-- footer modal -->
 				<div class="modal-footer bg-gradient-cyan p-0">
-					<button class="btn btn-default" data-dismiss="modal">Cerrar</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
 				</div>
 	</div>
 </div>

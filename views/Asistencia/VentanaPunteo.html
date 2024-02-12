@@ -1,0 +1,168 @@
+<!-- VENTANA MODAL - MODIFICAR LA FECHA DE LA FACTURA -->
+<div class="row m-1 p-1 text-dark">
+<div class="col">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="VentanaPunteo" tabindex="-1" role="document" aria-labelledby="VentanaPunteo" aria-hidden="true">
+<div class="modal-dialog modal-lg">
+	<div class="modal-content">
+		<div class="modal-header bg-cyan">
+			<h6 class="modal-title" id="">
+				<label for="CodigoNombreEmpleado"></label>
+			</h6>
+			<button class="close" data-dismiss="modal" aria-label="Cerrar" id="VentanaPunteo2">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<!-- FORMULARIO PRINCIPAL. -->
+		<form  action="" method="post" name="formPunteo" id="formPunteo" role="form">
+			<!-- VARIABLES QUE AYUDARAN AL PUNTEO -->
+			<input type="hidden" id="accion_buscar" name="accion_buscar" value="ActualizarJornada">
+			<input type="hidden" id="Id_" name="Id_" value="0">
+			<input type="hidden" id="CJTodos" name="CJTodos" value="0">
+			<input type="hidden" id="CJTodosSeparador" name="CJTodosSeparador" value="0">
+			CJ<input type="hidden" id="CJ" name="CJ" value="0" style="width: 30px;">
+			CTL<input type="hidden" id="CTL" name="CTL" value="0" style="width: 30px;">
+			CJA<input type="hidden" id="CJA" name="CJA" value="0" style="width: 30px;">
+			CJV<input type="hidden" id="CJV" name="CJV" value="0" style="width: 30px;">
+			CJD<input type="hidden" id="CJD" name="CJD" value="0" style="width: 30px;">
+			CJE4H<input type="hidden" id="CJE4H" name="CJE4H" value="0" style="width: 30px;">
+			CJN<input type="hidden" id="CJN" name="CJN" value="0" style="width: 30px;">
+
+			<div class="modal-body">
+				<div class="container">
+					<div class="row border border-info rounded p-2">
+						<div class="col col-md-4 col-sm-3">
+							<img src="#" class="rounded" alt="#" width="80" height="90" id="FotoEmpleado">
+						</div>
+						<div class="col col-md-4 col-sm-3">
+							<img src="#" class="rounded" alt="#" width="80" height="90" id="ImagenJornada">
+						</div>
+						<div class="col col-md-4 col-sm-3">
+							<button type="button" class="btn btn-primary btn-lg btn-block" id="BotonJornada" value="Jornada">Jornada</button>
+							<button type="button" class="btn btn-info btn-lg btn-block" id="BotonLicencia" value="Licencia">Licencia o Permiso</button>
+						</div>
+					</div> <!-- ROW -->
+					<!-- JORNA NORMAL -->
+						<div class="from-group row">
+							<div class="col col-md-6">
+								<fieldset id="DivJornada" style="display: none;">
+									<legend class="text-bold text-blue">Jornada</legend>
+										<!-- BLOQUE PARA LA JORNADA-->
+										<div class="border border-info rounded p-1">
+											<label for="lstJornada">Por</label>
+												<select class="custom-select" name="lstJornada" id="lstJornada"></select>  
+											<!-- SELECT CATALOGO JORNADA -->
+											<div class="form-group p-1 align-self-end" id="NocturnidadSiNo" style="display: none;">
+												<div class="form-check form-check-inline">
+												<input class="form-check-input" type="checkbox" name="chkNocturnidad" id="chkNocturnidad" value="Si">
+												<label class="form-check-label text-info" for="chkNocturnidad">
+													Nocturnidad
+												</label>
+												</div>
+											</div>    
+										</div>
+								</fieldset>
+								<!-- BLOQUE PARA LOS PERMISOS-->
+								<fieldset id="DivPermisos" style="display: none;">
+									<legend class="text-bold text-blue">Licencias, Permisos u Otros</legend>
+										<div class="border border-danger rounded p-2">
+											<label for="lstTipoLicencia">Por</label>
+											<select class="custom-select" name="lstTipoLicencia" id="lstTipoLicencia"></select>                                      
+										</div>
+								</fieldset>
+							</div>
+
+							<div class="col col-md-6 p-1 m-1">
+								<!-- DEFINIR CUANDO SE HAYA SELECCIONADO 4H Y PREGUNTAR SI HIZO TIEMPO EXTRA -->
+									<!-- SELECT CATALOGO JORNADA EXTRA RADIOS-->
+									<div class="form-group" id="JornadaExtra" style="display: none;">
+										<div>
+										<label class="form-check-label text-info" for="">
+											Jornada Extra en 4 horas
+										</label>
+										</div>
+
+										<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="RadiosE" id="JornadaExtraSi" value="si">
+										<label class="form-check-label text-info" for="JornadaExtraSi">
+											Si
+										</label>
+										</div>
+										<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="RadiosE" id="JornadaExtraNo" value="no" checked>
+										<label class="form-check-label" for="JornadaExtraNo">
+											No
+										</label>
+										</div>
+									</div>
+										<!-- SELECT CATALOGO JORNADA 4 extra-->
+										<div class="form-group p-1 m-1 border border-primary" id="JornadaExtra4Horas" style="display: none;">
+											<label class="form-check-label text-info" for="JornadaExtra4">
+											</label>
+											<span class="badge badge-primary" id="TextExtra4Descripcion"></span>
+											<!-- BLOQUE PARA LA JORNADA POR ASUENTO-->
+											<div class="border border-info rounded p-3">
+											<label for="lstJornadaExtraCuatroHoras">Por</label>
+											<select class="custom-select" name="lstJornadaExtraCuatroHoras" id="lstJornadaExtraCuatroHoras"></select>      
+											</div>
+										</div>
+										<!-- SELECT CATALOGO JORNADA 4 extra-->
+										<!-- SELECT CATALOGO JORNADA SE ACTIVARA CUANDO SE SELECCIONE Trabajó en Vacación-->
+										<div class="form-group" id="JornadaTV" style="display: none;">
+											<label class="form-check-label text-info" for="JornadaTV">
+											  Jornada (Trabajó en Vacación)
+											</label>
+											<span class="badge badge-primary" id="TextTVDescripcion"></span>
+											<!-- BLOQUE PARA LA JORNADA POR ASUENTO-->
+											<div class="border border-info rounded p-3">
+											  <label for="lstJornadaTV">Por</label>
+											  <select class="custom-select" name="lstJornadaTV" id="lstJornadaTV"></select>      
+											</div>
+										</div>
+										 <!-- SELECT CATALOGO JORNADA SE ACTIVARA CUANDO SE SELECCIONE Trabajó en Descanso-->
+										 <div class="form-group" id="JornadaDescanso" style="display: none;">
+											<label class="form-check-label text-info" for="JornadaDescanso">
+											  Jornada (Trabajó en Descanso)
+											</label>
+											<span class="badge badge-primary" id="TextDescansoDescripcion"></span>
+											<!-- BLOQUE PARA LA JORNADA POR DESCANSO-->
+											<div class="border border-info rounded p-3">
+											  <label for="lstJornadaDescanso">Por</label>
+											  <select class="custom-select" name="lstJornadaDescanso" id="lstJornadaDescanso"></select>      
+											</div>
+										</div>
+										<!-- SELECT CATALOGO JORNADA SE ACTIVARA CUANDO LA FECHA SEA DE ASUETO-->
+										<div class="form-group" id="JornadaAsueto" style="display: none;">
+											<label class="form-check-label text-info" for="JornadaAsueto">
+											  Jornada (Trabajó en Asueto)
+											</label>
+											<span class="badge badge-primary" id="TextAsuetoDescripcion"></span>
+										  <!-- BLOQUE PARA LA JORNADA POR ASUENTO-->
+										  <div class="border border-info rounded p-3">
+											<label for="lstJornadaAsueto">Por</label>
+											<select class="custom-select" name="lstJornadaAsueto" id="lstJornadaAsueto"></select>      
+										  </div>
+											<div class="form-group p-1 align-self-end" id="NocturnidadSiNoAsueto" style="display: none;">
+												<div class="form-check form-check-inline">
+												<input class="form-check-input" type="checkbox" name="chkNocturnidadAsueto" id="chkNocturnidadAsueto" value="Si">
+												<label class="form-check-label text-info" for="chkNocturnidadAsueto">
+													Nocturnidad
+												</label>
+												</div>
+											</div> 
+										</div>    
+							</div>
+						</div>
+					<!-- JORNA NORMAL -->	
+				</div> <!-- CONTAINER -->
+			</div> <!-- MODAL BODY -->
+				<!-- footer modal -->
+				<div class="modal-footer bg-gradient-dark">
+					<button type="button" class="btn btn-default" data-dismiss="modal" id="BotonCerrar" value="Cerrar">Cerrar</button>
+					<button type="button" class="btn btn-primary" id="goGuardarPunteo">Guardar</button>
+				</div>
+			</form>
+	</div>
+</div>
+</div>
+</div>			
+</div>

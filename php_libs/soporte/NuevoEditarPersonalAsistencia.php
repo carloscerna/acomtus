@@ -92,7 +92,7 @@ if($errorDbConexion == false){
 					//print 'Mes ' .$asueto_mes;
 					//print 'Día ' . $asueto_dia;
 					 // ARMAR LA CONSULTA
-					   $query_asueto = "SELECT * FROM catalogo_asuetos WHERE mes = '$asueto_mes' and dia = '$asueto_dia'";
+					   $query_asueto = "SELECT * FROM asuetos WHERE fecha = '$fecha'";
 						// EJECUTAR LA CONSULTA
 						$consulta_asueto = $dblink -> query($query_asueto);
 						// convertimos el objeto
@@ -113,6 +113,39 @@ if($errorDbConexion == false){
 					$contenidoOK = '';
 					$datos[$fila_array]["respuestaOK"] = false;
 					$datos[$fila_array]["mensajeError"] = 'Código No Existe o No Pertenece a este Departamento.';
+				}
+			break;
+			case "BuscarPersonalRutaCodigo":
+				$codigo_personal = trim($_POST['codigo_personal']);
+				// Armamos el query.
+				$query = "SELECT u.codigo_ruta, cat_ruta.descripcion as descripcion_ruta, u.codigo_ruta
+						FROM usuarios u 
+							INNER JOIN catalogo_ruta cat_ruta ON cat_ruta.id_ruta = TO_NUMBER(u.codigo_ruta,'99')
+								WHERE u.codigo_personal = '$codigo_personal'";
+				// Ejecutamos el Query.
+				$consulta = $dblink -> query($query);
+				// Validar si hay registros.
+				if($consulta -> rowCount() != 0){
+					$respuestaOK = true;
+					$num = 0;
+					// convertimos el objeto
+					while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+					{
+                        // Nombres de los campos de la tabla.
+                            $DescripcionRuta = trim($listado['descripcion_ruta']);
+							$CodigoRuta = trim($listado['codigo_ruta']);
+
+						// Rellenando la array.
+							$datos[$fila_array]["DescripcionRuta"] = $DescripcionRuta;
+							$datos[$fila_array]["CodigoRuta"] = $CodigoRuta;
+					}
+					$datos[$fila_array]["mensajeError"] = 'Código Encontrado.';
+					$datos[$fila_array]["respuestaOK"] = true;
+				}
+				else{	// verificar si el codigo no es el mismo de la empresa del Usuario que ingresa la asistencia.
+					$contenidoOK = '';
+					$datos[$fila_array]["respuestaOK"] = false;
+					$datos[$fila_array]["mensajeError"] = 'Ruta no asignada.';
 				}
 			break;
 			case 'BuscarTipoLicencia':
@@ -318,7 +351,7 @@ else{
 // Salida de la Array con JSON.
 	if($_POST["accion"] === "" or $_POST["accion"] === "BuscarTodosCodigo"){
 		echo json_encode($arreglo);	
-	}elseif($_POST["accion"] === "BuscarPersonalCodigo" or $_POST["accion"] === "BuscarTipoLicencia"){
+	}elseif($_POST["accion"] === "BuscarPersonalCodigo" or $_POST["accion"] === "BuscarTipoLicencia" or $_POST["accion"] === "BuscarPersonalRutaCodigo"){
 		echo json_encode($datos);
 		}
 	else{

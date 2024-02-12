@@ -34,13 +34,13 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="asistencia.php" class="nav-link">
+                <a href="#asistencia.php" class="nav-link">
                   <i class="fal fa-clipboard-user nav-icon"></i>
                   <p>Asistencia</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="planilla.php" class="nav-link">
+                <a href="##planilla.php" class="nav-link">
                   <i class="far fa-file-invoice-dollar nav-icon"></i>
                   <p>Planilla</p>
                 </a>
@@ -132,6 +132,12 @@
                 <p>Catalogos</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="Asuetos.php" class="nav-link">
+                <i class="fal fa-calendar-alt nav-icon"></i>
+                <p>Asuetos</p>
+              </a>
+            </li>
           </ul>
         </li>
   {% endif %}
@@ -164,13 +170,13 @@
         </a>
       </li>
       <li class="nav-item">
-        <a href="asistencia.php" class="nav-link">
+        <a href="##asistencia.php" class="nav-link">
           <i class="fal fa-clipboard-user nav-icon"></i>
           <p>Asistencia</p>
         </a>
       </li>
       <li class="nav-item">
-        <a href="planilla.php" class="nav-link">
+        <a href="#planilla.php" class="nav-link">
           <i class="far fa-file-invoice-dollar nav-icon"></i>
           <p>Planilla</p>
         </a>
@@ -208,13 +214,13 @@
         </a>
       </li>
       <li class="nav-item">
-        <a href="asistencia.php" class="nav-link">
+        <a href="#asistencia.php" class="nav-link">
           <i class="fal fa-clipboard-user nav-icon"></i>
           <p>Asistencia</p>
         </a>
       </li>
       <li class="nav-item">
-        <a href="planilla.php" class="nav-link">
+        <a href="#planilla.php" class="nav-link">
           <i class="far fa-file-invoice-dollar nav-icon"></i>
           <p>Planilla</p>
         </a>
@@ -359,13 +365,13 @@
     </a>
     <ul class="nav nav-treeview">
       <li class="nav-item">
-        <a href="asistencia.php" class="nav-link">
+        <a href="#asistencia.php" class="nav-link">
           <i class="fal fa-clipboard-user nav-icon"></i>
           <p>Asistencia</p>
         </a>
       </li>
       <li class="nav-item">
-        <a href="planilla.php" class="nav-link">
+        <a href="#planilla.php" class="nav-link">
           <i class="far fa-file-invoice-dollar nav-icon"></i>
           <p>Planilla</p>
         </a>
@@ -420,6 +426,7 @@
         <span class="badge badge-info right"></span>
       </p>
     </a>
+    {% if codigo_perfil == '11'%}
     <ul class="nav nav-treeview">
       <li class="nav-item">
         <a href="asistencia.php" class="nav-link">
@@ -428,6 +435,7 @@
         </a>
       </li>
     </ul>
+    {% endif %}
   </li>
 {% endif %}
 

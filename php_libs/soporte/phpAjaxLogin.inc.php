@@ -72,7 +72,7 @@ if($errorDbConexion == false){					// Validar conexión con la base de datos
 					// armar la consulta.
 						$query = "SELECT u.nombre, u.id_usuario, u.base_de_datos, u.codigo_perfil, u.password, u.codigo_personal, u.codigo_institucion,
 						btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) as nombre_personal,
-						u.codigo_departamento_empresa,
+						u.codigo_departamento_empresa, p.foto as foto_personal, p.codigo_genero,
 						cat_perfil.descripcion as nombre_perfil
 							FROM usuarios u
 								INNER JOIN personal p ON p.codigo = u.codigo_personal
@@ -101,8 +101,22 @@ if($errorDbConexion == false){					// Validar conexión con la base de datos
 								$_SESSION['CodigoDepartamentoEmpresa'] = (trim($listado['codigo_departamento_empresa']));
 								$_SESSION['nombre_perfil'] = (trim($listado['nombre_perfil']));
 								$_SESSION['nombre_institucion'] = 'ROOT';
-								$_SESSION['codigo_institucion'] = (trim($listado['codigo_institucion']));;
-								$_SESSION['foto_personal'] = './img/nofoto.jpg';
+								$_SESSION['codigo_institucion'] = (trim($listado['codigo_institucion']));
+								// validar la fotografía si existe.
+									$foto_personal = trim($listado['foto_personal']);
+									$codigo_genero = trim($listado['codigo_genero']);
+								//	default imagen masculino
+									$_SESSION['foto_personal'] = './img/avatar_masculino.png';
+								// validar
+									if(is_null($foto_personal)){
+										if($codigo_genero == '02'){	//	femenino
+											$_SESSION['foto_personal'] = './img/avatar_femenino.png';
+										}
+									}else{
+										// foto del empleado.
+										$_SESSION['foto_personal'] = "./img/".$foto_personal;
+									}
+								
 							}else{
 								$respuestaOK = false;
 								$contenidoOK = '';
@@ -136,8 +150,8 @@ if($errorDbConexion == false){					// Validar conexión con la base de datos
 												$_SESSION['nombre_institucion'] = trim($userData['nombre']);
 												$_SESSION['direccion'] = (trim($userData['direccion']));
 												$_SESSION['telefono'] = trim($userData['telefono_fijo']);
-												$_SESSION['nombre_municipio'] = utf8_encode(trim($userData['nombre_municipio']));
-												$_SESSION['nombre_departamento'] = utf8_encode(trim($userData['nombre_departamento']));
+												$_SESSION['nombre_municipio'] = mb_convert_encoding(trim($userData['nombre_municipio']),"ISO-8859-1","UTF-8");
+												$_SESSION['nombre_departamento'] = mb_convert_encoding(trim($userData['nombre_departamento']),"ISO-8859-1","UTF-8");
 												$_SESSION['nombre_personal'] = (trim($userData['nombre_personal']));
 												$_SESSION['logo_uno'] = trim($userData['logo_uno']);
 
@@ -149,7 +163,7 @@ if($errorDbConexion == false){					// Validar conexión con la base de datos
 														$_SESSION['foto_personal'] = "./img/avatar_femenino.png" ;
 													}
 												}else{
-													$_SESSION['foto_personal'] = trim($userData['foto']);
+													$_SESSION['foto_personal'] = "./img/fotos/".trim($userData['foto']);
 												}
 											//Guardamos dos variables de sesión que nos auxiliará para saber si se está o no "logueado" un usuario 
 												$_SESSION["autentica"] = "SI";

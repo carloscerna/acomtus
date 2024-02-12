@@ -1,0 +1,103 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+  /* mensajes de error para el validate de los form de input*/
+  input.error {
+      border-color: #f00 !important;
+  }
+  small.required {
+      color:#f00;
+  }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+    <!-- JS para esta página. -->
+    <script type="text/JavaScript" src="js/Asistencia/Seleccionar.js"></script> 
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header p-0" style="background-color: rgb(234, 236, 238);">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-6">
+            <h4></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="asistencia.php"> Asistencia</a></li>
+              <li class="breadcrumb-item active">Seleccionar</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+  
+  <!-- Small boxes (Stat box) -->
+    <section class="col col-sm-12 col-md-12 col-lg-8 col-xl-6 mx-auto" id="PantallaPrincipal">
+      <!-- FORM PRINCIPAL -->
+      <form action="" method="post" id="formAsistencia" name="formAsistencia" role="form" enctype="multipart/form-data">
+        <input type="hidden" name="CodigoPersonal" id="CodigoPersonal" value="{{ codigo_personal}}" title="CodigoPersonal">
+        <input type="hidden" id="CodigoDepartamentoEmpresa" name="CodigoDepartamentoEmpresa" value = "{{ CodigoDepartamentoEmpresa }}" aria-label="CodigoDepartamentoEmpresa">
+        <input type="hidden" name="CodigoRuta" id="CodigoRuta" value="" title="CodigoRuta">
+              <div class="card m-auto">
+                <div class="card-header bg-gradient-navy">
+                  <div class="card-tools">
+                    
+                  </div>        
+                    <div class="row">
+                      <div class="col-md-12 col-lg-12 col-xl-12">
+                        <h4 class="card-title"><i class="fad fa-clipboard-list-check"></i> Punteo (Asistencia) | Seleccionar</h4>
+                      </div>
+                    </div>
+                  <!-- /.card-tools -->
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                  <div class="form-group row d-flex justify-content-center">
+                      <!-- Botón Buscar Personal -->
+                      <div class="col col-md-12">
+                        <label for="LblResponsable">Responsable del Punteo: <label class="text-danger text-bold">{{ codigo_personal }} - {{ nombre_personal }}</label></label>
+                      </div>
+                      <div class="col col-md-12">
+                        <label for="Lbl"> <label class="text-primary text-bold" id="LblDescripcion"></label></label>
+                      </div>
+                  </div>
+                  <div class="form-group row d-flex justify-content-center">
+                    <div class="col col-md-6 m-0">
+                      <!-- Botón Buscar Personal -->
+                      <div class="m-0"><label class="">Por Empleado</label></div>
+                      <a href="AsistenciaPorEmpleado.php" class="btn btn-outline-primary" id="PorEmpleado" title="Por Empleado">
+                          <i class="fad fa-users fa-10x" style="color: #0004ff;"></i>
+                      </a>                   
+                    </div>
+                    <div class="col col-md-6 align-items-center">
+                      <!-- Botón Buscar Nómina -->
+                      <div class=""><label class="">Por Nómina</label></div>
+                      <a href="AsistenciaPorNomina.php" class="btn btn-outline-secondary" id="PorNomina" title="Por Nómina" >
+                        <i class="fad fa-poll-people fa-10x" style="--fa-primary-color: #2d71e6; --fa-secondary-color: #28529a;"></i>
+                      </a>                   
+                    </div>
+                  </div>
+              </div> <!-- /.card-body -->
+                  <!-- /.CARD  footer -->
+                    <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
+                      <!-- Botón Buscar Personal -->
+                      
+                    </div>
+              </div>      <!-- /.card -->
+      </form>
+    </section>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

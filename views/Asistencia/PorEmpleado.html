@@ -1,0 +1,254 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+  /* mensajes de error para el validate de los form de input*/
+  input.error {
+      border-color: #f00 !important;
+  }
+  small.required {
+      color:#f00;
+  }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+    <!-- JS para esta página. -->
+    <script type="text/JavaScript" src="js/Asistencia/PorEmpleado.js"></script>
+    <script>
+      var AM_or_PM = "AM";
+      var h = 0;
+      startTime();
+      function startTime(){
+          var today = new Date();
+          h = today.getHours();
+          var m = today.getMinutes();
+          var s = today.getSeconds();
+          $("#SoloHora").val(h);
+          //  CONVERTISION A FORMATO DE 12 HORAS.
+          h = twelve_hour_time(h);
+          m = checkTime(m);
+          s = checkTime(s);
+          $("#HoraActual").text(h + ":" + m + ":" + s +" "+AM_or_PM);
+          setTimeout("startTime()", 1000);
+      }
+      function checkTime(i){
+          if(i < 10){
+              i = "0" + i;// add zero in front of numbers < 10
+          }
+          return i;
+      }
+      // CONVERT TO 12 HOUR TIME. SET AM OR PM
+      function twelve_hour_time(h){
+          if(h > 12){
+              h = h - 12;
+              AM_or_PM = " PM";
+          }
+          return h;
+      }
+    </script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header p-0" style="background-color: rgb(234, 236, 238);">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-6">
+            <h4></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="asistencia.php"> Asistencia</a></li>
+              <li class="breadcrumb-item active">Personal</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+    
+    <section class="col col-sm-12 col-md-12 col-lg-8 col-xl-6 m-auto" id="PantallaPrincipalApagado" style="display: none;">
+      <div class="alert alert-primary" role="alert">
+        Ha Terminado el Tiempo para agregar la Asistencia (Punteado) de éste día.
+      </div>
+    </section>
+  <!-- Small boxes (Stat box) -->
+    <section class="col col-sm-12 col-md-12 col-lg-8 col-xl-6 m-auto" id="PantallaPrincipal">
+      <!-- FORM PRINCIPAL -->
+      <form action="" method="post" id="formAsistencia" name="formAsistencia" role="form" enctype="multipart/form-data">
+            <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
+            <input type="hidden" id="id_user" name="id_" value = "">            
+            <input type="hidden" id="accion" name="accion" value = "GuardarAsistencia">            
+            <!-- BOLLEAN PARA LOS DIFERETNES DATOS ASUETO, VACACIONES, DESCANSO-->
+            <input type="hidden" id="BooleanAsueto" name="BooleanAsueto" value = "no">
+            <input type="hidden" id="BooleanTV" name="BooleanTV" value = "no">
+            <input type="hidden" id="BooleanDescanso" name="BooleanDescanso" value = "no">
+            <!-- INFORMACIÓN DEL USUARIO CON SU PERFIL-->
+            <input type="hidden" id="codigo_perfil" name="codigo_perfil" value = "{{ codigo_perfil }}" aria-label="CodigoPerfil">
+            <input type="hidden" id="codigo_personal_usuario" name="codigo_personal_usuario" value = "{{ codigo_personal }}" aria-label="CodigoPersonalUsuario">
+            <input type="hidden" id="codigo_departamento_empresa" name="codigo_departamento_empresa" value = "{{ CodigoDepartamentoEmpresa }}" aria-label="CodigoDepartamentoEmpresa">
+            <!-- APERTURA DEL CARD-->
+              <div class="card m-auto">
+                <div class="card-header bg-gradient-navy">
+                  <div class="card-tools">
+                    <span class="badge badge-primary" id="HoraActual"></span>
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" aria-labelledby="HOraActual" title="Hora"><i class="fas fa-minus"></i>
+                    </button>
+                  </div>        
+                    <div class="row">
+                      <div class="col-md-12 col-lg-12 col-xl-12">
+                        <h4 class="card-title"><i class="far fa-clipboard-list"></i> Personal | Control de Asistencia</h4>
+                      </div>
+                    </div>
+                  <!-- /.card-tools -->
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
+                 <input type="hidden" id="MenuTab" value="{{ codigo_perfil }}">  
+                <!-- Fecha de la Asistencia -->       
+                    <div class="form-group">
+                      <label for="FechaAsistencia">Fecha:</label>
+                      <input type="date" class="form-control" id="FechaAsistencia" name="FechaAsistencia" readonly>
+                    </div>
+                  <div class="form-group">
+                    <label for="CodigoPersonal">Código Empleado:</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control"  id="CodigoPersonal" name="CodigoPersonal" maxlength="5" minlength="5" autocomplete="off" autofocus>
+                                <!-- Botón Buscar Personal -->
+                                <a href="#" class="btn btn-info" id="goBuscarPersonalAsistencia"><i class="fas fa-search"></i> Buscar</a>
+                        </div>
+                        <!-- TEXTO DEL NOMBRE DEL EMPLEADO-->
+                        <input type="text" class="form-control text-bold"  id="NombrePersonal" name="NombrePersonal" readonly required aria-label="NombrePersonal">
+                        <!-- IMAGEN DEL EMPLEADO-->
+                          <div class="img-thumbnail d-block mx-auto" style="width: 14rem;">
+                            <img class="card-img-top img-thumbnail rounded mx-auto d-block" id="Imagen" src="#" alt="Imagen">
+                          </div>
+                  </div>
+                  <!-- SELECT CATALOGO JORNADA -->
+                  <div class="form-group" id="JornadaSin">
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="Radios" id="Jornada" value="Jornada" required>
+                      <label class="form-check-label text-info" for="Jornada">
+                        Jornada
+                      </label>
+                    </div>
+                    <div class="form-check form-check-inline text-danger">
+                      <input class="form-check-input" type="radio" name="Radios" id="Permiso" value="Permiso">
+                      <label class="form-check-label" for="Permiso">
+                        Permiso
+                      </label>
+                    </div>
+
+                    <!-- BLOQUE PARA LA JORNADA-->
+                    <div class="border border-info rounded p-3" style="display: none;" id="DivJornada">
+                      <label for="lstJornada">Por</label>
+                      <select class="custom-select" name="lstJornada" id="lstJornada"></select>  
+                      <!-- SELECT CATALOGO JORNADA -->
+                        <div class="form-group p-1 align-self-end" id="NocturnidadSiNo" style="display: block;">
+                          <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="chkNocturnidad" id="chkNocturnidad" value="Si">
+                            <label class="form-check-label text-info" for="chkNocturnidad">
+                              Nocturnidad
+                            </label>
+                          </div>
+                        </div>    
+                    </div>
+
+                    <!-- BLOQUE PARA LOS PERMISOS-->
+                    <div class="border border-danger rounded p-3" style="display: none;" id="DivPermisos">
+                      <label for="lstTipoLicencia">Por</label>
+                      <select class="custom-select" name="lstTipoLicencia" id="lstTipoLicencia"></select>                                      
+                    </div>
+                  </div>
+                        <!-- SELECT CATALOGO JORNADA SE ACTIVARA CUANDO SE SELECCIONE Trabajó en Vacación-->
+                        <div class="form-group" id="JornadaTV" style="display: none;">
+                          <label class="form-check-label text-info" for="JornadaTV">
+                            Jornada por Trabajó en Vacación
+                          </label>
+                          <span class="badge badge-primary" id="TextTVDescripcion"></span>
+                          <!-- BLOQUE PARA LA JORNADA POR ASUENTO-->
+                          <div class="border border-info rounded p-3">
+                            <label for="lstJornadaTV">Por</label>
+                            <select class="custom-select" name="lstJornadaTV" id="lstJornadaTV"></select>      
+                          </div>
+                      </div>
+                        <!-- SELECT CATALOGO JORNADA SE ACTIVARA CUANDO SE SELECCIONE Trabajó en Descanso-->
+                        <div class="form-group" id="JornadaDescanso" style="display: none;">
+                          <label class="form-check-label text-info" for="JornadaDescanso">
+                            Jornada por Trabajó en Descanso
+                          </label>
+                          <span class="badge badge-primary" id="TextDescansoDescripcion"></span>
+                          <!-- BLOQUE PARA LA JORNADA POR DESCANSO-->
+                          <div class="border border-info rounded p-3">
+                            <label for="lstJornadaDescanso">Por</label>
+                            <select class="custom-select" name="lstJornadaDescanso" id="lstJornadaDescanso"></select>      
+                          </div>
+                      </div>
+                  <!-- SELECT CATALOGO JORNADA SE ACTIVARA CUANDO LA FECHA SEA DE ASUETO-->
+                  <div class="form-group" id="JornadaAsueto" style="display: none;">
+                      <label class="form-check-label text-info" for="JornadaAsueto">
+                        Jornada por Asueto
+                      </label>
+                      <span class="badge badge-primary" id="TextAsuetoDescripcion"></span>
+                    <!-- BLOQUE PARA LA JORNADA POR ASUENTO-->
+                    <div class="border border-info rounded p-3">
+                      <label for="lstJornadaAsueto">Por</label>
+                      <select class="custom-select" name="lstJornadaAsueto" id="lstJornadaAsueto"></select>      
+                    </div>
+                  </div>        
+                  
+                  <!-- DEFINIR CUANDO SE HAYA SELECCIONADO 4H Y PREGUNTAR SI HIZO TIEMPO EXTRA -->
+                      <!-- SELECT CATALOGO JORNADA EXTRA RADIOS-->
+                      <div class="form-group" id="JornadaExtra" style="display: none;">
+                        <div>
+                          <label class="form-check-label text-info" for="">
+                            Jornada Extra en 4 horas
+                          </label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="RadiosE" id="JornadaExtraSi" value="si">
+                          <label class="form-check-label text-info" for="JornadaExtraSi">
+                            Si
+                          </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="RadiosE" id="JornadaExtraNo" value="no" checked>
+                          <label class="form-check-label" for="JornadaExtraNo">
+                            No
+                          </label>
+                        </div>
+                      </div>
+                <!-- SELECT CATALOGO JORNADA 4 extra-->
+                  <div class="form-group" id="JornadaExtra4Horas" style="display: none;">
+                    <label class="form-check-label text-info" for="JornadaExtra4">
+                    </label>
+                    <span class="badge badge-primary" id="TextExtra4Descripcion"></span>
+                    <!-- BLOQUE PARA LA JORNADA POR ASUENTO-->
+                    <div class="border border-info rounded p-3">
+                      <label for="lstJornadaExtraCuatroHoras">Por</label>
+                      <select class="custom-select" name="lstJornadaExtraCuatroHoras" id="lstJornadaExtraCuatroHoras"></select>      
+                    </div>
+                  </div>
+                <!-- SELECT CATALOGO JORNADA 4 extra-->
+              </div> <!-- /.card-body -->
+                  <!-- /.CARD  footer -->
+                    <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
+                      <!-- Botón Buscar Personal -->
+                      <a href="#" class="btn btn-primary" id="goEnviar"> Enviar <i class="fas fa-paper-plane"></i></a>                   
+                    </div>
+              </div>      <!-- /.card -->
+      </form>
+    </section>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

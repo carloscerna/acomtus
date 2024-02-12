@@ -13,52 +13,59 @@
 {% endblock %}
 
 {% block loginUser %}
-      <div class="container-fluid">
+    <div class="container-fluid">
 		<div class="d-flex align-items-center flex-column justify-content-center h-200  text-white" id="header">
-				<div class="border-bottom mb-4 mt-4 pb-2">
-					<div class="alert alert-info" role="alert">
-						<h2>Administración</h2>
+			<div class="border-bottom mb-4 mt-4 pb-2">
+				<div class="alert alert-info" role="alert">
+					<img src="./img/logo.png" width="30px;" height="30px;" alt="ACOMTUS, S.A. DE C.V.">
+					<h2>Administración</h2>
+				</div>
+			</div>
+				<!-- /.MODAL CONTENT -->
+				<div class="login-box hold-transition">
+				<div class="modal-content">
+					<div class="modal-header bg-cyan">
+						<h6 class="modal-title" id="">
+							<label>Iniciar Sesión con tu Cuenta</label>
+						</h6>
+						<button class="close" data-dismiss="modal" aria-label="Cerrar" id="VentanaPunteo2">
+							<span aria-hidden="true">&times;</span>
+						</button>
 					</div>
 				</div>
-                  <div class="login-box hold-transition">
-			  <!-- /.login-logo -->
-			  <div class="card">
-				<div class="card-body">
-				  <label>Iniciar Sesión con tu Cuenta</label>
-                        <!-- FORM LOGIN -->
-				  <form action="" method="post" name="formLogin" id="formLogin">
-					<!-- INPUT OCULTOS -->
-						<input type="hidden" id="accion_buscar" name="accion_buscar" value = "BuscarUser" class="{required:true}">
-							<div class="input-group mb-3">
-							  <div class="input-group-append">
-								<div class="input-group-text">
-								  <span class="fas fa-user"></span>
-								</div>
-							  </div>
-                                    <input type="text" class="form-control" placeholder="Usuario" name="txtnombre" id="txtnombre" pattern="[a-zA-Z0-9]{1,35}" minlength="4" maxlength="20" autofocus="autofocus" required="required" autocomplete="off">
-							</div>
-							<div class="input-group mb-3">
-							  <div class="input-group-append">
-								<div class="input-group-text">
-								  <span class="fas fa-lock"></span>
-								</div>
-							  </div>
-                                    <input type="password" class="form-control" placeholder="Contraseña" id="txtpassword" name="txtpassword" maxlength="20" required="required" autocomplete="off">
-							</div>
-							<div class="row">
-                                               <!-- /.col -->
-                                               <div class="col">
-                                                   <button type="submit" class="btn btn-primary float-right">Iniciar Sesión</button>
-                                               </div>
-                                               <!-- /.col -->
-                                          </div>
-				  </form>			
 				</div>
-				<!-- /.login-card-body -->
-			  </div>
-			</div>
+				<!-- /.MODAL BODY -->
+				<div class="modal-body">
+					<div class="container">
+						<!-- FORM LOGIN -->
+						<form action="" method="post" name="formLogin" id="formLogin">
+							<!-- INPUT OCULTOS -->
+								<input type="hidden" id="accion_buscar" name="accion_buscar" value = "BuscarUser" class="{required:true}">
+									<div class="input-group mb-3">
+									<div class="input-group-append">
+										<div class="input-group-text">
+										<span class="fas fa-user"></span>
+										</div>
+									</div>
+										<input type="text" class="form-control" placeholder="Usuario" name="txtnombre" id="txtnombre" pattern="[a-zA-Z0-9]{1,35}" minlength="4" maxlength="20" autofocus="autofocus" required="required" autocomplete="off">
+									</div>
+									<div class="input-group mb-3">
+									<div class="input-group-append">
+										<div class="input-group-text">
+										<span class="fas fa-lock"></span>
+										</div>
+									</div>
+										<input type="password" class="form-control" placeholder="Contraseña" id="txtpassword" name="txtpassword" maxlength="20" required="required" autocomplete="off">
+									</div>
+									<!-- footer modal -->
+									<div class="modal-footer bg-gradient-dark">
+										<button type="submit" class="btn btn-primary float-right">Iniciar Sesión</button>
+									</div>
+						</form>
+					</div>
+				</div>	
 		</div>
-	  </div>
+	</div>
 {% endblock %}
 
 {% block javascripts %}

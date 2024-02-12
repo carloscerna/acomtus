@@ -1,0 +1,172 @@
+{# Heredando la plantilla principal #}
+
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<style>
+    @import url('https://fonts.googleapis.com/css?family=Numans');
+
+    html,body{
+    background-image: url('./img/dia.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 100%;
+    font-family: 'Numans', sans-serif;
+    }
+    
+    .container{
+    height: 100%;
+    align-content: center;
+    }
+    
+    .alert{
+        height: 100px;
+        margin-top: auto;
+        margin-bottom: auto;
+        width: 400px;
+        background-color: rgba(0,0,0,0.5) !important;
+        }
+
+    .card{
+    height: 320px;
+    margin-top: auto;
+    margin-bottom: auto;
+    width: 400px;
+    background-color: rgba(0,0,0,0.5) !important;
+    }
+    
+    .social_icon span{
+    font-size: 40px;
+    margin-left: 10px;
+    color: #FFC312;
+    }
+    
+    .social_icon span:hover{
+    color: white;
+    cursor: pointer;
+    }
+    
+    .card-header h3{
+    color: white;
+    }
+    
+    .social_icon{
+    position: absolute;
+    right: 20px;
+    top: -25px;
+    }
+    
+    .input-group-prepend span{
+    width: 50px;
+    background-color: #FFC312;
+    color: black;
+    border:0 !important;
+    }
+    
+    input:focus{
+    outline: 0 0 0 0  !important;
+    box-shadow: 0 0 0 0 !important;
+    
+    }
+    
+    .remember{
+    color: white;
+    }
+    
+    .remember input
+    {
+    width: 20px;
+    height: 20px;
+    margin-left: 15px;
+    margin-right: 5px;
+    }
+    
+    .login_btn{
+    color: black;
+    background-color: #FFC312;
+    width: 200px;
+    }
+    
+    .login_btn:hover{
+    color: black;
+    background-color: white;
+    }
+    
+    .links{
+    color: white;
+    }
+    
+    .links a{
+    margin-left: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block loginUser %}
+    <div class="container">
+
+        <div class="d-flex align-items-center flex-column justify-content-center h-200 vh-100">
+            <div class="border-bottom mb-4 mt-4 pb-2">
+				<div class="alert alert-info text-center" role="alert">
+                    <div class="d-flex justify-content-star">
+                        <img src="./img/logo.png" width="80px;" height="80px;" alt="ACOMTUS, S.A. DE C.V.">
+                        <h4>Sistema Administrativo</h4>
+                    </div>
+				</div>
+			</div>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="m-3 text-center">Iniciar Sesión</h3>
+                    
+                    <div class="d-flex justify-content-end social_icon">
+                        <span><i class="fad fa-users" title="Personal"></i></span>
+                        <span><i class="fad fa-bus-alt" title="Transporte"></i></span>
+                        <span><i class="fal fa-ticket-alt" title="Producción"></i></span>
+                        <span><i class="fal fa-file-invoice-dollar" title="Colecturía"></i></span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" name="formLogin" id="formLogin" role="form" enctype="multipart/form-data">
+                        <input type="hidden" id="accion_buscar" name="accion_buscar" value = "BuscarUser" class="{required:true}">
+                        <div class="input-group form-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Usuario" name="txtnombre" id="txtnombre" pattern="[a-zA-Z0-9]{1,35}" minlength="4" maxlength="20" autofocus="autofocus" required="required" autocomplete="off">
+                            
+                        </div>
+                        <div class="input-group form-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                            </div>
+                            <input type="password" class="form-control" placeholder="password" id="txtpassword" name="txtpassword" maxlength="20" required="required" autocomplete="off">
+                        </div>
+                        <!--
+                        <div class="row align-items-center remember">
+                            <input type="checkbox" id="CheckMember" title="Remember">Remember Me
+                        </div>
+                        -->
+                        <div class="form-group">
+                            <input type="submit" value="Iniciar Sesión" class="btn float-right login_btn">
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-white text-center">
+                    <h5>{{ mensaje }}</h5>
+                    <!--
+                    <div class="d-flex justify-content-center links">
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <a href="#">Forgot your password?</a>
+                    </div>
+                    -->
+                </div>
+            </div>
+        </div>	
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+
+{% endblock %}

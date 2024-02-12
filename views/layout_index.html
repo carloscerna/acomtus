@@ -12,12 +12,12 @@
     // DETEERMINA EL TAMAÑO DE LA PANTALLA     
       if (screen.width < 1024) {
         //document.write ("Pequeña") 
-        $("#PantallaSize").val("Pantalla: Pequeña");
+        //$("#PantallaSize").val("Pantalla: Pequeña " + screen.width);
       }else if(screen.width < 1280) {
-        $("#PantallaSize").val("Pantalla: Mediana");
+        //$("#PantallaSize").val("Pantalla: Mediana "  + screen.width);
         //document.write ("Mediana") 
       }else{
-        $("#PantallaSize").val("Pantalla: Grande");
+        //$("#PantallaSize").val("Pantalla: Grande "  + screen.width);
         //document.write ("Grande")
       }
             
@@ -43,9 +43,9 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0 text-bold">{{ nombre_institucion }}</h1>
+            <h1 class="m-0 text-bold">{{ nombre_institucion }} - {{ mensaje }}</h1>
             <!-- verifica el tamaño de la pantalla -->
-              <input type="text" id="PantallaSize" name="PantallaSize">
+              <input type="hidden" id="PantallaSize" name="PantallaSize" title="PantallaSize">
           </div><!-- /.col -->
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
@@ -55,9 +55,7 @@
           </div><!-- /.col -->
         </div><!-- /.row -->
       </div><!-- /.container-fluid -->
-    </div>
-    <!-- /.content-header -->
-    
+    </div> <!-- /.content-header -->
       <!-- CUANDO EL USUARIO SEA ROOT -->
       {% if codigo_perfil == '99' %}
       <!-- Main content -->
@@ -70,7 +68,7 @@
                   <h3 class="card-title">PASOS INICIALES</h3>
       
                   <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="BTools"><i class="fas fa-minus"></i>
                     </button>
                   </div>
                   <!-- /.card-tools -->
@@ -93,8 +91,6 @@
         </section>
       {% endif %}
       <!-- CUANDO EL USUARIO SEA ROOT -->
-   
-        <!-- CUANDO EL USUARIO SEA ROOT -->
         {% if codigo_perfil == '01' or codigo_perfil == '03' %}
         <!-- Main content -->
         <section class="content">
@@ -109,12 +105,10 @@
                   <h3 class="card-title">PRODUCCION DIARIA</h3>
       
                   <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Producción"><i class="fas fa-minus"></i>
                     </button>
-                  </div>
-                  <!-- /.card-tools -->
-                </div>
-                <!-- /.card-header -->
+                  </div><!-- /.card-tools -->
+                </div>  <!-- /.card-header -->
                 <div class="card-body">
                    <!-- SELECCIONAR ENTRE TODO Y FECHA            -->
                   <div class="form-group row">
@@ -150,9 +144,8 @@
                                   </tfoot>
                               </table>
                         </div>
-                        </fieldset>
-                </div>
-                <!-- /.card-body -->
+                      </fieldset>
+                </div><!-- /.card-body -->
                   <!-- /.CARD  footer -->
                   <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
                     <!-- Botón Buscar -->
@@ -171,15 +164,14 @@
                               <input type="radio" class="form-check-input" id="chkColones" name="OptBuscarDC" value="colones" checked>Colones
                             </label>
                           </div>
-                         </div>
-              </div>
-              <!-- /.card -->
-            </div>
-            <!-- /.row -->
+                        </div>
+                  </div>
+              </div>  <!-- /.card -->
+            </div>             <!-- /.row -->
           </div>
         </form>
         </section>
-      {% endif %}
+        {% endif %}
       <!-- CUANDO EL USUARIO SEA ROOT -->
   </div> <!-- /.content-Wrapper, Contains page content. --> 
   {% endblock %}

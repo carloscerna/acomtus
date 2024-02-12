@@ -1,0 +1,20 @@
+{
+    "name": "home/acomtus",
+    "description": "Sistema Administrativo y PLD",
+    "autoload": {
+        "psr-4": {
+            "Home\\Acomtus\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "carloscerna",
+            "email": "carlos_wilfredo_cerna@hotmail.com"
+        }
+    ],
+    "require": {
+        "phpmailer/phpmailer": "^6.9",
+        "twbs/bootstrap": "5.3.2",
+        "phpoffice/phpspreadsheet": "^1.25"
+    }
+}
