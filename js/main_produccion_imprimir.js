@@ -41,7 +41,7 @@ $("#NumeroCorrelativo").on('keyup', function (e) {
 		fecha = $("#FechaProduccion").val();
 		imprimir = "todos";
 		// Ejecutar Informe
-			varenviar = "/acomtus/php_libs/reportes/control_tiquete_ingresos_todos.php?codigo_produccion="+codigo_produccion+"&fecha="+fecha;
+			varenviar = "/acomtus/php_libs/reportes/Produccion/TiqueteTodos.php?codigo_produccion="+codigo_produccion+"&fecha="+fecha;
 		// Ejecutar la función abre otra pestaña.
 			AbrirVentana(varenviar);   
       }
@@ -57,7 +57,7 @@ $("#goImprimirProduccionCompleta").on('click', function (e) {
 		fecha = $("#FechaProduccion").val();
 		imprimir = "todos";
 		// Ejecutar Informe
-			varenviar = "/acomtus/php_libs/reportes/control_tiquete_ingresos_todos.php?codigo_produccion="+codigo_produccion+"&fecha="+fecha;
+			varenviar = "/acomtus/php_libs/reportes/Produccion/TiqueteTodos.php?codigo_produccion="+codigo_produccion+"&fecha="+fecha;
 		// Ejecutar la función abre otra pestaña.
 			AbrirVentana(varenviar);   
   });
@@ -73,10 +73,11 @@ $("#goImprmirProduccion").on('click', function (e) {
    });
 ///////////////////////////////////////////////////////////////////////////////	  
 // BLOQUE EXTRAER INFORMACIÓN DEL REGISTROS (PRODUCCION ASIGNADO)
-$('body').on('click','#listado a',function (e){
+$('body').on('click','#TablaProduccion a',function (e){
 	e.preventDefault();
 // DATA-ACCION Y HREF
 	codigo_produccion = $(this).attr('href');
+	alert(codigo_produccion);
 	accionAsignacion = $(this).attr('data-accion');
 	//alert(Id_Editar_Eliminar+" "+accionAsignacion);
 // EDTIAR REGISTRO.
@@ -85,7 +86,7 @@ $('body').on('click','#listado a',function (e){
 		fecha = $("#FechaProduccion").val();
 		imprimir = "todos";
 		// Ejecutar Informe
-			varenviar = "/acomtus/php_libs/reportes/control_tiquete_ingresos_todos.php?codigo_produccion="+codigo_produccion+"&fecha="+fecha+"&imprimir="+imprimir;
+			varenviar = "/acomtus/php_libs/reportes/Produccion/TiqueteTodos.php?codigo_produccion="+codigo_produccion+"&fecha="+fecha+"&imprimir="+imprimir;
 		// Ejecutar la función abre otra pestaña.
 			AbrirVentana(varenviar);   
 	}

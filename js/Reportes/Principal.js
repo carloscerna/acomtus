@@ -4,7 +4,21 @@ var accion = "todos";
 var tabla = "";
 var miselect = "";
 var today = "";
+// variables para la busqueda por numero de placa de la unidad.
+var OptBuscarUP = "Todo"; var NombreInstitucion = ""; var OptBuscarPM = "Todo";
 $(function(){ // iNICIO DEL fUNCTION.
+///////////////////////////////////////////////////////////////////////////////
+// INICIALIZARA DATATABLE. POR PLACA
+///////////////////////////////////////////////////////////////////////////////
+	$('#example').DataTable( { searching: false} );
+    var table = $('#listadoPorUnidadPlaca').DataTable( {
+      searching: false
+  });
+// POR MOTORISTA
+  $('#example1').DataTable( { searching: false} );
+  var table_m = $('#listadoPorMotorista').DataTable( {
+	searching: false
+});
 ///////////////////////////////////////////////////////////////////////////////
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,10 +32,12 @@ $(document).ready(function(){
 		$('#lstPersonalPorMotorista').select2({
 			theme: "bootstrap4"
 		});
-
+		//
 		if($('#MenuTab').val() == '000'){
 			$("#DivSoloParaContabilidad").hide();
 		}
+		//  NOMBRE INSTITUCIÓN
+		NombreInstitucion = $("#NombreInstitucion").val();
 });		
 ///////////////////////////////////////////////////////////////////////////////
 /// EVENTOS JQUERY Y BOTON NUEVO REGISTRO. CALCULO Y OTROS
@@ -139,11 +155,13 @@ $("#radioTodoPM").on('click', function (e) {
 	// LImpiar Tabla
 	$('#listadoPorMotoristaOk').empty();
 	//
-	$("label[for='LblProduccionesTotalPorMotorista']").text('Cantidad Tiquetes Vendidos ');
-	$("label[for='LblProduccionesTotalIngresoPorMotorista']").text('Total Ingresos $ ');
+	$("label[for='LblProduccionesTotalPorMotorista']").text('0');
+	$("label[for='LblProduccionesTotalIngresoPorMotorista']").text('$');
 	//
 	$("#FechaDesdePM").prop("readonly", true);
 	$("#FechaHastaPM").prop("readonly", true);
+	//
+	OptBuscarPM = this.value;
 });
 $("#radioFechaPM").on('click', function (e) {
 	// LImpiar Tabla
@@ -155,8 +173,10 @@ $("#radioFechaPM").on('click', function (e) {
 	$("#FechaDesdePM").prop("readonly", false);
 	$("#FechaHastaPM").prop("readonly", false);
 	//
-	$("label[for='LblProduccionesTotalPorMotorista']").text('Cantidad Tiquetes Vendidos ');
-	$("label[for='LblProduccionesTotalIngresoPorMotorista']").text('Total Ingresos $ ');
+	$("label[for='LblProduccionesTotalPorMotorista']").text('0');
+	$("label[for='LblProduccionesTotalIngresoPorMotorista']").text('$');
+	//
+	OptBuscarPM = this.value;
 });
 ///////////////////////////////////////////////////////////////////////////////	  
 // SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL N.º DE UNIDAD Y PLACA.
@@ -165,11 +185,14 @@ $("#radioTodoUP").on('click', function (e) {
 	// LImpiar Tabla
 	$('#listadoPorUnidadPlacaOk').empty();
 	//
-	$("label[for='LblProduccionesTotalPorUnidadPlaca']").text('Cantidad Tiquetes Vendidos ');
-	$("label[for='LblProduccionesTotalIngresoPorUnidadPlaca']").text('Total Ingresos $ ');
+	$("label[for='LblProduccionesTotalPorUnidadPlaca']").text('0');
+	$("label[for='LblProduccionesTotalIngresoPorUnidadPlaca']").text('$ ');
 	//
 	$("#FechaDesdeUP").prop("readonly", true);
 	$("#FechaHastaUP").prop("readonly", true);
+	//
+	//alert(this.value);
+	OptBuscarUP = this.value;
 });
 $("#radioFechaUP").on('click', function (e) {
 	// LImpiar Tabla
@@ -181,8 +204,11 @@ $("#radioFechaUP").on('click', function (e) {
 	$("#FechaDesdeUP").prop("readonly", false);
 	$("#FechaHastaUP").prop("readonly", false);
 	//
-	$("label[for='LblProduccionesTotalPorUnidadPlaca']").text('Cantidad Tiquetes Vendidos ');
-	$("label[for='LblProduccionesTotalIngresoPorUnidadPlaca']").text('Total Ingresos $ ');
+	$("label[for='LblProduccionesTotalPorUnidadPlaca']").text('0');
+	$("label[for='LblProduccionesTotalIngresoPorUnidadPlaca']").text('$ ');
+	//
+	//alert(this.value);
+	OptBuscarUP = this.value;
 });
 //////////////////////////////////////////////////////////////////////////////////
 /* BUSQUEDA DE CONTROL POR NUMERO DE TIQUETE. */
@@ -390,136 +416,227 @@ $('body').on('click','#listadoVerControles a',function (e){
 ///////////////////////////////////////////////////////////////////////////////
 /// EVENTOS JQUERY Y para disparar la busqueda. del por nombre motorista.
 ///////////////////////////////////////////////////////////////////////////////
-/*$("#goBuscarProduccionPM").on('click', function(){
-	var codigo = $("#lstPersonalPorMotorista option:selected").val();
-	$("#formBuscarPorMotorista").submit();
-});*/
 ///////////////////////////////////////////////////////
 // Validar Formulario, para la busqueda de un registro por codigo del motorista.
  //////////////////////////////////////////////////////
- $('#formBuscarPorMotorista').validate({
-	ignore:"",
-	rules:{
-			lstPersonalPorMotorista: {required: true},
+ $('#goBuscarProduccionPM').on('click', function(){
+	// focus
+	  $("#lstPersonalPorMotorista").focus()
+	  var buscartodos = "BuscarPorMotorista";
+	  var CodigoPersonal = $("#lstPersonalPorMotorista").val();
+	  var FechaHastaPM = $("#FechaHastaPM").val();
+	  var FechaDesdePM = $("#FechaDesdePM").val();
+   
+	  ///////////////////////////////////////////////////////////////////////////////	  
+	//
+	   if (table_m != undefined && table_m != null) 
+	   {
+	   table_m.destroy();
+	   table_m = null;
+	   } 
+	// CONFIGURACIÓN DE LA TABLA CON DATATABLE.
+	table_m = jQuery("#listadoPorMotorista").DataTable( {
+		"ajax":{
+		  lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+		  destroy: true,
+		  pageLength: 5,
+		  searching: false,
+		  url:"php_libs/soporte/ReporteGeneral.php",
+		  method:"POST",
+		  data: {"accion_buscar": buscartodos, codigo_personal: CodigoPersonal, OptBuscarPM: OptBuscarPM, 
+			  FechaDesdePM: FechaDesdePM, FechaHastaPM: FechaHastaPM
 			},
-			errorElement: "em",
-			errorPlacement: function ( error, element ) {
-				// Add the `invalid-feedback` class to the error element
-				error.addClass( "invalid-feedback" );
-				if ( element.prop( "type" ) === "checkbox" ) {
-					error.insertAfter( element.next( "label" ) );
-				} else {
-					error.insertAfter( element );
-				}
-			},
-				highlight: function ( element, errorClass, validClass ) {
-							$( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
-						},
-				unhighlight: function (element, errorClass, validClass) {
-							$( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
-						},
-				invalidHandler: function() {
-					setTimeout(function() {
-						toastr.error("Faltan Datos...");
-				});            
-			},
-		submitHandler: function(){	
-		var str = $('#formBuscarPorMotorista').serialize();
-		// VALIDAR CONDICIÓN DE CONTRASEÑA.
-		//if($('#chkcambiopassword').is(":checked")) {chkcambiopassword = 'yes';}else{chkcambiopassword = 'no';}                        
-		fecha = $("#FechaProduccion").val();
-		//alert(str);
+		  datatype: "json"
+		},
+		columns:[
+		  {data:"fecha_"},
+		  {data:"id_"},
+		  {data:"numero_equipo_placa"},
+		  {data:"descripcion_ruta"},
+		  {data:"precio_publico"},
+		  {data:"cantidadtiquete"},
+		  {data:"total_ingreso_por_bus"}
+		],
+		language:{
+		  url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+		},
+		dom: "Bfrtip",
+		  buttons:[
+			//'excel',
+			{
+			  extend: 'excelHtml5',
+			  text: '<i class="fas fa-file-excel"></i>',
+			  titleAttr: 'Exportar a Excel',
+			  className: 'btn btn-success',
+			  filename: 'Reporte',
+			  title: NombreInstitucion,
+			  exportOptions: {
+				  columns: [0,1,2,3,4,5,6,7 ]
+			  },
+			  className: 'btn-exportar-excel',
+		  },
+		  //'pdf',
+		  {
+			  extend: 'pdfHtml5',
+			  text: '<i class="fas fa-file-pdf"></i>',
+			  titleAttr: 'Exportar a PDF',
+			  className: 'btn btn-danger',
+			  filename: 'Reporte',
+			  title: NombreInstitucion,
+			  exportOptions: {
+				  columns: [0,1,2,3,4,5,6,7 ]
+			  },
+			  className: 'btn-exportar-pdf',
+		  },
+		  //'print'
+		  {
+			  extend: 'print',
+			  text: '<i class="fa fa-print"></i>',
+			  titleAttr: 'Imprimir',
+			  className: 'btn btn-md btn-info',
+			  title: NombreInstitucion,
+			  exportOptions: {
+				  columns: [0, 1,2,3,4,5,6,7 ]
+			  },
+			  className:'btn-exportar-print'
+		  },
+		  //extra. Cantidad de registros.
+		  'pageLength'
+		  ],
+	  }); // FINAL DEL DATATABLE.
 		///////////////////////////////////////////////////////////////			
 		// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
 		///////////////////////////////////////////////////////////////
-			$.ajax({
-				beforeSend: function(){
-					$('#listadoPorMotoristaOk').empty();
-				},
-				cache: false,
-				type: "POST",
-				dataType: "json",
-				url:"php_libs/soporte/ReporteGeneral.php",
-				data:str + "&id=" + Math.random() + "&fecha=" + fecha,
-				success: function(response){
-					// Validar mensaje de error
-					if(response.respuesta == false){
-						toastr["error"](response.mensaje, "Sistema");
-					}
-					else{
-						toastr["success"](response.mensaje, "Sistema");
-						$("label[for='LblProduccionesTotalPorMotorista']").text('Cantidad Tiquetes Vendidos ' + response.cantidadTiquete);
-						$("label[for='LblProduccionesTotalIngresoPorMotorista']").text('Total Ingresos $ ' + response.totalIngreso);
-						//
-						$('#listadoPorMotoristaOk').append(response.contenido);
-						}               
-				},
-			});
-		},
-});
+		   $.ajax({
+		   beforeSend: function(){
+		   },
+		   cache: false,
+		   type: "POST",
+		   dataType: "json",
+		   url:"php_libs/soporte/ReporteGeneral.php",
+			data: {"accion_buscar": buscartodos, codigo_personal: CodigoPersonal, OptBuscarPM: OptBuscarPM, 
+				FechaDesdePM: FechaDesdePM, FechaHastaPM: FechaHastaPM
+			},
+		   success: function(data){
+			   // Validar mensaje de error
+			   $("label[for='LblProduccionesTotalPorMotorista']").text(' ' + data[1].dataTotalTiquete );
+			   $("label[for='LblProduccionesTotalIngresoPorMotorista']").text('$' + data[1].dataTotalIngreso);
+			   //
+		   },
+		   });	// fin del ajax
+   }); // boton
 ///////////////////////////////////////////////////////
 // Validar Formulario, para la busqueda de un registro por codigo del motorista.
+// INCORPORACION DE DATATABLE.
  //////////////////////////////////////////////////////
- $('#formBuscarPorUnidadPlaca').validate({
-	ignore:"",
-	rules:{
-			lstPersonalPorMotorista: {required: true},
-			},
-			errorElement: "em",
-			errorPlacement: function ( error, element ) {
-				// Add the `invalid-feedback` class to the error element
-				error.addClass( "invalid-feedback" );
-				if ( element.prop( "type" ) === "checkbox" ) {
-					error.insertAfter( element.next( "label" ) );
-				} else {
-					error.insertAfter( element );
-				}
-			},
-				highlight: function ( element, errorClass, validClass ) {
-							$( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
-						},
-				unhighlight: function (element, errorClass, validClass) {
-							$( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
-						},
-				invalidHandler: function() {
-					setTimeout(function() {
-						toastr.error("Faltan Datos...");
-				});            
-			},
-		submitHandler: function(){	
-		var str = $('#formBuscarPorUnidadPlaca').serialize();
-		// VALIDAR CONDICIÓN DE CONTRASEÑA.
-		//if($('#chkcambiopassword').is(":checked")) {chkcambiopassword = 'yes';}else{chkcambiopassword = 'no';}                        
-		fecha = $("#FechaProduccion").val();
-		//alert(str);
-		///////////////////////////////////////////////////////////////			
-		// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
-		///////////////////////////////////////////////////////////////
-			$.ajax({
-				beforeSend: function(){
-					$('#listadoPorUnidadPlacaOk').empty();
-				},
-				cache: false,
-				type: "POST",
-				dataType: "json",
-				url:"php_libs/soporte/ReporteGeneral.php",
-				data:str + "&id=" + Math.random() + "&fecha=" + fecha,
-				success: function(response){
-					// Validar mensaje de error
-					if(response.respuesta == false){
-						toastr["error"](response.mensaje, "Sistema");
-					}
-					else{
-						toastr["success"](response.mensaje, "Sistema");
-						$("label[for='LblProduccionesTotalPorUnidadPlaca']").text('Cantidad Tiquetes Vendidos ' + response.cantidadTiquete);
-						$("label[for='LblProduccionesTotalIngresoPorUnidadPlaca']").text('Total Ingresos $ ' + response.totalIngreso);
-						//
-						$('#listadoPorUnidadPlacaOk').append(response.contenido);
-						}               
-				},
-			});	// fin del ajax
+// boton
+$('#goBuscarPorUnidadDeTransporte').on('click', function(){
+ // focus
+   $("#lstPorUnidadPlaca").focus()
+   var buscartodos = "BuscarTodosUnidadPlaca";
+   var NumeroPlaca = $("#lstPorUnidadPlaca").val();
+   var FechaHastaUP = $("#FechaHastaUP").val();
+   var FechaDesdeUP = $("#FechaDesdeUP").val();
+
+   ///////////////////////////////////////////////////////////////////////////////	  
+ //
+	if (table != undefined && table != null) 
+	{
+	table.destroy();
+	table = null;
+	} 
+ // CONFIGURACIÓN DE LA TABLA CON DATATABLE.
+ table = jQuery("#listadoPorUnidadPlaca").DataTable( {
+	 "ajax":{
+	   lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+	   destroy: true,
+	   pageLength: 5,
+	   searching: false,
+	   url:"php_libs/soporte/ReporteGeneral.php",
+	   method:"POST",
+	   data: {"accion_buscar": buscartodos, codigo_up: NumeroPlaca, OptBuscarUP: OptBuscarUP, 
+	   FechaDesdeUP: FechaDesdeUP, FechaHastaUP: FechaHastaUP
+			 },
+	   datatype: "json"
+	 },
+	 columns:[
+	   {data:"fecha_"},
+	   {data:"id_"},
+	   {data:"codigo"},
+	   {data:"nombre_motorista"},
+	   {data:"descripcion_ruta"},
+	   {data:"precio_publico"},
+	   {data:"cantidadtiquete"},
+	   {data:"total_ingreso_por_bus"}
+	 ],
+	 language:{
+	   url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+	 },
+	 dom: "Bfrtip",
+	   buttons:[
+		 //'excel',
+		 {
+		   extend: 'excelHtml5',
+		   text: '<i class="fas fa-file-excel"></i>',
+		   titleAttr: 'Exportar a Excel',
+		   className: 'btn btn-success',
+		   filename: 'Reporte',
+		   title: NombreInstitucion,
+		   exportOptions: {
+			   columns: [0,1,2,3,4,5,6,7 ]
+		   },
+		   className: 'btn-exportar-excel',
+	   },
+	   //'pdf',
+	   {
+		   extend: 'pdfHtml5',
+		   text: '<i class="fas fa-file-pdf"></i>',
+		   titleAttr: 'Exportar a PDF',
+		   className: 'btn btn-danger',
+		   filename: 'Reporte',
+		   title: NombreInstitucion,
+		   exportOptions: {
+			   columns: [0,1,2,3,4,5,6,7 ]
+		   },
+		   className: 'btn-exportar-pdf',
+	   },
+	   //'print'
+	   {
+		   extend: 'print',
+		   text: '<i class="fa fa-print"></i>',
+		   titleAttr: 'Imprimir',
+		   className: 'btn btn-md btn-info',
+		   title: NombreInstitucion,
+		   exportOptions: {
+			   columns: [0, 1,2,3,4,5,6,7 ]
+		   },
+		   className:'btn-exportar-print'
+	   },
+	   //extra. Cantidad de registros.
+	   'pageLength'
+	   ],
+   }); // FINAL DEL DATATABLE.
+ 	///////////////////////////////////////////////////////////////			
+	 // Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
+	 ///////////////////////////////////////////////////////////////
+		$.ajax({
+		beforeSend: function(){
 		},
-});
+		cache: false,
+		type: "POST",
+		dataType: "json",
+		url:"php_libs/soporte/ReporteGeneral.php",
+		data: {
+			accion_buscar: buscartodos, codigo_up: NumeroPlaca, OptBuscarUP: OptBuscarUP, FechaDesdeUP: FechaDesdeUP, FechaHastaUP: FechaHastaUP
+		},
+		success: function(data){
+			// Validar mensaje de error
+			$("label[for='LblProduccionesTotalPorUnidadPlaca']").text(' ' + data[1].dataTotalTiquete );
+			$("label[for='LblProduccionesTotalIngresoPorUnidadPlaca']").text('$' + data[1].dataTotalIngreso);
+			//
+		},
+		});	// fin del ajax
+}); // boton
 
 ///////////////////////////////////////////////////////////////////////////////
 // PROCESO PARA EL INFORME INGRESOS DIARIOS.

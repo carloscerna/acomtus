@@ -258,88 +258,80 @@ if($errorDbConexion == false){
                     ListadoPorUnidadTransporte();
             break;
             case 'BuscarPorMotorista':
-                $codigo_personal = trim($_REQUEST['lstPersonalPorMotorista']);
+                $codigo_personal = trim($_REQUEST['codigo_personal']);
                 $fecha_desde = trim($_REQUEST['FechaDesdePM']);
                 $fecha_hasta = trim($_REQUEST['FechaHastaPM']);
                 $OptBuscarPM = trim($_REQUEST['OptBuscarPM']);
                     ListadoPorCodigoPersonal();
                 break;
-                case 'BuscarPorUnidadPlaca':
-                    $codigo_up = trim($_REQUEST['lstPorUnidadPlaca']);
-                    $fecha_desde = trim($_REQUEST['FechaDesdeUP']);
-                    $fecha_hasta = trim($_REQUEST['FechaHastaUP']);
-                    $OptBuscarUP = trim($_REQUEST['OptBuscarUP']);
-                        ListadoPorUnidadPlaca();
-                    break;
-                case 'BuscarProduccionPorId':
-                    // TABS-1 - tabla produccion.
-                        $codigo_produccion = trim($_POST['codigo_produccion']);
-                    // 	validar la fecha de la producción.
-                        $numero_control = explode(",",$codigo_produccion);
-                        //$codigo_produccion_desde = $fechas[0];
-                        //$codigo_produccion_hasta = $fechas[1];
-                    for ($ab=0; $ab < count($numero_control); $ab++) { // MATRIZ CATALOGO RUTA Y INVENTARIO TIQUETE..
-                        $query = "SELECT p.id_ AS id_produccion, p.fecha, p.codigo_inventario_tiquete, p.id_, p.total_ingreso, p.codigo_jornada,
-                            p.codigo_personal, 
-                            p.codigo_transporte_colectivo, cat_ts.descripcion as nombre_serie, 
-                            btrim(cat_j.descripcion || CAST(': ' AS VARCHAR) || cat_j.hora_desde || CAST(' - ' AS VARCHAR) || cat_j.hora_hasta) as descripcion_jornada, 
-                            cat_r.descripcion as descripcion_ruta,
-                            btrim(per.nombres || CAST(' ' AS VARCHAR) || per.apellidos) as nombre_motorista,
-                            tc.numero_equipo, tc.numero_placa,
-                            cat_estatus.descripcion as descripcion_estatus
-                                FROM produccion p
-                                    INNER JOIN personal per ON per.codigo = p.codigo_personal
-                                    INNER JOIN inventario_tiquete it ON it.id_ = p.codigo_inventario_tiquete 
-                                    INNER JOIN catalogo_tiquete_serie cat_ts ON cat_ts.id_ = it.codigo_serie 
-                                    INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = p.codigo_jornada 
-                                    INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = p.codigo_ruta 
-                                    INNER JOIN transporte_colectivo tc ON tc.id_ = p.codigo_transporte_colectivo
-                                    INNER JOIN catalogo_estatus cat_estatus ON cat_estatus.codigo = p.codigo_estatus
-                                    WHERE p.id_ = '$numero_control[$ab]'
-                                            ORDER BY p.id_";
-                                    $consulta = $dblink -> query($query);
-                            // Crear matriz para poder tomar dos valores
+            case 'BuscarProduccionPorId':
+                // TABS-1 - tabla produccion.
+                    $codigo_produccion = trim($_POST['codigo_produccion']);
+                // 	validar la fecha de la producción.
+                    $numero_control = explode(",",$codigo_produccion);
+                    //$codigo_produccion_desde = $fechas[0];
+                    //$codigo_produccion_hasta = $fechas[1];
+                for ($ab=0; $ab < count($numero_control); $ab++) { // MATRIZ CATALOGO RUTA Y INVENTARIO TIQUETE..
+                    $query = "SELECT p.id_ AS id_produccion, p.fecha, p.codigo_inventario_tiquete, p.id_, p.total_ingreso, p.codigo_jornada,
+                        p.codigo_personal, 
+                        p.codigo_transporte_colectivo, cat_ts.descripcion as nombre_serie, 
+                        btrim(cat_j.descripcion || CAST(': ' AS VARCHAR) || cat_j.hora_desde || CAST(' - ' AS VARCHAR) || cat_j.hora_hasta) as descripcion_jornada, 
+                        cat_r.descripcion as descripcion_ruta,
+                        btrim(per.nombres || CAST(' ' AS VARCHAR) || per.apellidos) as nombre_motorista,
+                        tc.numero_equipo, tc.numero_placa,
+                        cat_estatus.descripcion as descripcion_estatus
+                            FROM produccion p
+                                INNER JOIN personal per ON per.codigo = p.codigo_personal
+                                INNER JOIN inventario_tiquete it ON it.id_ = p.codigo_inventario_tiquete 
+                                INNER JOIN catalogo_tiquete_serie cat_ts ON cat_ts.id_ = it.codigo_serie 
+                                INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = p.codigo_jornada 
+                                INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = p.codigo_ruta 
+                                INNER JOIN transporte_colectivo tc ON tc.id_ = p.codigo_transporte_colectivo
+                                INNER JOIN catalogo_estatus cat_estatus ON cat_estatus.codigo = p.codigo_estatus
+                                WHERE p.id_ = '$numero_control[$ab]'
+                                        ORDER BY p.id_";
+                                $consulta = $dblink -> query($query);
+                        // Crear matriz para poder tomar dos valores
 
-                            // Recorriendo la Tabla con PDO::
-                                while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-                                {
-                                    $fecha = $listado['fecha'];
-                                    $fecha_ = cambiaf_a_normal($listado["fecha"]);
-                                    $codigo_produccion = $listado['id_'];
+                        // Recorriendo la Tabla con PDO::
+                            while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+                            {
+                                $fecha = $listado['fecha'];
+                                $fecha_ = cambiaf_a_normal($listado["fecha"]);
+                                $codigo_produccion = $listado['id_'];
 
-                                    $descripcion_ruta = $listado['descripcion_ruta'];
-                                    $numero_equipo = $listado['numero_equipo'];
-                                    $codigo_jornada = $listado['codigo_jornada'];
-                                    $numero_placa = $listado['numero_placa'];
-                                    $nombre_serie = $listado['nombre_serie'];
-                                    $codigo_personal = $listado['codigo_personal'];
-                                    $nombre_motorista = $listado['nombre_motorista'];
-                                    $total_ingreso = $listado['total_ingreso'];
-                                    // TOTAL INGRESO
-                                        $totalIngresoOK = $totalIngresoOK + $total_ingreso;
-                                        $totalIngresoOKPantalla = $totalIngresoOK;
-                                // DAR VALORES A VARIABLES.
-                                    // ESTILO
-                                    $estilo_l = 'style="padding: 0px; font-size: medium; text-align: left;"';
-                                    $estilo_c = 'style="padding: 0px; font-size: medium; text-align: center;"';
-                                    $estilo_r = 'style="padding: 0px; font-size: medium;  text-align: right;"';
-                                    $estilo_r_green = 'style="padding: 0px; font-size: medium; color:green; text-align: right;"';
-                                    // CUANDO YA SE HA CALCULADO LA PRODUCCIÓN ASIGNADA.
-                                    // Validar si hay registros.
-                                        $contenidoOK .= "<tr>
-                                        <td $estilo_c><a data-accion=ProduccionVerAsignacion data-toggle=tooltip data-placement=left title=Imprimir href=$codigo_produccion><i class='fad fa-search fa-lg'></i></a>
-                                        <td $estilo_l>$codigo_produccion
-                                        <td $estilo_l>$descripcion_ruta
-                                        <td $estilo_c>$numero_equipo | $numero_placa
-                                        <td $estilo_l>$codigo_personal | $nombre_motorista
-                                        <td $estilo_r_green>$ $total_ingreso
-                                        <td>
-                                        ";
-                                }   // WHILE DE LA CONSULTA PRODUCCIÓN.
-                            }   // forDEL NUMERO CONTROL PARA OBETENER EL DATO CORRECTO DEL CONSOLIDADO DETALLES DE LA RUTA.
-                            $respuestaOK = true;
-                            $mensajeError = "Producción | Detalle Encontrada.";
-
+                                $descripcion_ruta = $listado['descripcion_ruta'];
+                                $numero_equipo = $listado['numero_equipo'];
+                                $codigo_jornada = $listado['codigo_jornada'];
+                                $numero_placa = $listado['numero_placa'];
+                                $nombre_serie = $listado['nombre_serie'];
+                                $codigo_personal = $listado['codigo_personal'];
+                                $nombre_motorista = $listado['nombre_motorista'];
+                                $total_ingreso = $listado['total_ingreso'];
+                                // TOTAL INGRESO
+                                    $totalIngresoOK = $totalIngresoOK + $total_ingreso;
+                                    $totalIngresoOKPantalla = $totalIngresoOK;
+                            // DAR VALORES A VARIABLES.
+                                // ESTILO
+                                $estilo_l = 'style="padding: 0px; font-size: medium; text-align: left;"';
+                                $estilo_c = 'style="padding: 0px; font-size: medium; text-align: center;"';
+                                $estilo_r = 'style="padding: 0px; font-size: medium;  text-align: right;"';
+                                $estilo_r_green = 'style="padding: 0px; font-size: medium; color:green; text-align: right;"';
+                                // CUANDO YA SE HA CALCULADO LA PRODUCCIÓN ASIGNADA.
+                                // Validar si hay registros.
+                                    $contenidoOK .= "<tr>
+                                    <td $estilo_c><a data-accion=ProduccionVerAsignacion data-toggle=tooltip data-placement=left title=Imprimir href=$codigo_produccion><i class='fad fa-search fa-lg'></i></a>
+                                    <td $estilo_l>$codigo_produccion
+                                    <td $estilo_l>$descripcion_ruta
+                                    <td $estilo_c>$numero_equipo | $numero_placa
+                                    <td $estilo_l>$codigo_personal | $nombre_motorista
+                                    <td $estilo_r_green>$ $total_ingreso
+                                    <td>
+                                    ";
+                            }   // WHILE DE LA CONSULTA PRODUCCIÓN.
+                        }   // forDEL NUMERO CONTROL PARA OBETENER EL DATO CORRECTO DEL CONSOLIDADO DETALLES DE LA RUTA.
+                        $respuestaOK = true;
+                        $mensajeError = "Producción | Detalle Encontrada.";
                 break;  
                 case 'BuscarProduccionPorIdTabla':
                     $codigo_produccion = trim($_POST['codigo_produccion']);
@@ -358,10 +350,11 @@ if($errorDbConexion == false){
 else{
 	$mensajeError = 'No se puede establecer conexi�n con la base de datos';}
 // Salida de la Array con JSON.
-	if($_POST["accion"] === "BuscarTodos" or $_POST["accion"] === "" or $_POST["accion"] === "BuscarTodosUnidadPlaca"){
+    $AccionBuscar = $_POST["accion"];
+	if($AccionBuscar === "BuscarTodos" or $AccionBuscar === "" or $AccionBuscar === "BuscarTodosUnidadPlaca" or $AccionBuscar === "BuscarPorMotorista"){
 		echo json_encode($arreglo);	
 	}elseif(
-        $_POST["accion"] === "BuscarCodigo" or $_POST["accion"] === "BuscarPersonalMotorista" or $_POST["accion"] === "EditarRegistro" 
+        $AccionBuscar === "BuscarCodigo" or $AccionBuscar === "BuscarPersonalMotorista" or $AccionBuscar === "EditarRegistro" 
         ){
 		echo json_encode($datos);
 		}
@@ -502,38 +495,44 @@ else{
     
     function ListadoPorCodigoPersonal(){
         global $dblink, $contenidoOK, $codigo_personal, $totalIngresoOK, $respuestaOK, $mensajeError, $CantidadtiqueteOK, $totalIngresoOKPantalla, $codigo_personal,
-        $descripcion_ruta_pm, $numero_equipo, $numero_placa, $precio_publico, $fecha_desde, $fecha_hasta, $OptBuscarPM, $fecha; 
+        $descripcion_ruta_pm, $numero_equipo, $numero_placa, $precio_publico, $fecha_desde, $fecha_hasta, $OptBuscarPM, $fecha, $arreglo; 
         // Condicionar la consulta.
-        if($OptBuscarPM == "fecha"){
+        if($OptBuscarPM == "Fecha"){
         // consulta. sólo código personal
-        $query_c = "SELECT SUM(pro.total_ingreso) AS total_ingreso_por_bus, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, pro.id_,
-                    per.codigo, pro.codigo_tiquete_color, cat_tc.precio_publico,
-                    cat_r.descripcion as descripcion_ruta, tc.numero_placa, tc.numero_equipo
+            $query_c = "SELECT SUM(pro.total_ingreso) AS total_ingreso_por_bus, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.id_,
+                    to_char(pro.fecha,'dd/mm/yyyy') as fecha_, per.foto, per.codigo_genero,
+                    per.codigo, pro.codigo_tiquete_color, cat_tc.precio_publico, 
+                    btrim(per.nombres || CAST(' ' AS VARCHAR) || per.apellidos) as nombre_motorista,
+                    cat_r.descripcion as descripcion_ruta, tc.numero_placa, tc.numero_equipo, btrim(tc.numero_equipo || CAST(' | ' AS VARCHAR) || tc.numero_placa) as numero_equipo_placa,
+                    CAST(SUM(pro.total_ingreso)/cat_tc.precio_publico AS INTEGER) as cantidadTiquete
                         FROM produccion pro
                             INNER JOIN personal per ON per.codigo = pro.codigo_personal
                             INNER JOIN catalogo_tiquete_color cat_tc ON cat_tc.id_ = pro.codigo_tiquete_color
                             INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = pro.codigo_ruta
                             INNER JOIN transporte_colectivo tc ON tc.id_ = pro.codigo_transporte_colectivo
-                                WHERE pro.codigo_personal = '$codigo_personal' and fecha >= '$fecha_desde' and fecha <= '$fecha_hasta'
+                                WHERE per.codigo = '$codigo_personal' and fecha >= '$fecha_desde' and fecha <= '$fecha_hasta'
                                     GROUP BY per.codigo, pro.codigo_tiquete_color, 
                                     cat_tc.precio_publico, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, descripcion_ruta,
-                                    tc.numero_placa, tc.numero_equipo, pro.id_
-                                    ORDER BY pro.fecha DESC";
-        }else if($OptBuscarPM == "todo"){
-        // consulta. sólo código personal
-        $query_c = "SELECT SUM(pro.total_ingreso) AS total_ingreso_por_bus, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, pro.id_,
-                    per.codigo, pro.codigo_tiquete_color, cat_tc.precio_publico,
-                    cat_r.descripcion as descripcion_ruta, tc.numero_placa, tc.numero_equipo
-                        FROM produccion pro
-                            INNER JOIN personal per ON per.codigo = pro.codigo_personal
-                            INNER JOIN catalogo_tiquete_color cat_tc ON cat_tc.id_ = pro.codigo_tiquete_color
-                            INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = pro.codigo_ruta
-                            INNER JOIN transporte_colectivo tc ON tc.id_ = pro.codigo_transporte_colectivo
-                                WHERE pro.codigo_personal = '$codigo_personal' 
-                                    GROUP BY per.codigo, pro.codigo_tiquete_color, 
-                                    cat_tc.precio_publico, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, descripcion_ruta,
-                                    tc.numero_placa, tc.numero_equipo, pro.id_
-                                    ORDER BY pro.fecha DESC";
+                                    tc.numero_placa, tc.numero_equipo, pro.id_, per.nombres, per.apellidos, per.foto, per.codigo_genero
+                                    ORDER BY pro.fecha, pro.codigo_ruta, pro.id_ asc";
+        }else if($OptBuscarPM == "Todo"){
+            // consulta. sólo código personal
+           $query_c = "SELECT SUM(pro.total_ingreso) AS total_ingreso_por_bus, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.id_,
+            to_char(pro.fecha,'dd/mm/yyyy') as fecha_, per.foto, per.codigo_genero,
+            per.codigo, pro.codigo_tiquete_color, cat_tc.precio_publico, 
+            btrim(per.nombres || CAST(' ' AS VARCHAR) || per.apellidos) as nombre_motorista,
+            cat_r.descripcion as descripcion_ruta, tc.numero_placa, tc.numero_equipo, btrim(tc.numero_equipo || CAST(' | ' AS VARCHAR) || tc.numero_placa) as numero_equipo_placa,
+            CAST(SUM(pro.total_ingreso)/cat_tc.precio_publico AS INTEGER) as cantidadTiquete
+                FROM produccion pro
+                    INNER JOIN personal per ON per.codigo = pro.codigo_personal
+                    INNER JOIN catalogo_tiquete_color cat_tc ON cat_tc.id_ = pro.codigo_tiquete_color
+                    INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = pro.codigo_ruta
+                    INNER JOIN transporte_colectivo tc ON tc.id_ = pro.codigo_transporte_colectivo
+                        WHERE per.codigo = '$codigo_personal' 
+                            GROUP BY pro.id_ ,per.codigo, pro.codigo_tiquete_color, 
+                            cat_tc.precio_publico, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, descripcion_ruta,
+                            tc.numero_placa, tc.numero_equipo,  per.nombres, per.apellidos, per.foto, per.codigo_genero
+                            ORDER BY pro.fecha, pro.codigo_ruta, pro.id_ asc";
         }
         // Ejecutamos el query
             $consulta = $dblink -> query($query_c);              
@@ -542,129 +541,32 @@ else{
 		if($consulta -> rowCount() != 0){  
             while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
             {
-                $codigo_produccion = trim($listado['id_']);    // dato de la tabla produccion_asignacion
-                $fecha = cambiaf_a_normal(trim($listado['fecha']));
+                $arreglo["data"][] = $listado;						
+                //
                 $precio_publico = trim($listado['precio_publico']);
-                $descripcion_ruta_pm = trim($listado['descripcion_ruta']);
-                $numero_equipo = trim($listado['numero_equipo']);
-                $numero_placa = trim($listado['numero_placa']);
                 $IngresoDiario = trim($listado['total_ingreso_por_bus']);
                 $CantidadTiquete = round($IngresoDiario / $precio_publico,0);
-                $estilo = ""; // definimos el estilo de cada elmento encontrado en codigo_esttratus.
-    
-                // variable armanda para posteriormente actualizar en <produccion_correlativo.
-                    //$todos = $id_pro_a . "#" . $pa_codigo_produccion . "#" . $tiquete_desde . "#" . $tiquete_hasta . "#" . $fecha . "#" . $precio_publico . "#" . $cantidad . "#" . $total . "#" . $tiquete_cola;                // Variables que pasa  a la tabla.s
-                    $estilo_l = 'style="padding: 0px; font-size: medium; color:blue; text-align: left;"';
-                    $estilo_c = 'style="padding: 0px; font-size: medium; color:blue; text-align: center;"';
-                    $estilo_r = 'style="padding: 0px; font-size: medium; color:blue; text-align: right;"';
-                    $estilo_cola = 'style="padding: 0px; font-size: medium; color:green; text-align: right; font-weight: bold;"';
-                    //"flat-red" checked="" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"';
-                    // EN DONDE NO SE HA CALCULADO LA PRODUCCIÓN ASIGNADA.
-                    $contenidoOK .= "<tr>
-                    <td $estilo_l>$fecha
-                    <td $estilo_c>$codigo_produccion
-                    <td $estilo_l>$numero_equipo | $numero_placa
-                    <td $estilo_l>$descripcion_ruta_pm
-                    <td $estilo_r>$ $precio_publico
-                    <td $estilo_c>$CantidadTiquete
-                    <td $estilo_r>$ $IngresoDiario
-                    ";
-                    $totalIngresoOK = $totalIngresoOK + $IngresoDiario;
-                    $CantidadtiqueteOK = $CantidadtiqueteOK + $CantidadTiquete;    // esto servirá para restar de la existencia.
+                $totalIngresoOK = $totalIngresoOK + $IngresoDiario;
+                $CantidadtiqueteOK = $CantidadtiqueteOK + $CantidadTiquete;    // esto servirá para restar de la existencia.
+                //  variables a pantalla
+                $arreglo[1]["dataTotalIngreso"] = number_format($totalIngresoOK,2,".",",");			
+                $arreglo[1]["dataTotalTiquete"] = number_format($CantidadtiqueteOK,0,".",",");
+                $arreglo[1]["foto"] = "";
             }   // FIN DEL WHILE.
-            //  variables a pantalla
-                $totalIngresoOKPantalla = $totalIngresoOK;
-                // Ver el listado produccion asigando.
-                $respuestaOK = true;
-                $mensajeError = "Registros Encontrados";
         }else{
                     // Ver el listado produccion asigando.
-                    $respuestaOK = false;
-                    $mensajeError = "No Hay Registros";
-        }   // FIN DEL IF QUE COMPRUEBA SI HAY REGISTROS EN LA CONSULTA.
-    }   
-    function ListadoPorUnidadPlaca(){
-        global $dblink, $contenidoOK, $codigo_up, $totalIngresoOK, $respuestaOK, $mensajeError, $CantidadtiqueteOK, $totalIngresoOKPantalla, $codigo_up,
-        $descripcion_ruta_pm, $numero_equipo, $numero_placa, $precio_publico, $fecha_desde, $fecha_hasta, $OptBuscarUP, $fecha; 
-        // Condicionar la consulta.
-        if($OptBuscarUP == "fecha"){
-        // consulta. sólo código personal
-        $query_c = "SELECT SUM(pro.total_ingreso) AS total_ingreso_por_bus, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, pro.id_,
-                    per.codigo, pro.codigo_tiquete_color, cat_tc.precio_publico, btrim(per.nombres || CAST(' ' AS VARCHAR) || per.apellidos) as nombre_motorista,
-                    cat_r.descripcion as descripcion_ruta, tc.numero_placa, tc.numero_equipo
-                        FROM produccion pro
-                            INNER JOIN personal per ON per.codigo = pro.codigo_personal
-                            INNER JOIN catalogo_tiquete_color cat_tc ON cat_tc.id_ = pro.codigo_tiquete_color
-                            INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = pro.codigo_ruta
-                            INNER JOIN transporte_colectivo tc ON tc.id_ = pro.codigo_transporte_colectivo
-                                WHERE pro.codigo_transporte_colectivo = '$codigo_up' and fecha >= '$fecha_desde' and fecha <= '$fecha_hasta'
-                                    GROUP BY per.codigo, pro.codigo_tiquete_color, 
-                                    cat_tc.precio_publico, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, descripcion_ruta,
-                                    tc.numero_placa, tc.numero_equipo, pro.id_, per.nombres, per.apellidos
-                                    ORDER BY pro.fecha DESC";
-        }else if($OptBuscarUP == "todo"){
-        // consulta. sólo código personal
-        $query_c = "SELECT SUM(pro.total_ingreso) AS total_ingreso_por_bus, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, pro.id_,
-                    per.codigo, pro.codigo_tiquete_color, cat_tc.precio_publico, btrim(per.nombres || CAST(' ' AS VARCHAR) || per.apellidos) as nombre_motorista,
-                    cat_r.descripcion as descripcion_ruta, tc.numero_placa, tc.numero_equipo
-                        FROM produccion pro
-                            INNER JOIN personal per ON per.codigo = pro.codigo_personal
-                            INNER JOIN catalogo_tiquete_color cat_tc ON cat_tc.id_ = pro.codigo_tiquete_color
-                            INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = pro.codigo_ruta
-                            INNER JOIN transporte_colectivo tc ON tc.id_ = pro.codigo_transporte_colectivo
-                                WHERE pro.codigo_transporte_colectivo = '$codigo_up' 
-                                    GROUP BY per.codigo, pro.codigo_tiquete_color, 
-                                    cat_tc.precio_publico, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, descripcion_ruta,
-                                    tc.numero_placa, tc.numero_equipo, pro.id_, per.nombres, per.apellidos
-                                    ORDER BY pro.fecha DESC";
-        }
-        // Ejecutamos el query
-            $consulta = $dblink -> query($query_c);              
-        // obtener el último dato en este caso el Id_
-        	// Validar si hay registros.
-		if($consulta -> rowCount() != 0){  
-            while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-            {
-                $codigo_produccion = trim($listado['id_']);    // dato de la tabla produccion_asignacion
-                $fecha = cambiaf_a_normal(trim($listado['fecha']));
-                $precio_publico = trim($listado['precio_publico']);
-                $descripcion_ruta_pm = trim($listado['descripcion_ruta']);
-                $numero_equipo = trim($listado['numero_equipo']);
-                $numero_placa = trim($listado['numero_placa']);
-                $nombre_motorista = trim($listado['nombre_motorista']);
-                $IngresoDiario = trim($listado['total_ingreso_por_bus']);
-                $CantidadTiquete = round($IngresoDiario / $precio_publico,0);
-                $estilo = ""; // definimos el estilo de cada elmento encontrado en codigo_esttratus.
-    
-                // variable armanda para posteriormente actualizar en <produccion_correlativo.
-                    //$todos = $id_pro_a . "#" . $pa_codigo_produccion . "#" . $tiquete_desde . "#" . $tiquete_hasta . "#" . $fecha . "#" . $precio_publico . "#" . $cantidad . "#" . $total . "#" . $tiquete_cola;                // Variables que pasa  a la tabla.s
-                    $estilo_l = 'style="padding: 0px; font-size: medium; color:blue; text-align: left;"';
-                    $estilo_c = 'style="padding: 0px; font-size: medium; color:blue; text-align: center;"';
-                    $estilo_r = 'style="padding: 0px; font-size: medium; color:blue; text-align: right;"';
-                    $estilo_cola = 'style="padding: 0px; font-size: medium; color:green; text-align: right; font-weight: bold;"';
-                    //"flat-red" checked="" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"';
-                    // EN DONDE NO SE HA CALCULADO LA PRODUCCIÓN ASIGNADA.
-                    $contenidoOK .= "<tr>
-                    <td $estilo_l>$fecha
-                    <td $estilo_c>$codigo_produccion
-                    <td $estilo_l>$nombre_motorista
-                    <td $estilo_l>$descripcion_ruta_pm
-                    <td $estilo_r>$ $precio_publico
-                    <td $estilo_c>$CantidadTiquete
-                    <td $estilo_r>$ $IngresoDiario
-                    ";
-                    $totalIngresoOK = $totalIngresoOK + $IngresoDiario;
-                    $CantidadtiqueteOK = $CantidadtiqueteOK + $CantidadTiquete;    // esto servirá para restar de la existencia.
-            }   // FIN DEL WHILE.
-            //  variables a pantalla
-                $totalIngresoOKPantalla = $totalIngresoOK;
-                // Ver el listado produccion asigando.
-                $respuestaOK = true;
-                $mensajeError = "Registros Encontrados";
-        }else{
-                    // Ver el listado produccion asigando.
-                    $respuestaOK = false;
-                    $mensajeError = "No Hay Registros";
+                // Inicializando el array                
+                $arreglo["data"]["Fecha"] = "";
+                $arreglo["data"]["Control"] = "";
+                $arreglo["data"]["NumeroEquipoYPlaca"] = "";
+                $arreglo["data"]["Ruta"] = "";
+                $arreglo["data"]["PU"] = "";
+                $arreglo["data"]["Tiquete"] = "";
+                $arreglo["data"]["Ingresos"] = "";
+                //  variables a pantalla
+                $arreglo[1]["dataTotalIngreso"] = "";			
+                $arreglo[1]["dataTotalTiquete"] = "";
+                $arreglo[1]["foto"] = "";
         }   // FIN DEL IF QUE COMPRUEBA SI HAY REGISTROS EN LA CONSULTA.
     }   
     function ListadoPorUnidadTransporte(){
@@ -673,9 +575,12 @@ else{
         // Condicionar la consulta.
         if($OptBuscarUP == "Fecha"){
         // consulta. sólo código personal
-        $query_c = "SELECT SUM(pro.total_ingreso) AS total_ingreso_por_bus, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, pro.id_,
-                    per.codigo, pro.codigo_tiquete_color, cat_tc.precio_publico, btrim(per.nombres || CAST(' ' AS VARCHAR) || per.apellidos) as nombre_motorista,
-                    cat_r.descripcion as descripcion_ruta, tc.numero_placa, tc.numero_equipo
+        $query_c = "SELECT SUM(pro.total_ingreso) AS total_ingreso_por_bus, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.id_,
+                    to_char(pro.fecha,'dd/mm/yyyy') as fecha_,
+                    per.codigo, pro.codigo_tiquete_color, cat_tc.precio_publico, 
+                    btrim(per.nombres || CAST(' ' AS VARCHAR) || per.apellidos) as nombre_motorista,
+                    cat_r.descripcion as descripcion_ruta, tc.numero_placa, tc.numero_equipo,
+                    CAST(SUM(pro.total_ingreso)/cat_tc.precio_publico AS INTEGER) as cantidadTiquete
                         FROM produccion pro
                             INNER JOIN personal per ON per.codigo = pro.codigo_personal
                             INNER JOIN catalogo_tiquete_color cat_tc ON cat_tc.id_ = pro.codigo_tiquete_color
@@ -685,7 +590,7 @@ else{
                                     GROUP BY per.codigo, pro.codigo_tiquete_color, 
                                     cat_tc.precio_publico, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, descripcion_ruta,
                                     tc.numero_placa, tc.numero_equipo, pro.id_, per.nombres, per.apellidos
-                                    ORDER BY pro.id_, pro.fecha";
+                                    ORDER BY pro.fecha, pro.codigo_ruta, pro.id_ asc";
         }else if($OptBuscarUP == "Todo"){
         // consulta. sólo código personal
             $query_c = "SELECT SUM(pro.total_ingreso) AS total_ingreso_por_bus, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.id_,
@@ -721,20 +626,23 @@ else{
                     $CantidadTiquete = round($IngresoDiario / $precio_publico,0);
                     $totalIngresoOK = $totalIngresoOK + $IngresoDiario;
                     $CantidadtiqueteOK = $CantidadtiqueteOK + $CantidadTiquete;    // esto servirá para restar de la existencia.
+                    //  variables a pantalla
+                    $arreglo[1]["dataTotalIngreso"] = number_format($totalIngresoOK,2,".",",");			
+                    $arreglo[1]["dataTotalTiquete"] = number_format($CantidadtiqueteOK,0,".",",");
             }   // FIN DEL WHILE.
-            //  variables a pantalla
-                $arreglo[1]["dataTotalIngreso"] = number_format($totalIngresoOK,2,".",",");			
-                $arreglo[1]["dataTotalTiquete"] = number_format($CantidadtiqueteOK,0,".",",");
         }else{
                     // Ver el listado produccion asigando.
                 // Inicializando el array                
-                $datos["data"]["Fecha"] = "";
-                $datos["data"]["Control"] = "";
-                $datos["data"]["NombreEmpleado"] = "";
-                $datos["data"]["Ruta"] = "";
-                $datos["data"]["PU"] = "";
-                $datos["data"]["Tiquete"] = "";
-                $datos["data"]["Ingresos"] = "";
+                $arreglo["data"]["Fecha"] = "";
+                $arreglo["data"]["Control"] = "";
+                $arreglo["data"]["NombreEmpleado"] = "";
+                $arreglo["data"]["Ruta"] = "";
+                $arreglo["data"]["PU"] = "";
+                $arreglo["data"]["Tiquete"] = "";
+                $arreglo["data"]["Ingresos"] = "";
+                //  variables a pantalla
+                $arreglo[1]["dataTotalIngreso"] = "";			
+                $arreglo[1]["dataTotalTiquete"] = "";
         }   // FIN DEL IF QUE COMPRUEBA SI HAY REGISTROS EN LA CONSULTA.
     }   
 ?>
