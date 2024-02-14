@@ -4,37 +4,191 @@
 
 {% block extraCSS %}
   <link href="css/styles-loading.css" rel="stylesheet">
-<style>
-  /* mensajes de error para el validate de los form de input*/
-   input.error {
-      border-color: #f00 !important;
-  }  
-  small.required {
-      color:#f00;
-  } 
-  /* when not active use specificity to override the !important on border-(color) */
-  .nav-tabs .nav-link:not(.active) {
-      border-color: transparent !important;
-  }
+  <!-- DATA TABLE. -->
+  <link href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"  rel="stylesheet" />
+<!-- DATA TABLE. botones -->
+  <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <style>
+          /* mensajes de error para el validate de los form de input*/
+          input.error {
+              border-color: #f00 !important;
+          }  
+          small.required {
+              color:#f00;
+          } 
+          /* when not active use specificity to override the !important on border-(color) */
+          .nav-tabs .nav-link:not(.active) {
+              border-color: transparent !important;
+          }
 
- /* CARD HORIZONAL CCSS CONFIGURACÓN */
-  .card-horizontal {
-    display: flex;
-    flex: 1 1 auto;
-}
-  </style>
+        /* CARD HORIZONAL CCSS CONFIGURACÓN */
+          .card-horizontal {
+            display: flex;
+            flex: 1 1 auto;
+        }
+    </style>
+    <style>
+      .btn-exportar-excel {
+        background-color: #198754 !important;
+        color: white !important;
+        
+      }
+
+      .btn-exportar-pdf {
+          background-color: #dc3545 !important;
+          color: white !important;
+      }
+
+      .btn-exportar-print {
+          background-color: #00a7c9 !important;
+          color: white !important;
+      }
+    </style>
 {% endblock %}
 
 {% block javascripts %}
-  <!-- JS para esta página. -->
-    <script type="text/JavaScript" src="js/main_reporte_general.js"></script>
+<!-- JS DATATABLES.NET. -->
+  <script type="text/JavaScript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script type="text/JavaScript" src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+  <script type="text/JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script type="text/JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+  <script type="text/JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+  <script type="text/JavaScript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+  <script type="text/JavaScript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+<!-- DATATABLES.NET. -->
+<script>
+  $(document).ready(function () { 
+    //$("listadoPorUnidadPlaca").DataTable();
+  });
+</script>
+<script>
+$(function(){ // iNICIO DEL fUNCTION.
+  $('#example').DataTable( { searching: false} );
+    var table = $('#listadoPorUnidadPlaca').DataTable( {
+      searching: false
+  });
+  // boton
+  $('#goBuscarPorUnidadDeTransporte').on('click', function(){
+    // focus
+      $("#lstPorUnidadPlaca").focus()
+      var buscartodos = "BuscarTodosUnidadPlaca";
+      var NumeroPlaca = $("#lstPorUnidadPlaca").val();
+      var FechaHastaUP = $("#FechaHastaUP").val();
+      var FechaDesdeUP = $("#FechaDesdeUP").val();
+      var OptBuscarUP = "Todo";
+      ///////////////////////////////////////////////////////////////////////////////	  
+    //
+    if (table != undefined && table != null) 
+    {
+      table.destroy();
+      table = null;
+    } 
+    //
+    table = jQuery("#listadoPorUnidadPlaca").DataTable( {
+        "ajax":{
+          lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+          destroy: true,
+          pageLength: 5,
+          searching: false,
+          url:"php_libs/soporte/ReporteGeneral.php",
+          method:"POST",
+          data: {"accion_buscar": buscartodos, codigo_up: NumeroPlaca, OptBuscarUP: OptBuscarUP, 
+          FechaDesdeUP: FechaDesdeUP, FechaHastaUP: FechaHastaUP
+                },
+          datatype: "json"
+        },
+        columns:[
+          {data:"fecha_"},
+          {data:"id_"},
+          {data:"codigo"},
+          {data:"nombre_motorista"},
+          {data:"descripcion_ruta"},
+          {data:"precio_publico"},
+          {data:"cantidadtiquete"},
+          {data:"total_ingreso_por_bus"}
+        ],
+        language:{
+          url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+        },
+        dom: "Bfrtip",
+          buttons:[
+            //'excel',
+            {
+              extend: 'excelHtml5',
+              text: '<i class="fas fa-file-excel"></i>',
+              titleAttr: 'Exportar a Excel',
+              className: 'btn btn-success',
+              filename: 'Reporte Empleados',
+              title: '{{ nombre_institucion}}',
+              exportOptions: {
+                  columns: [0,1,2,3,4,5,6,7 ]
+              },
+              className: 'btn-exportar-excel',
+          },
+          //'pdf',
+          {
+              extend: 'pdfHtml5',
+              text: '<i class="fas fa-file-pdf"></i>',
+              titleAttr: 'Exportar a PDF',
+              className: 'btn btn-danger',
+              filename: 'Reporte Empleados',
+              title: '{{ nombre_institucion}}',
+              exportOptions: {
+                  columns: [0,1,2,3,4,5,6,7 ]
+              },
+              className: 'btn-exportar-pdf',
+          },
+          //'print'
+          {
+              extend: 'print',
+              text: '<i class="fa fa-print"></i>',
+              titleAttr: 'Imprimir',
+              className: 'btn btn-md btn-info',
+              title: '{{ nombre_institucion}}',
+              exportOptions: {
+                  columns: [0, 1,2,3,4,5,6,7 ]
+              },
+              className:'btn-exportar-print'
+          },
+          //extra. Cantidad de registros.
+          'pageLength'
+          ],
+      }); // FINAL DEL DATATABLE.
+///////////////////////////////////////////////////////////////			
+		// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
+		///////////////////////////////////////////////////////////////
+    $.ajax({
+      beforeSend: function(){
+      },
+      cache: false,
+      type: "POST",
+      dataType: "json",
+      url:"php_libs/soporte/ReporteGeneral.php",
+      data: {
+        accion_buscar: buscartodos, codigo_up: NumeroPlaca, OptBuscarUP: OptBuscarUP, FechaDesdeUP: FechaDesdeUP, FechaHastaUP: FechaHastaUP
+      },
+      success: function(data){
+        // Validar mensaje de error
+          $("label[for='LblProduccionesTotalPorUnidadPlaca']").text(' ' + data[1].dataTotalTiquete );
+          $("label[for='LblProduccionesTotalIngresoPorUnidadPlaca']").text('$' + data[1].dataTotalIngreso);
+          //
+      },
+    });	// fin del ajax
+  }); // boton
+}); // funcion principal
+</script>
+  
+
+<!-- JS para esta página. -->
+  <script type="text/JavaScript" src="js/Reportes/Principal.js"></script>
 <!-- DEINIR EL AJAX START- STOP Y ERROR -->
-  <script>
-    $(document).ready(function () { 
-     var screen = $('#loading-screen');
-     configureLoadingScreen(screen);
-   })
- </script>
+<script>
+  $(document).ready(function () { 
+    var screen = $('#loading-screen');
+    configureLoadingScreen(screen);
+  })
+</script>
+
 {% endblock %}
 
 {% block contenidos %}
@@ -54,13 +208,13 @@
       </div><!-- /.container-fluid -->
   </section>
 <!-- Section que contiene el card -->
-  <section class="col col-sm-12 col-md-12 col-lg-6 col-xl-4 m-auto">
+  <section class="col col-md-4 m-auto">
     <div class="card m-auto">
       <!-- /.card-header -->
       <div class="card-header bg-gradient-navy">
       <!-- /.card-tools -->
         <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+          <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Minimizar"><i class="fas fa-minus"></i>
           </button>
         </div>
         <!-- /.card-title -->
@@ -70,31 +224,31 @@
         <!-- /.CARD BODY -->
         <div class="card-body">
         <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
-            <input type="hidden" id="MenuTab" value='{{ codigo_perfil }}'>         
+            <input type="hidden" id="MenuTab" value="{{ codigo_perfil }}">         
                 <div class="row" id="DivSoloParaContabilidad">
                   <div class="col">
                     <div class="form-group">
                       <label for="FechaProduccion">Fecha</label>
                         <input type="date" id="FechaProduccion" name="FechaProduccion" class="form-control" required autofocus>
                         <!-- Botón Buscar Producción -->
-                        <button class='btn btn-primary' id="goBuscarProduccion" data-toggle="tooltip" data-placement="left" title="Buscar"> 
-                          <div style='text-align:center;'><i class="fa fa-search"></i></div>  
+                        <button class="btn btn-primary" id="goBuscarProduccion" data-toggle="tooltip" data-placement="left" title="Buscar"> 
+                          <div style="text-align:center;"><i class="fa fa-search"></i></div>  
                         </button>
                         <!-- Botón Buscar Producción Informe Generales Diferencias.-->
-                        <button class='btn btn-dark' id="goProduccionDiferencias" data-toggle="tooltip" data-placement="left" title="Guardar Diferencias"> 
-                          <div style='text-align:center;'><i class="fal fa-money-check-alt"></i></div>  
+                        <button class="btn btn-dark" id="goProduccionDiferencias" data-toggle="tooltip" data-placement="left" title="Guardar Diferencias"> 
+                          <div style="text-align:center;"><i class="fal fa-money-check-alt"></i></div>  
                         </button>
                         <!-- Botón Imprimir Toda La Producción.-->
-                        <button class='btn btn-info' id="goReporteGeneral" data-toggle="tooltip" data-placement="left" title="Reporte General"> 
-                          <div style='text-align:center;'><i class="fa fa-print "></i></div>  
+                        <button class="btn btn-info" id="goReporteGeneral" data-toggle="tooltip" data-placement="left" title="Reporte General"> 
+                          <div style="text-align:center;"><i class="fa fa-print "></i></div>  
                         </button>
                         <!-- Botón Imprimir Toda La Producción por unidad (bus).-->
-                        <button class='btn btn-info' id="goReporteGeneralUnidadTransporte" data-toggle="tooltip" data-placement="left" title="Reporte por Unidad"> 
-                          <div style='text-align:center;'><i class="fal fa-bus-alt"></i></div>  
+                        <button class="btn btn-info" id="goReporteGeneralUnidadTransporte" data-toggle="tooltip" data-placement="left" title="Reporte por Unidad"> 
+                          <div style="text-align:center;"><i class="fal fa-bus-alt"></i></div>  
                         </button>
                         <!-- Botón Imprimir Toda La Producción por Motorista.-->
-                        <button class='btn btn-info' id="goReporteGeneralMotorista" data-toggle="tooltip" data-placement="left" title="Reporte por Motorista"> 
-                          <div style='text-align:center;'><i class="fal fa-address-card"></i></div>  
+                        <button class="btn btn-info" id="goReporteGeneralMotorista" data-toggle="tooltip" data-placement="left" title="Reporte por Motorista"> 
+                          <div style="text-align:center;"><i class="fal fa-address-card"></i></div>  
                         </button>
                     </div>
                   </div> 
@@ -109,16 +263,16 @@
                     <label for="goBuscarPorUnidad">Buscar Por:</label>
                     <div class="form-group">
                         <!-- Botón Buscar por Undiad (Bus).-->
-                        <button class='btn btn-info' id="goBuscarPorUnidad" data-toggle="tooltip" data-placement="left" title="Buscar por Undiad (Bus)"> 
-                          <div style='text-align:center;'><i class="fad fa-bus-school"></i></div>  
+                        <button class="btn btn-info" id="goBuscarPorUnidad" data-toggle="tooltip" data-placement="left" title="Buscar por Unidad de Transporte"> 
+                          <div style="text-align:center;"><i class="fad fa-bus-school"></i></div>  
                         </button>                    
                         <!-- Botón Buscar por Motorista-->
-                        <button class='btn btn-info' id="goBuscarPorMotorista" data-toggle="tooltip" data-placement="left" title="Buscar por Motorista"> 
-                          <div style='text-align:center;'><i class="fad fa-user-tie"></i></div>  
+                        <button class="btn btn-info" id="goBuscarPorMotorista" data-toggle="tooltip" data-placement="left" title="Buscar por Motorista"> 
+                          <div style="text-align:center;"><i class="fad fa-user-tie"></i></div>  
                         </button>                    
                         <!-- Botón Buscar por Tiquete.-->
-                        <button class='btn btn-info' id="goBuscarPorTiquete" data-toggle="tooltip" data-placement="left" title="Buscar por Tiquete"> 
-                          <div style='text-align:center;'><i class="fal fa-ticket"></i></div>  
+                        <button class="btn btn-info" id="goBuscarPorTiquete" data-toggle="tooltip" data-placement="left" title="Buscar por Tiquete"> 
+                          <div style="text-align:center;"><i class="fal fa-ticket"></i></div>  
                         </button>                    
                     </div>
                   </div>
@@ -135,7 +289,7 @@
   <section class="col m-auto" id="BuscarPorMotorista" style="display: none;">
     <div class="card p-0 mt-2">
       <div class="card-header bg-gradient-navy">
-        <h5 class="card-title">Motoristas</h5>
+        <h5 class="card-title"><i class="fad fa-user-tie"></i> Por Motoristas</h5>
         <div class="card-tools">
           <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
           </button>
@@ -144,8 +298,8 @@
       <div class="card-body">
         <form action="" method="post" id="formBuscarPorMotorista" name="formBuscarPorMotorista" role="form" enctype="multipart/form-data">
           <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
-          <input type="hidden" id="id_user" name="id_user" value = 0>            
-          <input type="hidden" id="accion" name="accion" value = 'BuscarPorMotorista'>    
+          <input type="hidden" id="id_user" name="id_user" value = "0">            
+          <input type="hidden" id="accion" name="accion" value = "BuscarPorMotorista">    
           <!-- SELECCIONAR ENTRE TODO Y FECHA            -->
           <div class="form-group row">
             <label class="col-lg-3 col-form-label form-control-label">Buscar Por:</label>
@@ -174,11 +328,10 @@
                 <label class="col-lg-3 col-form-label form-control-label">Nombre (motorista)</label>
                 <div class="col-lg-9">
                   <div class="input-group">
-                    <select class="" name="lstPersonalPorMotorista" id="lstPersonalPorMotorista"></select> 
-                    </select>
+                    <select class="form-select" name="lstPersonalPorMotorista" id="lstPersonalPorMotorista"></select> 
                     <!-- Botón Buscar Producción -->
-                    <button class='btn btn-secondary' id="goBuscarProduccionPM" data-toggle="tooltip" data-placement="left" title="Buscar"> 
-                      <div style='text-align:center;'><i class="fa fa-search"></i></div>  
+                    <button type="submit" class="btn btn-secondary" id="goBuscarProduccionPM" data-toggle="tooltip" data-placement="left" title="Buscar"> 
+                      <div style="text-align:center;"><i class="fa fa-search"></i></div>  
                     </button>
                   </div>
               </div>
@@ -222,74 +375,94 @@
   <section class="col m-auto" id="BuscarPorUnidadPlaca" style="display: none;">
       <div class="card p-0 mt-2">
         <div class="card-header bg-gradient-navy">
-          <h5 class="card-title">Unidad</h5>
+          <h5 class="card-title"><i class="fal fa-bus-alt"></i>Por Unidad de Transporte</h5>
           <div class="card-tools">
             <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
             </button>
           </div>
         </div>
         <div class="card-body">
-          <form action="" method="post" id="formBuscarPorUnidadPlaca" name="formBuscarPorUnidadPlaca" role="form" enctype="multipart/form-data">
-            <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
-            <input type="hidden" id="id_user" name="id_user" value = 0>            
-            <input type="hidden" id="accion" name="accion" value = 'BuscarPorUnidadPlaca'>    
-            <!-- SELECCIONAR ENTRE TODO Y FECHA            -->
-            <div class="form-group row">
-              <label class="col-lg-3 col-form-label form-control-label">Buscar Por:</label>
-              <div class="form-check-inline">
-                <label class="form-check-label" for="radio1">
-                  <input type="radio" class="form-check-input" id="radioTodoUP" name="OptBuscarUP" value="todo" checked>Todo
-                </label>
-              </div>
-              <div class="form-check-inline">
-                <label class="form-check-label" for="radio2">
-                  <input type="radio" class="form-check-input" id="radioFechaUP" name="OptBuscarUP" value="fecha">Fecha
-                </label>
-              </div>
-              <div class="form-group form-select">
-                <label for="Desde">Desde: 
-                    <input type="date" id="FechaDesdeUP" name="FechaDesdeUP" class="form-control" readonly="readonly">
-                </label>
-                
-                <label for="Hasta">Hasta: 
-                  <input type="date" id="FechaHastaUP" name="FechaHastaUP" class="form-control" readonly="readonly">
-              </label>
-              </div>
-            </div>
-              <!-- NOmbre Personal (motorista) . -->
-              <div class="form-group row">
-                  <label class="col-lg-3 col-form-label form-control-label">N.º Unidad y Placa</label>
-                  <div class="col-lg-9">
-                    <div class="input-group">
-                      <select class="" name="lstPorUnidadPlaca" id="lstPorUnidadPlaca"></select> 
-                      </select>
-                      <!-- Botón Buscar Producción -->
-                      <button class='btn btn-primary' id="goBuscarProduccionUP" data-toggle="tooltip" data-placement="left" title="Buscar"> 
-                        <div style='text-align:center;'><i class="fa fa-search"></i></div>  
-                      </button>
+          <div class="row">
+            <div class="col col-md-6">
+              <form action="" method="post" id="formBuscarPorUnidadPlaca" name="formBuscarPorUnidadPlaca" role="form" enctype="multipart/form-data">
+                <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
+                  <input type="hidden" id="accion_buscar" name="accion_buscar" value = "BuscarPorUnidadPlaca">   
+                  <div class="info-box mb-3">
+                    <span class="info-box-icon bg-success elevation-1"><i class="fad fa-search"></i></span>
+                    <div class="info-box-content">
+                      <!-- SELECCIONAR ENTRE TODO Y FECHA            -->
+                      <div class="form-group row">
+                        <label class="col-lg-3 col-form-label form-control-label">Buscar Por:</label>
+                        <div class="form-check-inline">
+                          <label class="form-check-label" for="radio1">
+                            <input type="radio" class="form-check-input" id="radioTodoUP" name="OptBuscarUP" value="todo" checked aria-label=""> Todo
+                          </label>
+                        </div>
+                        <div class="form-check-inline">
+                          <label class="form-check-label" for="radio2">
+                            <input type="radio" class="form-check-input" id="radioFechaUP" name="OptBuscarUP" value="fecha"> Fecha
+                          </label>
+                        </div>
+                        <div class="form-group form-select">
+                          <label for="Desde">Desde: 
+                              <input type="date" id="FechaDesdeUP" name="FechaDesdeUP" class="form-control" readonly="readonly">
+                          </label>
+                          
+                          <label for="Hasta">Hasta: 
+                            <input type="date" id="FechaHastaUP" name="FechaHastaUP" class="form-control" readonly="readonly">
+                        </label>
+                        </div>
+                      </div>
+                    <!-- NOmbre Personal (motorista) . -->
+                    <div class="form-group row">
+                        <label class="col col-md-5 col-form-label form-control-label">N.º Unidad y Placa</label>
+                        <div class="col col-md-7">
+                          <div class="input-group">
+                            <select class="form-select" name="lstPorUnidadPlaca" id="lstPorUnidadPlaca"></select> 
+                            <!-- Botón Buscar Producción -->
+                            <button type="button" class="btn btn-primary" id="goBuscarPorUnidadDeTransporte" data-toggle="tooltip" data-placement="left" title="Buscar"> 
+                              <div style="text-align:center;"><i class="fa fa-search"></i></div>  
+                            </button>
+                          </div>
+                      </div>
                     </div>
+                    </div>
+                  </div>
+            </form>
+            </div>
+            <div class="col col-md-6">
+              <div class="info-box mb-3">
+                <span class="info-box-icon bg-success elevation-1"><i class="fad fa-dollar-sign"></i></span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Total Ingreso</span>
+                  <span class="info-box-number">
+                    <label for="LblProduccionesTotalIngresoPorUnidadPlaca" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">$</label>
+                  </span>
                 </div>
               </div>
-          </form>
-        <!-- DETALLE DE TOTAL INGRESO Y TOTAL DE TIQUETES VENDIDOS. -->  
-            <div class="row">
-              <div class="col d-flex justify-content-between">
-                <label for="LblProduccionesTotalPorUnidadPlaca" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Tiquetes Vendidos : </label>
-                <label for="LblProduccionesTotalIngresoPorUnidadPlaca" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Total Ingreso $ </label>
-              </div>
+                <div class="info-box mb-3">
+                  <span class="info-box-icon bg-warning elevation-1"><i class="fal fa-ticket-alt"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Total Tiquete </span>
+                    <span class="info-box-number">
+                      <label for="LblProduccionesTotalPorUnidadPlaca" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">0</label>
+                    </span>
+                  </div>
+                </div>
             </div>
-          
+          </div>
         <!-- DETALLE table DE LA PRODUCCIÓN DIFERENCIAS -->
-          <table id="listadoPorUnidadPlaca" class="table table-condensed display responsive nowrap" style="width: 100%; padding: 0; text-align: right;">
+          <table id="listadoPorUnidadPlaca" class="table table-condensed display responsive" style="width: 100%;">
             <thead>
                 <tr>
-                  <th style="text-align: left; ">Fecha</th>
-                  <th style="text-align: right;"># Control</th>
-                  <th style="text-align: left;">Nombre (Motorista)</th>
-                  <th style="text-align: left;">Ruta</th>
-                  <th style="text-align: right;">P/U</th>
-                  <th style="text-align: center;">Tiquete/V</th>
-                  <th style="text-align: right;">Ingresos</th>
+                  <th>Fecha</th>
+                  <th># Control</th>
+                  <th>Código</th>
+                  <th>Nombre Empleado(Motorista)</th>
+                  <th>Ruta</th>
+                  <th>P/P $</th>
+                  <th>Cant./Tiquete</th>
+                  <th>Ingresos $</th>
                 </tr>                
             </thead>
               <tbody id="listadoPorUnidadPlacaOk">
@@ -316,14 +489,13 @@
     <div class="card-body">
       <form action="" method="post" id="formDiferencias" name="formDiferencias" role="form" enctype="multipart/form-data">
         <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
-        <input type="hidden" id="id_user" name="id_user" value = 0>            
-        <input type="hidden" id="accion" name="accion" value = 'Agregar'>    
+        <input type="hidden" id="id_user" name="id_user" value = "0">            
+        <input type="hidden" id="accion" name="accion" value = "Agregar">    
           <!-- NOmbre Personal (motorista) . -->
           <div class="form-group row">
             <label class="col-lg-3 col-form-label form-control-label">Buscar (motorista)</label>
             <div class="col-lg-9">
-                <select class="" name="lstPersonal" id="lstPersonal"></select> 
-                </select>
+                <select class="form-select" name="lstPersonal" id="lstPersonal"></select> 
             </div>
           </div>
           <!-- nombre puede ser cualquier -->
@@ -353,7 +525,7 @@
               <div class="input-group">
                 <!-- GUARDAR Y CANCELAR  PRODUCCIÓN DIFERENCIAS -->
                 <input class="btn btn-primary btn-sm" type="submit" value="Guardar" name="Guardar">
-                <input class='btn btn-secondary' type="button" id="goDiferenciasCancelar" name="goDiferenciasCancelar" value="Cancelar"> 
+                <input class="btn btn-secondary" type="button" id="goDiferenciasCancelar" name="goDiferenciasCancelar" value="Cancelar"> 
               </div>
             </div> <!-- DIV  -->
           </div>
@@ -518,7 +690,7 @@
         </div>
           <div class="card-horizontal">
             <div class="img-square-wrapper">
-              <img class="card-img-top img-fluid" style="width: 8rem;" id="ImagenPersonal" src="">
+              <img class="card-img-top img-fluid" style="width: 8rem;" id="ImagenPersonal" src="#">
             </div>
               <div class="card-body p-0">
                 <div class="row">
@@ -602,7 +774,7 @@
     </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->
 
-
+<!-- plantilla loading-screen . -->
 <div id="loading-screen" style="display:none">
   <img src="img/spinning-circles.svg">
   <h3>
@@ -611,10 +783,10 @@
 </div>
 
 <!-- plantilla que contiene el . -->
-{% include 'VentanaBuscarPorTiquete.html' %}
+{% include "VentanaBuscarPorTiquete.html" %}
 
 {% endblock %}
 
 {% block loginUser %}
-<!--	{% include 'layout-login-user.html' %} -->
+<!--	{% include "layout-login-user.html" %} -->
 {% endblock %}

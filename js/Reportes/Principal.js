@@ -71,7 +71,7 @@ $("#goReporteGeneral").on('click', function (e) {
 		// Limpiar datos
 		fecha = $("#FechaProduccion").val();
 		// Ejecutar Informe
-			varenviar = "/acomtus/php_libs/reportes/ingreso_diario.php?fecha="+fecha;
+			varenviar = "/acomtus/php_libs/reportes/Ingresos/Diario.php?fecha="+fecha;
 		// Ejecutar la función abre otra pestaña.
 			AbrirVentana(varenviar);   
   });
@@ -80,7 +80,7 @@ $("#goReporteGeneralUnidadTransporte").on('click', function (e) {
 	// Limpiar datos
 	fecha = $("#FechaProduccion").val();
 	// Ejecutar Informe
-		varenviar = "/acomtus/php_libs/reportes/ingreso_por_unidad_bus.php?fecha="+fecha;
+		varenviar = "/acomtus/php_libs/reportes/Ingresos/PorUnidadTransporte.php?fecha="+fecha;
 	// Ejecutar la función abre otra pestaña.
 		AbrirVentana(varenviar);   
 });
@@ -89,7 +89,7 @@ $("#goReporteGeneralMotorista").on('click', function (e) {
 	// Limpiar datos
 	fecha = $("#FechaProduccion").val();
 	// Ejecutar Informe
-		varenviar = "/acomtus/php_libs/reportes/ingreso_por_motorista.php?fecha="+fecha;
+		varenviar = "/acomtus/php_libs/reportes/Ingresos/PorMotorista.php?fecha="+fecha;
 	// Ejecutar la función abre otra pestaña.
 		AbrirVentana(varenviar);   
 });
@@ -517,7 +517,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 						$('#listadoPorUnidadPlacaOk').append(response.contenido);
 						}               
 				},
-			});
+			});	// fin del ajax
 		},
 });
 
@@ -1063,17 +1063,16 @@ function listar_serie(){
             }
     }, "json");    
 }
-
-      // Mensaje de Carga de Ajax.
-      function configureLoadingScreen(screen){
-		$(document)
-			.ajaxStart(function () {
-				screen.fadeIn();
-			})
-			.ajaxStop(function () {
-				screen.fadeOut();
-			});
-	}
+// Mensaje de Carga de Ajax.
+function configureLoadingScreen(screen){
+$(document)
+	.ajaxStart(function () {
+		screen.fadeIn();
+	})
+	.ajaxStop(function () {
+		screen.fadeOut();
+	});
+}
 
 function delimitNumbers(str) { return (str + "").replace(/\b(\d+)((\.\d+)*)\b/g, function(a, b, c) { return (b.charAt(0) > 0 && !(c || ".").lastIndexOf(".") ? b.replace(/(\d)(?=(\d{3})+$)/g, "$1,") : b) + c; }); } 
 

@@ -13,7 +13,7 @@
         $fecha = trim($_REQUEST['fecha']);
         $fecha_inicio = '2020-12-01';
         $fecha_ = cambiaf_a_normal($_REQUEST["fecha"]);
-        $fecha_partial = explode("-",$fecha);
+        $fecha_partial = explode("/",$fecha_);   //"dd/mm/yyyy"
         $numero_dias = 0;
         $db_link = $dblink;
         $salto = 1;
@@ -31,16 +31,12 @@
             $meses = array("","enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre");
         //Salida: Viernes 24 de Febrero del 2012		
 		//Crear una línea. Fecha.
-		//$dia = strftime("%d");		// El Día.
-        //$mes = $meses[date('n')-1];     // El Mes.
-        //$año = strftime("%Y");		// El Año.
-        $dia = $fecha_partial[2];		// El Día.
-        $mes = $meses[$fecha_partial[1]];     // El Mes.
-        $año = $fecha_partial[0];		// El Año.
+        $dia = $fecha_partial[0];		// El Día.
+        $mes = $meses[intval($fecha_partial[1])];     // El Mes.
+        $año = $fecha_partial[2];		// El Año.
         $numero_dias = cal_days_in_month(CAL_GREGORIAN, $fecha_partial[1], $fecha_partial[0]); // 31
 
 		setlocale(LC_MONETARY,"es_ES");
-
 class PDF extends FPDF
 {
     //Cabecera de página
@@ -60,9 +56,9 @@ function Header()
 	
     // Teléfono.
 	if(empty($_SESSION['telefono'])){
-	    $this->RotatedText(30,24,'',0,1,'C');    
+	    $this->RotatedText(30,24,'',0,);    
 	}else{
-	    $this->RotatedText(30,24,utf8_decode('Teléfono: ').$_SESSION['telefono'],0,1,'C');
+	    $this->RotatedText(30,24,utf8_decode('Teléfono: ').$_SESSION['telefono'],0);
 	}
     // ARMAR ENCABEZADO.
 	$style6 = array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => '0', 'color' => array(0,0,0));
@@ -82,11 +78,6 @@ if ($print_sumas === 1){
     //Crear una línea de la primera firma.
     $this->Line(15,255,85,255);    
 	$this->RotatedText(15,260, utf8_decode('Revisado por:'), 0);    // Nombre1
-	//$this->RotatedText(15,265, utf8_decode('Presidente'), 0);    // Cargo1
-    //Crear una línea de la primera firma.
-	//$this->Line(115,255,200,255);
-	//$this->RotatedText(115,260, utf8_decode('Gladis Marisol López'), 0);    // Nombre2
-	//$this->RotatedText(115,265, utf8_decode('Contador'), 0);    // Cargo2
     // ARMAR pie de página.
 	$style6 = array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => '0', 'color' => array(0,0,0));
 }
@@ -163,7 +154,7 @@ function FancyTable($header)
 	$pdf->RotatedText(130,40,'Santa Ana, ' . $dia . ' de ' . $mes . ' de ' . $año,0);
 	// estado de cuenta
 	$pdf->RoundedRect(15, 45, 130, 8, 2, '1234', 'DF');
-	$pdf->RotatedText(18,50,"REPORTE DE INGRESO POR UNIDAD DEL 1 AL $numero_dias/$fecha_partial[1]/$fecha_partial[0]",0);
+	$pdf->RotatedText(18,50,"REPORTE DE INGRESO POR UNIDAD DEL 1 AL $numero_dias/$fecha_partial[1]/$fecha_partial[2]",0);
 // Definimos el tipo de fuente, estilo y tamaño.
     $pdf->SetFont('Arial','',11); // I : Italica; U: Normal;
 //  mostrar los valores de la consulta
@@ -194,7 +185,7 @@ function FancyTable($header)
                     FROM produccion pro
                         INNER JOIN transporte_colectivo tc ON tc.id_ = pro.codigo_transporte_colectivo
                         INNER JOIN catalogo_tiquete_color cat_tc ON cat_tc.id_ = pro.codigo_tiquete_color
-                            WHERE pro.codigo_transporte_colectivo = '$codigo_tc' AND pro.fecha >= '$fecha_partial[0]-$fecha_partial[1]-01' AND pro.fecha <= '$fecha_partial[0]-$fecha_partial[1]-$numero_dias'
+                            WHERE pro.codigo_transporte_colectivo = '$codigo_tc' AND pro.fecha >= '$fecha_partial[2]-$fecha_partial[1]-01' AND pro.fecha <= '$fecha_partial[2]-$fecha_partial[1]-$numero_dias'
                                 GROUP BY pro.codigo_transporte_colectivo, tc.numero_equipo, tc.numero_placa, pro.codigo_tiquete_color, cat_tc.precio_publico";
             // Ejecutamos el Query.
             $consulta_tc = $dblink -> query($query_tc);
@@ -268,16 +259,6 @@ function FancyTable($header)
     $pdf->Cell($w[3],$h[0],$total_general_tiquete,0,0,'C',$fill);    // Cantidad Tiquetes Vendidos
     $pdf->Cell($w[4],$h[0],'$ ' . number_format($total_general,2,'.',','),1,1,'C',$fill);    // Total ingreso por bus    
 /****************************************************************************************** */
-    // REVISADO POR
-/*
-    $pdf->ln(); $pdf->ln(); $pdf->ln(); $pdf->ln(); 
-
-    $pdf->SetX(10);
-        $pdf->Cell($w[0],$h[1],'Revisado por:',0,0,'L',$fill);    // Nombre ruta
-    $pdf->ln(); $pdf->ln(); 
-    $pdf->SetX(10);
-        $pdf->Cell($w[0],$h[1],'_______________________________________',0,0,'L',$fill);    // Nombre ruta
-        */
 // Salida del pdf.
 	$modo = 'I'; // Envia al navegador (I), Descarga el archivo (D), Guardar el fichero en un local(F).
 	$print_nombre = "Ingreso diario por unidad" . $fecha_ . '.pdf';
