@@ -13,7 +13,8 @@ $(function(){ // iNICIO DEL fUNCTION.
 	$('#example').DataTable( { searching: false} );
     var table = $('#listadoPorUnidadPlaca').DataTable( {
       searching: false
-  });
+  	});
+
 // POR MOTORISTA
   $('#example1').DataTable( { searching: false} );
   var table_m = $('#listadoPorMotorista').DataTable( {
@@ -424,6 +425,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 	  $("#lstPersonalPorMotorista").focus()
 	  var buscartodos = "BuscarPorMotorista";
 	  var CodigoPersonal = $("#lstPersonalPorMotorista").val();
+	  var NombreCodigoPersonal = $("#lstPersonalPorMotorista option:selected").text();
 	  var FechaHastaPM = $("#FechaHastaPM").val();
 	  var FechaDesdePM = $("#FechaDesdePM").val();
    
@@ -453,10 +455,52 @@ $('body').on('click','#listadoVerControles a',function (e){
 		  {data:"id_"},
 		  {data:"numero_equipo_placa"},
 		  {data:"descripcion_ruta"},
-		  {data:"precio_publico"},
+		  {data:"precio_publico",
+				render: function(data, type, row){
+					return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
+				}
+			},	// Preico Púyblic.
 		  {data:"cantidadtiquete"},
-		  {data:"total_ingreso_por_bus"}
+		  {data:"total_ingreso_por_bus",
+				render: function(data, type, row){
+						return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
+				}
+			}	/// total ingresos
 		],
+		"footerCallback": function ( row, data, start, end, display ) {
+			var api = this.api(), data;
+
+			// Remove the formatting to get integer data for summation
+			var intVal = function ( i ) {
+				return typeof i === 'string' ?
+					i.replace(/[\$,]/g, '')*1 :
+					typeof i === 'number' ?
+						i : 0;
+			};
+
+			// Total over all pages
+			total = api
+				.column( 6 )
+				.data()
+				.reduce( function (a, b) {
+					return intVal(a) + intVal(b);
+				}, 0 );
+				total = total.toFixed(2),
+				TotalAllPagina = new Intl.NumberFormat('en-US').format(total)
+			// Total over this page
+			pageTotal = api
+				.column( 6, { page: 'current'} )
+				.data()
+				.reduce( function (a, b) {
+					return intVal(a) + intVal(b);
+				}, 0 );
+				pagina = pageTotal.toFixed(2),
+				TotalPagina = new Intl.NumberFormat('en-US').format(pagina)
+			// Update footer
+			$( api.column( 6 ).footer() ).html(
+				'$'+ TotalPagina +' ( $'+ TotalAllPagina +')'
+			);
+		},
 		language:{
 		  url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
 		},
@@ -471,7 +515,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 			  filename: 'Reporte',
 			  title: NombreInstitucion,
 			  exportOptions: {
-				  columns: [0,1,2,3,4,5,6,7 ]
+				  columns: [0,1,2,3,4,5,6,]
 			  },
 			  className: 'btn-exportar-excel',
 		  },
@@ -482,9 +526,9 @@ $('body').on('click','#listadoVerControles a',function (e){
 			  titleAttr: 'Exportar a PDF',
 			  className: 'btn btn-danger',
 			  filename: 'Reporte',
-			  title: NombreInstitucion,
+			  title: NombreInstitucion + " " + NombreCodigoPersonal,
 			  exportOptions: {
-				  columns: [0,1,2,3,4,5,6,7 ]
+				  columns: [0,1,2,3,4,5,6,]
 			  },
 			  className: 'btn-exportar-pdf',
 		  },
@@ -496,7 +540,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 			  className: 'btn btn-md btn-info',
 			  title: NombreInstitucion,
 			  exportOptions: {
-				  columns: [0, 1,2,3,4,5,6,7 ]
+				  columns: [0, 1,2,3,4,5,6,]
 			  },
 			  className:'btn-exportar-print'
 		  },
@@ -521,7 +565,9 @@ $('body').on('click','#listadoVerControles a',function (e){
 			   // Validar mensaje de error
 			   $("label[for='LblProduccionesTotalPorMotorista']").text(' ' + data[1].dataTotalTiquete );
 			   $("label[for='LblProduccionesTotalIngresoPorMotorista']").text('$' + data[1].dataTotalIngreso);
-			   //
+			   // imagen
+			   // FOTO DEL EMPLEADO.
+					$("#ImagenPersonalGlobal").attr("src", data[1].foto);	
 		   },
 		   });	// fin del ajax
    }); // boton
@@ -545,6 +591,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 	table.destroy();
 	table = null;
 	} 
+	
  // CONFIGURACIÓN DE LA TABLA CON DATATABLE.
  table = jQuery("#listadoPorUnidadPlaca").DataTable( {
 	 "ajax":{
@@ -565,10 +612,52 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 	   {data:"codigo"},
 	   {data:"nombre_motorista"},
 	   {data:"descripcion_ruta"},
-	   {data:"precio_publico"},
+	   {data:"precio_publico",
+			render: function(data, type, row){
+				return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
+			}
+		},	// Preico Púyblic.
 	   {data:"cantidadtiquete"},
-	   {data:"total_ingreso_por_bus"}
+	   {data:"total_ingreso_por_bus",
+			render: function(data, type, row){
+					return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
+			}
+		}	/// total ingresos
 	 ],
+	 "footerCallback": function ( row, data, start, end, display ) {
+		var api = this.api(), data;
+
+		// Remove the formatting to get integer data for summation
+		var intVal = function ( i ) {
+			return typeof i === 'string' ?
+				i.replace(/[\$,]/g, '')*1 :
+				typeof i === 'number' ?
+					i : 0;
+		};
+
+		// Total over all pages
+		total = api
+			.column( 7 )
+			.data()
+			.reduce( function (a, b) {
+				return intVal(a) + intVal(b);
+			}, 0 );
+			total = total.toFixed(2),
+			TotalAllPagina = new Intl.NumberFormat('en-US').format(total)
+		// Total over this page
+		pageTotal = api
+			.column( 7, { page: 'current'} )
+			.data()
+			.reduce( function (a, b) {
+				return intVal(a) + intVal(b);
+			}, 0 );
+			pagina = pageTotal.toFixed(2),
+			TotalPagina = new Intl.NumberFormat('en-US').format(pagina)
+		// Update footer
+		$( api.column( 7 ).footer() ).html(
+			'$'+ TotalPagina +' ( $'+ TotalAllPagina +')'
+		);
+	},
 	 language:{
 	   url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
 	 },

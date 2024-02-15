@@ -545,13 +545,26 @@ else{
                 //
                 $precio_publico = trim($listado['precio_publico']);
                 $IngresoDiario = trim($listado['total_ingreso_por_bus']);
+                $foto = trim($listado["foto"]);
+                $codigo_genero = trim($listado["codigo_genero"]);
                 $CantidadTiquete = round($IngresoDiario / $precio_publico,0);
                 $totalIngresoOK = $totalIngresoOK + $IngresoDiario;
                 $CantidadtiqueteOK = $CantidadtiqueteOK + $CantidadTiquete;    // esto servirá para restar de la existencia.
                 //  variables a pantalla
                 $arreglo[1]["dataTotalIngreso"] = number_format($totalIngresoOK,2,".",",");			
                 $arreglo[1]["dataTotalTiquete"] = number_format($CantidadtiqueteOK,0,".",",");
-                $arreglo[1]["foto"] = "";
+                $arreglo[1]["codigo_genero"] = trim($listado["codigo_genero"]);
+                //	default imagen masculino
+                $arreglo[1]["foto"] = '../acomtus/img/avatar_masculino.png';
+                // validar
+                    if(is_null($foto) || $foto == "" || $foto == " "){
+                        if($codigo_genero == '02'){	//	femenino
+                            $arreglo[1]["foto"] = '../acomtus/acomtus/img/avatar_femenino.png';
+                        }
+                    }else{
+                        // foto del empleado.
+                        $arreglo[1]["foto"] = "../acomtus/img/fotos/".$foto;
+                    }
             }   // FIN DEL WHILE.
         }else{
                     // Ver el listado produccion asigando.
@@ -567,6 +580,7 @@ else{
                 $arreglo[1]["dataTotalIngreso"] = "";			
                 $arreglo[1]["dataTotalTiquete"] = "";
                 $arreglo[1]["foto"] = "";
+                $arreglo[1]["codigo_genero"] = "";
         }   // FIN DEL IF QUE COMPRUEBA SI HAY REGISTROS EN LA CONSULTA.
     }   
     function ListadoPorUnidadTransporte(){

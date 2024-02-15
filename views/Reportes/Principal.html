@@ -208,8 +208,8 @@
                     </div>
                       <!-- NOmbre Personal (motorista) . -->
                       <div class="form-group row">
-                          <label class="col-lg-3 col-form-label form-control-label">Nombre (motorista)</label>
-                          <div class="col-lg-9">
+                          <label class="col col-md-12 col-form-label form-control-label">Nombre (motorista)</label>
+                          <div class="col col-md-12">
                             <div class="input-group">
                               <select class="form-select" name="lstPersonalPorMotorista" id="lstPersonalPorMotorista"></select> 
                               <!-- Botón Buscar Producción -->
@@ -224,25 +224,32 @@
             </form>
           </div>
           <div class="col col-md-6">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-success elevation-1"><i class="fad fa-dollar-sign"></i></span>
-              <div class="info-box-content">
-                <span class="info-box-text">Total Ingreso</span>
-                <span class="info-box-number">
-                  <label for="LblProduccionesTotalIngresoPorMotorista" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">$</label>
-                </span>
+            <div class="card-horizontal"> <!-- card horizontal APERTURA-->
+              <div class="img-square-wrapper">
+                <img class="card-img-top img-fluid" style="width: 8rem;" id="ImagenPersonalGlobal" src="/acomtus/img/avatar_masculino.png">
               </div>
-            </div>
-              <div class="info-box mb-3">
-                <span class="info-box-icon bg-warning elevation-1"><i class="fal fa-ticket-alt"></i></span>
-                <div class="info-box-content">
-                  <span class="info-box-text">Total Tiquete </span>
-                  <span class="info-box-number">
-                    <label for="LblProduccionesTotalPorMotorista" style="padding: 0px; font-size: large; color:darkblue; text-align: left;"></label>
-                  </span>
+              <div class="card-body p-0"> <!-- card body CIERRE-->
+                <div class="info-box mb-3">
+                  <span class="info-box-icon bg-success elevation-1"><i class="fad fa-dollar-sign"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Total Ingreso</span>
+                    <span class="info-box-number">
+                      <label for="LblProduccionesTotalIngresoPorMotorista" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">$</label>
+                    </span>
+                  </div>
                 </div>
-              </div>
-          </div>
+                <div class="info-box mb-3">
+                  <span class="info-box-icon bg-warning elevation-1"><i class="fal fa-ticket-alt"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Total Tiquete </span>
+                    <span class="info-box-number">
+                      <label for="LblProduccionesTotalPorMotorista" style="padding: 0px; font-size: large; color:darkblue; text-align: left;"></label>
+                    </span>
+                  </div>
+                </div>
+              </div> <!-- card body CIERRE-->
+            </div> <!-- card horizontal CIERRE-->
+          </div> <!-- COL MD-6 CIERRE-->
           </div>
         </div>
       <!-- DETALLE table DE LA PRODUCCIÓN DIFERENCIAS -->
@@ -261,7 +268,15 @@
             <tbody id="listadoPorMotoristaOk">
             </tbody>
             <tfoot>
-
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
             </tfoot>
         </table>        
     </div>
@@ -359,15 +374,24 @@
                   <th>Código</th>
                   <th>Nombre Empleado(Motorista)</th>
                   <th>Ruta</th>
-                  <th>P/P $</th>
+                  <th>P/P</th>
                   <th>Cant./Tiquete</th>
-                  <th>Ingresos $</th>
+                  <th>Ingresos</th>
                 </tr>                
             </thead>
               <tbody id="listadoPorUnidadPlacaOk">
               </tbody>
               <tfoot>
-
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
               </tfoot>
           </table>              
         </div>
@@ -573,7 +597,7 @@
     </div> <!-- CIERRE DEL CARD-->
   </section>
 
-    <!-- DETALLE DE LA PRODUCCIÓN ASIGNADA -->
+    <!-- DETALLE DE LA PRODUCCIÓN ASIGNADA POR MOTORISTA -->
     <section id="FieldsetTabla" style="display: none;">
       <div class="card">
         <div class="card-header bg-gradient-navy">
