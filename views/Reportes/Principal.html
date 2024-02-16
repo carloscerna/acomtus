@@ -609,18 +609,25 @@
     <!-- DETALLE DE LA PRODUCCIÓN ASIGNADA POR MOTORISTA -->
     <section id="FieldsetTabla" style="display: none;">
       <div class="card">
-        <div class="card-header bg-gradient-navy">
-          <h5 class="card-title">Producción | Talonario - Serie - Tiquete</h5>
-          <div class="card-tools">
-            <!-- Buttons, labels, and many other things can be placed here! -->
-            <!-- Here is a label for example -->
-            <span class="badge badge-dark">
-              <!-- NOMBRE Y TOTAL INGRESO -->
-              <label for="LblNombreMotorista"></label>
-            </span>
-          </div>
-        </div>
-          <div class="card-horizontal">
+        <div class="card-header bg-gradient-navy text-white">
+          <div class="row">
+            <div class="col col-md-6 d-flex justify-content-start p-0">
+              <h5 class="card-title">Producción | Talonario - Serie - Tiquete</h5>
+            </div>
+            <div class="col col-md-6 d-flex justify-content-end p-0">
+              <div class="card-tools">
+                <span class="badge badge-dark bg-white">
+                  <label for="LblNombreMotorista"></label> <!-- NOMBRE Y TOTAL INGRESO -->
+                </span>
+              </div>
+              <button type="button" class="btn btn-info" id="goImprmirProduccionDetalleMotorista" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Imprimir Producción">
+                <span class="fal fa-print-search"></span>
+              </button>
+            </div> <!-- card-->
+          </div> <!-- row-->
+        </div> <!-- header card-->
+          
+          <div class="card-body">
             <div class="img-square-wrapper">
               <img class="card-img-top img-fluid" style="width: 8rem;" id="ImagenPersonal" src="#">
             </div>
@@ -653,56 +660,56 @@
                   </div> 
                 </div>
               </div>
-            </div>  <!-- card horizontal cierre-->
+              <div class="table-responsive">
+                <table id="listadoAsignacion" class="table table-hover table-stripe">
+                  <thead>
+                      <tr>
+                        <th style="text-align: left; " colspan="3"># Correlativo</th>
+                        <th style="text-align: center;">Serie</th>
+                        <th style="text-align: right;">Cola</th>
+                        <th style="text-align: right;">Desde</th>
+                        <th style="text-align: right;">Hasta</th>
+                        <th style="text-align: right;">Total</th>
+                      </tr>                
+                  </thead>
+                    <tbody id="listadoDevolucionIngresoOk">
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                          <th style="text-align: left; " colspan="3"># Correlativo</th>
+                          <th style="text-align: center;">Serie</th>
+                          <th style="text-align: right;">Cola</th>
+                          <th style="text-align: right;">Desde</th>
+                          <th style="text-align: right;">Hasta</th>
+                          <th style="text-align: right;">Total</th>
+                      </tr>
+        
+                      <div class="row">
+                        <div class="col">
+                          <!-- <label for="">Inventiario Tiquete</label> -->
+                            <input type="hidden" name="CodigoInventarioTiquete" id="CodigoInventarioTiquete"> 
+                          <!-- <label for="">Cantidad Tiquete</label> -->
+                            <input type="hidden" name="CantidadTiqueteAsignado" id="CantidadTiqueteAsignado">
+                          <!--<label for="">Precio Publico</label> -->
+                            <input type="hidden" id="PrecioPublico">
+                          <!-- <label for="">total</label> -->
+                            <input type="hidden" name="TotalAsignado" id="TotalAsignado">
+                          <!-- <label for="">Codigo producción Asignado</label> -->
+                            <input type="hidden" id="CodigoProduccionAsignacion">
+                          <!-- <label for="">Código Producción</label> -->
+                            <input type="hidden" id="CodigoProduccion">
+                          <!-- <label for="">Código Producción</label> -->
+                          <input type="hidden" id="DesdeTablaAsignado">
+                        </div>
+                      </div>
+                    </tfoot>
+              </table>
+              </div>
+          </div>  <!-- card horizontal cierre-->
         <div class="card-footer">
-          <div class="table-responsive">
-            <table id="listadoAsignacion" class="table table-hover table-stripe">
-              <thead>
-                  <tr>
-                    <th style="text-align: left; " colspan="3"># Correlativo</th>
-                    <th style="text-align: center;">Serie</th>
-                    <th style="text-align: right;">Cola</th>
-                    <th style="text-align: right;">Desde</th>
-                    <th style="text-align: right;">Hasta</th>
-                    <th style="text-align: right;">Total</th>
-                  </tr>                
-              </thead>
-                <tbody id="listadoDevolucionIngresoOk">
-                </tbody>
-                <tfoot>
-                  <tr>
-                      <th style="text-align: left; " colspan="3"># Correlativo</th>
-                      <th style="text-align: center;">Serie</th>
-                      <th style="text-align: right;">Cola</th>
-                      <th style="text-align: right;">Desde</th>
-                      <th style="text-align: right;">Hasta</th>
-                      <th style="text-align: right;">Total</th>
-                  </tr>
-    
-                  <div class="row">
-                    <div class="col">
-                      <!-- <label for="">Inventiario Tiquete</label> -->
-                        <input type="hidden" name="CodigoInventarioTiquete" id="CodigoInventarioTiquete"> 
-                      <!-- <label for="">Cantidad Tiquete</label> -->
-                        <input type="hidden" name="CantidadTiqueteAsignado" id="CantidadTiqueteAsignado">
-                      <!--<label for="">Precio Publico</label> -->
-                        <input type="hidden" id="PrecioPublico">
-                      <!-- <label for="">total</label> -->
-                        <input type="hidden" name="TotalAsignado" id="TotalAsignado">
-                      <!-- <label for="">Codigo producción Asignado</label> -->
-                        <input type="hidden" id="CodigoProduccionAsignacion">
-                      <!-- <label for="">Código Producción</label> -->
-                        <input type="hidden" id="CodigoProduccion">
-                      <!-- <label for="">Código Producción</label> -->
-                      <input type="hidden" id="DesdeTablaAsignado">
-                    </div>
-                  </div>
-                </tfoot>
-          </table>
-          </div>
-           
+
         </div>
-      </div>
+      </div> <!-- div card -->
     </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->
 
