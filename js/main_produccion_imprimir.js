@@ -77,7 +77,7 @@ $('body').on('click','#TablaProduccion a',function (e){
 	e.preventDefault();
 // DATA-ACCION Y HREF
 	codigo_produccion = $(this).attr('href');
-	alert(codigo_produccion);
+	//alert(codigo_produccion);
 	accionAsignacion = $(this).attr('data-accion');
 	//alert(Id_Editar_Eliminar+" "+accionAsignacion);
 // EDTIAR REGISTRO.

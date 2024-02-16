@@ -1078,8 +1078,43 @@ $('body').on('click','#listado a',function (e){
 		});
 	}
 });
-	
+///////////////////////////////////////////////////////
+// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN.
+ //////////////////////////////////////////////////////
+$("#goImprmirProduccionDetalle").on('click', function (e) {
+	var $objCuerpoTabla=$("#listadoDetalle").children().prev().parent();
+	var control_ = [];  var ruta_ = []; var equipo_ = []; var motorista_ = []; var ingreso_ = [];
+	var fila = 0;
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// recorre el contenido de la tabla.
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	$objCuerpoTabla.find("tbody tr").each(function(){
+		var control =$(this).find('td').eq(1).html();
+		var ruta =$(this).find('td').eq(2).html();
+		var equipo =$(this).find('td').eq(3).html();
+		var motorista =$(this).find('td').eq(4).html();
+		var ingreso =$(this).find('td').eq(5).html();
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// VALORES DE LA MATRIZ QUE VIAJAN POR EL POST
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+		control_[fila] = control.trim();
+		ruta_[fila] = ruta.trim();
+		equipo_[fila] = equipo.trim();
+		motorista_[fila] = motorista.trim();
+		ingreso_[fila] = ingreso.trim();
+			fila = fila + 1;
+	});
+	// Limpiar datos
+		fecha = $("#FechaProduccion").val();
+	// Ejecutar Informe
+		varenviar = "/acomtus/php_libs/reportes/Produccion/DetalleProduccion.php?fecha="+fecha+
+					"&control="+control_+"&ruta="+ruta_+"&equipo="+equipo_+"&motorista="+motorista_+"&ingreso="+ingreso_;
+	// Ejecutar la función abre otra pestaña.
+		AbrirVentana(varenviar);
 
+
+
+});
 
 
 });	// final de FUNCTION.

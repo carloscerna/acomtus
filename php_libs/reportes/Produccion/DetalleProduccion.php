@@ -11,6 +11,12 @@
 // variables y consulta a la tabla.
     $db_link = $dblink;
 	$fecha = $_REQUEST["fecha"];
+	$fecha_produccion = cambiaf_a_normal($_REQUEST["fecha"]);
+	$control = explode(",",$_REQUEST["control"]);
+	$ruta = explode(",",$_REQUEST["ruta"]);
+	$equipo = explode(",",$_REQUEST["equipo"]);
+	$motorista = explode(",",$_REQUEST["motorista"]);
+	$ingreso = explode(",",$_REQUEST["ingreso"]);
 	$fecha_ = explode("/",cambiaf_a_normal($fecha));
 	$fecha_mes = $fecha_[1];
 	$totalProduccionOK = 0;
@@ -89,8 +95,9 @@ function FancyTable($header)
     $this->SetLineWidth(.3);
     $this->SetFont('','B');
 //  mostrar los valores de la consulta
-	$w=array(25,50,25,30,30,30); // FECHA, FIANZAS, DEVOLUCION Y DESCRIPCION.//determina el ancho de las columnas
+	$w=array(15,50,20,85,15); // control, ruta, equipo, motorista, ingreso.
     $w2=array(6,12); //determina el ALTO de las columnas
+	$this->SetXY(10,60);
     for($i=0;$i<count($header);$i++)
         $this->Cell($w[$i],5,mb_convert_encoding($header[$i],"ISO-8859-1","UTF-8"),'LTR',0,'C',1);
     $this->Ln();
@@ -100,7 +107,7 @@ function FancyTable($header)
 	$this->SetDrawColor(0,0,0);
     $this->SetFont('');
 	// Ubicación del eje X.
-	$this->SetX(20);	
+	$this->SetX(10);	
     //Datos
     $fill=false;
 }
@@ -115,7 +122,7 @@ function FancyTable($header)
     $pdf->SetAutoPageBreak(true,5);
     $data = array();
 //Títulos de las columnas
-    $header=array('Fecha','Ruta','Producción','Color','Precio Público');	
+    $header=array('Control','Ruta','Equipo','Motorista','Ingreso');	
 //Títulos de las columnas
     $pdf->AliasNbPages();
     $pdf->AddPage();
@@ -129,107 +136,41 @@ function FancyTable($header)
 	$pdf->RotatedText(140,40,'Santa Ana, ' . $dia . ' de ' . $nombresMeses[$mes] . ' de ' . $año,0);
 	// estado de cuenta
 	$pdf->RoundedRect(15, 45, 120, 8, 2, '1234', 'DF');
-	$pdf->RotatedText(18,50,mb_convert_encoding('PRODUCCIÓN - CONTROLES DE INGRESOS (TIQUETES)',"ISO-8859-1","UTF-8"),0);
+	$pdf->RotatedText(18,50,mb_convert_encoding('PRODUCCIÓN - DETALLE POR RUTA ',"ISO-8859-1","UTF-8") . $fecha_produccion,0);
 // Definimos el tipo de fuente, estilo y tamaño.
-    $pdf->SetFont('Arial','',10); // I : Italica; U: Normal;
+    $pdf->SetFont('Arial','',9); // I : Italica; U: Normal;
 //  mostrar los valores de la consulta
-    $w=array(25,50,25,30,30,30); // FECHA, FIANZAS, DEVOLUCION Y DESCRIPCION.//determina el ancho de las columnas
+    $w=array(15,50,20,85,15); // control, ruta, equipo, motorista, ingreso.
     $w2=array(5,7); //determina el ALTO de las columnas
 // Variables.
     $fill = false; $i=1;
-// Definimos el tipo de fuente, estilo y tamaño.
-    $pdf->SetXY(20,80);
 //  Encabezando.
     $pdf->FancyTable($header); // Solo carge el encabezado de la tabla porque medaba error el cargas los datos desde la consulta.		
-// armando el Query. PARA LA TABLA HISTORIAL.
-	# buscar en la tabla catalogo_ruta.
-	$fecha = $_REQUEST["fecha"];
-	$fecha_ = cambiaf_a_normal($_REQUEST["fecha"]);
-// armando el Query.
-	$query = "SELECT id_ruta, codigo, descripcion FROM catalogo_ruta  WHERE codigo_estatus = '01' ORDER BY codigo";
-// Ejecutamos el Query.
-	$codigo_ruta = array();
-	$consulta = $dblink -> query($query);
-// crear matriz
-	while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-	{
-		$codigo_ruta[] = $listado['id_ruta'];
-		$descripcion_ruta[] = $listado['descripcion'];
-	}
-	// armando el Query. PARA LA TABLA INVENTARIO TIQUETE..
-	$query = "SELECT DISTINCT cat_tc.id_ as id_tiquete_color, cat_tc.descripcion as tiquete_color, it.precio_publico
-					FROM catalogo_tiquete_color cat_tc
-						INNER JOIN inventario_tiquete it ON cat_tc.id_ = it.codigo_tiquete_color
-							ORDER BY it.precio_publico";
-	// Ejecutamos el Query.
-		$id_tiquete_color = array(); $precio_publico_ = array(); $nombre_serie = array(); $tiquete_color = array();
-		$consulta = $dblink -> query($query);
-	// crear matriz
-		while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-		{
-			$id_tiquete_color[] = $listado['id_tiquete_color'];
-			$precio_publico[] = $listado['precio_publico'];
-			//$nombre_serie[] = $listado['nombre_serie'];
-			$tiquete_color[] = $listado['tiquete_color'];
-		}
-	// CREAR MATRIZ UNIENDO LA RUTA CON EL PRECIO PUBLICO DE CADA TIQUETE.
-		$codigo_ruta_precio = array(); $descripcion_ruta_ = array(); $precio_publico_ = array(); $nombre_serie_ = array(); $tiquete_color_ = array();
-		for ($Hj=0; $Hj < count($codigo_ruta); $Hj++) { // tabla CATALOGO RUTA.
-			for ($jj=0; $jj < count($precio_publico); $jj++) {   // TABLA CATALOGO INVENTARIO TIQUETE.
-
-				// Verificar que sólo se genere ruta y único precio público.
-				//$codigo_ruta_precio[] = $codigo_ruta[$Hj] . $id_it[$jj];
-				$codigo_ruta_precio[] = $codigo_ruta[$Hj] . $id_tiquete_color[$jj];
-				$descripcion_ruta_[] = $descripcion_ruta[$Hj];
-				$precio_publico_[] = $precio_publico[$jj];
-				//$nombre_serie_[] = $nombre_serie[$jj];
-				$tiquete_color_[] = $tiquete_color[$jj];
-			}
-		}
-
-		// CONSULTA FOR INVENTARIO TIQUETE.
-		for ($Hj=0; $Hj < count($codigo_ruta_precio); $Hj++) { // MATRIZ CATALOGO RUTA Y INVENTARIO TIQUETE..
-			 $query = "SELECT pro.id_, pro.total_ingreso, pro.codigo_ruta
-			   FROM produccion pro WHERE fecha = '$fecha' and concat(codigo_ruta,codigo_tiquete_color) = '$codigo_ruta_precio[$Hj]'
-			   ORDER BY pro.codigo_ruta, pro.id_ ASC";
-				 $consulta = $dblink -> query($query);
-			 // Validar si hay registros.
-				 if($consulta -> rowCount() != 0){
-				 // Crear matriz para poder tomar dos valores
-					 $ProduccionDesdeHasta = array(); $ProduccionDesde = 0; $ProduccionHasta = 0;
-				 // Recorriendo la Tabla con PDO::
-					 while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-					 {
-						 $ProduccionDesdeHasta[] = $listado["id_"];
-					 }   // WHILE DE LA CONSULTA PRODUCCIÓN.
-					 // PASAR VALOR PRIMERO Y ÚLTIMO DE LA MATRIZ A LAS VARIALBES.
-						 $ProduccionDesde = reset($ProduccionDesdeHasta);
-						 $ProduccionHasta = end($ProduccionDesdeHasta);
-						 $ProduccionCantidad = count($ProduccionDesdeHasta);
-						 $totalProduccionOK = $totalProduccionOK + $ProduccionCantidad;
-				 }   // IF DE LA CONSULTA PRODUCCION.
-			 // DAR VALORES A VARIABLES.
-				 // Validar si hay registros.
-				 if($consulta -> rowCount() != 0){
-					 // convertir la matriz $ProduccionDesdeHasta
-					 $separado_por_comas = implode(",", $ProduccionDesdeHasta);
-					 // cambiar el color de la fila.
-					 $pdf->Cell($w[0],$w2[1],$fecha_,1,0,'C',$fill);
-					 $pdf->Cell($w[1],$w2[1],$descripcion_ruta_[$Hj],1,0,'L',$fill);
-					 $pdf->Cell($w[2],$w2[1],$ProduccionCantidad,1,0,'C',$fill);
-					 $pdf->Cell($w[3],$w2[1],$tiquete_color_[$Hj],1,0,'L',$fill);
-					 $pdf->Cell($w[4],$w2[1],"$". $precio_publico_[$Hj],1,0,'C',$fill);
-					 $pdf->ln();
-					 $fill=!$fill;
-				 }
-			  }   // FOR DE LA TABLA CATALOGO RUTA Y INVENTARIO TIQUETE..
+// Definimos el tipo de fuente, estilo y tamaño.
+	$pdf->SetXY(10,65);
+		// RECORRER LA ARRAY
+		for ($Hj=0; $Hj < count($control); $Hj++) { // MATRIZ CATALOGO RUTA Y INVENTARIO TIQUETE..
+			$pdf->SetX(10);
+				// cambiar el color de la fila.
+				$pdf->Cell($w[0],$w2[1],$control[$Hj],1,0,'C',$fill);
+				$pdf->Cell($w[1],$w2[1],$ruta[$Hj],1,0,'L',$fill);
+				$pdf->Cell($w[2],$w2[1],$equipo[$Hj],1,0,'C',$fill);
+				$pdf->Cell($w[3],$w2[1],$motorista[$Hj],1,0,'L',$fill);
+				$pdf->Cell($w[4],$w2[1],$ingreso[$Hj],1,0,'C',$fill);
+				$pdf->ln();
+				$fill=!$fill;
+		}   // FOR DE LA TABLA CATALOGO RUTA Y INVENTARIO TIQUETE..
 			////////////////////////////////////////////////////
 			/// Linea para colocar totoal producción.
 			////////////////////////////////////////////////////
+			$pdf->SetX(10);
+			$totalProduccionOK = array_sum($ingreso);
 			$pdf->Cell($w[0],$w2[1],"",1,0,'C',$fill);
+			$pdf->Cell($w[1],$w2[1],"",1,0,'C',$fill);
+			$pdf->Cell($w[2],$w2[1],"",1,0,'C',$fill);
 			$pdf->SetFont('Arial','B',12); // I : Italica; U: Normal;
-			$pdf->Cell($w[1],$w2[1],"TOTAL PRODUCCION",1,0,'R',$fill);
-			$pdf->Cell($w[2],$w2[1],$totalProduccionOK,1,0,'C',$fill);
+			$pdf->Cell($w[3],$w2[1],"TOTAL PRODUCCION",1,0,'R',$fill);
+			$pdf->Cell($w[4],$w2[1],$totalProduccionOK,1,0,'C',$fill);
 // Salida del pdf.
 	$modo = 'I'; // Envia al navegador (I), Descarga el archivo (D), Guardar el fichero en un local(F).
 	$nombre_archivo  = mb_convert_encoding("Producción: " . $fecha . '.pdf',"ISO-8859-1","UTF-8");
