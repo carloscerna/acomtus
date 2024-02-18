@@ -480,24 +480,44 @@
   <section id="ProduccionTabla" style="display: none;">
   <div class="card">
     <div class="card-header bg-gradient-navy">
-      <h5 class="card-title">Producción</h5>
+      <h5 class="card-title">Producción Diaria</h5>
       <div class="card-tools">
-        <span class="badge badge-primary">Label</span>
+        <button type="button" class="btn btn-info" id="goImprmirProduccionDiaria" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Imprimir Producción">
+          <span class="fal fa-print-search"></span>
+        </button>
         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
         </button>
       </div>
     </div>
     <div class="card-body">
+      <div class="row">
+        <div class="col col-md-6">
+          <div class="info-box bg-yellow p-1">
+            <span class="info-box-icon"><i class="fad fa-tags"></i></span>
+            <div class="info-box-content bg-gradient-warning">
+              <label class="info-box-number text-bold text-lg" id="LblProduccionesTotal" for="LblProduccionesTotal">0</label>
+            <div class="progress">
+              <div class="progress-bar"></div>
+            </div>
+            <label for="LblCantidadProduccionesVendidas" id="LblCantidadProduccionesVendidas" class="progress-description text-bold text-lg"></label>
+            </div>
+            
+            </div>
+        </div>
+        <div class="col col-md-6">
+          
+        </div>
+      </div>
+
       <div class="row p-0">
         <div class="col d-flex justify-content-between">
-          <label for="LblCantidadProduccionesVendidas" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Cantidad Controles Vendidos: </label>
-          <label for="LblTotalTiquetes" style="padding: 0px; font-size: large; color:darkblue; text-align: left;"># Tiquetes Vendidos: </label>
+
+          <label for="LblTotalTiquetes" id="LblTotalTiquetes" style="padding: 0px; font-size: large; color:darkblue; text-align: left;"># Tiquetes Vendidos: </label>
         </div>
       </div>
       <div class="row">
         <div class="col d-flex justify-content-between">
-          <label for="LblProduccionesTotal" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Total Producciones : </label>
-          <label for="LblProduccionesTotalIngreso" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Total Ingreso $ </label>
+          <label for="LblProduccionesTotalIngreso" id="LblProduccionesTotalIngreso" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Total Ingreso $ </label>
         </div>
       </div>
 
@@ -553,7 +573,7 @@
     <!-- DETALLE DE LA PRODUCCIÓN ASIGNADA -->
   <section id="field_produccion_detalle" style="display: none;">
     <div class="card">
-      <div class="card-header bg-gradient-navy">
+      <div class="card-header bg-gradient-navy"> <!-- BARRA DE TÍTULO - APERTURA -->
         <div class="row">
           <div class="col col-md-6 d-flex justify-content-start p-0">
             <h5 class="card-title">Detalle de la Producción</h5>
@@ -561,15 +581,14 @@
           <div class="col col-md-6 d-flex justify-content-end p-0">
             <div class="card-tools">
               <span class="badge badge-primary bg-white"><label for="LblDetalleTotalIngreso" style="padding: 0px; font-size: medium; text-align: left;">Total $ </label></span>
-                <button type="button" class="btn btn-tool btn-sm" data-card-widget="collapse"><i class="fas fa-minus"></i>
-              </button>
               <button type="button" class="btn btn-info" id="goImprmirProduccionDetalle" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Imprimir Producción">
                 <span class="fal fa-print-search"></span>
               </button>
+              <button type="button" class="btn btn-tool btn-sm" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
             </div>
           </div>
         </div>
-      </div>
+      </div>  <!-- BARRA DE TÍTULO - CIERRE -->
       <div class="card-body">
         <div class="row">
           <div class="col">
@@ -609,7 +628,7 @@
     <!-- DETALLE DE LA PRODUCCIÓN ASIGNADA POR MOTORISTA -->
     <section id="FieldsetTabla" style="display: none;">
       <div class="card">
-        <div class="card-header bg-gradient-navy text-white">
+        <div class="card-header bg-gradient-navy text-white"> <!-- BARRA DE TÍTULO - APERTURA -->
           <div class="row">
             <div class="col col-md-6 d-flex justify-content-start p-0">
               <h5 class="card-title">Producción | Talonario - Serie - Tiquete</h5>
@@ -617,98 +636,102 @@
             <div class="col col-md-6 d-flex justify-content-end p-0">
               <div class="card-tools">
                 <span class="badge badge-dark bg-white">
-                  <label for="LblNombreMotorista"></label> <!-- NOMBRE Y TOTAL INGRESO -->
+                  <label for="LblNombreMotorista" id="LblNombreMotorista"></label> <!-- NOMBRE Y TOTAL INGRESO -->
                 </span>
               </div>
               <button type="button" class="btn btn-info" id="goImprmirProduccionDetalleMotorista" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Imprimir Producción">
                 <span class="fal fa-print-search"></span>
               </button>
+              <button type="button" class="btn btn-tool btn-sm" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
             </div> <!-- card-->
           </div> <!-- row-->
-        </div> <!-- header card-->
+        </div> <!-- header card--> <!-- BARRA DE TÍTULO - CIERRE -->
           
-          <div class="card-body">
-            <div class="img-square-wrapper">
-              <img class="card-img-top img-fluid" style="width: 8rem;" id="ImagenPersonal" src="#">
-            </div>
-              <div class="card-body p-0">
-                <div class="row">
-                  <!--   RUTA  -->
-                  <div class="col col-md-6 col-lg-6 col-xl-6">
-
-                    <div class="info-box">
-                      <span class="info-box-icon bg-info"><i class="fal fa-info-circle"></i></span>
-                      <div class="info-box-content p-0">
-                        <span class="info-box-text">Código: <span class="badge badge-dark" id="LblDescripcionCodigo">CódigoPersonal</span></span>
-                        <span class="info-box-text">Ruta: <span class="badge badge-dark" id="LblDescripcionRuta">Ruta</span></span>
-                        <span class="info-box-text">Unidad: <span class="badge badge-dark" id="LblDescripcionUnidad">Unidad</span></span>
-                        <span class="info-box-text">Fecha: <span class="badge badge-dark" id="LblListadoIdFecha">Fecha</span></span>
-                      </div>
+          <div class="card-body"> <!-- BARRA DE TÍTULO - APÈRTURA -->
+              <div class="row">
+                <!--   RUTA  -->
+                <div class="col col-md-6">
+                  <div class="info-box">
+                    <div class="img-square-wrapper">
+                      <img class="card-img-top img-fluid" style="width: 8rem;" id="ImagenPersonal" src="#">
                     </div>
-
+                    <span class="info-box-icon bg-info"><i class="fal fa-info-circle"></i></span>
+                    <div class="info-box-content p-0">
+                      <span class="info-box-text">Código: <span class="badge badge-dark" id="LblDescripcionCodigo">CódigoPersonal</span></span>
+                      <span class="info-box-text">Ruta: <span class="badge badge-dark" id="LblDescripcionRuta">Ruta</span></span>
+                      <span class="info-box-text">Unidad: <span class="badge badge-dark" id="LblDescripcionUnidad">Unidad</span></span>
+                      <span class="info-box-text">Fecha: <span class="badge badge-dark" id="LblListadoIdFecha">Fecha</span></span>
+                    </div>
                   </div>
-                  <!--   tiquete vendidos, devueltos y total  -->
-                  <div class="col col-md-6 col-lg-6 col-xl-6 d-flex justify-content-end">
-                    <div class="info-box">
-                      <span class="info-box-icon bg-info"><i class="fad fa-dollar-sign"></i></span>
-                      <div class="info-box-content p-0">
-                        <span class="info-box-text">Precio Público: <span class="badge badge-dark" id="LblListadoPrecio">Precio</span></span>
-                        <span class="info-box-text">Cantidad Vendida: <span class="badge badge-dark" id="LblListadoCantidad">Cantidad</span></span>
-                        <span class="info-box-text">Total: <span class="badge badge-dark" id="LblListadoTotalIngreso">Total</span></span>
-                      </div>
+
+                </div>
+                <!--   tiquete vendidos, devueltos y total  -->
+                <div class="col col-md-6 d-flex justify-content-end">
+                  <div class="info-box">
+                    <span class="info-box-icon bg-info"><i class="fad fa-dollar-sign"></i></span>
+                    <div class="info-box-content p-0">
+                      <span class="info-box-text">Precio Público: <span class="badge badge-dark" id="LblListadoPrecio">Precio</span></span>
+                      <span class="info-box-text">Cantidad Vendida: <span class="badge badge-dark" id="LblListadoCantidad">Cantidad</span></span>
+                      <span class="info-box-text">Total: <span class="badge badge-dark" id="LblListadoTotalIngreso">Total</span></span>
                     </div>
-                  </div> 
+                  </div>
+                </div> 
+              </div>
+          
+              <div class="row"> <!-- FILA PARA LA TABLA-->
+                <div class="col">
+                  <div class="table-responsive">
+                    <table id="listadoAsignacion" class="table table-hover table-stripe">
+                      <thead>
+                          <tr>
+                            <th style="text-align: left; "># Correlativo</th>
+                            <th style="text-align: center; ">Estatus</th>
+                            <th style="text-align: center;">Serie</th>
+                            <th style="text-align: right;">Cola</th>
+                            <th style="text-align: right;">Desde</th>
+                            <th style="text-align: right;">Hasta</th>
+                            <th style="text-align: right;">Total</th>
+                          </tr>                
+                      </thead>
+                        <tbody id="listadoDevolucionIngresoOk">
+                        </tbody>
+                        <tfoot>
+                          <tr>
+                              <th style="text-align: left;"># Correlativo</th>
+                              <th style="text-align: center; ">Estatus</th>
+                              <th style="text-align: center;">Serie</th>
+                              <th style="text-align: right;">Cola</th>
+                              <th style="text-align: right;">Desde</th>
+                              <th style="text-align: right;">Hasta</th>
+                              <th style="text-align: right;">Total</th>
+                          </tr>
+            
+                          <div class="row">
+                            <div class="col">
+                              <!-- <label for="">Inventiario Tiquete</label> -->
+                                <input type="hidden" name="CodigoInventarioTiquete" id="CodigoInventarioTiquete"> 
+                              <!-- <label for="">Cantidad Tiquete</label> -->
+                                <input type="hidden" name="CantidadTiqueteAsignado" id="CantidadTiqueteAsignado">
+                              <!--<label for="">Precio Publico</label> -->
+                                <input type="hidden" id="PrecioPublico">
+                              <!-- <label for="">total</label> -->
+                                <input type="hidden" name="TotalAsignado" id="TotalAsignado">
+                              <!-- <label for="">Codigo producción Asignado</label> -->
+                                <input type="hidden" id="CodigoProduccionAsignacion">
+                              <!-- <label for="">Código Producción</label> -->
+                                <input type="hidden" id="CodigoProduccion">
+                              <!-- <label for="">Código Producción</label> -->
+                              <input type="hidden" id="DesdeTablaAsignado">
+                            </div>
+                          </div>
+                        </tfoot>
+                  </table> <!-- CIERRE DE LA TABLA-->
                 </div>
               </div>
-              <div class="table-responsive">
-                <table id="listadoAsignacion" class="table table-hover table-stripe">
-                  <thead>
-                      <tr>
-                        <th style="text-align: left; " colspan="3"># Correlativo</th>
-                        <th style="text-align: center;">Serie</th>
-                        <th style="text-align: right;">Cola</th>
-                        <th style="text-align: right;">Desde</th>
-                        <th style="text-align: right;">Hasta</th>
-                        <th style="text-align: right;">Total</th>
-                      </tr>                
-                  </thead>
-                    <tbody id="listadoDevolucionIngresoOk">
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                          <th style="text-align: left; " colspan="3"># Correlativo</th>
-                          <th style="text-align: center;">Serie</th>
-                          <th style="text-align: right;">Cola</th>
-                          <th style="text-align: right;">Desde</th>
-                          <th style="text-align: right;">Hasta</th>
-                          <th style="text-align: right;">Total</th>
-                      </tr>
-        
-                      <div class="row">
-                        <div class="col">
-                          <!-- <label for="">Inventiario Tiquete</label> -->
-                            <input type="hidden" name="CodigoInventarioTiquete" id="CodigoInventarioTiquete"> 
-                          <!-- <label for="">Cantidad Tiquete</label> -->
-                            <input type="hidden" name="CantidadTiqueteAsignado" id="CantidadTiqueteAsignado">
-                          <!--<label for="">Precio Publico</label> -->
-                            <input type="hidden" id="PrecioPublico">
-                          <!-- <label for="">total</label> -->
-                            <input type="hidden" name="TotalAsignado" id="TotalAsignado">
-                          <!-- <label for="">Codigo producción Asignado</label> -->
-                            <input type="hidden" id="CodigoProduccionAsignacion">
-                          <!-- <label for="">Código Producción</label> -->
-                            <input type="hidden" id="CodigoProduccion">
-                          <!-- <label for="">Código Producción</label> -->
-                          <input type="hidden" id="DesdeTablaAsignado">
-                        </div>
-                      </div>
-                    </tfoot>
-              </table>
-              </div>
-          </div>  <!-- card horizontal cierre-->
-        <div class="card-footer">
-
-        </div>
+              
+              </div> <!-- CIERRE FILA PARA LA TABLA-->
+          </div> <!-- CIERRE DEL CARD BODY-->
+        <div class="card-footer bg-gradient-cyan"></div>
       </div> <!-- div card -->
     </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->
@@ -717,7 +740,7 @@
 <div id="loading-screen" style="display:none">
   <img src="img/spinning-circles.svg">
   <h3>
-    <label for="LblDescripcion" class="">Por Favor Espere...</label>
+    <label for="LblDescripcion" class="bg-gradiente-gray" >Por Favor Espere...</label>
   </h3>
 </div>
 

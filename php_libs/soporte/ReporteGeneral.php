@@ -457,7 +457,6 @@ else{
                     $contenidoOK .= "<tr>
                     <td $estilo_c>$pa_codigo_produccion-$id_pro_a
                     <td $estilo>$descripcion_estatus
-                    <td $estilo_l>
                     <td $estilo_c>$nombre_serie
                     <td $estilo_cola>$tiquete_cola
                     <td $estilo_r>$tiquete_desde

@@ -1081,6 +1081,65 @@ $('body').on('click','#listado a',function (e){
 ///////////////////////////////////////////////////////
 // BOTONES - IMPRIMIR DETALLE PRODUCCIÓN.
  //////////////////////////////////////////////////////
+ $("#goImprmirProduccionDiaria").on('click', function (e) {
+	// Información.
+	var codigo = $('#LblDescripcionCodigo');
+	codigo_ = codigo.text();
+	var ruta = $('#LblDescripcionRuta');
+	ruta_ = ruta.text();
+	var unidad = $('#LblDescripcionUnidad');
+	unidad_ = unidad.text();
+	//	Valores
+	var precio = $('#LblListadoPrecio');
+	precio_ = precio.text();
+	var cantidad = $('#LblListadoCantidad');
+	cantidad_ = cantidad.text();
+	var total = $('#LblListadoTotalIngreso');
+	total_ = total.text();
+	//	Tabla.
+	var $objCuerpoTabla=$("#listadoAsignacion").children().prev().parent();
+	var correlativo_ = [];  var serie_ = []; var cola_ = []; var desde_ = []; var hasta_ = [];
+	var ingreso_ = []; var estatus_ = [];
+	var fila = 0;
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// recorre el contenido de la tabla.
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	$objCuerpoTabla.find("tbody tr").each(function(){
+		var correlativo =$(this).find('td').eq(0).html();
+		var estatus =$(this).find('td').eq(1).html();
+		var serie =$(this).find('td').eq(2).html();
+		var cola =$(this).find('td').eq(3).html();
+		var desde =$(this).find('td').eq(4).html();
+		var hasta =$(this).find('td').eq(5).html();
+		var ingreso =$(this).find('td').eq(6).html();
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// VALORES DE LA MATRIZ QUE VIAJAN POR EL POST
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+		correlativo_[fila] = correlativo.trim();
+		estatus_[fila] = estatus.trim();
+		serie_[fila] = serie.trim();
+		cola_[fila] = cola.trim();
+		desde_[fila] = desde.trim();
+		hasta_[fila] = hasta.trim();
+		ingreso_[fila] = ingreso.trim();
+			fila = fila + 1;
+	});
+	// Limpiar datos
+		fecha = $("#FechaProduccion").val();
+	// Ejecutar Informe
+		varenviar = "/acomtus/php_libs/reportes/Produccion/DetallePorMotorista.php?fecha="+fecha+
+					"&correlativo="+correlativo_+"&serie="+serie_+"&cola="+cola_+"&desde="+desde_+"&hasta="+hasta_+"&ingreso="+ingreso_
+					+"&estatus="+estatus_+"&NombreMotorista="+NombreMotorista+"&ImagenPersonal="+ImagenFoto
+					+"&codigo="+codigo_+"&ruta="+ruta_+"&unidad="+unidad_+"&precio="+precio_+"&cantidad="+cantidad_+"&total="+total_
+					;
+	// Ejecutar la función abre otra pestaña.
+		AbrirVentana(varenviar);
+
+
+});
+///////////////////////////////////////////////////////
+// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN.
+ //////////////////////////////////////////////////////
 $("#goImprmirProduccionDetalle").on('click', function (e) {
 	var $objCuerpoTabla=$("#listadoDetalle").children().prev().parent();
 	var control_ = [];  var ruta_ = []; var equipo_ = []; var motorista_ = []; var ingreso_ = [];
@@ -1111,7 +1170,66 @@ $("#goImprmirProduccionDetalle").on('click', function (e) {
 					"&control="+control_+"&ruta="+ruta_+"&equipo="+equipo_+"&motorista="+motorista_+"&ingreso="+ingreso_;
 	// Ejecutar la función abre otra pestaña.
 		AbrirVentana(varenviar);
-
+});
+///////////////////////////////////////////////////////
+// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN.
+ //////////////////////////////////////////////////////
+ $("#goImprmirProduccionDetalleMotorista").on('click', function (e) {
+	var LabelNombreMotorista = $('#LblNombreMotorista');
+	NombreMotorista = LabelNombreMotorista.text();
+	let ImagenFoto = $("#ImagenPersonal").attr("src");
+	// Información Empleado.
+	var codigo = $('#LblDescripcionCodigo');
+	codigo_ = codigo.text();
+	var ruta = $('#LblDescripcionRuta');
+	ruta_ = ruta.text();
+	var unidad = $('#LblDescripcionUnidad');
+	unidad_ = unidad.text();
+	//	Valores
+	var precio = $('#LblListadoPrecio');
+	precio_ = precio.text();
+	var cantidad = $('#LblListadoCantidad');
+	cantidad_ = cantidad.text();
+	var total = $('#LblListadoTotalIngreso');
+	total_ = total.text();
+	//	Tabla.
+	var $objCuerpoTabla=$("#listadoAsignacion").children().prev().parent();
+	var correlativo_ = [];  var serie_ = []; var cola_ = []; var desde_ = []; var hasta_ = [];
+	var ingreso_ = []; var estatus_ = [];
+	var fila = 0;
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// recorre el contenido de la tabla.
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	$objCuerpoTabla.find("tbody tr").each(function(){
+		var correlativo =$(this).find('td').eq(0).html();
+		var estatus =$(this).find('td').eq(1).html();
+		var serie =$(this).find('td').eq(2).html();
+		var cola =$(this).find('td').eq(3).html();
+		var desde =$(this).find('td').eq(4).html();
+		var hasta =$(this).find('td').eq(5).html();
+		var ingreso =$(this).find('td').eq(6).html();
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// VALORES DE LA MATRIZ QUE VIAJAN POR EL POST
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+		correlativo_[fila] = correlativo.trim();
+		estatus_[fila] = estatus.trim();
+		serie_[fila] = serie.trim();
+		cola_[fila] = cola.trim();
+		desde_[fila] = desde.trim();
+		hasta_[fila] = hasta.trim();
+		ingreso_[fila] = ingreso.trim();
+			fila = fila + 1;
+	});
+	// Limpiar datos
+		fecha = $("#FechaProduccion").val();
+	// Ejecutar Informe
+		varenviar = "/acomtus/php_libs/reportes/Produccion/DetallePorMotorista.php?fecha="+fecha+
+					"&correlativo="+correlativo_+"&serie="+serie_+"&cola="+cola_+"&desde="+desde_+"&hasta="+hasta_+"&ingreso="+ingreso_
+					+"&estatus="+estatus_+"&NombreMotorista="+NombreMotorista+"&ImagenPersonal="+ImagenFoto
+					+"&codigo="+codigo_+"&ruta="+ruta_+"&unidad="+unidad_+"&precio="+precio_+"&cantidad="+cantidad_+"&total="+total_
+					;
+	// Ejecutar la función abre otra pestaña.
+		AbrirVentana(varenviar);
 
 
 });
@@ -1155,15 +1273,26 @@ function BuscarProduccionPorFecha() {
 					// limpiar tabla producción detalle.
 						$('#listadoDetalleOk').empty();
 					// cambiar el valor del ingreso.
-					var colones = response.totalProduccionIngreso;
-					colones = colones.replace(/,/g,"");
-					colones = Number(colones);
-					var total_colones = (colones * parseFloat(8.75));
-					total_colones = delimitNumbers(total_colones.toFixed(2));
-						$("label[for='LblProduccionesTotal']").text('Total Salida de Controles: ' + response.totalProduccion);
+						var colones = response.totalProduccionIngreso;
+						colones = colones.replace(/,/g,"");
+						colones = Number(colones);
+						var total_colones = (colones * parseFloat(8.75));
+						total_colones = delimitNumbers(total_colones.toFixed(2));
+					//	cantidades de controles a y vendidas.
+						controles = Number(response.totalProduccion);
+						controlesVendidos = Number(response.cantidadProduccionVendidos);
+					//	porcentaje // cambiaar css progress bar.
+						var porcentaje_controles = ((controlesVendidos * 100) / controles);
+						porcentaje_controles = delimitNumbers(porcentaje_controles.toFixed(0));
+					//
+						$("label[for='LblProduccionesTotal']").text("Controles: " + controles);
+							$('.progress-bar').css('width', porcentaje_controles +'%').attr('aria-valuenow', porcentaje_controles);
+						$("label[for='LblCantidadProduccionesVendidas']").text("Procesados: " + controlesVendidos + " es el " + porcentaje_controles + "% de " + controles + ".");
+					// Etiquetas
+						
 						$("label[for='LblProduccionesTotalIngreso']").text('Total Ingreso Produccion $ ' + response.totalProduccionIngreso + ' (¢ ' + total_colones +')');
 						$("label[for='LblTotalTiquetes']").text('# Tiquetes Vendidos: ' + response.cantidadTiquetePantalla);
-						$("label[for='LblCantidadProduccionesVendidas']").text('Cantidad de Controles Vendidos: ' + response.cantidadProduccionVendidos);
+						
 						
 				}
 			},	// DATA.
