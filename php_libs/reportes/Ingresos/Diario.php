@@ -313,8 +313,8 @@ function FancyTable($header)
                             }   //FOR CODIGO-PRODUCCION MATRIZ
                             //
                             
-                            print_r($tiquete_['vendido']);
-                            exit;
+                            //print_r($tiquete_['vendido']);
+                            //exit;
                             for ($jjh=0; $jjh < count($precio_publico_cobradores); $jjh++) { 
                                 //  Detectar el precio del tiquete
                                 switch ($precio_publico_cobradores[$jjh]) {

@@ -480,9 +480,9 @@
   <section id="ProduccionTabla" style="display: none;">
   <div class="card">
     <div class="card-header bg-gradient-navy">
-      <h5 class="card-title">Producción Diaria</h5>
+      <h5 class="card-title">Producción</h5>
       <div class="card-tools">
-        <button type="button" class="btn btn-info" id="goImprmirProduccionDiaria" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Imprimir Producción">
+        <button type="button" class="btn btn-info" id="goImprmirProduccionPorFecha" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Imprimir Producción">
           <span class="fal fa-print-search"></span>
         </button>
         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
@@ -491,36 +491,44 @@
     </div>
     <div class="card-body">
       <div class="row">
-        <div class="col col-md-6">
-          <div class="info-box bg-yellow p-1">
-            <span class="info-box-icon"><i class="fad fa-tags"></i></span>
-            <div class="info-box-content bg-gradient-warning">
-              <label class="info-box-number text-bold text-lg" id="LblProduccionesTotal" for="LblProduccionesTotal">0</label>
+        <div class="col col-md-4">
+          <div class="info-box">
+            <span class="info-box-icon bg-info"><i class="fal fa-list-alt"></i></span>
+            <div class="info-box-content">
+              <label class="info-box-number text-bold text-md" id="LblProduccionesTotal" for="LblProduccionesTotal">0</label>
             <div class="progress">
-              <div class="progress-bar"></div>
+              <div class="progress-bar bg-info"></div>
             </div>
-            <label for="LblCantidadProduccionesVendidas" id="LblCantidadProduccionesVendidas" class="progress-description text-bold text-lg"></label>
+            <label for="LblCantidadProduccionesVendidas" id="LblCantidadProduccionesVendidas" class="progress-description text-bold text-md"></label>
             </div>
-            
-            </div>
+          </div>
         </div>
-        <div class="col col-md-6">
-          
+        <div class="col col-md-4">
+          <div class="info-box">
+            <span class="info-box-icon bg-gradient-warning"><i class="fal fa-ticket-alt"></i></span>
+            <div class="info-box-content">
+              <label class="info-box-number text-bold text-md" id="LblTotalTiquetesEntregados" for="LblTotalTiquetesEntregados">0</label>
+            <div class="progress">
+              <div class="progress-bar bg-info" id="progress-bar-tiquete"></div>
+            </div>
+            <label for="LblTotalTiquetesVendidos" id="LblTotalTiquetesVendidos" class="progress-description text-bold text-md"></label>
+            </div>
+          </div>
+        </div>
+        <div class="col col-md-4">
+          <div class="info-box">
+            <span class="info-box-icon bg-gradient-success"><i class="fal fa-file-invoice-dollar"></i></span>
+            <div class="info-box-content">
+              <label class="info-box-number text-bold text-md" id="LblIngresoTotal" for="LblIngresoTotal">0</label>
+            <div class="progress">
+              <div class="progress-bar bg-info"></div>
+            </div>
+            <label for="LblProduccionesTotalIngreso" id="LblProduccionesTotalIngreso" class="progress-description text-bold text-md"></label>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div class="row p-0">
-        <div class="col d-flex justify-content-between">
-
-          <label for="LblTotalTiquetes" id="LblTotalTiquetes" style="padding: 0px; font-size: large; color:darkblue; text-align: left;"># Tiquetes Vendidos: </label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col d-flex justify-content-between">
-          <label for="LblProduccionesTotalIngreso" id="LblProduccionesTotalIngreso" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">Total Ingreso $ </label>
-        </div>
-      </div>
-
+      <!-- TABLA CON LA PRODUCCIÓN DIARIA-->
       <div class="row">
         <div class="col">
           <div class="table-responsive">

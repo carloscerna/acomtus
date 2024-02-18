@@ -1079,7 +1079,66 @@ $('body').on('click','#listado a',function (e){
 	}
 });
 ///////////////////////////////////////////////////////
-// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN.
+// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN POR FECHA.
+ //////////////////////////////////////////////////////
+ $("#goImprmirProduccionPorFecha").on('click', function (e) {
+	// Información.
+	var produccionTotal = $('#LblProduccionesTotal');
+	produccionTotal_ = produccionTotal.text();
+	var produccionVendida = $('#LblCantidadProduccionesVendidas');
+	produccionVendida_ = produccionVendida.text();
+	var tiqueteEntregados = $('#LblTotalTiquetesEntregados');
+	tiqueteEntregados_ = tiqueteEntregados.text();
+	//	Valores
+	var tiqueteVendidos = $('#LblTotalTiquetesVendidos');
+	tiqueteVendidos_ = tiqueteVendidos.text();
+	var ingresoTotal = $('#LblIngresoTotal');
+	ingresoTotal_ = ingresoTotal.text();
+	var ingresoColones = $('#LblProduccionesTotalIngreso');
+	ingresoColones_ = ingresoColones.text();
+	//	Tabla.
+	var $objCuerpoTabla=$("#listado").children().prev().parent();
+	var ruta_ = [];  var entregados_ = []; var devolucion_ = []; var vendidos_ = []; var precio_publico_ = [];
+	var ingreso_ = []; var cantidad_ = [];
+	var fila = 0;
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// recorre el contenido de la tabla.
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	$objCuerpoTabla.find("tbody tr").each(function(){
+		var ruta =$(this).find('td').eq(1).html();		//	ruta.
+		var cantidad =$(this).find('td').eq(3).html();	// cantidad
+		var entregados =$(this).find('td').eq(4).html();		// entregados
+		var devolucion =$(this).find('td').eq(5).html();		// devolucion
+		var vendidos =$(this).find('td').eq(6).html();		// vendidos
+		var precio_publico =$(this).find('td').eq(7).html();		// precio publico
+		var ingreso =$(this).find('td').eq(8).html();	// ingresos.
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// VALORES DE LA MATRIZ QUE VIAJAN POR EL POST
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+		ruta_[fila] = ruta.trim();
+		cantidad_[fila] = cantidad.trim();
+		entregados_[fila] = entregados.trim();
+		devolucion_[fila] = devolucion.trim();
+		vendidos_[fila] = vendidos.trim();
+		precio_publico_[fila] = precio_publico.trim();
+		ingreso_[fila] = ingreso.trim();
+			fila = fila + 1;
+	});
+	// Limpiar datos
+		fecha = $("#FechaProduccion").val();
+	// Ejecutar Informe
+		varenviar = "/acomtus/php_libs/reportes/Produccion/PorFecha.php?fecha="+fecha+
+					"&ruta="+ruta_+"&cantidad="+cantidad_+"&entregados="+entregados_+"&devolucion="+devolucion_+"&vendidos="+vendidos_+"&ingreso="+ingreso_
+					+"&precio_publico="+precio_publico_+"&produccion_total="+produccionTotal_+"&produccion_vendida="+produccionVendida_
+					+"&tiqueteEntregados="+tiqueteEntregados_+"&tiqueteVendidos="+tiqueteVendidos_+"&ingresoTotal="+ingresoTotal_+"&ingresoColones="+ingresoColones_
+					;
+	// Ejecutar la función abre otra pestaña.
+		AbrirVentana(varenviar);
+
+
+});
+///////////////////////////////////////////////////////
+// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN DIARIA.
  //////////////////////////////////////////////////////
  $("#goImprmirProduccionDiaria").on('click', function (e) {
 	// Información.
@@ -1172,7 +1231,7 @@ $("#goImprmirProduccionDetalle").on('click', function (e) {
 		AbrirVentana(varenviar);
 });
 ///////////////////////////////////////////////////////
-// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN.
+// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN POR MOTORISTA.
  //////////////////////////////////////////////////////
  $("#goImprmirProduccionDetalleMotorista").on('click', function (e) {
 	var LabelNombreMotorista = $('#LblNombreMotorista');
@@ -1284,15 +1343,27 @@ function BuscarProduccionPorFecha() {
 					//	porcentaje // cambiaar css progress bar.
 						var porcentaje_controles = ((controlesVendidos * 100) / controles);
 						porcentaje_controles = delimitNumbers(porcentaje_controles.toFixed(0));
-					//
+					//	CONTROLES
 						$("label[for='LblProduccionesTotal']").text("Controles: " + controles);
 							$('.progress-bar').css('width', porcentaje_controles +'%').attr('aria-valuenow', porcentaje_controles);
 						$("label[for='LblCantidadProduccionesVendidas']").text("Procesados: " + controlesVendidos + " es el " + porcentaje_controles + "% de " + controles + ".");
-					// Etiquetas
-						
-						$("label[for='LblProduccionesTotalIngreso']").text('Total Ingreso Produccion $ ' + response.totalProduccionIngreso + ' (¢ ' + total_colones +')');
-						$("label[for='LblTotalTiquetes']").text('# Tiquetes Vendidos: ' + response.cantidadTiquetePantalla);
-						
+					//	cantidades de controles a y vendidas.
+						var tiqueteEntregados_ = response.cantidadEntregados;
+						tiqueteEntregados = tiqueteEntregados_.replace(/,/g,"");
+						tiqueteEntregados = Number(tiqueteEntregados);
+						var tiquetesVendidos_ = response.cantidadTiquetePantalla;
+						tiquetesVendidos = tiquetesVendidos_.replace(/,/g,"");
+						tiquetesVendidos = Number(tiquetesVendidos);
+					//	porcentaje // cambiaar css progress bar.
+						var porcentaje_tiquetes = ((tiquetesVendidos * 100) / tiqueteEntregados);
+						porcentaje_tiquetes = delimitNumbers(porcentaje_tiquetes.toFixed(0));
+					// TIQUETES
+						$("label[for='LblTotalTiquetesEntregados']").text('Entregados: ' + response.cantidadEntregados);
+							$('#progress-bar-tiquete').css('width', porcentaje_tiquetes +'%').attr('aria-valuenow', porcentaje_tiquetes);
+						$("label[for='LblTotalTiquetesVendidos']").text('Vendidos: ' + tiquetesVendidos_ + " es el " + porcentaje_tiquetes + "% de " + tiqueteEntregados_ +".");
+					//	INBRESO - COLONES Y DOLARES
+						$("label[for='LblIngresoTotal']").text('Ingreso $ ' + response.totalProduccionIngreso);
+						$("label[for='LblProduccionesTotalIngreso']").text('Ingreso ¢ ' + total_colones);
 						
 				}
 			},	// DATA.
