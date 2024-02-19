@@ -1105,13 +1105,14 @@ $('body').on('click','#listado a',function (e){
 	// recorre el contenido de la tabla.
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 	$objCuerpoTabla.find("tbody tr").each(function(){
-		var ruta =$(this).find('td').eq(1).html();		//	ruta.
-		var cantidad =$(this).find('td').eq(3).html();	// cantidad
-		var entregados =$(this).find('td').eq(4).html();		// entregados
-		var devolucion =$(this).find('td').eq(5).html();		// devolucion
-		var vendidos =$(this).find('td').eq(6).html();		// vendidos
-		var precio_publico =$(this).find('td').eq(7).html();		// precio publico
-		var ingreso =$(this).find('td').eq(8).html();	// ingresos.
+		var ruta =$(this).find('td').eq(2).html();		//	ruta.
+		var cantidad =$(this).find('td').eq(4).html();	// cantidad
+		var entregados =$(this).find('td').eq(5).html();		// entregados
+		var devolucion =$(this).find('td').eq(6).html();		// devolucion
+		var vendidos =$(this).find('td').eq(7).html();		// vendidos
+		var precio_publico =$(this).find('td').eq(8).html();		// precio publico
+		var ingreso =$(this).find('td').eq(9).html();	// ingresos.
+		ingreso = ingreso.replace(/,/g,"");
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 	// VALORES DE LA MATRIZ QUE VIAJAN POR EL POST
 	///////////////////////////////////////////////////////////////////////////////////////////////////

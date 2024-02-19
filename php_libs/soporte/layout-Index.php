@@ -8,7 +8,6 @@ clearstatcache();
 header("Content-Type: text/html;charset=iso-8859-1");
 // Insertar y actualizar tabla de usuarios
 sleep(0);
-
 // Inicializamos variables de mensajes y JSON
 $respuestaOK = false;
 $mensajeError = "No se puede ejecutar la aplicaci�n";
@@ -19,12 +18,9 @@ $datos = array();
 $listado = array("0","1","2","3","4","5","6","7");
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);
-    
 // Incluimos el archivo de funciones y conexi�n a la base de datos
-
 include($path_root."/acomtus/includes/mainFunctions_conexion.php");
 include($path_root."/acomtus/includes/funciones.php");
-
 // Validar conexi�n con la base de datos
 if($errorDbConexion == false){
 	// Validamos qe existan las variables post
@@ -37,14 +33,19 @@ if($errorDbConexion == false){
 		case 'BuscarProduccionDiaria':
             $FechaDesde = $_REQUEST["FechaDesdePD"];
             $FechaHasta = $_REQUEST["FechaHastaPD"];
+			$mostrarDias = $_REQUEST["mostrarDias"];
             	//	Estilos
                 $estilo_l = 'style="padding: 0px; font-size: large; color:black; text-align: left;"';
                 $estilo_c = 'style="padding: 0px; font-size: large; color:black; text-align: center;"';
                 $estilo_r = 'style="padding: 0px; font-size: medium; color:black; text-align: right;"';                                                                         
-				// Armamos el query.
-				$query = "SELECT * FROM produccion_diaria WHERE fecha >= '$FechaDesde' and fecha <= '$FechaHasta'
-								ORDER BY fecha
-						";
+				// Armamos el query. validar dís de la
+				if($mostrarDias == 0){
+					$query = "SELECT * FROM produccion_diaria WHERE fecha >= '$FechaDesde' and fecha <= '$FechaHasta'
+					ORDER BY fecha";
+				}else{
+					$query = "SELECT * FROM produccion_diaria ORDER BY fecha desc limit 7";
+				}
+
 				// Ejecutamos el Query.
 				$consulta = $dblink -> query($query);
 				// Validar si hay registros.
@@ -72,26 +73,6 @@ if($errorDbConexion == false){
 					$mensajeError =  'No Registro';					
 				}
 			break;
-
-			case 'eliminarA':
-				// Armamos el query
-				//$query = "DELETE FROM alumno WHERE id_alumno = $_POST[id_user]";
-
-				// Ejecutamos el query
-					$count = $dblink -> exec($query);
-				
-				// Validamos que se haya actualizado el registro
-				if($count != 0){
-					$respuestaOK = true;
-					$mensajeError = 'Se ha eliminado el registro correctamente'.$query;
-
-					$contenidoOK = 'Se ha Eliminado '.$count.' Registro(s).';
-
-				}else{
-					$mensajeError = 'No se ha eliminado el registro'.$query;
-				}
-			break;
-        
 			default:
 				$mensajeError = 'Esta acci�n no se encuentra disponible';
 			break;

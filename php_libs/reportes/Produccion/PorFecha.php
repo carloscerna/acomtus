@@ -15,7 +15,7 @@
 	$ruta = explode(",",$_REQUEST["ruta"]);
 	$cantidad = explode(",",$_REQUEST["cantidad"]);
 	$entregados = explode(",",$_REQUEST["entregados"]);
-	$devolucion = explode(",",$_REQUEST["$devolucion"]);
+	$devolucion = explode(",",$_REQUEST["devolucion"]);
 	$vendidos = explode(",",$_REQUEST["vendidos"]);
 	$precio_publico = explode(",",$_REQUEST["precio_publico"]);
 	$ingreso = explode(",",$_REQUEST["ingreso"]);
@@ -37,6 +37,9 @@
 	setlocale(LC_TIME,'es_SV');
 // CREAR MATRIZ DE MESES Y FECH.
 	$meses = array("enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre");
+	$dia_produccion = intval($fecha_[0]);	// dia.
+	$mes_produccion = $meses[intval($fecha_[1])];	// mes.
+	$año_produccion = $fecha_[2];	// año.
 //Crear una línea. Fecha con getdate();
 	$hoy = getdate();
 	$NombreDia = $hoy["wday"];  // dia de la semana Nombre.
@@ -107,9 +110,9 @@ function FancyTable($header)
     $this->SetLineWidth(.3);
     $this->SetFont('','B');
 	//  mostrar los valores de la consulta
-	$w=array(25,25,10,20,20,20,20,20); // ruta, cantidad, entregados, velocuiones, venvidos, precio public, ingresos.
+	$w=array(50,15,25,25,20,25,25,20); // ruta, cantidad, entregados, velocuiones, venvidos, precio public, ingresos.
     $w2=array(6,12); //determina el ALTO de las columnas
-	$this->SetXY(30,95);
+	$this->SetXY(20,95);
     for($i=0;$i<count($header);$i++)
         $this->Cell($w[$i],5,mb_convert_encoding($header[$i],"ISO-8859-1","UTF-8"),'LTR',0,'C',1);
     $this->Ln();
@@ -148,47 +151,47 @@ function FancyTable($header)
 	$pdf->RotatedText(140,40,'Santa Ana, ' . $dia . ' de ' . $nombresMeses[$mes] . ' de ' . $año,0);
 	// estado de cuenta
 	$pdf->RoundedRect(15, 45, 140, 8, 2, '1234', 'DF');
-	$pdf->RotatedText(18,50,mb_convert_encoding('EMPLEADO: ' . $NombreMotorista,"ISO-8859-1","UTF-8"),0);
+	$pdf->RotatedText(18,50,mb_convert_encoding('Producción Diaria: ' . $dia_produccion . " de " . $mes_produccion . " de " . $año_produccion,"ISO-8859-1","UTF-8"),0);
 // Definimos el tipo de fuente, estilo y tamaño.
     $pdf->SetFont('Arial','',9); // I : Italica; U: Normal;
 //  mostrar los valores de la consulta
-	$w=array(25,25,10,20,20,20,20,20); // ruta, cantidad, entregados, velocuiones, venvidos, precio public, ingresos.
-	$w1 = array(55);
+	$w=array(50,15,25,25,20,25,25,20); // ruta, cantidad, entregados, velocuiones, venvidos, precio public, ingresos.
+	$w1 = array(55,60);
     $w2=array(5,7); //determina el ALTO de las columnas
 // Variables.
     $fill = false; $i=1; $totalIngreso = 0;
 //  Encabezando.
     $pdf->FancyTable($header); // Solo carge el encabezado de la tabla porque medaba error el cargas los datos desde la consulta.		
 // Definimos el tipo de fuente, estilo y tamaño.
-	$pdf->SetXY(30,55);
+	$pdf->SetXY(20,65);
 //	INFORMACIÓN DEL EMPLEADO.
-	$pdf->SetX(70);
-	$pdf->Cell($w1[0],$w2[1],mb_convert_encoding("Controles: ","ISO-8859-1","UTF-8") . $tiqueteEntregados,1,0,'L',$fill);
-	$pdf->SetX(70+$w1[0]+10);
-	$pdf->Cell($w1[0],$w2[1],mb_convert_encoding("Procesados: ","ISO-8859-1","UTF-8") . $tiqueteVendidos,1,1,'L',$fill);
-	$pdf->SetX(70);
-	$pdf->Cell($w1[0],$w2[1],"Ruta: " . $produccion_total,1,0,'L',$fill);
-	$pdf->SetX(70+$w1[0]+10);
-	$pdf->Cell($w1[0],$w2[1],"Cantidad Vendida: " . $produccion_vendida,1,1,'L',$fill);
-	$pdf->SetX(70);
-	$pdf->Cell($w1[0],$w2[1],"Unidad: " . $ingresoTotal,1,0,'L',$fill);
-	$pdf->SetX(70+$w1[0]+10);
-	$pdf->Cell($w1[0],$w2[1],"Total: " . $ingresoColones,1,1,'L',$fill);
-	$pdf->SetX(70);
-	$pdf->Cell($w1[0],$w2[1],"Fecha: " . cambiaf_a_normal($fecha),1,1,'L',$fill);
-	$pdf->SetXY(30,100);
+	$pdf->SetX(20);
+	$pdf->Cell($w1[0],$w2[1],$produccion_total,"LTR",0,'L',$fill);	// Controles
+	$pdf->SetX(20+$w1[0]+5);
+	$pdf->Cell($w1[1],$w2[1],$tiqueteEntregados,"LTR",0,'L',$fill);	// tiquetes entregados
+	$pdf->SetX(20+$w1[0]+5+$w1[0]+10);
+	$pdf->Cell($w1[0],$w2[1],$ingresoTotal,"LTR",1,'L',$fill);	// ingresoen dólares
+
+	$pdf->SetX(20);
+	$pdf->Cell($w1[0],$w2[1],$produccion_vendida,"LBR",0,'L',$fill);	// Procesados
+	$pdf->SetX(20+$w1[0]+5);
+	$pdf->Cell($w1[1],$w2[1],$tiqueteVendidos,"LBR",0,'L',$fill);	// tiquetes vendidos.
+	$pdf->SetX(20+$w1[0]+5+$w1[0]+10);
+	$pdf->Cell($w1[0],$w2[1],mb_convert_encoding($ingresoColones,"ISO-8859-1","UTF-8"),"LBR",1,'L',$fill);	// ingreso en colones.
+	$pdf->SetXY(20,100);
 	
 		// RECORRER LA ARRAY
 		for ($Hj=0; $Hj < count($ruta); $Hj++) { // MATRIZ CATALOGO RUTA Y INVENTARIO TIQUETE..
-			$pdf->SetX(30);
+			$pdf->SetX(20);
 				// cambiar el color de la fila.
-				$pdf->Cell($w[0],$w2[1],$ruta[$Hj],1,0,'C',$fill);
-				$pdf->Cell($w[1],$w2[1],mb_convert_encoding($cantidad[$Hj],"ISO-8859-1","UTF-8"),1,0,'L',$fill);
+				$pdf->Cell($w[0],$w2[1],$ruta[$Hj],1,0,'L',$fill);
+				$pdf->Cell($w[1],$w2[1],mb_convert_encoding($cantidad[$Hj],"ISO-8859-1","UTF-8"),1,0,'C',$fill);
 				$pdf->Cell($w[2],$w2[1],$entregados[$Hj],1,0,'C',$fill);
 				$pdf->Cell($w[3],$w2[1],$devolucion[$Hj],1,0,'C',$fill);
 				$pdf->Cell($w[4],$w2[1],$vendidos[$Hj],1,0,'C',$fill);
 				$pdf->Cell($w[5],$w2[1],$precio_publico[$Hj],1,0,'C',$fill);
-				$pdf->Cell($w[6],$w2[1],$ingreso[$Hj],1,0,'R',$fill);
+				$Ingreso = floatval(substr($ingreso[$Hj],1));
+				$pdf->Cell($w[6],$w2[1],"$ " . number_format($Ingreso,2,".",","),1,0,'R',$fill);
 				$pdf->ln();
 				$fill=!$fill;
 					$totalIngreso = $totalIngreso + floatval(substr($ingreso[$Hj],1));
@@ -196,7 +199,7 @@ function FancyTable($header)
 			////////////////////////////////////////////////////
 			/// Linea para colocar totoal producción.
 			////////////////////////////////////////////////////
-			$pdf->SetX(30);
+			$pdf->SetX(20);
 			$totalProduccionOK = $totalIngreso;
 			$pdf->Cell($w[0],$w2[1],"",1,0,'C',$fill);
 			$pdf->Cell($w[1],$w2[1],"",1,0,'C',$fill);
