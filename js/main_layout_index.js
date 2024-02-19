@@ -67,7 +67,28 @@ $(document).ready(function(){
 						toastr["success"](response.mensaje, "Sistema");
 							// lIMPIAR LOS VALORES DE LAS TABLAS.                     
 					$('#listadoVerProduccionDiaria').append(response.contenido);
-						}               
+						}      
+				// 	grafico
+					const ctx = document.getElementById('myChart');
+				//
+					new Chart(ctx, {
+					type: 'bar',
+					data: {
+						labels: response.fecha,
+						datasets: [{
+						label: '$ Últimos 7 días',
+						data: response.ingresos,
+						borderWidth: 1
+						}]
+					},
+					options: {
+						scales: {
+						y: {
+							beginAtZero: true
+						}
+						}
+					}
+					});         
 				},
 			});	// cierre de ajax
 				return false;

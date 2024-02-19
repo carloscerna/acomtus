@@ -16,6 +16,8 @@ $lista = "";
 $arreglo = array();
 $datos = array();
 $listado = array("0","1","2","3","4","5","6","7");
+$fecha_graficos = array();
+$ingresos = array();
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);
 // Incluimos el archivo de funciones y conexi�n a la base de datos
@@ -58,11 +60,14 @@ if($errorDbConexion == false){
                         $fecha = cambiaf_a_normal(trim($listado['fecha']));
                         $dolares = number_format(trim($listado['total_dolares']),0,".",",");
                         $colones = number_format(trim($listado['total_colones']),0,".",",");
-                        
+						// datos para el grafico
+                        $fecha_graficos[] = cambiaf_a_normal(trim($listado['fecha']));
+						$ingresos[] = ($listado['total_dolares']);
+						// datos para la tabla.
                         $contenidoOK .= "<tr>
-                        <td $estilo_c>$fecha
-                        <td $estilo_c>$ $dolares
-                        <td $estilo_c>&#162 $colones"
+							<td $estilo_c>$fecha
+							<td $estilo_c>$ $dolares
+							<td $estilo_c>&#162 $colones"
                         ;				
 					}
 					$mensajeError = "Si Registro";
@@ -93,7 +98,10 @@ else{
 		// Armamos array para convertir a JSON
 		$salidaJson = array("respuesta" => $respuestaOK,
 			"mensaje" => $mensajeError,
-			"contenido" => $contenidoOK);
+			"contenido" => $contenidoOK,
+			"fecha" => $fecha_graficos,
+			"ingresos" => $ingresos
+		);
 		echo json_encode($salidaJson);
 	}
 ?>
