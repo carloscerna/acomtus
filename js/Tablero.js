@@ -84,7 +84,7 @@ $(document).ready(function(){
 						myChartIngresos7dias.update();
 					// MUESTRA LA INFOMRACIÓN DE INGRESOS POR AÑO.
 						console.log(myChartIngresosPorAño); // check the console to see different properities of the current Chart object.. which of course we can set to new values and then update with the .update() function
-						myChartIngresosPorAño.config.data.label = "$ Ingresos Por Mes - año: " + year;
+						myChartIngresosPorAño.config.data.label = "$ Ingresos Por Mes - año: " + response.GraficoYear;
 						myChartIngresosPorAño.config.data.labels = response.NombreMes; // // silo down and replace current property with new value
 						myChartIngresosPorAño.config.data.datasets[0].data = response.IngresoPorMes; //;
 						/* update chart */
@@ -164,8 +164,14 @@ function GraficoIngresos7dias() {
 		options: {
 			scales: {
 			y: {
-				beginAtZero: true
-			}
+					beginAtZero: true,
+					ticks: {
+						// Include a dollar sign in the ticks
+						callback: function(value, index, values) {
+							return '$' + value.toFixed(2);
+						}
+					}					
+				},
 			}
 		}
 		});         // cierre del gráfico.

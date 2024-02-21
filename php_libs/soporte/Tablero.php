@@ -125,7 +125,7 @@ else{
 			"contenido" => $contenidoOK,
 			"fecha" => $fecha_graficos,
 			"ingresos" => $ingresos,
-			"year" => $GraficoYear,
+			"GraficoYear" => $GraficoYear,
 			"NombreMes" => $meses,
 			"IngresoPorMes" => $ingresoPorMes
 		);
