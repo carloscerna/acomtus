@@ -4,8 +4,8 @@
 
 {% block javascripts %}
  <!-- JS SCRIPT  -->
- <script type="text/JavaScript" src="js/main_layout_index.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ <script type="text/JavaScript" src="js/Tablero.js"></script>
+ <script src="js/Chart.js-4.4.1/dist/chart.js"></script>
 
  <script>
   $(document).ready(function () { 
@@ -132,7 +132,7 @@
                         </div>   
                         <!-- tabla -->
                         <fieldset id="FieldsetTabla">
-                          <legend> Producción | Diaria</legend>
+                          <legend> Producción | Ingreso</legend>
                           <div class="table-responsive">
                               <table id="ProduccionDiaria" class="table table-striped table-condensed responsive nowrap" style="width: 100%;">
                                   <thead>
@@ -174,7 +174,8 @@
                               </div>
                     </div> <!-- FIN DE COL-MD-6 -->
                     <div class="col col-md-6">
-                        <canvas id="myChart"></canvas>
+                        <canvas id="GraficoIngresos7dias"></canvas>
+                        <canvas id="GraficoIngresosPorAño"></canvas>
                     </div>
                   </div>
                 </div><!-- /.card-body -->

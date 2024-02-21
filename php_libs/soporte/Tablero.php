@@ -15,9 +15,11 @@ $contenidoOK = "";
 $lista = "";
 $arreglo = array();
 $datos = array();
-$listado = array("0","1","2","3","4","5","6","7");
+$NumeroMes = array("1","2","3","4","5","6","7","8","9","10","11","12");
+$meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
 $fecha_graficos = array();
 $ingresos = array();
+
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);
 // Incluimos el archivo de funciones y conexi�n a la base de datos
@@ -36,12 +38,16 @@ if($errorDbConexion == false){
             $FechaDesde = $_REQUEST["FechaDesdePD"];
             $FechaHasta = $_REQUEST["FechaHastaPD"];
 			$mostrarDias = $_REQUEST["mostrarDias"];
+			$fechaHoy = cambiaf_a_normal($_REQUEST["FechaHoy"]);
+			$fechaHoy = explode("/", $fechaHoy);
+			$GraficoYear = $fechaHoy[2];
+			
             	//	Estilos
                 $estilo_l = 'style="padding: 0px; font-size: large; color:black; text-align: left;"';
                 $estilo_c = 'style="padding: 0px; font-size: large; color:black; text-align: center;"';
                 $estilo_r = 'style="padding: 0px; font-size: medium; color:black; text-align: right;"';                                                                         
 				// Armamos el query. validar dís de la
-				if($mostrarDias == 0){
+				if($mostrarDias == 1){
 					$query = "SELECT * FROM produccion_diaria WHERE fecha >= '$FechaDesde' and fecha <= '$FechaHasta'
 					ORDER BY fecha";
 				}else{
@@ -100,7 +106,8 @@ else{
 			"mensaje" => $mensajeError,
 			"contenido" => $contenidoOK,
 			"fecha" => $fecha_graficos,
-			"ingresos" => $ingresos
+			"ingresos" => $ingresos,
+			"year" => $GraficoYear
 		);
 		echo json_encode($salidaJson);
 	}

@@ -35,7 +35,7 @@ $root = '';
 if(!empty($_SESSION) && $_SESSION['userLogin'] == true){
     include('includes/templateEngine.inc.php');
 
-    $twig->display('layout_index.html',array(
+    $twig->display('Tablero.html',array(
         "userName" => $_SESSION['userNombre'],
         "userID" => $_SESSION['userID'],
         "dbname" => $_SESSION['dbname'],
