@@ -19,6 +19,8 @@ $NumeroMes = array("1","2","3","4","5","6","7","8","9","10","11","12");
 $meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
 $fecha_graficos = array();
 $ingresos = array();
+$ingresoPorMes = array();
+$ingresoPorDia = 0;
 
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);
@@ -47,12 +49,12 @@ if($errorDbConexion == false){
                 $estilo_c = 'style="padding: 0px; font-size: large; color:black; text-align: center;"';
                 $estilo_r = 'style="padding: 0px; font-size: medium; color:black; text-align: right;"';                                                                         
 				// Armamos el query. validar dís de la
-				if($mostrarDias == 1){
+			//	if($mostrarDias == 1){
 					$query = "SELECT * FROM produccion_diaria WHERE fecha >= '$FechaDesde' and fecha <= '$FechaHasta'
 					ORDER BY fecha";
-				}else{
-					$query = "SELECT * FROM produccion_diaria ORDER BY fecha desc limit 7";
-				}
+			//	}else{
+					//$query = "SELECT * FROM produccion_diaria ORDER BY fecha desc limit 7";
+			//	}
 
 				// Ejecutamos el Query.
 				$consulta = $dblink -> query($query);
@@ -83,6 +85,22 @@ if($errorDbConexion == false){
 					$contenidoOK = '';
 					$mensajeError =  'No Registro';					
 				}
+				// crear matriz para el calculo del ingreso por mes y año
+				for ($i=0; $i < count($NumeroMes) ; $i++) { 
+					$query_consulta_ = "SELECT SUM(total_dolares) as ingresoPorMes FROM produccion_diaria
+										WHERE EXTRACT(MONTH FROM fecha) = '$NumeroMes[$i]' and EXTRACT(YEAR FROM fecha) = '$GraficoYear'";
+						// Ejecutamos el Query.
+						$consulta = $dblink -> query($query_consulta_);
+						// Validar si hay registros.
+						if($consulta -> rowCount() != 0){
+							// convertimos el objeto
+							while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+							{
+								$ingresoPorMes[] = $listado['ingresopormes'];
+							}
+						}	// fin del if.
+					// datos para el gráfico.
+				}	// fin del for.
 			break;
 			default:
 				$mensajeError = 'Esta acci�n no se encuentra disponible';
@@ -107,7 +125,9 @@ else{
 			"contenido" => $contenidoOK,
 			"fecha" => $fecha_graficos,
 			"ingresos" => $ingresos,
-			"year" => $GraficoYear
+			"year" => $GraficoYear,
+			"NombreMes" => $meses,
+			"IngresoPorMes" => $ingresoPorMes
 		);
 		echo json_encode($salidaJson);
 	}

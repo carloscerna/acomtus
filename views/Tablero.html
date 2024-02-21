@@ -2,6 +2,16 @@
 
 {% extends 'default_layout.html' %}
 
+{% block extraCSS %}
+<style>
+  .scrollme {
+    width: 100%;
+    height: 350px; /* Altura de ejemplo */
+    overflow-x: auto;
+  }
+</style>
+{% endblock %}
+
 {% block javascripts %}
  <!-- JS SCRIPT  -->
  <script type="text/JavaScript" src="js/Tablero.js"></script>
@@ -101,7 +111,7 @@
         <!-- Main content -->
         <section class="content">
           	<!-- FORMULARIO PRINCIPAL. -->
-	      <form  action="" method="post" name="form" id="formProduccionDiaria" role="form">
+	      <form  action="" method="post" name="form-inline" id="formProduccionDiaria" role="form">
           <input type="hidden" id="accion" name="accion" value="BuscarProduccionDiaria">
           <div class="container-fluid">
             <!-- Small boxes (Stat box) -->
@@ -117,24 +127,45 @@
                 </div>  <!-- /.card-header -->
                 <div class="card-body">
                   <div class="row">
-                    <div class="col col-md-6">
+                    <div class="col col-md-12">
                       <!-- SELECCIONAR ENTRE TODO Y FECHA -->
-                        <div class="form-group">
-                          <div class="form-group form-select">
-                            <label for="Desde">Desde: 
+                        <div class="input-group">
+                            <label class="input-group-text" for="Desde">Desde: 
                                 <input type="date" id="FechaDesdePD" name="FechaDesdePD" class="form-control">
                             </label>
                             
-                            <label for="Hasta">Hasta: 
+                            <label class="input-group-text" for="Hasta">Hasta: 
                               <input type="date" id="FechaHastaPD" name="FechaHastaPD" class="form-control">
+                                <!-- Botón Buscar -->
+                                    <a href="#" class="btn btn-primary" id="goBuscarProduccionDiaria"><i class="fal fa-search"></i></a>                   
+                                    <a href="#" class="btn btn-secondary" id="goBuscarProduccionDiariaImprimir"><i class="fal fa-print"></i></a>                   
+                                <!-- SELECCIONAR COLONES O DOLARES            -->
+                                  <label class="form-label"></label>
+                                  <div class="form-check-inline">
+                                    <label class="form-check-label" for="radio1">
+                                      <input type="radio" class="form-check-input" id="chkDolares" name="OptBuscarDC" value="dolares">Dólares
+                                    </label>
+                                  </div>
+                                  <div class="form-check-inline">
+                                    <label class="form-check-label" for="radio2">
+                                      <input type="radio" class="form-check-input" id="chkColones" name="OptBuscarDC" value="colones" checked>Colones
+                                    </label>
+                                  </div>
                             </label>
+                            <!-- BOTONES -->
+
+
+
                           </div>
-                        </div>   
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col">
                         <!-- tabla -->
                         <fieldset id="FieldsetTabla">
                           <legend> Producción | Ingreso</legend>
-                          <div class="table-responsive">
-                              <table id="ProduccionDiaria" class="table table-striped table-condensed responsive nowrap" style="width: 100%;">
+                          <div class="scrollme">
+                              <table id="ProduccionDiaria" class="table table-striped table-condensed nowrap" style="width: 100%;">
                                   <thead>
                                       <tr>
                                         <th style="text-align: center;">Fecha</th>
@@ -154,24 +185,6 @@
                                 </table>
                           </div>
                         </fieldset>
-                        <!-- BOTONES -->
-                        <!-- Botón Buscar -->
-                          <a href="#" class="btn btn-primary" id="goBuscarProduccionDiaria"> Buscar <i class="fal fa-search-plus"></i></a>                   
-                          <a href="#" class="btn btn-secondary" id="goBuscarProduccionDiariaImprimir"> Imprimir <i class="fal fa-print"></i></a>                   
-                              <!-- SELECCIONAR COLONES O DOLARES            -->
-                              <div class="form-group row p-1">
-                                <label class="form-label"></label>
-                                <div class="form-check-inline">
-                                  <label class="form-check-label" for="radio1">
-                                    <input type="radio" class="form-check-input" id="chkDolares" name="OptBuscarDC" value="dolares">Dólares
-                                  </label>
-                                </div>
-                                <div class="form-check-inline">
-                                  <label class="form-check-label" for="radio2">
-                                    <input type="radio" class="form-check-input" id="chkColones" name="OptBuscarDC" value="colones" checked>Colones
-                                  </label>
-                                </div>
-                              </div>
                     </div> <!-- FIN DE COL-MD-6 -->
                     <div class="col col-md-6">
                         <canvas id="GraficoIngresos7dias"></canvas>

@@ -31,7 +31,6 @@ $(document).ready(function(){
 	$('#formProduccionDiaria').validate({
 			rules:{
 				FechaDesdePD: {required: true},
-				FechaDesdePD: {required: true},
 			},
 		errorElement: "em",
 			errorPlacement: function ( error, element ) {
@@ -52,6 +51,7 @@ $(document).ready(function(){
 		submitHandler: function(){
 			// Serializar los datos, toma todos los Id del formulario con su respectivo valor.
 			var str = $('#formProduccionDiaria').serialize();
+			fecha_desde = $("#FechaDesdePD").val();
 			//alert(str);
 			$.ajax({
 				beforeSend: function(){
@@ -61,7 +61,7 @@ $(document).ready(function(){
 				type: "POST",
 				dataType: "json",
 				url:"php_libs/soporte/Tablero.php",
-				data:str + "&id=" + Math.random() + "&mostrarDias="+ mostrarDias + "&FechaHoy="+today,
+				data:str + "&id=" + Math.random() + "&mostrarDias="+ mostrarDias + "&FechaHoy="+fecha_desde,
 				success: function(response){
 					// Validar mensaje de error proporcionado por el response. contenido.
 					if(response.respuesta == false){
@@ -84,9 +84,9 @@ $(document).ready(function(){
 						myChartIngresos7dias.update();
 					// MUESTRA LA INFOMRACIÓN DE INGRESOS POR AÑO.
 						console.log(myChartIngresosPorAño); // check the console to see different properities of the current Chart object.. which of course we can set to new values and then update with the .update() function
-						myChartIngresosPorAño.config.data.label = "$ Ingresos Por Mes año: " + year;
-						myChartIngresosPorAño.config.data.labels = response.fecha; // // silo down and replace current property with new value
-						myChartIngresosPorAño.config.data.datasets[0].data = response.ingresos; //;
+						myChartIngresosPorAño.config.data.label = "$ Ingresos Por Mes - año: " + year;
+						myChartIngresosPorAño.config.data.labels = response.NombreMes; // // silo down and replace current property with new value
+						myChartIngresosPorAño.config.data.datasets[0].data = response.IngresoPorMes; //;
 						/* update chart */
 						myChartIngresosPorAño.update();
 				}, 
@@ -103,23 +103,23 @@ $(document).ready(function(){
 	});
 // IMPRIMIR REPORTE DE INGRESO DIARIO POR FECHA.
 	$("#goBuscarProduccionDiariaImprimir").on('click', function(){
-				// Limpiar datos
-				fecha_inicio = $("#FechaDesdePD").val();
-				fecha_final = $("#FechaHastaPD").val();
-			//
-			if($('#chkDolares').is(':checked') ) {
-				//alert('Seleccionado Dolares');
-				var tipo_moneda = "dolares";
-			}
-			//
-			if($('#chkColones').is(':checked') ) {
-				//alert('Seleccionado Colones');
-				var tipo_moneda = "colones";
-			}
-				// Ejecutar Informe
-					varenviar = "/acomtus/php_libs/reportes/reporte_ingreso_diario.php?fecha_inicio="+fecha_inicio+"&fecha_final="+fecha_final+"&tipo_moneda="+tipo_moneda;
-				// Ejecutar la función abre otra pestaña.
-					AbrirVentana(varenviar);   
+		// Limpiar datos
+		fecha_inicio = $("#FechaDesdePD").val();
+		fecha_final = $("#FechaHastaPD").val();
+		//
+		if($('#chkDolares').is(':checked') ) {
+			//alert('Seleccionado Dolares');
+			var tipo_moneda = "dolares";
+		}
+		//
+		if($('#chkColones').is(':checked') ) {
+			//alert('Seleccionado Colones');
+			var tipo_moneda = "colones";
+		}
+		// Ejecutar Informe
+			varenviar = "/acomtus/php_libs/reportes/Ingresos/IngresoPorFecha.php?fecha_inicio="+fecha_inicio+"&fecha_final="+fecha_final+"&tipo_moneda="+tipo_moneda+"&mostrarDias="+mostrarDias;
+		// Ejecutar la función abre otra pestaña.
+			AbrirVentana(varenviar);   
 	});
 }); // FINAL DELA FUNCION
 function AbrirVentana(url)

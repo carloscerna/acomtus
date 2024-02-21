@@ -17,6 +17,7 @@
         $tipo_moneda = trim($_REQUEST["tipo_moneda"]);
         $fecha_partial = explode("-",$fecha_inicio);
         $fecha_partial_f = explode("-",$fecha_final);
+        $mostrarDias = $_REQUEST["mostrarDias"];
         $db_link = $dblink;
 //  imprimir datos del bachillerato.
            //
@@ -154,8 +155,12 @@ function FancyTable($header)
     $pdf->SetXY(10,60);
 //  Encabezando.
     // armando el Query. PARA LA TABLA CATALOGO RUTA.
-    $query = "SELECT fecha, round(total_dolares) as total_dolares, round(total_colones) as total_colones, to_char(fecha, 'dy') as nombre_dia, extract('day' from fecha) as numero_dia
-             FROM produccion_diaria WHERE fecha >= '$fecha_inicio' and fecha <= '$fecha_final' ORDER BY fecha";
+    if($mostrarDias == 1){
+        $query = "SELECT fecha, round(total_dolares) as total_dolares, round(total_colones) as total_colones, to_char(fecha, 'dy') as nombre_dia, extract('day' from fecha) as numero_dia
+                FROM produccion_diaria WHERE fecha >= '$fecha_inicio' and fecha <= '$fecha_final' ORDER BY fecha";
+    }else{
+        $query = "SELECT * FROM produccion_diaria ORDER BY fecha desc limit 7";
+    }
     // crear varialbes array();
         $fecha_a = array(); $total_dolares_a = array(); $total_colones_a = array(); $salto_linea = 0; $dia_numero = 0; $yy = 60; $xx = 10; $y_linea = 0; $yyy = 0;
         $numero_dia = array(); $nombre_dia = array(); $print_tipo_moneda = array();
