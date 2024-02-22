@@ -198,14 +198,27 @@ function Header()
     // Persona REsponsable del Punteo.
     $this->SetFont('Arial','B',9);
     $this->SetX(30);
-    $this->Cell(180,6,mb_convert_encoding("Responsable del Punteo: " . $reporte_persona_responsable,"ISO-8859-1"),0,0,"L",false);
+    $this->Cell(160,6,mb_convert_encoding("Responsable del Punteo: " . $reporte_persona_responsable,"ISO-8859-1"),0,0,"L",false);
     $this->Cell(4,6,"",0,0,"L",false);
     if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"]){
+        // SIN CONTROL
         $this->SetFillColor(255,100,100);   // CORAL CLARO
             $this->Cell(4,4,"",1,0,"L",true);   // cuadro
         $this->SetFillColor(255,100,100);   //RGB(255,100,100)
         $this->SetFont('Arial','B',7);
-            $this->Cell(15,6,mb_convert_encoding("Sin Nº Control","ISO-8859-1"),0,1,"L",false);
+            $this->Cell(25,6,mb_convert_encoding("Sin Nº Control","ISO-8859-1"),0,0,"L",false);
+        // JEFE DE LINEA
+        $this->SetFillColor(208, 236, 231);   // CORAL CLARO
+        $this->Cell(4,4,"",1,0,"L",true);   // cuadro
+            $this->SetFillColor(255,100,100);   //RGB(208,236,231)
+            $this->SetFont('Arial','B',7);
+                $this->Cell(25,6,mb_convert_encoding("Jefe de línea","ISO-8859-1"),0,0,"L",false);
+        // DESPACHO
+        $this->SetFillColor(213,245,227);   // CORAL CLARO
+        $this->Cell(4,4,"",1,0,"L",true);   // cuadro
+            $this->SetFillColor(213, 245, 227);   //RGB(213,245,227)
+            $this->SetFont('Arial','B',7);
+                $this->Cell(25,6,mb_convert_encoding("Despacho","ISO-8859-1"),0,1,"L",false);
         $this->SetFont('Arial','B',9);
     }
     // Posición en donde va iniciar el texto.
@@ -880,21 +893,43 @@ function VerificarControl($fecha, $codigo_personal){
         $consulta_ = $dblink -> query($query_busqueda);
     // validar si existen archivos en la consulta segun la fecha.
         $count_asistencia = $consulta_ -> rowCount();        
+        $codigo_cargo = "";
     //  
     while($listado = $consulta_ -> fetch(PDO::FETCH_BOTH))
     {
         $codigo_produccion = $listado["id_"];
     }
     // Verificar si existen registros.
-        if($consulta_ -> rowCount() != 0){
+        if($consulta_ -> rowCount() != 0){  // cuentra producción.
             $pdf->SetFillColor(255,255,255);    // SIN FONDO rgb(255,255,255)
             $fillFecha = false;
             $fill = true;
         }else{
-            $pdf->SetFillColor(255,100,100);    // CORAL CLARO rgb(240,252,192); rgb(255,100,100)
-            $fillFecha = true;
-            $fill = false;
-            $codigo_produccion = 0;
+            $query_busqueda_p = "SELECT p.codigo_cargo from personal p where p.codigo = '$codigo_personal'";
+            // EJECUTAR CONSULTA
+                $consulta_ = $dblink -> query($query_busqueda_p);
+                while($listado = $consulta_ -> fetch(PDO::FETCH_BOTH))
+                    {
+                        $codigo_cargo = $listado["codigo_cargo"];
+                    }
+            if($codigo_cargo == "32"){  // codigo para el motorista.
+                $pdf->SetFillColor(255,100,100);    // CORAL CLARO rgb(240,252,192); rgb(255,100,100)
+                $fillFecha = true;
+                $fill = false;
+                $codigo_produccion = 0;
+            }
+            if($codigo_cargo == "28"){  // codigo para jefe de linea.
+                $pdf->SetFillColor(208, 236, 231);    // CORAL CLARO rgb(208, 236, 231); rgb(255,100,100)
+                $fillFecha = true;
+                $fill = false;
+                $codigo_produccion = 0;
+            }
+            if($codigo_cargo == "17"){  // codigo para el despacho.
+                $pdf->SetFillColor(213, 245, 227);    // CORAL CLARO rgb(213, 245, 227); rgb(255,100,100)
+                $fillFecha = true;
+                $fill = false;
+                $codigo_produccion = 0;
+            }
         }
 }
 function VerificarFechaDescuento($codigo_personal){

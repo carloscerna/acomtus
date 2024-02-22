@@ -5,11 +5,21 @@ var tabla = "";
 var miselect = "";
 var today = "";
 $(function(){ // iNICIO DEL fUNCTION.
+$(document).ready(function(){
 ///////////////////////////////////////////////////////////////////////////////
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
 ///////////////////////////////////////////////////////////////////////////////
-$(document).ready(function(){
+		// LLAMAR A LA TABLA PERSONAL.
+		    codigo_personal = $("#CodigoPersonalEncargado").val();
+            codigo_departamento_empresa = $("#CodigoDepartamentoEmpresa").val();
+        //
+            $('#listadoEmpleadosNomina').append("<tr><td>Buscando Registros... Por Favor Espere.</td></tr>"); 
+        //
+            buscar_personal_departamento_empresa(codigo_personal);
+            CodigoRuta = $("#CodigoRuta").val();
+///////////////////////////////////////////////////////////////////////////////
 	// LLAMAR A LA TABLA PERSONAL.
+///////////////////////////////////////////////////////////////////////////////
 		listar_jornada();
 	// IMAGEN PREDETERMINADA
 		$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
@@ -26,20 +36,19 @@ $(document).ready(function(){
 				$("#PantallaPrincipalApagado").hide();
 				$("#FechaAsistencia").attr("readonly",false);
 			}else{
-
-					//	VALIDAR LA HORA QUE PUEDA GUARDAR DE 7:00 A.M. A 5:30 P.M.
-						var h = $("#SoloHora").val();
-						if(h > 17){
-						//alert(h);
-							$("#PantallaPrincipal").hide();
-							$("#PantallaPrincipalApagado").show();
-							$("#FechaAsistencia").attr("readonly",true);
-						}else{
-							$("#PantallaPrincipal").show();
-							$("#PantallaPrincipalApagado").hide();
-							$("#FechaAsistencia").attr("readonly",true);
-						}
-						$("#FechaAsistencia").attr("readonly",false);
+			//	VALIDAR LA HORA QUE PUEDA GUARDAR DE 7:00 A.M. A 5:30 P.M.
+				var h = $("#SoloHora").val();
+				if(h > 17){
+				//alert(h);
+					$("#PantallaPrincipal").hide();
+					$("#PantallaPrincipalApagado").show();
+					$("#FechaAsistencia").attr("readonly",true);
+				}else{
+					$("#PantallaPrincipal").show();
+					$("#PantallaPrincipalApagado").hide();
+					$("#FechaAsistencia").attr("readonly",true);
+				}
+				$("#FechaAsistencia").attr("readonly",false);
 			}
 });		
 ///////////////////////////////////////////////////////////////////////////////
@@ -242,7 +251,7 @@ $("#goEnviar").on('click', function(){
 				cache: false,
 				type: "POST",
 				dataType: "json",
-				url:"php_libs/soporte/NuevoEditarPersonalAsistencia.php",
+				url:"php_libs/soporte/Asistencia/PorEmpleado.php",
 				data:str + "&tipochecks=" + TipoLicenciaChecks + "&Nocturnidad=" + chkNocturnidad + "&id=" + Math.random(),
 				success: function(response){
 					// Validar mensaje de error
@@ -296,7 +305,7 @@ function buscar_personal(codigo_personal){
     var codigo_personal = $("#CodigoPersonal").val();
 	var fecha_ = $("#FechaAsistencia").val();
 	var CodigoDepartamentoEmpresa = $("#codigo_departamento_empresa").val();
-    $.post("php_libs/soporte/NuevoEditarPersonalAsistencia.php", {
+    $.post("php_libs/soporte/Asistencia/PorEmpleado.php", {
 		accion_buscar: 'BuscarPersonalCodigo', codigo_personal: codigo_personal, fecha: fecha_, codigo_departamento_empresa: CodigoDepartamentoEmpresa},
         function(data) {
 			if(data[0].respuestaOK == true){
@@ -500,7 +509,7 @@ function listar_tipo_licencia(codigo_tipo_licencia){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/NuevoEditarPersonalAsistencia.php", {accion_buscar: 'BuscarTipoLicencia'},
+    $.post("php_libs/soporte/Asistencia/PorEmpleado.php", {accion_buscar: 'BuscarTipoLicencia'},
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
