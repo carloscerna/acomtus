@@ -109,10 +109,10 @@ $(document).ready(function(){
 			// Cìdog 02 corresponde a los motoristas
 			if(DepartamentoEmpresa == '02'){
 			// Ejecutar Informe
-				varenviar = "/acomtus/php_libs/reportes/NominaAsistencia.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&persona_responsable="+persona_responsable;
+				varenviar = "/acomtus/php_libs/reportes/Planilla/NominaAsistencia.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&persona_responsable="+persona_responsable;
 			}else{
 			// Ejecutar Informe
-				varenviar = "/acomtus/php_libs/reportes/NominaAsistencia.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText+"&persona_responsable="+persona_responsable;;
+				varenviar = "/acomtus/php_libs/reportes/Planilla/NominaAsistencia.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText+"&persona_responsable="+persona_responsable;;
 			}
 			// Ejecutar la función abre otra pestaña.
 				AbrirVentana(varenviar);   
@@ -148,10 +148,10 @@ $(document).ready(function(){
 			// Cìdog 02 corresponde a los motoristas
 			if(DepartamentoEmpresa == '02'){
 				// Ejecutar Informe
-					varenviar = "/acomtus/php_libs/reportes/NominaAsistenciaCalcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&chkCalcular="+calcular+"&persona_responsable="+persona_responsable;
+					varenviar = "/acomtus/php_libs/reportes/Planilla/NominaAsistenciaCalcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&chkCalcular="+calcular+"&persona_responsable="+persona_responsable;
 				}else{
 				// Ejecutar Informe
-					varenviar = "/acomtus/php_libs/reportes/NominaAsistenciaCalcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText+"&chkCalcular="+calcular+"&persona_responsable="+persona_responsable;
+					varenviar = "/acomtus/php_libs/reportes/Planilla/NominaAsistenciaCalcular.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText+"&chkCalcular="+calcular+"&persona_responsable="+persona_responsable;
 				}
 			AbrirVentana(varenviar);   
 	});

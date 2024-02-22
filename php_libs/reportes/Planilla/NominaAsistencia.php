@@ -4,7 +4,7 @@
 // Archivos que se incluyen.
     include($path_root."/acomtus/includes/mainFunctions_conexion.php");
 // Llamar a la libreria fpdf
-    include($path_root."/acomtus/php_libs/fpdf186/fpdf.php");
+    include($path_root."/acomtus/php_libs/fpdf/fpdf.php");
 // cambiar a utf-8.
     header("Content-Type: text/html; charset=UTF-8");    
 // variables y consulta a la tabla.

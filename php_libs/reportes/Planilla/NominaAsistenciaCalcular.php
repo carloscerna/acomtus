@@ -44,7 +44,7 @@ TABLA: catalogo_departamento_empresa
     $DescripcionJornada = array();
     $codigo_produccion = 0;
     $pase = 0;
-    $link = "/acomtus/php_libs/reportes/control_tiquete_ingresos.php?codigo_produccion=" . $codigo_produccion;
+    $link = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=" . $codigo_produccion;
 // Nocturnidad.
     $NocturnaValorUnitario = 0.57;
     $NocturnaCantidad = 0;
@@ -631,7 +631,7 @@ function rellenar($total_dias_quincena){
                             break;
                             default:
                                 if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"]){
-                                    $link = "/acomtus/php_libs/reportes/control_tiquete_ingresos.php?codigo_produccion=" . $codigo_produccion;
+                                    $link = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=" . $codigo_produccion;
                                     $pdf->Cell($w[3],6,$Jornada,'1',0,'C',$fillFecha, $link);   // CUALQUIER VALOR DE LA JORNADA
                                 }else{
                                     if($Jornada == "4H"){
@@ -818,9 +818,9 @@ function CuadrosFaltantes($columnas){
         
 }
 function Punto1T(){
-    global $pdf, $fillFecha, $w, $codigo_produccion, $DepartamentoEmpresa, $Jornada, $NombresCodigoDE;
+    global $pdf, $fillFecha, $w, $codigo_produccion, $DepartamentoEmpresa, $Jornada, $NombresCodigoDE,$link;
     if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"]){
-        $link = "/acomtus/php_libs/reportes/control_tiquete_ingresos.php?codigo_produccion=" . $codigo_produccion;
+        $link = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=" . $codigo_produccion;
     // Establce un punto en media (.) si se establece el valor como una 1T (1 Tanda).
         $pdf->SetFont('Arial','B',20); // I : Italica; U: Normal;
         $x = $pdf->GetX(); $y = $pdf->GetY();
