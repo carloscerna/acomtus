@@ -266,7 +266,17 @@ $("#lstJornada").change(function () {
 				// VOLVER A COLOCAR EN VALOR "si"
 	    			$("#JornadaExtra").show();
     				//listar_jornada_cuatro_horas(4);
-			}else{
+			}else if(ValorJornada == "4")
+            {
+                // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
+                $("#CJ").val(4);    // VALOR PREDETERMINADO.
+                $("#CTL").val(1)    // CODIGO JORANDA TIPO LICENCIA.
+                $("#CJV").val(4);    // valor actual de lstJornadaTV
+                $("#CJD").val(4);    // valor actual de lstJornadaDescanso
+                $("#CJA").val(4);    // valor actual de lstJornadaAsueto
+                $('#CJE4H').val(4);  // CODIGO JORNADA 4 HORAS EXTRAS
+                $("#CJN").val(4);   // CODIGO JORNADA NOCTURNIDAD
+            }else{
                 //  VALORES POR DEFECTO DE LA 
                     $('#CJE4H').val(4);  // CODIGO JORNADA
                 //
@@ -507,7 +517,7 @@ function listar_jornada(codigo_jornada){
             miselect.empty();
             for (var i=0; i<data.length; i++) {
 				// VALIDAR CODIGO JORNADA IGUAL A 0H
-				if(data[i].codigo == '4' || data[i].codigo == '5'){
+				if(data[i].codigo == '5'){
 
 				}else{
 					if(codigo_jornada == data[i].codigo){
