@@ -511,14 +511,14 @@ function listar_jornada(codigo_jornada){
 
 				}else{
 					if(codigo_jornada == data[i].codigo){
-						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].descripcion_completa +'</option>');
               		  }else{
 						if(i==1){
-							miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+							miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
                             // cabmiar el valor del text o hidden.
                                 $('#CJ').val(data[i].codigo);  // CODIGO JORNADA
 						}else{
-							miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+							miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " +  data[i].descripcion_completa + '</option>');
 						}
 					}
 				}

@@ -30,11 +30,26 @@ $arreglo = array();
 $datos = array();
 $fila_array = 0;
 $fila = 0;
+$url_cat_img = "/acomtus/img/Catalogo Jornada/";
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);
 // Incluimos el archivo de funciones y conexi�n a la base de datos
 	include($path_root."/acomtus/includes/mainFunctions_conexion.php");
 	include($path_root."/acomtus/includes/funciones.php");
+// OBTENER VALORES DE LA TABLA CATALOGO_JORNADA_IMAGENES.
+// CREAR ARRAY ASOCIATIVA DE LA TABLA: asuetos
+	$query_j_img = "SELECT * FROM catalogo_jornada_imagenes ORDER BY id_";    // consulta
+	$resultado_j_img = $dblink -> query($query_j_img); // ejecuciónd ela consult.a
+// while
+	$Codigo = ""; $Descripcion = ""; $codigo_img = ""; $descripcion_img = "";
+	while($listado_j_img = $resultado_j_img -> fetch(PDO::FETCH_BOTH))
+		{
+			$codigo = $listado_j_img["codigo"];
+			$descripcion = trim($listado_j_img["descripcion"]);
+			// CREAR ARRAY ASOCIATIVA
+				$CodigoJornadaImagen["codigo"][] = $codigo;
+				$CodigoJornadaImagen["descripcion"][] = $descripcion;
+		}
 // Validar conexi�n con la base de datos
 if($errorDbConexion == false){
 	// Validamos qe existan las variables post
@@ -48,6 +63,7 @@ if($errorDbConexion == false){
 				$codigo_personal = trim($_POST['codigo_personal']);
 				$fecha = trim($_POST['fecha']);
 				$CodigoDepartamentoEmpresa = trim($_POST['codigo_departamento_empresa']);
+				$codigo_personal_encargado = trim($_POST['codigo_personal_encargado']);
 				// Armamos el query.
 				$query = "SELECT p.id_personal, p.codigo, TRIM(p.nombres) as nombre, TRIM(p.apellidos) as apellido, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado,
 							p.foto, p.codigo_genero, p.codigo_departamento_empresa
@@ -114,6 +130,46 @@ if($errorDbConexion == false){
 					$datos[$fila_array]["respuestaOK"] = false;
 					$datos[$fila_array]["mensajeError"] = 'Código No Existe o No Pertenece a este Departamento.';
 				}
+				// BUSCAR EN PERSONAL ASISTENCIA.
+				// BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
+				$query_buscar_i = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha' and codigo_personal_encargado = '$codigo_personal_encargado'";
+				// Ejecutamos el Query.
+					$consulta_b = $dblink -> query($query_buscar_i);
+					// Validar si hay registros.
+					$imgJornada = "#";
+					if($consulta_b -> rowCount() != 0){
+						while($listado_b = $consulta_b -> fetch(PDO::FETCH_BOTH))
+						{
+							// Variables.
+								$Id_ = trim($listado_b['id_']);
+								$CodigoJornada = trim($listado_b['codigo_jornada']);
+								$CodigoLicencia = trim($listado_b['codigo_tipo_licencia']);
+								$CodigoJornadaAsueto = trim($listado_b['codigo_jornada_asueto']);
+								$CodigoJornadaVacaciones = trim($listado_b['codigo_jornada_vacaciones']);
+								$CodigoJornadaDescanso = trim($listado_b['codigo_jornada_descanso']);
+								$CodigoJornadaE4H = trim($listado_b['codigo_jornada_e_4h']);
+								$CodigoJornadaNocturna = trim($listado_b['codigo_jornada_nocturna']);
+							//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
+								$CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.
+													$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.
+													$CodigoJornadaNocturna;
+							//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
+								$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
+															".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
+															".".$CodigoJornadaNocturna;
+							// Condiciones para la Imagen.
+								$buscar = array_search($CodigoJornadaTodas, $CodigoJornadaImagen['codigo']);
+								if(!empty($buscar)){
+									$codigo_img = $CodigoJornadaImagen['codigo'][$buscar];
+									$descripcion_img = $CodigoJornadaImagen['descripcion'][$buscar];
+									$imgJornada = $CodigoJornadaImagen['descripcion'][$buscar];
+									$imgJornada = $url_cat_img . $imgJornada;
+								}	// FIN DEL IF DE BUSQUEDA
+						}	// FIN DEL WHILE DE SELECT PERSONAL ASISTENCIA
+						// PASAR EL IMGJORNADA.
+							$fila_array++;
+							$datos[$fila_array]["imgJornada"] = $imgJornada;
+					}	// FIN DEL IF ROWCOUNT():
 			break;
 			case "BuscarPersonalRutaCodigo":
 				$codigo_personal = trim($_POST['codigo_personal']);
@@ -217,6 +273,8 @@ if($errorDbConexion == false){
 					$codigo_tipo_licencia = "1";
 					$codigo_jornada_vacaciones = '4';
 					$codigo_jornada_descanso = '4';
+					$codigo_jornada_4_extra = '4';
+					$codigo_jornada_nocturnidad = '4';
 				}
 				// VALIDAR VALORES CUANDO ASUETO SEA IGUAL A "SI"
 				if($boolean_asueto == "si"){

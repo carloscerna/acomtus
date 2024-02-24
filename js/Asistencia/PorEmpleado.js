@@ -308,8 +308,11 @@ function buscar_personal(codigo_personal){
     var codigo_personal = $("#CodigoPersonal").val();
 	var fecha_ = $("#FechaAsistencia").val();
 	var CodigoDepartamentoEmpresa = $("#codigo_departamento_empresa").val();
+	codigo_personal_encargado = $("#codigo_personal_usuario").val();
     $.post("php_libs/soporte/Asistencia/PorEmpleado.php", {
-		accion_buscar: 'BuscarPersonalCodigo', codigo_personal: codigo_personal, fecha: fecha_, codigo_departamento_empresa: CodigoDepartamentoEmpresa},
+		accion_buscar: 'BuscarPersonalCodigo', codigo_personal: codigo_personal, fecha: fecha_, codigo_departamento_empresa: CodigoDepartamentoEmpresa,
+		codigo_personal_encargado: codigo_personal_encargado
+	},
         function(data) {
 			if(data[0].respuestaOK == true){
 				var nombre_empleado = data[0].nombre_empleado;
@@ -325,6 +328,8 @@ function buscar_personal(codigo_personal){
 					}else{
 						$(".card-img-top").attr("src", "../acomtus/img/fotos/" + data[0].url_foto);	
 					}
+				//	IMAGEN JORNADA
+					$("#ImagenAsistencia").attr("src", ".." + data[1].imgJornada);
 				// presar CHECK BOX NOCTURNIDAD.
 				if(data[0].codigo_departamento_empresa == "08" || data[0].codigo_departamento_empresa == "09"){
 					$("#NocturnidadSiNo").show();
@@ -360,6 +365,7 @@ function buscar_personal(codigo_personal){
 			}else{
 				// IMAGEN PREDETERMINADA
 				$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
+				$("#ImagenAsistencia").attr("src", "../acomtus/img/Catalogo Jornada/SinJornada.jpg");
 				toastr["error"](data[0].mensajeError, "Sistema");
 			}
         }, "json");    
@@ -376,16 +382,16 @@ function listar_jornada(codigo_jornada){
             miselect.empty();
             for (var i=0; i<data.length; i++) {
 				// VALIDAR CODIGO JORNADA IGUAL A 0H Y N
-				if(data[i].codigo == '4' || data[i].codigo == '5'){
+				if(data[i].codigo == '5'){
 
 				}else{
 					if(codigo_jornada == data[i].codigo){
-						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
               		  }else{
 						if(i==1){
-							miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+							miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
 						}else{
-							miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+							miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
 						}
 					}
 				}
