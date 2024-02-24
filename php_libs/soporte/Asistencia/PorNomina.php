@@ -467,7 +467,8 @@ if($errorDbConexion == false){
 				}
 				break;
 				case "EditarJornada":
-					$Todos = base64_decode($_POST['Id_']);
+					//$Todos = base64_decode($_POST['Id_']);
+					$Todos = ($_POST['Id_']);
 					//
 					$VariablesTabla = explode("#",$Todos);
 						$Foto = $VariablesTabla[0];
@@ -539,7 +540,7 @@ else{
 function BuscarJornadaImagen($imgJornada){
 	global $contenidoOK, $foto, $codigo_personal, $nombre_completo, $imgJornada, $Id_, $CodigoJornadaTodas, $CodigoJornadaTodasSeparador;
 	$datos_ = $foto . "#" . $imgJornada . "#". $Id_ ."#". $codigo_personal ."#". $nombre_completo . "#" . $CodigoJornadaTodas . "#" . $CodigoJornadaTodasSeparador;
-	$datos_codificados = base64_encode($datos_);
+	$datos_codificados = $datos_;//base64_encode($datos_);
 	//8 CREAR FILAS Y COLUMNAS.
 	$contenidoOK .= "<tr>
 		<td class='mx-auto text-center'>

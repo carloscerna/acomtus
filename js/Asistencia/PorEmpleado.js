@@ -3,20 +3,23 @@ var id_ = 0;
 var accion = "todos";
 var tabla = "";
 var miselect = "";
-var today = "";
+var fecha = "";
 $(function(){ // iNICIO DEL fUNCTION.
-$(document).ready(function(){
-///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
 ///////////////////////////////////////////////////////////////////////////////
-		// LLAMAR A LA TABLA PERSONAL.
-		    codigo_personal = $("#CodigoPersonalEncargado").val();
-            codigo_departamento_empresa = $("#CodigoDepartamentoEmpresa").val();
-        //
-            $('#listadoEmpleadosNomina').append("<tr><td>Buscando Registros... Por Favor Espere.</td></tr>"); 
-        //
-            buscar_personal_departamento_empresa(codigo_personal);
-            CodigoRuta = $("#CodigoRuta").val();
+$(document).ready(function(){
+	// LLAMAR A LA TABLA PERSONAL.
+		codigo_personal = $("#codigo_personal_usuario").val();
+		codigo_departamento_empresa = $("#CodigoDepartamentoEmpresa").val();
+
+	//
+		$('#listadoEmpleadosNomina').append("<tr><td>Buscando Registros... Por Favor Espere.</td></tr>"); 
+	//
+		buscar_personal_departamento_empresa(codigo_personal);
+		CodigoRuta = $("#CodigoRuta").val();
+});
+$(document).ready(function(){
 ///////////////////////////////////////////////////////////////////////////////
 	// LLAMAR A LA TABLA PERSONAL.
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,8 +72,8 @@ var day = ("0" + now.getDate()).slice(-2);
 var month = ("0" + (now.getMonth() + 1)).slice(-2);
 var year = now.getFullYear();
 
-today = now.getFullYear()+"-"+(month)+"-"+(day) ;
-$('#FechaAsistencia').val(today);
+fecha = now.getFullYear()+"-"+(month)+"-"+(day) ;
+$('#FechaAsistencia').val(fecha);
 ///////////////////////////////////////////////////////////////////////////////	  
 // BLOQUE DE BUSQUEDA
 ///////////////////////////////////////////////////////////////////////////////	  
@@ -226,7 +229,7 @@ $("#goEnviar").on('click', function(){
 			},
 		submitHandler: function(){	
 		var str = $('#formAsistencia').serialize();
-		alert(str);
+		//alert(str);
 			// casilla de verificación revisar el valor.
 			var TipoLicenciaChecks = "off";
 			if ($("#Permiso").is(':checked')) {
@@ -520,5 +523,60 @@ function listar_tipo_licencia(codigo_tipo_licencia){
                 }
             }
     }, "json");    
+}
+// FUNCION LISTAR TABLA buscar en PERSONAL ASISTENCIA
+////////////////////////////////////////////////////////////
+function buscar_personal_departamento_empresa(codigo_personal){
+    codigo_personal = $("#codigo_personal_usuario").val();
+    codigo_departamento_empresa = $("#CodigoDepartamentoEmpresa").val();
+    //
+    $.post("php_libs/soporte/Asistencia/PorNomina.php", {
+		accion_buscar: 'BuscarPersonalRutaCodigo', codigo_personal: codigo_personal, fecha: fecha, codigo_departamento_empresa: codigo_departamento_empresa},
+        function(data) {
+			if(data[0].respuestaOK == true){
+				// CUANDO SEA OTRO DEPARTAMENTO
+				if(codigo_departamento_empresa == "02"){
+					$("#LblDescripcion").html("Ruta: " + data[0].Descripcion + " - Empleados: " + data[0].TotalEmpleados)
+                    $("#CodigoRuta").val(data[0].Codigo)
+                    CodigoRuta = data[0].Codigo;
+				}else{
+					$("#LblDescripcion").html("Departamento: " + data[0].Descripcion + " - Empleados: " + data[0].TotalEmpleados)
+				}
+				//	MENSAJE DEL SISEMA
+			}else{
+				$("#LblDescripcion").html(data[0].mensajeError)
+			}
+
+            $.ajax({
+                beforeSend: function(){
+
+                },
+                cache: false,
+                type: "POST",
+                dataType: "json",
+                url:"php_libs/soporte/Asistencia/PorNomina.php",
+                data: {                     
+                    accion_buscar: 'BuscarEmpleadosPorRuta', CodigoRuta: CodigoRuta, fecha: fecha, codigo_personal_encargado: codigo_personal, CodigoDepartamentoEmpresa: codigo_departamento_empresa
+                    },  
+                success: function(response){
+                    // Validar mensaje de error
+                    if(response.respuesta == false){
+
+                    }else{
+                        toastr["success"](response.mensaje, "Sistema");
+                        //$('#listadoEmpleadosNomina').empty();
+                        //$('#listadoEmpleadosNomina').append(response.contenido);
+                        // MostrarMensaje
+                        if(response.mensajeAsueto === ""){
+                            $("#MostrarMensajes").hide();
+                        }else{
+                            $("label[for=LblMensaje]").text("Asueto: " + response.mensajeAsueto);
+                            $("#MostrarMensajes").show();
+                        }
+
+                    }               
+                },
+            });            
+        }, "json");    
 }
 function delimitNumbers(str) { return (str + "").replace(/\b(\d+)((\.\d+)*)\b/g, function(a, b, c) { return (b.charAt(0) > 0 && !(c || ".").lastIndexOf(".") ? b.replace(/(\d)(?=(\d{3})+$)/g, "$1,") : b) + c; }); } 
