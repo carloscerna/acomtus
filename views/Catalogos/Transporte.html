@@ -1,0 +1,157 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+  <link href="css/styles-loading.css" rel="stylesheet">
+  <!-- DATA TABLE. -->
+  <link href="../acomtus/js/Datatablet/css/jquery.dataTables.min.css"  rel="stylesheet" />
+<!-- DATA TABLE. botones -->
+  <link href="../acomtus/js/Datatablet/css/buttons.dataTables.min.css" rel="stylesheet">
+    <style>
+          /* mensajes de error para el validate de los form de input*/
+          input.error {
+              border-color: #f00 !important;
+          }  
+          small.required {
+              color:#f00;
+          } 
+          /* when not active use specificity to override the !important on border-(color) */
+          .nav-tabs .nav-link:not(.active) {
+              border-color: transparent !important;
+          }
+
+        /* CARD HORIZONAL CCSS CONFIGURACÓN */
+          .card-horizontal {
+            display: flex;
+            flex: 1 1 auto;
+        }
+    </style>
+    <style>
+      .btn-exportar-excel {
+        background-color: #198754 !important;
+        color: white !important;
+        
+      }
+
+      .btn-exportar-pdf {
+          background-color: #dc3545 !important;
+          color: white !important;
+      }
+
+      .btn-exportar-print {
+          background-color: #00a7c9 !important;
+          color: white !important;
+      }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <!-- JS para esta página. -->
+    <script type="text/JavaScript" src="js/Catalogos/Transporte.js"></script>
+    <script>   
+        (function(){
+            function removeAccents ( data ) {
+                if ( data.normalize ) {
+                    // Use I18n API if avaiable to split characters and accents, then remove
+                    // the accents wholesale. Note that we use the original data as well as
+                    // the new to allow for searching of either form.
+                    return data +' '+ data
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '');
+                }
+              
+                return data;
+            }
+            }());
+    </script>
+    <!-- JS DATATABLES.NET. -->
+  <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/jquery.dataTables.min.js"></script>
+  <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/dataTables.buttons.min.js"></script>
+  <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/jszip.min.js"></script>
+  <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/pdfmake.min.js"></script>
+  <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/vfs_fonts.js"></script>
+  <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/buttons.html5.min.js"></script>
+  <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/buttons.print.min.js"></script>
+<!-- DATATABLES.NET. -->
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header p-0">
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col-sm-6">
+            <h4></h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="index.php">Home</a></li>
+              <li class="breadcrumb-item active">Busqueda</li>
+              <input type="hidden" name="NombreInstitucion" id="NombreInstitucion" value="{{ nombre_institucion }}">
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+
+  <!-- Small boxes (Stat box) -->
+  <div class="col-md-12">
+    <div class="card card-success">
+      <div class="card-header bg-gradient-navy">
+        <div class="row">
+          <div class="col col-md-6 p-0">
+            <h3 class="card-title"><i class="fas fa-bus-alt"></i> Transporte</h3>
+          </div>
+          <div class="col col-md-6 d-flex justify-content-end p-0">
+            <button type="button" class="btn btn-primary btn-md" data-toggle="tooltip" data-placement="top" title="Nuevo" id = "goNuevoUser"><span class="fad fa-layer-plus"></span></button>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Mini"><i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- /.card-tools -->
+      </div>
+      <!-- /.card-header -->
+      <div class="card-body">
+        <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
+        <div class="card-body">
+        </div>
+          <table id="listadoTransporte" class="table display responsive nowrap" style="width: 100%;">
+            <thead>
+                <tr>
+                  <th>Acción</th>
+                  <th>Id</th>
+                  <th>Tipo: Transporte</th>
+                  <th>N.º Equipo</th>
+                  <th>N.º Placa</th>
+                  <th>Estatus</th>
+                </tr>                
+            </thead>
+              <tbody id="listadoOk">
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </tfoot>
+          </table>
+        </div> <!-- /.card-body -->
+      </div>        <!-- /.card-body -->
+    </div>      <!-- /.card -->
+  </div>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

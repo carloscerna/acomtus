@@ -172,11 +172,11 @@ jQuery(function($){
      <div class="tab-content tab-validate"> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
         <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            
         <input type="hidden" id="accion_buscar" name="accion_buscar" value = "GenerarCodigoNuevo" class="{required:true}">-->            
-        <input type="hidden" id="id_user" name="id_user" value = '{{ id }}'>            
-        <input type="hidden" id="accion" name="accion" value = '{{ accion }}'>            
-        <input type="hidden" id="txtId" name="txtId" value = ''>   
+        <input type="hidden" id="id_user" name="id_user" value = "{{ id }}">            
+        <input type="hidden" id="accion" name="accion" value = "{{ accion }}">            
+        <input type="hidden" id="txtId" name="txtId" value = "">   
         <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
-        <input type="hidden" id="MenuTab" value='{{ codigo_perfil }}'>         
+        <input type="hidden" id="MenuTab" value="{{ codigo_perfil }}">         
         <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
       <div class="row">
         <div class="col-12">
@@ -194,7 +194,7 @@ jQuery(function($){
             <div class="card-body">
             <!-- Nav tabs -->
             <div class="container py-2">
-              <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
+              <ul class="nav nav-tabs border-0" id="myTab" role="list">
                 <li class="nav-item">
                     <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Empleado</a>
                 </li>
@@ -250,14 +250,14 @@ jQuery(function($){
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Nombres</label>
                                       <div class="col-lg-9">
-                                        <input class="form-control" type="text" id="txtnombres" name="txtnombres" maxlength="60" required="required" placeholder="" autocomplete = "off" onchange='conMayusculas(this);' autofocus="autofocus">
+                                        <input class="form-control" type="text" id="txtnombres" name="txtnombres" maxlength="60" required="required" placeholder="" autocomplete = "off" onchange="conMayusculas(this);" autofocus="autofocus">
                                       </div>
                                     </div>
                                 <!-- APELLIDOS  -->
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Apellidos</label>
                                       <div class="col-lg-9">
-                                        <input class="form-control" type="text" id="txtapellido" name="txtapellido" maxlength="60" required="required" placeholder="" autocomplete = "off" onchange='conMayusculas(this);'>
+                                        <input class="form-control" type="text" id="txtapellido" name="txtapellido" maxlength="60" required="required" placeholder="" autocomplete = "off" onchange="conMayusculas(this);">
                                       </div>
                                     </div>
                                 <!-- FECHA DE NACIMIENTO -->
@@ -295,7 +295,7 @@ jQuery(function($){
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Tipo de Sangre</label>
                                       <div class="col-lg-4">
-                                        <input class="form-control" aria-describedby="basic-addon1" type="text" id="txtTipoSangre" name="txtTipoSangre" onchange='conMayusculas(this)'>
+                                        <input class="form-control" aria-describedby="basic-addon1" type="text" id="txtTipoSangre" name="txtTipoSangre" onchange="conMayusculas(this)">
                                       </div>
                                 <!-- ESTUDIOS -->        
                                       <label class="col-lg-2 col-form-label form-control-label text-right">Estudios</label>
@@ -319,7 +319,7 @@ jQuery(function($){
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Nombre del Cónyuge</label>
                                       <div class="col-lg-9">
-                                        <input class="form-control" aria-describedby="basic-addon1 sizing-addon2" type="text" id="txtConyuge" name="txtConyuge" placeholder="nombre del conyuge" autofocus class="{required:false,minlength:3,maxlength:40} span3 form-control" onchange='conMayusculas(this)'>
+                                        <input class="form-control" aria-describedby="basic-addon1 sizing-addon2" type="text" id="txtConyuge" name="txtConyuge" placeholder="nombre del conyuge" autofocus class="{required:false,minlength:3,maxlength:40} span3 form-control" onchange="conMayusculas(this)">
                                       </div>
                                     </div>
                               </fieldset>
@@ -556,8 +556,8 @@ jQuery(function($){
                                       <div class="col-md-8">
                                         <!-- Default form subscription -->
                                         <form name="formHistorial" id="formHistorial" class="text-center border border-light p-5" action="#!">
-                                          <input type="hidden" id="accionHistorial" name="accionHistorial" value = 'AgregarNuevo'>            
-                                          <input type="hidden" id="IdHistorial" name="IdHistorial" value = '0'>            
+                                          <input type="hidden" id="accionHistorial" name="accionHistorial" value = "AgregarNuevo">            
+                                          <input type="hidden" id="IdHistorial" name="IdHistorial" value = "0">            
                                               <div class="card">
   
                                                 <div class="card-body">
@@ -646,8 +646,8 @@ jQuery(function($){
                                     <div class="col-md-8">
                                       <!-- Default form subscription -->
                                       <form name="formPortafolio" id="formPortafolio" class="text-center border border-light p-5" action="#!">
-                                        <input type="hidden" id="accionPortafolio" name="accionPortafolio" value = 'AgregarNuevo'>            
-                                        <input type="hidden" id="IdPortafolio" name="IdPortafolio" value = '0'>            
+                                        <input type="hidden" id="accionPortafolio" name="accionPortafolio" value = "AgregarNuevo">            
+                                        <input type="hidden" id="IdPortafolio" name="IdPortafolio" value = "0">            
                                             <div class="card">
 
                                               <div class="card-body">
@@ -700,12 +700,12 @@ jQuery(function($){
               </div>              
             </div>
           </div> <!-- /.card -->
-          </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+          </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT"S -->
      </form> <!-- fin del form -->            
     </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->
 {% endblock %}
 
 {% block loginUser %}
-<!--	{% include 'layout-login-user.html' %} -->
+<!--	{% include "layout-login-user.html" %} -->
 {% endblock %}

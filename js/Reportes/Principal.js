@@ -8,7 +8,7 @@ var today = "";
 var OptBuscarUP = "Todo"; var NombreInstitucion = ""; var OptBuscarPM = "Todo";
 $(function(){ // iNICIO DEL fUNCTION.
 ///////////////////////////////////////////////////////////////////////////////
-// INICIALIZARA DATATABLE. POR PLACA
+// INICIALIZARA DATATABLE. POR PLACA y NOMBRE MOTORISTA.
 ///////////////////////////////////////////////////////////////////////////////
 	$('#example').DataTable( { searching: false} );
     var table = $('#listadoPorUnidadPlaca').DataTable( {
@@ -502,7 +502,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 			);
 		},
 		language:{
-		  url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+		  url: "../acomtus/js/DataTablet/es-ES.json"
 		},
 		dom: "Bfrtip",
 		  buttons:[
@@ -513,7 +513,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 			  titleAttr: 'Exportar a Excel',
 			  className: 'btn btn-success',
 			  filename: 'Reporte',
-			  title: NombreInstitucion,
+			  title: NombreInstitucion + " " + NombreCodigoPersonal,
 			  exportOptions: {
 				  columns: [0,1,2,3,4,5,6,]
 			  },
@@ -538,7 +538,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 			  text: '<i class="fa fa-print"></i>',
 			  titleAttr: 'Imprimir',
 			  className: 'btn btn-md btn-info',
-			  title: NombreInstitucion,
+			  title: NombreInstitucion + " " + NombreCodigoPersonal,
 			  exportOptions: {
 				  columns: [0, 1,2,3,4,5,6,]
 			  },
@@ -659,7 +659,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 		);
 	},
 	 language:{
-	   url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+		url: "../acomtus/js/DataTablet/es-ES.json"
 	 },
 	 dom: "Bfrtip",
 	   buttons:[
@@ -670,7 +670,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 		   titleAttr: 'Exportar a Excel',
 		   className: 'btn btn-success',
 		   filename: 'Reporte',
-		   title: NombreInstitucion,
+		   title: NombreInstitucion + " " + NombreCodigoPersonal, 
 		   exportOptions: {
 			   columns: [0,1,2,3,4,5,6,7 ]
 		   },
@@ -683,7 +683,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 		   titleAttr: 'Exportar a PDF',
 		   className: 'btn btn-danger',
 		   filename: 'Reporte',
-		   title: NombreInstitucion,
+		   title: NombreInstitucion + " " + NombreCodigoPersonal,
 		   exportOptions: {
 			   columns: [0,1,2,3,4,5,6,7 ]
 		   },
@@ -695,7 +695,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 		   text: '<i class="fa fa-print"></i>',
 		   titleAttr: 'Imprimir',
 		   className: 'btn btn-md btn-info',
-		   title: NombreInstitucion,
+		   title: NombreInstitucion + " " + NombreCodigoPersonal,
 		   exportOptions: {
 			   columns: [0, 1,2,3,4,5,6,7 ]
 		   },
@@ -1515,6 +1515,5 @@ $(document)
 		screen.fadeOut();
 	});
 }
-
 function delimitNumbers(str) { return (str + "").replace(/\b(\d+)((\.\d+)*)\b/g, function(a, b, c) { return (b.charAt(0) > 0 && !(c || ".").lastIndexOf(".") ? b.replace(/(\d)(?=(\d{3})+$)/g, "$1,") : b) + c; }); } 
 

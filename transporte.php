@@ -11,7 +11,7 @@ if(empty($_SESSION['userNombre']))
 $root = '';
     include('includes/templateEngine.inc.php');
 
-    $twig->display('layout-transporte.html',array(
+    $twig->display('Catalogos/Transporte.html',array(
         "userName" => $_SESSION['userNombre'],
         "userID" => $_SESSION['userID'],
         "codigo_perfil" => $_SESSION['codigo_perfil'],

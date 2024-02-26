@@ -19,7 +19,7 @@ $(function(){ // INICIO DEL FUNCTION.
         $("#lstTipoTransporte").change(function() {
             var codigo_tipo_transporte  = (this.value);
                 // DETARMINAR QUE SE VA EJECUTAR.	
-                $.post("php_libs/soporte/NuevoEditarTransporteColectivo.php",  { codigo_tipo_transporte: codigo_tipo_transporte, accion: 'BuscarTipoTransporte' },
+                $.post("php_libs/soporte/Catalogos/EditarNuevoTransporte.php",  { codigo_tipo_transporte: codigo_tipo_transporte, accion: 'BuscarTipoTransporte' },
                 function(data){
                 // datos para el card TITLE - INFORMACIÓN GENERAL
                     $('#txtNumeroEquipo').val(data[0].numero_equipo);
@@ -37,6 +37,7 @@ $(function(){ // INICIO DEL FUNCTION.
             $("#lstTipoTransporte").prop('disabled', true);
             // Llamar a la función listar.
                 listar();
+                listar_estatus();
 		}
 		if($("#accion").val() == "AgregarNuevo"){
             NuevoRegistro();
@@ -51,15 +52,16 @@ $(function(){ // INICIO DEL FUNCTION.
 /* INICIO DE LA FUNCION PARA NUEVO REGISTRO */
 //////////////////////////////////////////////////////////////////////////////////
 var NuevoRegistro = function(){
-            LimpiarCampos();
-            PasarFoco();
+    LimpiarCampos();
+    PasarFoco();
+    listar_estatus();
 };
 //////////////////////////////////////////////////////////////////////////////////
 /* INICIO DE LA FUNCION PARA MOSTRAR LOS DATOS DEL ALUMNO */
 //////////////////////////////////////////////////////////////////////////////////
 	var listar = function(){
 		// DETARMINAR QUE SE VA EJECUTAR.	
-			$.post("php_libs/soporte/NuevoEditarTransporteColectivo.php",  { id_x: id_, accion: 'BuscarPorId' },
+			$.post("php_libs/soporte/Catalogos/EditarNuevoTransporte.php",  { id_x: id_, accion: 'BuscarPorId' },
 				function(data){
 				// Cargar valores a los objetos Llenar el formulario con los datos del registro seleccionado.
 				// Modificar label en la tabs-8.
@@ -70,6 +72,10 @@ var NuevoRegistro = function(){
                     $('#txtNumeroPlaca').val(data[0].numero_placa);
                     $('#txtNumeroEquipo').val(data[0].numero_equipo);
                     $('#lstTipoTransporte').val(data[0].codigo_tipo_transporte);
+                    NombreTipoTransporte = data[0].nombre_tipo_transporte;
+                    $('#lstEstatus').val(data[0].codigo_estatus).change();
+                //
+                    $("label[for='txtEdicionNuevo']").text("Actualizar - Tipo Transporte: " + NombreTipoTransporte +  " # " + data[0].numero_equipo + " " + data[0].numero_placa);
                 }, "json");                				
 	}; /* FINAL DE LA FUNCION LISTAR(); */
 ///////////////////////////////////////////////////////
@@ -113,7 +119,7 @@ var NuevoRegistro = function(){
 		            cache: false,
 		            type: "POST",
 		            dataType: "json",
-		            url:"php_libs/soporte/NuevoEditarTransporteColectivo.php",
+		            url:"php_libs/soporte/Catalogos/EditarNuevoTransporte.php",
 		            data:str + "&id=" + Math.random(),
 		            success: function(response){
 		            	// Validar mensaje de error
@@ -127,7 +133,11 @@ var NuevoRegistro = function(){
 		        });
 		    },
    });
-
+// ventana modal. GENERAR BUSCAR REGISTROS
+///////////////////////////////////////////////////////////////////////////////	  
+$('#goBuscar').on( 'click', function () {
+    window.location.href = "Transporte.php";
+});	  
 }); // fin de la funcion principal ************************************/
 
 // Pasar foco cuando seleccionar un encargado.
@@ -159,6 +169,21 @@ function listar_tipo_transporte(){
             miselect.empty();
             miselect.append('<option value="">Seleccionar...</option>');
             for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+            }
+    }, "json");    
+}
+// FUNCION LISTAR CATALOGO ESTATUS
+////////////////////////////////////////////////////////////
+function listar_estatus(){
+    var miselect=$("#lstEstatus");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_estatus.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length -3; i++) {
                 miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
             }
     }, "json");    

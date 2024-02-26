@@ -35,7 +35,7 @@ if($errorDbConexion == false){
 		switch ($_POST['accion']) {
 		case 'BuscarTodos':
 				// Armamos el query.
-				$query = 'SELECT tc.id_, tc.codigo_tipo_transporte, tc.numero_equipo, tc.numero_placa, tc.descripcion,
+				$query = 'SELECT tc.id_, tc.codigo_tipo_transporte, tc.numero_equipo, tc.numero_placa, tc.descripcion, tc.codigo_estatus,
 							cat_tt.descripcion as nombre_tipo_transporte
 							FROM transporte_colectivo tc
 							INNER JOIN catalogo_tipo_transporte cat_tt ON cat_tt.id_ = tc.codigo_tipo_transporte

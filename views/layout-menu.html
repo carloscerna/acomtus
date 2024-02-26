@@ -2,14 +2,14 @@
   {% if codigo_perfil == '01' %}
 	       <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
           <li class="nav-item has-treeview menu-open">
-          <a href="index.php" class="nav-link active">
-            <i class="nav-icon fas fa-school"></i>
-            <p>
-              Tablero
-              <i class="right fas fa-angle-left"></i>
-            </p>
-          </a>
-          </li>
+            <a href="index.php" class="nav-link active">
+              <i class="nav-icon fas fa-school"></i>
+              <p>
+                Tablero
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            </li>
           <!-- /. CONFIGURACIÓN INICIAL -->
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
@@ -76,26 +76,45 @@
                   <p>Calcular</p>
                 </a>
               </li> 
-              <li class="nav-item">
-                <a href="transporte.php" class="nav-link">
-                  <i class="fas fa-bus-alt nav-icon"></i>
-                  <p>Transporte Colectivo</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="proveedores.php" class="nav-link">
-                  <i class="fas fa-industry nav-icon"></i>
-                  <p>Proveedores</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="inventario_tiquete.php" class="nav-link">
-                  <i class="fas fa-dolly-flatbed nav-icon"></i>
-                  <p>Inventario</p>
-                </a>
-              </li>
             </ul>
           </li>
+                    <!-- /. ITEMS PARA LA PRODUCCIÓN. -->
+                    <li class="nav-item has-treeview">
+                      <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>
+                          Catalogos
+                          <i class="fas fa-angle-left right"></i>
+                          <span class="badge badge-info right"></span>
+                        </p>
+                      </a>
+                      <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                          <a href="transporte.php" class="nav-link">
+                            <i class="fas fa-bus-alt nav-icon"></i>
+                            <p>Transporte</p>
+                          </a>
+                        </li>
+                        <li class="nav-item">
+                          <a href="proveedores.php" class="nav-link">
+                            <i class="fas fa-industry nav-icon"></i>
+                            <p>Proveedores</p>
+                          </a>
+                        </li>
+                        <li class="nav-item">
+                          <a href="inventario_tiquete.php" class="nav-link">
+                            <i class="fas fa-dolly-flatbed nav-icon"></i>
+                            <p>Inventario</p>
+                          </a>
+                        </li>
+                        <li class="nav-item">
+                          <a href="#clientes.php" class="nav-link">
+                            <i class="fas fa-users nav-icon"></i>
+                            <p>Clientes</p>
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
           <!-- /. INFORMES -->
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
@@ -263,25 +282,8 @@
             <p>Calcular</p>
           </a>
         </li> 
-        <li class="nav-item">
-          <a href="transporte.php" class="nav-link">
-            <i class="fas fa-bus-alt nav-icon"></i>
-            <p>Transporte Colectivo</p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="proveedores.php" class="nav-link">
-            <i class="fas fa-industry nav-icon"></i>
-            <p>Proveedores</p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="inventario_tiquete.php" class="nav-link">
-            <i class="fas fa-dolly-flatbed nav-icon"></i>
-            <p>Inventario</p>
-          </a>
-        </li>
       </ul>
+    </li>
         <!-- /. INFORMES -->
         <li class="nav-item has-treeview">
           <a href="#" class="nav-link">

@@ -27,16 +27,16 @@ include($path_root."/acomtus/includes/mainFunctions_conexion.php");
 // Validar conexi�n con la base de datos
 if($errorDbConexion == false){
 	// Validamos qe existan las variables post
-	if(isset($_POST) && !empty($_POST)){
-		if(!empty($_POST['accion_buscar'])){
-			$_POST['accion'] = $_POST['accion_buscar'];
+	if(isset($_REQUEST) && !empty($_REQUEST)){
+		if(!empty($_REQUEST['accion_buscar'])){
+			$_REQUEST['accion'] = $_REQUEST['accion_buscar'];
 		}
 		// Verificamos las variables de acci�n
-		switch ($_POST['accion']) {
+		switch ($_REQUEST['accion']) {
 		case 'BuscarPorId':
-			$id_x = trim($_POST['id_x']);
+			$id_x = trim($_REQUEST['id_x']);
 				// Armamos el query.
-				$query = "SELECT tc.id_, tc.codigo_tipo_transporte, tc.numero_equipo, tc.numero_placa, tc.descripcion,
+				$query = "SELECT tc.id_, tc.codigo_tipo_transporte, tc.numero_equipo, tc.numero_placa, tc.descripcion, tc.codigo_estatus,
                             cat_tt.descripcion as nombre_tipo_transporte
                             FROM transporte_colectivo tc
                             INNER JOIN catalogo_tipo_transporte cat_tt ON cat_tt.id_ = tc.codigo_tipo_transporte
@@ -56,12 +56,16 @@ if($errorDbConexion == false){
                             $numero_placa = trim($listado['numero_placa']);
                             $numero_equipo = trim($listado['numero_equipo']);
 							$codigo_tipo_transporte = trim($listado['codigo_tipo_transporte']);
+							$nombre_tipo_transporte = trim($listado['nombre_tipo_transporte']);
+							$codigo_estatus = trim($listado['codigo_estatus']);
 
                         // Rellenando la array.
                             $datos[$fila_array]["descripcion"] = $descripcion;
                             $datos[$fila_array]["numero_placa"] = $numero_placa;
                             $datos[$fila_array]["numero_equipo"] = $numero_equipo;
 							$datos[$fila_array]["codigo_tipo_transporte"] = $codigo_tipo_transporte;
+							$datos[$fila_array]["nombre_tipo_transporte"] = $nombre_tipo_transporte;
+							$datos[$fila_array]["codigo_estatus"] = $codigo_estatus;
 					}
 					$mensajeError = "Si Registro";
 				}
@@ -72,7 +76,7 @@ if($errorDbConexion == false){
 				}
 			break;
             case 'BuscarTipoTransporte':
-                $codigo_tipo_transporte = trim($_POST['codigo_tipo_transporte']);
+                $codigo_tipo_transporte = trim($_REQUEST['codigo_tipo_transporte']);
                     // Armamos el query.
                     $query = "SELECT numero_equipo FROM transporte_colectivo WHERE codigo_tipo_transporte = '$codigo_tipo_transporte' ORDER BY numero_equipo DESC LIMIT 1";
                     // Ejecutamos el Query.
@@ -109,10 +113,11 @@ if($errorDbConexion == false){
 			case 'AgregarNuevo':		
 				// armar variables.
 				// TABS-1
-                    $codigo_tipo_transporte = trim($_POST['lstTipoTransporte']);
-                    $numero_equipo = intval($_POST['txtNumeroEquipo']);
-                    $numero_placa = trim($_POST['txtNumeroPlaca']);
-                    $descripcion = trim($_POST['txtDescripcion']);
+					$codigo_estatus = trim($_REQUEST['lstEstatus']);
+                    $codigo_tipo_transporte = trim($_REQUEST['lstTipoTransporte']);
+                    $numero_equipo = intval($_REQUEST['txtNumeroEquipo']);
+                    $numero_placa = trim($_REQUEST['txtNumeroPlaca']);
+                    $descripcion = trim($_REQUEST['txtDescripcion']);
                     // COMPROBAR SI EL REGISTRO YA EXISTE (TIPOTRANSPORTE Y NUMERO EQUIPO)
                         $query_v = "SELECT * FROM transporte_colectivo WHERE codigo_tipo_transporte = '$codigo_tipo_transporte' and numero_equipo = '$numero_equipo'" ;
                             $resultadoQuery = $dblink -> query($query_v); 
@@ -122,8 +127,8 @@ if($errorDbConexion == false){
                             }
                     ///////////////////////////////////////////////////////////////////////////////////////
 					// Query
-					$query = "INSERT INTO transporte_colectivo (descripcion, codigo_tipo_transporte, numero_equipo, numero_placa)
-						VALUES ('$descripcion','$codigo_tipo_transporte','$numero_equipo','$numero_placa')";
+					$query = "INSERT INTO transporte_colectivo (descripcion, codigo_tipo_transporte, numero_equipo, numero_placa, codigo_estatus)
+						VALUES ('$descripcion','$codigo_tipo_transporte','$numero_equipo','$numero_placa','$codigo_estatus')";
 					// Ejecutamos el query
 						$resultadoQuery = $dblink -> query($query);              
                         ///////////////////////////////////////////////////////////////////////////////////////
@@ -141,13 +146,14 @@ if($errorDbConexion == false){
 			case 'EditarRegistro':
                 //$codigo_tipo_transporte = trim($_POST['lstTipoTransporte']);
                 //$numero_equipo = intval($_POST['txtNumeroEquipo']);
-                $numero_placa = trim($_POST['txtNumeroPlaca']);
-                $descripcion = trim($_POST['txtDescripcion']);	
+                $numero_placa = trim($_REQUEST['txtNumeroPlaca']);
+                $descripcion = trim($_REQUEST['txtDescripcion']);	
+				$codigo_estatus = trim($_REQUEST['lstEstatus']);
                 // query de actulizar.
                 $query_ = sprintf("UPDATE transporte_colectivo SET descripcion = '%s',  
-						numero_placa = '%s' 
+						numero_placa = '%s', codigo_estatus =  '%s'
 						WHERE id_ = %d",
-                        $descripcion, $numero_placa, $_POST['id_user']);	
+                        $descripcion, $numero_placa, $codigo_estatus, $_POST['id_user']);	
                         
                 // Ejecutamos el query guardar los datos en la tabla alumno..
                     $resultadoQuery = $dblink -> query($query_);				
@@ -164,14 +170,14 @@ if($errorDbConexion == false){
 			break;
 		
 			case 'EliminarRegistro':
-				$nombre = trim($_POST['nombre']);
+				$nombre = trim($_REQUEST['nombre']);
 				// COMPARAR QUE ELUSUARIO ROOT NO PUEDA SER ELIMINADO.
 				if($nombre == 'root'){
 					$mensajeError = "El Usuario <b> root </b> no se puede Eliminar";
 						break;
 				}
 				// Armamos el query
-				$query = "DELETE FROM usuarios WHERE id_usuario = $_POST[id_user]";
+				$query = "DELETE FROM usuarios WHERE id_usuario = $_REQUEST[id_user]";
 
 				// Ejecutamos el query
 				//	$count = $dblink -> exec($query);
@@ -202,9 +208,10 @@ if($errorDbConexion == false){
 else{
 	$mensajeError = 'No se puede establecer conexión con la base de datos';}
 // Salida de la Array con JSON.
-	if($_POST["accion"] === "" or $_POST["accion"] === "BuscarTodosCodigo"){
+	$accion = $_REQUEST["accion"];
+	if($accion === "" or $accion === "BuscarTodosCodigo"){
 		echo json_encode($arreglo);	
-	}elseif($_POST["accion"] === "BuscarTipoTransporte" or $_POST["accion"] === "GenerarCodigoNuevo" or $_POST["accion"] === "BuscarPorId"){
+	}elseif($accion === "BuscarTipoTransporte" or $accion === "GenerarCodigoNuevo" or $accion === "BuscarPorId"){
 		echo json_encode($datos);
 		}
 	else{
