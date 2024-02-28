@@ -3,39 +3,9 @@
 {% extends 'default_layout.html' %}
 
 {% block extraCSS %}
-<style>
-/* mensajes de error para el validate de los form de input*/
- input.error {
-    border-color: #f00 !important;
-}
+<!-- CSS ESTILO PLANTILLA PERSONAL -->
+<link rel="stylesheet" href="css/estilo_personal.css">
 
-small.required {
-    color:#f00;
-}
-  
-/* when not active use specificity to override the !important on border-(color) */
-.nav-tabs .nav-link:not(.active) {
-    border-color: transparent !important;
-}
-
-fieldset {
-	/*background-color: rgba(111, 66, 193, 0.3);*/
-	  border-radius: 6px;
-    border: 1px solid #0080FF;
-    padding: 10px 10px 10px 10px;
-}
-
-legend {
-	background-color: #FFFFFF;
-	border: 1.5px solid #0080FF;
-	border-radius: 4px;
-	color: var(--green);
-	font-size: 17px;
-	font-weight: bold;
-	padding: 5px 5px 3px 7px;
-	width: auto;
-}
-</style>
 {% endblock %}
 
 {% block javascripts %}
@@ -61,6 +31,122 @@ legend {
       //  CUANDO CAMBIE EL SELECT.  
       });
   </script>
+  <script>
+  /* SCRIPT PARA SUBIR LA FOTO.*/
+ $(document).ready(function() {
+  $('#fileup').change(function(){
+//here we take the file extension and set an array of valid extensions
+    var res=$('#fileup').val();
+    var arr = res.split("\\");
+    var filename=arr.slice(-1)[0];
+    console.log(this.files);
+
+    filextension=filename.split(".");
+    filext="."+filextension.slice(-1)[0];
+    valid=[".jpg",".png",".jpeg",".bmp"];
+//if file is not valid we show the error icon, the red alert, and hide the submit button
+    if (valid.indexOf(filext.toLowerCase())==-1){
+        $( ".imgupload.ok" ).hide("slow");
+        $( ".imgupload.stop" ).show("slow");
+      
+        $('#namefile').css({"color":"red","font-weight":700});
+        $('#namefile').html("No es una Imagen!");
+    }else{
+        //if file is valid we show the green alert and show the valid submit
+        $( ".imgupload.stop" ).hide("slow");
+        $( ".imgupload.ok" ).show("slow");
+      
+        $('#namefile').css({"color":"green","font-weight":700});
+        $('#namefile').html("Imagen!");
+    }
+});
+// CARGAR DEL ARCHIVO A LA TABLA CORRESPONDIENTE.
+    $(".upload").on('click', function() {
+        var formData = new FormData();
+        var files = $('#fileup')[0].files[0];
+        formData.append('file',files);
+        $.ajax({
+            cache: false,
+            url: 'php_libs/soporte/Catalogos/UploadTransporteFoto.php',
+            type: 'post',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                if (response != 0) {
+                    //$('.card-img-top').removeAttr('src');
+                    $(".card-img-top").attr("src", response);
+                    //let timestamp = Math.floor( Date.now() );
+                    //$("#Imagen").attr("src", response + '?ver=' + timestamp);
+
+                    $('#namefile').html("Sólo Imagen!");
+                    toastr["success"]('Imagen Cargada...', "Sistema");
+                } else {
+                  toastr["error"]('Formato de imagen incorrecto.', "Sistema");
+                }
+            }
+        });
+		return false;
+    });
+  ///////////////////////////////////////////////////////////////////////////////////////
+// PARA CARGAR LA IMAGEN DEL FRENTE DE LA TARJETA DE CIRCULACIÓN.
+  ///////////////////////////////////////////////////////////////////////////////////////
+    $('#fileup_tc_frente').change(function(){
+      //here we take the file extension and set an array of valid extensions
+          var res=$('#fileup_tc_frente').val();
+          var arr = res.split("\\");
+          var filename=arr.slice(-1)[0];
+          console.log(this.files);
+      
+          filextension=filename.split(".");
+          filext="."+filextension.slice(-1)[0];
+          valid=[".jpg",".png",".jpeg",".bmp"];
+      //if file is not valid we show the error icon, the red alert, and hide the submit button
+          if (valid.indexOf(filext.toLowerCase())==-1){
+              $( ".imguploadTCFrente.ok" ).hide("slow");
+              $( ".imguploadTCFrente.stop" ).show("slow");
+            
+              $('#namefile_tc_frente').css({"color":"red","font-weight":700});
+              $('#namefile_tc_frente').html("No es una Imagen!");
+          }else{
+              //if file is valid we show the green alert and show the valid submit
+              $( ".imguploadTCFrente.stop" ).hide("slow");
+              $( ".imguploadTCFrente.ok" ).show("slow");
+            
+              $('#namefile_tc_frente').css({"color":"green","font-weight":700});
+              $('#namefile_tc_frente').html("Imagen!");
+          }
+      });
+      // CARGAR DEL ARCHIVO A LA TABLA CORRESPONDIENTE.
+          $(".uploadTcFrente").on('click', function() {
+              var formData = new FormData();
+              var files = $('#fileup_tc_frente')[0].files[0];
+              formData.append('file',files);
+              $.ajax({
+                  cache: false,
+                  url: 'php_libs/soporte/Catalogos/UploadTarjetaCFrente.php',
+                  type: 'post',
+                  data: formData,
+                  contentType: false,
+                  processData: false,
+                  success: function(response) {
+                      if (response != 0) {
+                          //$('.card-img-top').removeAttr('src');
+                          $("Imagen_tc_frente").attr("src", response);
+                          //let timestamp = Math.floor( Date.now() );
+                          //$("#Imagen").attr("src", response + '?ver=' + timestamp);
+      
+                          $('#namefile_tc_frente').html("Sólo Imagen!");
+                          toastr["success"]('Imagen Cargada...', "Sistema");
+                      } else {
+                        toastr["error"]('Formato de imagen incorrecto.', "Sistema");
+                      }
+                  }
+              });
+          return false;
+          });
+});
+</script>
 {% endblock %}
 
 {% block contenidos %}
@@ -86,7 +172,7 @@ legend {
   <!-- Main content -->
     <section class="content">
      <!-- FORM PRINCIPAL -->
-     <form action="" method="post" id="formUsers" name="formUsers" role="form" enctype="multipart/form-data">
+     <form action="" method="post" id="formTransporte" name="formTransporte" role="form" enctype="multipart/form-data">
      <div class="tab-content tab-validate"> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
         <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            
         <input type="hidden" id="accion_buscar" name="accion_buscar" value = "GenerarCodigoNuevo" class="{required:true}">-->            
@@ -97,7 +183,6 @@ legend {
         <div class="col col-md-12">
           <div class="card">
             <div class="card-header bg-gradient-navy">
-
               <div class="row">
                 <div class="col col-md-6 p-0">
                   <h3 class="card-title"><span class="fas fa-bus-alt"></span><label class="text-white" for="txtEdicionNuevo"> Edición | Nuevo</label></h3>
@@ -120,15 +205,15 @@ legend {
               <div class="container py-2">
                 <ul class="nav nav-tabs border-0" id="myTab" role="list">
                   <li class="nav-item">
-                      <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="list" aria-controls="home" aria-selected="true">Transporte</a>
+                      <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tablist" aria-controls="home" aria-selected="true" aria-label="Transporte">Transporte</a>
                   </li>
                 </ul>
                 <!-- Tab panes -->
                 <div class="tab-content">
                   <div class="tab-pane p-2 active border border-primary" id="home" role="tabpanel" aria-labelledby="home-tab">
-                        <!-- MODAL BODY ROW -->
-                        <div class="modal-body row">
-                          <div class="col col-md-6">
+                        <div class="modal-body"> <!-- INICIO MODAL BODY -->
+                          <div class="row"> <!--  ROW  INFORMACION GENERAL-->
+                            <div class="col col-md-6">
                               <!-- INICIO DEL FORMULARIO -->
                               <fieldset>
                                   <legend>Información General</legend>
@@ -153,13 +238,6 @@ legend {
                                           <input class="form-control" type="text" id="txtNumeroEquipo" name="txtNumeroEquipo" aria-label="NumeroEquipo">
                                       </div>
                                     </div>
-                                  <!-- NUMERO PLACA  -->
-                                      <div class="form-group row">
-                                        <label class="col-lg-3 col-form-label form-control-label">N.º Placa</label>
-                                        <div class="col-lg-9">
-                                          <input class="form-control" type="text" id="txtNumeroPlaca" name="txtNumeroPlaca" aria-label="NumeroPlaca">
-                                        </div>
-                                      </div>
                                   <!-- DESCRIPCION -->
                                   <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Descripción</label>
@@ -173,11 +251,219 @@ legend {
                           <div class="col col-md-6">
                             <fieldset>
                               <legend>Unidad de Transporte</legend>
+                              <form name="formImagen" id="formImagen" class="text-center border border-light p-5" action="#!" enctype="multipart/form-data">
+                                <div class="card" style="width: 18rem;">
+                                  <div class="card-head">
+                                        <div id="estilo_foto">             
+                                          <p id="AgregarFoto">Agregar Foto</p>
+                                            <input type="file" value="" name="fileup" id="fileup" disabled title="Subir Archivo">
+                                        </div>
+                                        <label class="text-center" id="namefile"></label>
+                                          <span class="imgupload ok"><i class="fa fa-check"></i></span>
+                                          <span class="imgupload stop"><i class="fa fa-times"></i></span>
+                                  </div>
+                                    <div class="card-body">
+                                      <form method="post" action="#" enctype="multipart/form-data">
+                                        <img class="card-img-top img-fluid" id="Imagen" src="#" title="Unidad de Transporte">
+                                      </form>
+                                    </div>
+                                    <div class="card-footer text-center">
+                                      <input type="button" class="btn btn-primary btn-block upload" value="Subir" id="SubirImagen" disabled>
+                                    </div>
+                                </div>                                  
+                                </form>
                             </fieldset>
-                          </div>
-                        </div><!-- FIN MODAL BODY INFORMACIÓN GENERAL-->
-                    </div>
+                          </div>                    
+                          </div> <!-- ROW INFORMACIÓN GENERAL -->
+                          <div class="row"> <!-- ROW INFORMACIÓN TARJETA DE CIRCULACIÓN -->
+                            <div class="col col-md-6">
+                              <fieldset>
+                                <legend>Tarjeta de Circulación</legend>
+                                  <!-- NOMBRE PROPIETARIO  -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Nombre Propietario</label>
+                                    <div class="col-lg-9">
+                                      <input class="form-control" type="text" id="txtNombrePropietario" name="txtNombrePropietario" aria-label="txtNombrePropietario" maxlength="80">
+                                    </div>
+                                  </div>
+                                  <!-- NUMERO PLACA  -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">N.º Placa</label>
+                                    <div class="col-lg-9">
+                                      <input class="form-control" type="text" id="txtNumeroPlaca" name="txtNumeroPlaca" aria-label="NumeroPlaca" maxlength="8">
+                                    </div>
+                                  </div>
+                                  <!-- AÑO PLACA  -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Año Placa</label>
+                                    <div class="col-lg-9">
+                                      <input class="form-control" type="numeric" id="txtYearPlaca" name="txtYearPlaca" aria-label="txtYearPlaca" maxlength="4">
+                                    </div>
+                                  </div>
+                                  <!-- NUMERO DUI  -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">N.º DUI</label>
+                                    <div class="col-lg-9">
+                                      <input class="form-control" type="text" id="txtDui" name="txtDui" aria-label="txtDui" maxlength="10">
+                                    </div>
+                                  </div>
+                                  <!-- DEPARTAMENTO  -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Departamento</label>
+                                    <div class="col-lg-9">
+                                      <select id="lstdepartamento" name="lstdepartamento" title="Departamento" class="custom-select" onchange="listar_municipio(this.value)"></select>
+                                    </div>
+                                  </div>
+                                  <!-- MUNICIPIO  -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Municipio</label>
+                                    <div class="col-lg-9">
+                                      <select id="lstmunicipio" name="lstmunicipio" title="Municipio" class="custom-select"></select>
+                                    </div>
+                                  </div>
+                                  <!-- NUMERO DUI  -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Vencimiento</label>
+                                    <div class="col-lg-9">
+                                      <input class="form-control" type="date" id="txtVencimiento" name="txtVencimiento" aria-label="txtVencimiento">
+                                    </div>
+                                  </div>
+                                  <!-- NUMERO DUI  -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Emisión</label>
+                                    <div class="col-lg-9">
+                                      <input class="form-control" type="date" id="txtEmision" name="txtEmision" aria-label="txtEmision">
+                                    </div>
+                                  </div>
+                              </fieldset>
+                            </div>
+                            <div class="col col-md-6">
+                              <fieldset>
+                                <legend>Foto - Frente</legend>
+                                  <form name="formImagenTarjetaCFrente" id="formImagenTarjetaCFrente" class="text-center border border-light p-5" action="#!" enctype="multipart/form-data">
+                                    <div class="card" style="width: 18rem;">
+                                      <div class="card-head">
+                                            <div id="estilo_foto_tc_frente">             
+                                              <p id="AgregarFoto_tc_frente">Agregar Foto</p>
+                                                <input type="file" value="" name="fileup" id="fileup_tc_frente" disabled title="Subir Archivo">
+                                            </div>
+                                            <label class="text-center" id="namefile_tc_frente"></label>
+                                              <span class="imguploadTCFrente ok"><i class="fa fa-check"></i></span>
+                                              <span class="imguploadTCFrente stop"><i class="fa fa-times"></i></span>
+                                      </div>
+                                        <div class="card-body">
+                                          <form method="post" action="#" enctype="multipart/form-data">
+                                            <img class="card-img-top-TC-Frente img-fluid" id="Imagen_tc_frente" src="#" title="Unidad de Transporte">
+                                          </form>
+                                        </div>
+                                        <div class="card-footer text-center">
+                                          <input type="button" class="btn btn-primary btn-block uploadTcFrente" value="Subir" id="SubirImagenTCFrente" disabled>
+                                        </div>
+                                    </div>                                  
+                                  </form>
+                              </fieldset>
+                            </div>
+                          </div><!-- ROW INFORMACIÓN TARJETA DE CIRCULACIÓN frente-->
+                          <div class="row"> <!-- ROW INFORMACIÓN TARJETA DE CIRCULACIÓN vuelto-->
+                            <div class="col col-md-6">
+                              <fieldset>
+                                <legend>Tarjeta de Circulación</legend>
+                                    <!-- AÑO  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Año</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="numeric" id="txtYear" name="txtYear" aria-label="txtYear">
+                                      </div>
+                                    </div>
+                                    <!-- MARCA  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Marca</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtMarca" name="txtMarca" aria-label="txtMarca">
+                                      </div>
+                                    </div>
+                                    <!-- MODELO  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Modelo</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtModelo" name="txtModelo" aria-label="txtModelo">
+                                      </div>
+                                    </div>
+                                    <!-- CAPACIDAD  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Capacidad</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtCapacidad" name="txtCapacidad" aria-label="txtCapacidad">
+                                      </div>
+                                    </div>
+                                    <!-- TIPO  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Tipo</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtTipo" name="txtTipo" aria-label="txtTipo">
+                                      </div>
+                                    </div>
+                                    <!-- CLASE  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Clase</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtClase" name="txtClase" aria-label="txtClase">
+                                      </div>
+                                    </div>
+                                    <!-- DOMINIO AJENO  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Dominio Ajeno</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtDominioAjeno" name="txtDominioAjeno" aria-label="txtDominioAjeno">
+                                      </div>
+                                    </div>
+                                    <!-- EN CALIDAD  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">En calidad</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtEnCalidad" name="txtEnCalidad" aria-label="txtEnCalidad">
+                                      </div>
+                                    </div>
+                                    <!-- COLOR  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Color</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtColor" name="txtColor" aria-label="txtColor">
+                                      </div>
+                                    </div>
+                                    <!-- N.º CHASIS  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">N.º Chasis</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtNumeroChasis" name="txtNumeroChasis" aria-label="txtNumeroChasis">
+                                      </div>
+                                    </div>
+                                    <!-- Nº MOTOR  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">N.º Motor</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtNumeroMotor" name="txtNumeroMotor" aria-label="txtNumeroMotor">
+                                      </div>
+                                    </div>
+                                    <!-- Nº VIN  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">N.º VIN</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtNumeroVin" name="txtNumeroVin" aria-label="txtNumeroVin">
+                                      </div>
+                                    </div>
+                              </fieldset>
+                            </div>
+                            <div class="col col-md-6">
+                              <fieldset>
+                                <legend>Foto - Vuelto</legend>
+                              </fieldset>
+                            </div>
 
+                          </div><!-- ROW INFORMACIÓN TARJETA DE CIRCULACIÓN vuelto -->
+
+                        </div><!-- FIN MODAL BODY -->
+                    </div>
                 </div> <!-- /.tab-content -->
               </div> <!-- /.container -->
             </div> <!-- /.card-body -->

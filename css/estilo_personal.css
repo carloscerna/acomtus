@@ -10,13 +10,13 @@ small.required {
     border-color: transparent !important;
 }
 fieldset {
-	/*background-color: rgba(111, 66, 193, 0.3);*/
-/*	  border-radius: 6px;
+	background-color: rgba(245, 245, 184, 0.3);
+    border-radius: 6px;
     border: 1px solid #0080FF;
-    padding: 10px 10px 10px 10px;*/
+    padding: 10px 10px 10px 10px;
 }
 legend {
-	/*background-color: #383a38;*/
+	background-color: #383a38;
 	border: 1.5px solid #0080FF;
 	border-radius: 4px;
 	color: white;
@@ -67,6 +67,14 @@ h4>strong{
     border-color: #ff3f3f !important;
 }
 /*these two are set to not display at start*/
+.imguploadTCFrente.ok{
+    display:none;
+    color:green;
+}
+.imguploadTCFrente.stop{
+    display:none;
+    color:red;
+}
 .imgupload.ok{
     display:none;
     color:green;
@@ -94,16 +102,37 @@ h4>strong{
     width: 100%;
     opacity: 0;
 }
+#estilo_foto_tc_frente{
+    padding: 5px;
+    background: red;
+    width: 100%;
+    position: relative;
+}
 #estilo_foto{
     padding: 5px;
     background: red;
     width: 100%;
     position: relative;
 }
+#AgregarFoto_tc_frente{
+    color: white;
+    text-align: center;
+    font-size: 18px;
+}
 #AgregarFoto{
     color: white;
     text-align: center;
     font-size: 18px;
+}
+#fileup_tc_frente{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
 }
 #fileupPortafolio{
     position: absolute;

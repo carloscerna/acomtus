@@ -37,7 +37,8 @@ if($errorDbConexion == false){
 			$id_x = trim($_REQUEST['id_x']);
 				// Armamos el query.
 				$query = "SELECT tc.id_, tc.codigo_tipo_transporte, tc.numero_equipo, tc.numero_placa, tc.descripcion, tc.codigo_estatus,
-                            cat_tt.descripcion as nombre_tipo_transporte
+                            cat_tt.descripcion as nombre_tipo_transporte,
+							tc.foto_transporte, tc.foto_tarjeta_frente, tc.foto_tarjeta_vuelto
                             FROM transporte_colectivo tc
                             INNER JOIN catalogo_tipo_transporte cat_tt ON cat_tt.id_ = tc.codigo_tipo_transporte
                                 WHERE tc.id_ = " . $id_x
@@ -58,6 +59,9 @@ if($errorDbConexion == false){
 							$codigo_tipo_transporte = trim($listado['codigo_tipo_transporte']);
 							$nombre_tipo_transporte = trim($listado['nombre_tipo_transporte']);
 							$codigo_estatus = trim($listado['codigo_estatus']);
+							$foto_transporte = trim($listado['foto_transporte']);
+							$foto_tarjeta_frente = trim($listado['foto_tarjeta_frente']);
+							$foto_tarjeta_vuelto = trim($listado['foto_tarjeta_vuelto']);
 
                         // Rellenando la array.
                             $datos[$fila_array]["descripcion"] = $descripcion;
@@ -66,6 +70,9 @@ if($errorDbConexion == false){
 							$datos[$fila_array]["codigo_tipo_transporte"] = $codigo_tipo_transporte;
 							$datos[$fila_array]["nombre_tipo_transporte"] = $nombre_tipo_transporte;
 							$datos[$fila_array]["codigo_estatus"] = $codigo_estatus;
+							$datos[$fila_array]["foto_transporte"] = $foto_transporte;
+							$datos[$fila_array]["foto_tarjeta_frente"] = $foto_tarjeta_frente;
+							$datos[$fila_array]["foto_tarjeta_vuelto"] = $foto_tarjeta_vuelto;
 					}
 					$mensajeError = "Si Registro";
 				}

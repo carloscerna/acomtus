@@ -35,6 +35,10 @@ $(function(){ // INICIO DEL FUNCTION.
             $("label[for='iEdicionNuevo']").text("Edición");
             $("#txtNumeroEquipo").prop('readonly', true);
             $("#lstTipoTransporte").prop('disabled', true);
+            $("#fileup").attr("disabled",false);		// Botón Subir Imagen Portafolio
+            $("#SubirImagen").attr("disabled",false);		// Botón Subir Imagen Portafolio
+            $("#fileup_tc_frente").attr("disabled",false);		// Botón Subir Imagen Portafolio
+            $("#SubirImagenTCFrente").attr("disabled",false);		// Botón Subir Imagen Portafolio
             // Llamar a la función listar.
                 listar();
                 listar_estatus();
@@ -46,6 +50,15 @@ $(function(){ // INICIO DEL FUNCTION.
 			// cambiar texto de label y enlace.
 			$("label[for='txtEdicionNuevo']").text("Nuevo - Tipo Transporte");
 			$("label[for='iEdicionNuevo']").text("Agregar");
+            //  Botones de la imagen o foto Unidad de Transporte.
+            $("#fileup").attr("disabled",true);		// Botón Subir Imagen Portafolio
+            $("#SubirImagen").attr("disabled",true);		// Botón Subir Imagen Portafolio
+            $("#fileup_tc_frente").attr("disabled",true);		// Botón Subir Imagen Portafolio
+            $("#SubirImagenTCFrente").attr("disabled",true);		// Botón Subir Imagen Portafolio
+            // IMAGEN
+            $(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");	
+            $("#Imagen_tc_frente").attr("src", "../acomtus/img/NoDisponible.jpg");	
+            $("#Imagen_tc_vuelto").attr("src", "../acomtus/img/NoDisponible.jpg");	
 		}				
 	});
 //////////////////////////////////////////////////////////////////////////////////
@@ -74,6 +87,20 @@ var NuevoRegistro = function(){
                     $('#lstTipoTransporte').val(data[0].codigo_tipo_transporte);
                     NombreTipoTransporte = data[0].nombre_tipo_transporte;
                     $('#lstEstatus').val(data[0].codigo_estatus).change();
+                // FOTO DE LA UNIDAD DE TRANSPORTE.
+					if(data[0].foto_transporte == "")
+					{
+                        $(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");	
+					}else{
+						$(".card-img-top").attr("src", "../acomtus/img/Unidad de Transporte/" + data[0].foto_transporte);	
+					}
+                // FOTO DE LA UNIDAD DE TRANSPORTE.
+                if(data[0].foto_tarjeta_frente == "")
+                {
+                    $(".card-img-top-TC-Frente").attr("src", "../acomtus/img/NoDisponible.jpg");	
+                }else{
+                    $(".card-img-top-TC-Frente").attr("src", "../acomtus/img/Unidad de Transporte/" + data[0].foto_transporte);	
+                }
                 //
                     $("label[for='txtEdicionNuevo']").text("Actualizar - Tipo Transporte: " + NombreTipoTransporte +  " # " + data[0].numero_equipo + " " + data[0].numero_placa);
                 }, "json");                				
@@ -81,7 +108,7 @@ var NuevoRegistro = function(){
 ///////////////////////////////////////////////////////
 // Validar Formulario, para posteriormente Guardar o Modificarlo.
  //////////////////////////////////////////////////////
-	$('#formUsers').validate({
+	$('#formTransporte').validate({
 		ignore:"",
 		rules:{
                 txtNumeroPlaca: {required: true, minlength: 1, maxlength: 8},
@@ -153,10 +180,10 @@ function LimpiarCampos(){
 ///////////////////////////////////////////////////////////
 // Convertir a mayúsculas cuando abandone el input.
 ////////////////////////////////////////////////////////////
-   function conMayusculas(field)
-   {
-        field.value = field.value.toUpperCase();
-   }
+function conMayusculas(field)
+{
+    field.value = field.value.toUpperCase();
+}
 // FUNCION LISTAR CATALOGO TIPO TRANSPORTE
 ////////////////////////////////////////////////////////////
 function listar_tipo_transporte(){

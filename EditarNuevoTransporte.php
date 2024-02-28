@@ -11,7 +11,7 @@ if(empty($_SESSION['userNombre']))
 $root = '';
 $Id = $_REQUEST['id'];
 $accion = $_REQUEST['accion'];
-$_SESSION['Id_A'] = $_REQUEST['id'];
+$_SESSION['Id_Transporte'] = $_REQUEST['id']; // id del transporte colectivo.
     include('includes/templateEngine.inc.php');
 
     $twig->display('Catalogos/EditarNuevoTransporte.html',array(

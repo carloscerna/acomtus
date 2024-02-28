@@ -227,7 +227,7 @@ jQuery(function($){
                                   </label>
                                 </span>
                               </div>
-                                  <input type="text" class="form-control text-primary text-bold text-right" id="txtcodigo" maxlength="5" name="txtcodigo" alt="Activar Código para Edición" readonly="readonly">
+                                  <input type="text" class="form-control text-primary text-bold text-right" id="txtcodigo" maxlength="5" name="txtcodigo" alt="Activar Código para Edición" readonly="readonly" title="Código">
                             </div>
                     </div>
                     <div class="col-lg-8">
@@ -235,7 +235,7 @@ jQuery(function($){
                         <div class="form-group row">
                           <label class="col-lg-3 col-form-label form-control-label text-right">Estatus</label>
                           <div class="col-lg-3">
-                            <select class="custom-select" id="lstestatus" name="lstestatus"></select>
+                            <select class="custom-select" id="lstestatus" name="lstestatus" title="Estatus"></select>
                           </div>
                         </div>
                     </div>
@@ -250,26 +250,26 @@ jQuery(function($){
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Nombres</label>
                                       <div class="col-lg-9">
-                                        <input class="form-control" type="text" id="txtnombres" name="txtnombres" maxlength="60" required="required" placeholder="" autocomplete = "off" onchange="conMayusculas(this);" autofocus="autofocus">
+                                        <input class="form-control" type="text" id="txtnombres" name="txtnombres" title="Nombre" maxlength="60" required="required" placeholder="" autocomplete = "off" onchange="conMayusculas(this);" autofocus="autofocus">
                                       </div>
                                     </div>
                                 <!-- APELLIDOS  -->
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Apellidos</label>
                                       <div class="col-lg-9">
-                                        <input class="form-control" type="text" id="txtapellido" name="txtapellido" maxlength="60" required="required" placeholder="" autocomplete = "off" onchange="conMayusculas(this);">
+                                        <input class="form-control" type="text" id="txtapellido" name="txtapellido" title="Apellido" maxlength="60" required="required" placeholder="" autocomplete = "off" onchange="conMayusculas(this);">
                                       </div>
                                     </div>
                                 <!-- FECHA DE NACIMIENTO -->
                                       <div class="form-group row">
                                         <label class="col-lg-3 col-form-label form-control-label">Fecha Nacimiento</label>
                                         <div class="col-lg-4">
-                                          <input class="form-control" type="date" id="txtfechanacimiento" name="fechanacimiento" onblur="calcular_edad(this.value);">
+                                          <input class="form-control" type="date" id="txtfechanacimiento" name="fechanacimiento" title="Fecha Nacimiento" onblur="calcular_edad(this.value);">
                                         </div>
                                 <!-- EDAD -->        
                                         <label class="col-lg-2 col-form-label form-control-label text-right">Edad</label>
                                         <div class="col-lg-3">
-                                          <input class="form-control text-right" type="text" id="txtedad" name="txtedad" value = "0" readonly="readonly">
+                                          <input class="form-control text-right" type="text" id="txtedad" name="txtedad" title="Edad" value = "0" readonly="readonly">
                                           <input type="hidden" name= "edad_enviar" id="edad_enviar" value = "00" class="form-control">
                                         </div>
                                       </div>
@@ -283,43 +283,43 @@ jQuery(function($){
                                       <div class="form-group row">
                                         <label class="col-lg-3 col-form-label form-control-label">Género</label>
                                         <div class="col-lg-3">
-                                          <select class="custom-select" id="lstgenero" name="lstgenero"></select>
+                                          <select class="custom-select" id="lstgenero" name="lstgenero" title="Genero"></select>
                                         </div>
                                 <!-- ESTADO CIVIL -->
                                         <label class="col-lg-3 col-form-label form-control-label text-right">Estado Civil</label>
                                         <div class="col-lg-3">
-                                          <select class="custom-select text-right" id="lstEstadoCivil" name="lstEstadoCivil"></select>
+                                          <select class="custom-select text-right" id="lstEstadoCivil" name="lstEstadoCivil" title="Estado Civil"></select>
                                         </div>
                                       </div>
                                 <!-- TIPO DE SANGRE -->
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Tipo de Sangre</label>
                                       <div class="col-lg-4">
-                                        <input class="form-control" aria-describedby="basic-addon1" type="text" id="txtTipoSangre" name="txtTipoSangre" onchange="conMayusculas(this)">
+                                        <input class="form-control" aria-describedby="basic-addon1" type="text" id="txtTipoSangre" name="txtTipoSangre" title="Tipo de Sangre" onchange="conMayusculas(this)">
                                       </div>
                                 <!-- ESTUDIOS -->        
                                       <label class="col-lg-2 col-form-label form-control-label text-right">Estudios</label>
                                       <div class="col-lg-3">
-                                        <select class="form-control" aria-describedby="basic-addon1" id="lstEstudios" name="lstEstudios"></select>
+                                        <select class="form-control" aria-describedby="basic-addon1" id="lstEstudios" name="lstEstudios" title="Estudios"></select>
                                       </div>
                                     </div>
                                 <!-- TIPO DE SANGRE -->
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Vivienda</label>
                                       <div class="col-lg-4">
-                                        <select class="form-control" aria-describedby="basic-addon1" id="lstVivienda" name="lstVivienda"></select>
+                                        <select class="form-control" aria-describedby="basic-addon1" id="lstVivienda" name="lstVivienda" title="Vivienda"></select>
                                       </div>
                                 <!-- ESTUDIOS -->        
                                       <label class="col-lg-2 col-form-label form-control-label text-right">AFP</label>
                                       <div class="col-lg-3">
-                                        <select class="form-control" aria-describedby="basic-addon1" id="lstAfp" name="lstAfp"></select>
+                                        <select class="form-control" aria-describedby="basic-addon1" id="lstAfp" name="lstAfp" title="afp"></select>
                                       </div>
                                     </div>
                                 <!-- NOMBRE DEL CÓNYUGE  -->
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Nombre del Cónyuge</label>
                                       <div class="col-lg-9">
-                                        <input class="form-control" aria-describedby="basic-addon1 sizing-addon2" type="text" id="txtConyuge" name="txtConyuge" placeholder="nombre del conyuge" autofocus class="{required:false,minlength:3,maxlength:40} span3 form-control" onchange="conMayusculas(this)">
+                                        <input class="form-control" aria-describedby="basic-addon1 sizing-addon2" type="text" id="txtConyuge" name="txtConyuge" placeholder="nombre del conyuge" autofocus class='{required:false,minlength:3,maxlength:40} span3 form-control' onchange="conMayusculas(this)">
                                       </div>
                                     </div>
                               </fieldset>
@@ -331,7 +331,7 @@ jQuery(function($){
                                     <div class="card-head">
                                           <div id="estilo_foto">             
                                             <p id="AgregarFoto">Agregar Foto</p>
-                                              <input type="file" value="" name="fileup" id="fileup" disabled>
+                                              <input type="file" value="" name="fileup" id="fileup" title="Foto" disabled>
                                           </div>
                                           <label class="text-center" id="namefile"></label>
                                             <span class="imgupload ok"><i class="fa fa-check"></i></span>
@@ -339,7 +339,7 @@ jQuery(function($){
                                     </div>
                                       <div class="card-body">
                                         <form method="post" action="#" enctype="multipart/form-data">
-                                          <img class="card-img-top img-fluid" id="Imagen" src="">
+                                          <img class="card-img-top img-fluid" id="Imagen" src="#" title="Imagen">
                                         </form>
                                       </div>
                                       <div class="card-footer text-center">
@@ -356,38 +356,38 @@ jQuery(function($){
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Departamento</label>
                                       <div class="col-lg-3">
-                                        <select id="lstdepartamento" name="lstdepartamento" class="custom-select"  onchange="listar_municipio(this.value)"></select>
+                                        <select id="lstdepartamento" name="lstdepartamento" title="Departamento" class="custom-select" onchange="listar_municipio(this.value)"></select>
                                       </div>
                                     <!--  MUNICIPIOS -->
                                       <label class="col-lg-3 col-form-label form-control-label text-right">Municipio</label>
                                       <div class="col-lg-3">
-                                        <select id="lstmunicipio" name="lstmunicipio" class="custom-select"></select>
+                                        <select id="lstmunicipio" name="lstmunicipio" title="Municipio" class="custom-select"></select>
                                       </div>
                                     </div>
                                 <!-- DIRECCIÓN -->
                                     <div class="form-group row">
                                       <label for="" class="col-lg-3 col-form-label form-control-label">Dirección</label>
                                       <div class="col-lg-9">
-                                        <textarea style="height: 60px;" id="direccion" name="direccion" class="form-control"></textarea>
+                                        <textarea style="height: 60px;" id="direccion" name="direccion" title="Direccion" class="form-control"></textarea>
                                       </div>
                                     </div>
                                     <!-- TELEFONO FIJO -->
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Teléfono Fijo</label>
                                       <div class="col-lg-3">
-                                        <input class="form-control" type="text" name="telefono_fijo" id="telefono_fijo">
+                                        <input class="form-control" type="text" name="telefono_fijo" title="Telefono" id="telefono_fijo">
                                       </div>
                                     <!--  TELEFONO MOVIL -->
                                       <label class="col-lg-3 col-form-label form-control-label text-right">Teléfono Móvil</label>
                                       <div class="col-lg-3">
-                                        <input class="form-control" type="text" name="telefono_movil" id="telefono_movil">
+                                        <input class="form-control" type="text" name="telefono_movil" id="telefono_movil" title="Telefono Movil">
                                       </div>
                                     </div>
                                 <!-- CORREO ELECTRICO -->
                                     <div class="form-group row">
                                         <label class="col-lg-3 col-form-label form-control-label">Correo Electrónico</label>
                                         <div class="col-lg-9">
-                                            <input type="text" name="correo_electronico" id="correo_electronico" placeholder="" class="form-control">
+                                            <input type="text" name="correo_electronico" id="correo_electronico" title="correo" placeholder="" class="form-control">
                                         </div>
                                     </div>
                             </fieldset>
