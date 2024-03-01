@@ -10,7 +10,8 @@ $(function(){ // INICIO DEL FUNCTION.
     var month = ("0" + (now.getMonth() + 1)).slice(-2);
     var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
 // ASIGNAR FECHA ACTUAL A LOS DATE CORRESPONDIENTES.
-    $('#txtFecha').val(today);
+    $('#txtVencimiento').val(today);
+    $('#txtEmision').val(today);
 ///////////////////////////////////////////////////////////////////////////////
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,6 +45,7 @@ $(function(){ // INICIO DEL FUNCTION.
             // Llamar a la función listar.
                 listar();
                 listar_estatus();
+                listar_departamento();  // LLENAR CATALOGO PERFIL.
 		}
 		if($("#accion").val() == "AgregarNuevo"){
             NuevoRegistro();
@@ -70,6 +72,9 @@ var NuevoRegistro = function(){
     LimpiarCampos();
     PasarFoco();
     listar_estatus();
+    var codigo_departamento = '02';
+    listar_departamento();  // LLENAR CATALOGO PERFIL.
+    listar_municipio(codigo_departamento,''); // LLENAR CATALOGO ESTATUS.
 };
 //////////////////////////////////////////////////////////////////////////////////
 /* INICIO DE LA FUNCION PARA MOSTRAR LOS DATOS DEL ALUMNO */
@@ -93,6 +98,24 @@ var NuevoRegistro = function(){
                     $('#txtNombrePropietario').val(data[0].nombre_propietario);
                     $('#txtYearPlaca').val(data[0].año_placa);
                     $('#txtDui').val(data[0].dui);
+                        listar_municipio(data[0].codigo_departamento,data[0].codigo_municipio); // LLENAR CATALOGO ESTATUS.
+                        $('#lstdepartamento').val(data[0].codigo_departamento);
+                        $('#lstmunicipio').val(data[0].codigo_municipio);
+                        $('#txtVencimiento').val(data[0].vencimiento);
+                        $('#txtEmision').val(data[0].emision);  
+                // DATOS TARJETA DE CIRCULACION VUELTO.
+                $('#txtYear').val(data[0].año);
+                $('#txtMarca').val(data[0].marca);
+                $('#txtModelo').val(data[0].modelo);
+                $('#txtCapacidad').val(data[0].capacidad);
+                $('#txtTipo').val(data[0].tipo);
+                $('#txtClase').val(data[0].clase);
+                $('#txtDominioAjeno').val(data[0].dominio_ajeno);
+                $('#txtEnCalidad').val(data[0].en_calidad);
+                $('#txtColor').val(data[0].color);
+                $('#txtNumeroChasis').val(data[0].numero_chasis);
+                $('#txtNumeroMotor').val(data[0].numero_motor);
+                $('#txtNumeroVin').val(data[0].numero_vin);
                     //$('#').val(data[0].);
                 // DATOS TARJETA DE CIRCULACION FRENTE.
 
@@ -230,4 +253,38 @@ function listar_estatus(){
                 miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
             }
     }, "json");    
+}
+////////////////////////////////////////////////////////////
+function listar_departamento(){
+    var miselect=$("#lstdepartamento");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_departamento.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+            }
+    }, "json");    
+}
+// FUNCION LISTAR CATALOGO ESTATUS
+////////////////////////////////////////////////////////////
+function listar_municipio(departamento,municipio){
+	//console.log(municipio);
+    var miselect=$("#lstmunicipio");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+        miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+
+            $.post("includes/cargar_municipio.php", { departamento: departamento },
+                   function(data){
+                miselect.empty();
+                for (var i=0; i<data.length; i++) {
+					if(municipio == data[i].codigo){
+						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+					}else{
+						miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+					}
+                }
+            }, "json");			
 }
