@@ -22,7 +22,7 @@ if (is_array($_FILES) && count($_FILES) > 0) {
                 $resultadoQuery = $dblink -> query($query_file);				
                 while($listado = $resultadoQuery -> fetch(PDO::FETCH_BOTH))
                 {
-                    $nombreArchivo = trim($listado['foto_tarjeta_frente']);
+                    $nombreArchivo = trim($listado['foto_tarjeta_vuelto']);
                     $id_ = trim($listado['id_']);
                 }
             // REGISTRO CON UNLINK().
@@ -33,7 +33,7 @@ if (is_array($_FILES) && count($_FILES) > 0) {
                 }
             // Capturar nombre temporal.
                 $extension = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
-                $nombreArchivo = "foto-tarjeta-frente-".$id_."-".$random.".".$extension;
+                $nombreArchivo = "foto-tarjeta-vuelto-".$id_."-".$random.".".$extension;
             //  renombrar archivo y la ubicación por defecto.
                 rename($path_root.$url_.$_FILES['file']['name'],$path_root.$url_.$nombreArchivo);
             // UTILIZACIÓN DE LAS HERRAMIENTAS GD CON IMAGE.
@@ -62,7 +62,7 @@ if (is_array($_FILES) && count($_FILES) > 0) {
             // UTILIZACIÓN DE LAS HERRAMIENTAS GD CON IMAGE.
                 // Guardar el nombre de la imagen. en la tabla.            
             // Armar query. para actualizar el nombre del archivo de la ruta foto.
-                $query = "UPDATE transporte_colectivo SET foto_tarjeta_frente = '".$nombreArchivo."' WHERE id_ = ". $id_;
+                $query = "UPDATE transporte_colectivo SET foto_tarjeta_vuelto = '".$nombreArchivo."' WHERE id_ = ". $id_;
             // Ejecutamos el Query.
                 $consulta = $dblink -> query($query);
                     echo "../acomtus/img/Unidad de Transporte/".$nombreArchivo;

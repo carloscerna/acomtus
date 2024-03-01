@@ -39,6 +39,8 @@ $(function(){ // INICIO DEL FUNCTION.
             $("#SubirImagen").attr("disabled",false);		// Botón Subir Imagen Portafolio
             $("#fileup_tc_frente").attr("disabled",false);		// Botón Subir Imagen Portafolio
             $("#SubirImagenTCFrente").attr("disabled",false);		// Botón Subir Imagen Portafolio
+            $("#fileup_tc_vuelto").attr("disabled",false);		// Botón Subir Imagen Portafolio
+            $("#SubirImagenTCVuelto").attr("disabled",false);		// Botón Subir Imagen Portafolio
             // Llamar a la función listar.
                 listar();
                 listar_estatus();
@@ -87,6 +89,13 @@ var NuevoRegistro = function(){
                     $('#lstTipoTransporte').val(data[0].codigo_tipo_transporte);
                     NombreTipoTransporte = data[0].nombre_tipo_transporte;
                     $('#lstEstatus').val(data[0].codigo_estatus).change();
+                // DATOS TARJETA DE CIRCULACION FRENTE.
+                    $('#txtNombrePropietario').val(data[0].nombre_propietario);
+                    $('#txtYearPlaca').val(data[0].año_placa);
+                    $('#txtDui').val(data[0].dui);
+                    //$('#').val(data[0].);
+                // DATOS TARJETA DE CIRCULACION FRENTE.
+
                 // FOTO DE LA UNIDAD DE TRANSPORTE.
 					if(data[0].foto_transporte == "")
 					{
@@ -99,10 +108,17 @@ var NuevoRegistro = function(){
                 {
                     $(".card-img-top-TC-Frente").attr("src", "../acomtus/img/NoDisponible.jpg");	
                 }else{
-                    $(".card-img-top-TC-Frente").attr("src", "../acomtus/img/Unidad de Transporte/" + data[0].foto_transporte);	
+                    $(".card-img-top-TC-Frente").attr("src", "../acomtus/img/Unidad de Transporte/" + data[0].foto_tarjeta_frente);	
                 }
                 //
                     $("label[for='txtEdicionNuevo']").text("Actualizar - Tipo Transporte: " + NombreTipoTransporte +  " # " + data[0].numero_equipo + " " + data[0].numero_placa);
+                // FOTO DE TARJETA DE CIRCULACION VUELTO
+                if(data[0].foto_tarjeta_vuelto == "")
+                {
+                    $(".card-img-top-TC-Vuelto").attr("src", "../acomtus/img/NoDisponible.jpg");	
+                }else{
+                    $(".card-img-top-TC-Vuelto").attr("src", "../acomtus/img/Unidad de Transporte/" + data[0].foto_tarjeta_vuelto);	
+                }
                 }, "json");                				
 	}; /* FINAL DE LA FUNCION LISTAR(); */
 ///////////////////////////////////////////////////////
@@ -137,7 +153,7 @@ var NuevoRegistro = function(){
 					});            
 				},
 		    submitHandler: function(){	
-            var str = $('#formUsers').serialize();
+            var str = $('#formTransporte').serialize();
 			//alert(str);
 			///////////////////////////////////////////////////////////////			
 			// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.

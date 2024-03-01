@@ -132,7 +132,7 @@
                   success: function(response) {
                       if (response != 0) {
                           //$('.card-img-top').removeAttr('src');
-                          $("Imagen_tc_frente").attr("src", response);
+                          $("#Imagen_tc_frente").attr("src", response);
                           //let timestamp = Math.floor( Date.now() );
                           //$("#Imagen").attr("src", response + '?ver=' + timestamp);
       
@@ -145,6 +145,61 @@
               });
           return false;
           });
+  ///////////////////////////////////////////////////////////////////////////////////////
+  $('#fileup_tc_Vuelto').change(function(){
+    //here we take the file extension and set an array of valid extensions
+        var res=$('#fileup_tc_vuelto').val();
+        var arr = res.split("\\");
+        var filename=arr.slice(-1)[0];
+        console.log(this.files);
+    
+        filextension=filename.split(".");
+        filext="."+filextension.slice(-1)[0];
+        valid=[".jpg",".png",".jpeg",".bmp"];
+    //if file is not valid we show the error icon, the red alert, and hide the submit button
+        if (valid.indexOf(filext.toLowerCase())==-1){
+            $( ".imguploadTCVuelto.ok" ).hide("slow");
+            $( ".imguploadTCVuelto.stop" ).show("slow");
+          
+            $('#namefile_tc_vuelto').css({"color":"red","font-weight":700});
+            $('#namefile_tc_vuelto').html("No es una Imagen!");
+        }else{
+            //if file is valid we show the green alert and show the valid submit
+            $( ".imguploadTCVuelto.stop" ).hide("slow");
+            $( ".imguploadTCVuelto.ok" ).show("slow");
+          
+            $('#namefile_tc_vuelto').css({"color":"green","font-weight":700});
+            $('#namefile_tc_vuelto').html("Imagen!");
+        }
+    });
+    // CARGAR DEL ARCHIVO A LA TABLA CORRESPONDIENTE.
+        $(".uploadTcVuelto").on('click', function() {
+            var formData = new FormData();
+            var files = $('#fileup_tc_vuelto')[0].files[0];
+            formData.append('file',files);
+            $.ajax({
+                cache: false,
+                url: 'php_libs/soporte/Catalogos/UploadTarjetaCVuelto.php',
+                type: 'post',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    if (response != 0) {
+                        //$('.card-img-top').removeAttr('src');
+                        $("#Imagen_tc_vuelto").attr("src", response);
+                        //let timestamp = Math.floor( Date.now() );
+                        //$("#Imagen").attr("src", response + '?ver=' + timestamp);
+    
+                        $('#namefile_tc_vuelto').html("Sólo Imagen!");
+                        toastr["success"]('Imagen Cargada...', "Sistema");
+                    } else {
+                      toastr["error"]('Formato de imagen incorrecto.', "Sistema");
+                    }
+                }
+            });
+        return false;
+        });
 });
 </script>
 {% endblock %}
@@ -363,7 +418,7 @@
                                   </form>
                               </fieldset>
                             </div>
-                          </div><!-- ROW INFORMACIÓN TARJETA DE CIRCULACIÓN frente-->
+                          </div><!-- ROW INFORMACIÓN TARJETA DE CIRCULACIÓN vuelto-->
                           <div class="row"> <!-- ROW INFORMACIÓN TARJETA DE CIRCULACIÓN vuelto-->
                             <div class="col col-md-6">
                               <fieldset>
@@ -457,6 +512,27 @@
                             <div class="col col-md-6">
                               <fieldset>
                                 <legend>Foto - Vuelto</legend>
+                                  <form name="formImagenTarjetaCVuelto" id="formImagenTarjetaCVuelto" class="text-center border border-light p-5" action="#!" enctype="multipart/form-data">
+                                    <div class="card" style="width: 18rem;">
+                                      <div class="card-head">
+                                            <div id="estilo_foto_tc_vuelto">             
+                                              <p id="AgregarFoto_tc_vuelto">Agregar Foto</p>
+                                                <input type="file" value="" name="fileup" id="fileup_tc_vuelto" disabled title="Subir Archivo">
+                                            </div>
+                                            <label class="text-center" id="namefile_tc_vuelto"></label>
+                                              <span class="imguploadTCVuelto ok"><i class="fa fa-check"></i></span>
+                                              <span class="imguploadTCVuelto stop"><i class="fa fa-times"></i></span>
+                                      </div>
+                                        <div class="card-body">
+                                          <form method="post" action="#" enctype="multipart/form-data">
+                                            <img class="card-img-top-TC-Vuelto img-fluid" id="Imagen_tc_vuelto" src="#" title="Tarjeta Circulación">
+                                          </form>
+                                        </div>
+                                        <div class="card-footer text-center">
+                                          <input type="button" class="btn btn-primary btn-block uploadTcVuelto" value="Subir" id="SubirImagenTCVuelto" disabled>
+                                        </div>
+                                    </div>                                  
+                                  </form>
                               </fieldset>
                             </div>
 

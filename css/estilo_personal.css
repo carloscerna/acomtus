@@ -75,6 +75,14 @@ h4>strong{
     display:none;
     color:red;
 }
+.imguploadTCVuelto.ok{
+    display:none;
+    color:green;
+}
+.imguploadTCVuelto.stop{
+    display:none;
+    color:red;
+}
 .imgupload.ok{
     display:none;
     color:green;
@@ -108,6 +116,12 @@ h4>strong{
     width: 100%;
     position: relative;
 }
+#estilo_foto_tc_vuelto{
+    padding: 5px;
+    background: red;
+    width: 100%;
+    position: relative;
+}
 #estilo_foto{
     padding: 5px;
     background: red;
@@ -119,12 +133,27 @@ h4>strong{
     text-align: center;
     font-size: 18px;
 }
+#AgregarFoto_tc_vuelto{
+    color: white;
+    text-align: center;
+    font-size: 18px;
+}
 #AgregarFoto{
     color: white;
     text-align: center;
     font-size: 18px;
 }
 #fileup_tc_frente{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+}
+#fileup_tc_vuelto{
     position: absolute;
     left: 0;
     right: 0;

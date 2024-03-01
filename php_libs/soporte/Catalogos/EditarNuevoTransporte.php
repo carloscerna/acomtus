@@ -38,7 +38,8 @@ if($errorDbConexion == false){
 				// Armamos el query.
 				$query = "SELECT tc.id_, tc.codigo_tipo_transporte, tc.numero_equipo, tc.numero_placa, tc.descripcion, tc.codigo_estatus,
                             cat_tt.descripcion as nombre_tipo_transporte,
-							tc.foto_transporte, tc.foto_tarjeta_frente, tc.foto_tarjeta_vuelto
+							tc.foto_transporte, tc.foto_tarjeta_frente, tc.foto_tarjeta_vuelto,
+							tc.nombre_propietario, tc.año_placa, tc.dui, tc.codigo_departamento, tc.codigo_municipio
                             FROM transporte_colectivo tc
                             INNER JOIN catalogo_tipo_transporte cat_tt ON cat_tt.id_ = tc.codigo_tipo_transporte
                                 WHERE tc.id_ = " . $id_x
@@ -62,7 +63,13 @@ if($errorDbConexion == false){
 							$foto_transporte = trim($listado['foto_transporte']);
 							$foto_tarjeta_frente = trim($listado['foto_tarjeta_frente']);
 							$foto_tarjeta_vuelto = trim($listado['foto_tarjeta_vuelto']);
+							$nombre_propietario = trim($listado['nombre_propietario']);
+							$año_placa = trim($listado['año_placa']);
+							$dui = trim($listado['dui']);
+							$codigo_departamento = trim($listado['codigo_departamento']);
+							$codigo_municipio = trim($listado['codigo_municipio']);
 
+							//$ = trim($listado['']);
                         // Rellenando la array.
                             $datos[$fila_array]["descripcion"] = $descripcion;
                             $datos[$fila_array]["numero_placa"] = $numero_placa;
@@ -73,6 +80,13 @@ if($errorDbConexion == false){
 							$datos[$fila_array]["foto_transporte"] = $foto_transporte;
 							$datos[$fila_array]["foto_tarjeta_frente"] = $foto_tarjeta_frente;
 							$datos[$fila_array]["foto_tarjeta_vuelto"] = $foto_tarjeta_vuelto;
+							//
+							$datos[$fila_array]["nombre_propietario"] = $nombre_propietario;
+							$datos[$fila_array]["año_placa"] = $año_placa;
+							$datos[$fila_array]["dui"] = $dui;
+							$datos[$fila_array]["codigo_departamento"] = $codigo_departamento;
+							$datos[$fila_array]["codigo_municipio"] = $codigo_municipio;
+							//$datos[$fila_array][""] = $;
 					}
 					$mensajeError = "Si Registro";
 				}
@@ -125,6 +139,13 @@ if($errorDbConexion == false){
                     $numero_equipo = intval($_REQUEST['txtNumeroEquipo']);
                     $numero_placa = trim($_REQUEST['txtNumeroPlaca']);
                     $descripcion = trim($_REQUEST['txtDescripcion']);
+					//
+					$nombre_propietario = trim($_REQUEST['txtNombrePropietario']);
+					$YearPlaca = trim($_REQUEST['txtYearPlaca']);
+					$dui = trim($_REQUEST['txtDui']);
+					$codigo_departamento = trim($_REQUEST['codigo_departamento']);
+					$codigo_municipio = trim($_REQUEST['codigo_municipio']);
+					//$ = trim($_REQUEST['']);
                     // COMPROBAR SI EL REGISTRO YA EXISTE (TIPOTRANSPORTE Y NUMERO EQUIPO)
                         $query_v = "SELECT * FROM transporte_colectivo WHERE codigo_tipo_transporte = '$codigo_tipo_transporte' and numero_equipo = '$numero_equipo'" ;
                             $resultadoQuery = $dblink -> query($query_v); 
@@ -134,8 +155,12 @@ if($errorDbConexion == false){
                             }
                     ///////////////////////////////////////////////////////////////////////////////////////
 					// Query
-					$query = "INSERT INTO transporte_colectivo (descripcion, codigo_tipo_transporte, numero_equipo, numero_placa, codigo_estatus)
-						VALUES ('$descripcion','$codigo_tipo_transporte','$numero_equipo','$numero_placa','$codigo_estatus')";
+					$query = "INSERT INTO transporte_colectivo (descripcion, codigo_tipo_transporte, numero_equipo, numero_placa, codigo_estatus
+							,nombre_propietario, año_placa, dui, codigo_departamento, codigo_municipio
+							)
+						VALUES ('$descripcion','$codigo_tipo_transporte','$numero_equipo','$numero_placa','$codigo_estatus',
+							'$nombre_propietario','$YearPlaca','$dui','$codigo_departamento','$codigo_municipio'
+							)";
 					// Ejecutamos el query
 						$resultadoQuery = $dblink -> query($query);              
                         ///////////////////////////////////////////////////////////////////////////////////////
@@ -156,11 +181,60 @@ if($errorDbConexion == false){
                 $numero_placa = trim($_REQUEST['txtNumeroPlaca']);
                 $descripcion = trim($_REQUEST['txtDescripcion']);	
 				$codigo_estatus = trim($_REQUEST['lstEstatus']);
+				$Id_ = trim($_REQUEST['id_user']);
+				//
+				$nombre_propietario = trim($_REQUEST['txtNombrePropietario']);
+				$YearPlaca = trim($_REQUEST['txtYearPlaca']);
+				$dui = trim($_REQUEST['txtDui']);
+				$codigo_departamento = trim($_REQUEST['codigo_departamento']);
+				$codigo_municipio = trim($_REQUEST['codigo_municipio']);
+				//$ = trim($_REQUEST['']);
+
                 // query de actulizar.
-                $query_ = sprintf("UPDATE transporte_colectivo SET descripcion = '%s',  
+				$query_ = "UPDATE transporte_colectivo SET
+							codigo_estatus = '$codigo_estatus',
+							numero_placa = '$numero_placa',
+							descripcion = '$descripcion',
+							nombre_propietario = '$nombre_propietario',
+							año_placa = '$YearPlaca',
+							dui = '$dui',
+							codigo_departamento = '$codigo_departamento',
+							codigo_municipio = '$codigo_municipìo'
+						WHERE id_ = '$Id_'
+						";
+					/*ID_,
+					CODIGO_TIPO_TRANSPORTE,
+					NUMERO_EQUIPO,
+					NUMERO_PLACA,
+					DESCRIPCION,
+					"año_placa",
+					DUI,
+					CODIGO_DEPARTAMENTO,
+					CODIGO_MUNICIPIO,
+					VENCIMIENTO,
+					EMISION,
+					"año",
+					MARCA,
+					MODELO,
+					CAPACIDAD,
+					TIPO,
+					CLASE,
+					DOMINIO_AJENO,
+					EN_CALIDAD,
+					COLOR,
+					NUMERO_CHASIS,
+					NUMERO_MOTOR,
+					NUMERO_VIN,
+					CODIGO_ESTATUS,
+					OBSERVACIONES,
+					FOTO_TRANSPORTE,
+					FOTO_TARJETA_FRENTE,
+					FOTO_TARJETA_VUELTO
+					*/
+                /*$query_ = sprintf("UPDATE transporte_colectivo SET descripcion = '%s',  
 						numero_placa = '%s', codigo_estatus =  '%s'
 						WHERE id_ = %d",
-                        $descripcion, $numero_placa, $codigo_estatus, $_POST['id_user']);	
+                        $descripcion, $numero_placa, $codigo_estatus, $_POST['id_user']);	*/
                         
                 // Ejecutamos el query guardar los datos en la tabla alumno..
                     $resultadoQuery = $dblink -> query($query_);				
