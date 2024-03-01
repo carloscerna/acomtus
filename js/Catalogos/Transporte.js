@@ -50,8 +50,12 @@ var table = $('#listadoTransporte').DataTable( {
 		},
 		{data:"id_"},
 		{data:"nombre_tipo_transporte"},
-		{data:"numero_equipo"},
-		{data:"numero_placa"},
+		{data:"equipo_placa_year"},
+		{data:"vencimiento"},
+		{data:"emision"},
+		{data:"año"},
+		{data:"marca"},
+		{data:"modelo"},
 		{"data":"codigo_estatus",
 		render: function(data, type, row){
 			if(data == '01'){
@@ -76,7 +80,7 @@ var table = $('#listadoTransporte').DataTable( {
 			filename: 'Reporte',
 			title: NombreInstitucion + " Unidades de Transporte", 
 			exportOptions: {
-				columns: [2,3,4,5]
+				columns: [2,3,4,5,6,7,8]
 			},
 			className: 'btn-exportar-excel',
 		},
@@ -89,7 +93,7 @@ var table = $('#listadoTransporte').DataTable( {
 			filename: 'Reporte',
 			title: NombreInstitucion + " Unidades de Transporte", 
 			exportOptions: {
-				columns: [2,3,4,5]
+				columns: [2,3,4,5,6,7,8]
 			},
 			className: 'btn-exportar-pdf',
 		},
@@ -101,7 +105,7 @@ var table = $('#listadoTransporte').DataTable( {
 			className: 'btn btn-md btn-info',
 			title: NombreInstitucion + " Unidades de Transporte", 
 			exportOptions: {
-				columns: [2,3,4,5]
+				columns: [2,3,4,5,6,7,8]
 			},
 			className:'btn-exportar-print'
 		},

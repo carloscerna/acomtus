@@ -35,12 +35,17 @@ if($errorDbConexion == false){
 		switch ($_POST['accion']) {
 		case 'BuscarTodos':
 				// Armamos el query.
-				$query = 'SELECT tc.id_, tc.codigo_tipo_transporte, tc.numero_equipo, tc.numero_placa, tc.descripcion, tc.codigo_estatus,
-							cat_tt.descripcion as nombre_tipo_transporte
+				$query = "SELECT tc.id_, tc.codigo_tipo_transporte, tc.numero_equipo, tc.numero_placa, tc.descripcion, tc.codigo_estatus,
+							cat_tt.descripcion as nombre_tipo_transporte,
+							tc.foto_transporte, tc.foto_tarjeta_frente, tc.foto_tarjeta_vuelto,
+							tc.nombre_propietario, tc.año_placa, tc.dui, tc.codigo_departamento, tc.codigo_municipio, tc.vencimiento, tc.emision,
+							tc.año, tc.marca, tc.modelo, tc.capacidad, tc.tipo, tc.clase, tc.dominio_ajeno, tc.en_calidad, tc.color, tc.numero_chasis,
+							tc.numero_motor, tc.numero_vin,
+							btrim(tc.numero_equipo || CAST('-' AS VARCHAR) || tc.numero_placa || CAST('-' AS VARCHAR) || tc.año_placa) AS equipo_placa_year
 							FROM transporte_colectivo tc
 							INNER JOIN catalogo_tipo_transporte cat_tt ON cat_tt.id_ = tc.codigo_tipo_transporte
 								ORDER BY tc.id_ ASC
-						';
+						";
 				// Ejecutamos el Query.
 				$consulta = $dblink -> query($query);
 				// Validar si hay registros.
