@@ -6,6 +6,13 @@ var fecha_hasta = "";
 var mostrarDias = 0;
 // FUNCION RINCIPAL
 $(function(){   
+		///////////////////////////////////////////////////////////////////////////////
+// INICIALIZARA DATATABLE. POR PLACA y NOMBRE MOTORISTA.
+///////////////////////////////////////////////////////////////////////////////
+$('#example').DataTable( { searching: false} );
+var table = $('#listadoPorTiquete').DataTable( {
+searching: false
+});
 // Escribir la fecha actual.
 	var now = new Date();                
 	var day = ("0" + now.getDate()).slice(-2);
@@ -20,10 +27,15 @@ $(function(){
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
 ///////////////////////////////////////////////////////////////////////////////
 $(document).ready(function(){
+		//  NOMBRE INSTITUCIÓN
+		NombreInstitucion = $("#NombreInstitucion").val();
+		//
 	fecha_desde = $("#FechaDesdePD").val();
 	mostrarDias = 7;
 	GraficoIngresosPorAño();	// datos de ingresos por mes del año.
 	GraficoIngresos7dias();		// muestra los últimos 7 días.
+	//
+	listar_serie_tiquete()
 
 	$("#formProduccionDiaria").submit();		
 });		// documentready
@@ -121,6 +133,169 @@ $(document).ready(function(){
 		// Ejecutar la función abre otra pestaña.
 			AbrirVentana(varenviar);   
 	});
+///////////////////////////////////////////////////////
+// Validar Formulario, para la busqueda de un registro por codigo del motorista.
+// INCORPORACION DE DATATABLE.
+ //////////////////////////////////////////////////////
+// boton
+$('#lstSerieBuscarTiquete').on('change', function(){
+	// focus
+	  var buscartodos = "BuscarTodosPorId";
+	  var id_tiquete = $("#lstSerieBuscarTiquete").val();
+   
+	  ///////////////////////////////////////////////////////////////////////////////	  
+	//
+	   if (table != undefined && table != null) 
+	   {
+	   table.destroy();
+	   table = null;
+	   } 
+	   
+	// CONFIGURACIÓN DE LA TABLA CON DATATABLE.
+	table = jQuery("#listadoPorTiquete").DataTable( {
+		"ajax":{
+			lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+			destroy: true,
+			pageLength: 5,
+			searching: false,
+			url:"php_libs/soporte/Tablero.php",
+			method:"POST",
+			data: {"accion_buscar": buscartodos, Id_: id_tiquete
+				},
+			complete: function(data){
+				var strJson = JSON.stringify(data["responseJSON"]); // convertir el objeto
+				var jsonParseado = JSON.parse(strJson);	// pasearlo
+				var totalTiquetes = 0; totalIngreso = 0;	// variales a 0
+				var tiraje = Number(jsonParseado["data"][0].tiraje);
+				//
+				for (let index = 0; index < jsonParseado["data"].length; index++) {
+					const element = jsonParseado["data"][index].total_tiquete_utilizados;
+					const elementTotalIngreso = jsonParseado["data"][index].total_ingreso;
+					totalTiquetes += parseFloat(element);
+					totalIngreso += parseFloat(elementTotalIngreso);
+				}
+					// TOTAL DE TIQUETES
+					//console.log(totalTiquetes);
+						var totalTiqueteString = totalTiquetes.toLocaleString('es-SV'); // 0.00
+						$("label[for='LblTotalTiquetes']").text(totalTiqueteString);
+					// TOTAL DE INGRESO POR TIQUETE.
+						var totalIngresoString = totalIngreso.toLocaleString('en-US'); // $0.000
+						$("label[for='LblTotalIngreso']").text('$' + totalIngresoString);
+				//	porcentaje // cambiaar css progress bar.
+					var porcentaje_tiquetes = ((totalTiquetes * 100) / tiraje);
+					porcentaje_tiquetes = (porcentaje_tiquetes.toFixed(0));
+				// TIQUETES
+					var totalTiquetesPantalla = totalTiquetes.toLocaleString("en-US");
+					var tirajePantalla = tiraje.toLocaleString("en-US");
+					$("label[for='LblTotalTiraje']").text('Tiraje: ' + tiraje.toLocaleString("en-US"));
+						$('#progress-bar-tiquete').css('width', porcentaje_tiquetes +'%').attr('aria-valuenow', porcentaje_tiquetes);
+					$("label[for='LblTotalTiquetes']").text('Utilizados: ' + totalTiquetesPantalla + " es el " + porcentaje_tiquetes + "% de " + tirajePantalla +".");
+				// ACTUALIZAR EXISTENCIA DE TIQUETE
+					$.post("php_libs/soporte/Tablero.php", {accion_buscar: 'actualizarExistencia', Id_: id_tiquete, totalTiquetes: totalTiquetes},
+					//
+						function(data) {
+					}, "json");    
+			},
+			datatype: "json"
+		},
+		columns:[
+		  {data:"codigo_produccion"},
+		  {data:"fecha_"},
+		  {data:"codigo_inventario_tiquete"},
+		  {data:"descripcion_tiquete"},
+		  {data:"precio_publico",
+			   render: function(data, type, row){
+				   return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
+			   }
+		   },	// Preico Púyblic.
+		  {data:"total_ingreso",
+			   render: function(data, type, row){
+					   return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
+			   }
+		   }	/// total ingresos
+		],
+		"footerCallback": function ( row, data, start, end, display ) {
+		   var api = this.api(), data;
+   
+		   // Remove the formatting to get integer data for summation
+		   var intVal = function ( i ) {
+			   return typeof i === 'string' ?
+				   i.replace(/[\$,]/g, '')*1 :
+				   typeof i === 'number' ?
+					   i : 0;
+		   };
+   
+		   // Total over all pages
+		   total = api
+			   .column( 5 )
+			   .data()
+			   .reduce( function (a, b) {
+				   return intVal(a) + intVal(b);
+			   }, 0 );
+			   total = total.toFixed(2),
+			   TotalAllPagina = new Intl.NumberFormat('en-US').format(total)
+		   // Total over this page
+		   pageTotal = api
+			   .column( 5, { page: 'current'} )
+			   .data()
+			   .reduce( function (a, b) {
+				   return intVal(a) + intVal(b);
+			   }, 0 );
+			   pagina = pageTotal.toFixed(2),
+			   TotalPagina = new Intl.NumberFormat('en-US').format(pagina)
+		   // Update footer
+		   $( api.column( 5 ).footer() ).html(
+			   '$'+ TotalPagina +' ( $'+ TotalAllPagina +')'
+		   );
+	   },
+		language:{
+		   url: "../acomtus/js/DataTablet/es-ES.json"
+		},
+		dom: "Bfrtip",
+		  buttons:[
+			//'excel',
+			{
+			  extend: 'excelHtml5',
+			  text: '<i class="fas fa-file-excel"></i>',
+			  titleAttr: 'Exportar a Excel',
+			  className: 'btn btn-success',
+			  filename: 'Reporte',
+			  title: NombreInstitucion, 
+			  exportOptions: {
+				  columns: [0,1,2,3,4,5 ]
+			  },
+			  className: 'btn-exportar-excel',
+		  },
+		  //'pdf',
+		  {
+			  extend: 'pdfHtml5',
+			  text: '<i class="fas fa-file-pdf"></i>',
+			  titleAttr: 'Exportar a PDF',
+			  className: 'btn btn-danger',
+			  filename: 'Reporte',
+			  title: NombreInstitucion, 
+			  exportOptions: {
+				  columns: [0,1,2,3,4,5 ]
+			  },
+			  className: 'btn-exportar-pdf',
+		  },
+		  //'print'
+		  {
+			  extend: 'print',
+			  text: '<i class="fa fa-print"></i>',
+			  titleAttr: 'Imprimir',
+			  className: 'btn btn-md btn-info',
+			  title: NombreInstitucion, 
+			  exportOptions: {
+				  columns: [0, 1,2,3,4,5 ]
+			  },
+			  className:'btn-exportar-print'
+		  },
+		  //extra. Cantidad de registros.
+		  'pageLength'
+		  ],
+	  }); // FINAL DEL DATATABLE.
+	}); // FINAL DEL botón.
 }); // FINAL DELA FUNCION
 function AbrirVentana(url)
 {
@@ -195,3 +370,20 @@ function GraficoIngresosPorAño(){
 	},
 	});
 }
+// TODAS LAS TABLAS VAN HA ESTAR EN PRODUCCIONBUSCAR.*******************
+// FUNCION LISTAR TABLA catalogo_tiquete_color, inventario_tiquete
+////////////////////////////////////////////////////////////
+function listar_serie_tiquete(){
+    var miselect=$("#lstSerieBuscarTiquete");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
+        function(data) {
+            miselect.empty();
+            miselect.append('<option value="">0-Seleccionar...</option>');
+            for (var i=0; i<data.length; i++) {
+                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color + " - " + data[i].precio_publico + '</option>');
+            }
+    }, "json");    
+}    

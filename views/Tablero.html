@@ -10,12 +10,42 @@
     overflow-x: auto;
   }
 </style>
+<style>
+  .btn-exportar-excel {
+    background-color: #198754 !important;
+    color: white !important;
+    
+  }
+
+  .btn-exportar-pdf {
+      background-color: #dc3545 !important;
+      color: white !important;
+  }
+
+  .btn-exportar-print {
+      background-color: #00a7c9 !important;
+      color: white !important;
+  }
+</style>
+  <!-- DATA TABLE. -->
+  <link href="../acomtus/js/Datatablet/css/jquery.dataTables.min.css"  rel="stylesheet" />
+<!-- DATA TABLE. botones -->
+  <link href="../acomtus/js/Datatablet/css/buttons.dataTables.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block javascripts %}
  <!-- JS SCRIPT  -->
  <script type="text/JavaScript" src="js/Tablero.js"></script>
  <script src="js/Chart.js-4.4.1/dist/chart.js"></script>
+ <!-- JS DATATABLES.NET. -->
+ <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/jquery.dataTables.min.js"></script>
+ <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/dataTables.buttons.min.js"></script>
+ <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/jszip.min.js"></script>
+ <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/pdfmake.min.js"></script>
+ <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/vfs_fonts.js"></script>
+ <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/buttons.html5.min.js"></script>
+ <script type="text/JavaScript" src="../acomtus/js/Datatablet/js/buttons.print.min.js"></script>
+<!-- DATATABLES.NET. -->
 
  <script>
   $(document).ready(function () { 
@@ -201,6 +231,100 @@
           </div>
         </form>
         </section>
+
+          <!-- BLOQUE DE BUSQUEDAS  TIQUETE INVENTARIO E INFORMACIÓN.-->
+        <section class="col m-auto" id="BuscarPorTiquete">
+          <div class="card p-0 mt-2">
+            <div class="card-header bg-gradient-navy">
+              <h5 class="card-title"><i class="fal fa-ticket-alt"></i>Por Tiquete</h5>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Minimizar"><i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col col-md-4">
+                  <form action="" method="post" id="formBuscarPorTiquete" name="formBuscarPorTiquete" role="form" enctype="multipart/form-data">
+                    <input type="hidden" name="NombreInstitucion" id="NombreInstitucion" value="{{ nombre_institucion }}">
+                    <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
+                      <input type="hidden" id="accion_buscar" name="accion_buscar" value = "BuscarPorTiquete">   
+                      <div class="info-box mb-3">
+                        <span class="info-box-icon bg-success elevation-1"><i class="fad fa-search"></i></span>
+                        <div class="info-box-content">
+                          <!-- Por Tiquete . -->
+                          <div class="form-group row">
+                              <label class="col col-md-4 col-form-label form-control-label">Tiquete</label>
+                              <div class="col col-md-8">
+                                <div class="input-group">
+                                  <select class="form-select" name="lstSerieBuscarTiquete" id="lstSerieBuscarTiquete" title="Por Tiquete"></select> 
+                                  <!-- Botón Buscar Tiquete 
+                                  <button type="button" class="btn btn-primary" id="goBuscarPorTiquete" data-toggle="tooltip" data-placement="left" title="Buscar"> 
+                                    <div style="text-align:center;"><i class="fa fa-search"></i></div>  
+                                  </button>-->
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                </form>
+                </div>
+                <div class="col col-md-4">
+                  <div class="info-box mb-3">
+                    <span class="info-box-icon bg-success elevation-1"><i class="fad fa-dollar-sign"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Total Ingreso</span>
+                      <span class="info-box-number">
+                        <label for="LblTotalIngreso" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">$</label>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col col-md-4">
+                    <div class="info-box mb-3">
+                      <span class="info-box-icon bg-warning elevation-1"><i class="fal fa-ticket-alt"></i></span>
+                      <div class="info-box-content">
+                        <span class="info-box-text">Total Tiquete </span>
+                        <span class="info-box-number">
+                          <label for="LblTotalTiraje" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">0</label>
+                        </span>
+                        <div class="progress">
+                          <div class="progress-bar bg-info" id="progress-bar-tiquete"></div>
+                        </div>
+                        <label for="LblTotalTiquetes" id="LblTotalTiquetes" class="progress-description text-bold text-xs"></label>
+                      </div>
+                    </div>
+                </div>
+              </div>
+            <!-- DETALLE table DE LA PRODUCCIÓN DIFERENCIAS -->
+              <table id="listadoPorTiquete" class="table table-condensed table-sm display responsive nowrap" style="width: 100%;">
+                <thead>
+                    <tr>
+                      <th>Cod. Prod</th>
+                      <th>Fecha</th>
+                      <th>Cod. Tiquete</th>
+                      <th>Color</th>
+                      <th>P/P</th>
+                      <th>Ingresos</th>
+                    </tr>                
+                </thead>
+                  <tbody id="listadoPorTiqueteOk">
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                    </tr>
+                  </tfoot>
+              </table>              
+            </div>
+            <div class="card-footer bg-gradient-cyan">...</div>
+          </div>
+      </section>
         {% endif %}
       <!-- CUANDO EL USUARIO SEA ROOT -->
   </div> <!-- /.content-Wrapper, Contains page content. --> 

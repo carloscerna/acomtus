@@ -49,12 +49,12 @@ if($errorDbConexion == false){
                 $estilo_c = 'style="padding: 0px; font-size: large; color:black; text-align: center;"';
                 $estilo_r = 'style="padding: 0px; font-size: medium; color:black; text-align: right;"';                                                                         
 				// Armamos el query. validar dís de la
-			//	if($mostrarDias == 1){
+				if($mostrarDias == 1){
 					$query = "SELECT * FROM produccion_diaria WHERE fecha >= '$FechaDesde' and fecha <= '$FechaHasta'
 					ORDER BY fecha";
-			//	}else{
-					//$query = "SELECT * FROM produccion_diaria ORDER BY fecha desc limit 7";
-			//	}
+				}else{
+					$query = "SELECT * FROM produccion_diaria ORDER BY fecha desc limit 7";
+				}
 
 				// Ejecutamos el Query.
 				$consulta = $dblink -> query($query);
@@ -102,6 +102,38 @@ if($errorDbConexion == false){
 					// datos para el gráfico.
 				}	// fin del for.
 			break;
+			case 'BuscarTodosPorId':
+				$Id_ = $_REQUEST["Id_"];
+				$query_ = "SELECT pro.id_ as codigo_produccion, to_char(pro.fecha,'dd/mm/yyyy') as fecha_, pro.codigo_inventario_tiquete, 
+					trim(tiq_color.descripcion) as descripcion_tiquete,
+					pro.codigo_ruta, pro.total_ingreso,
+					inv_tiq.precio_publico, inv_tiq.existencia, inv_tiq.tiraje,
+					ROUND(pro.total_ingreso/inv_tiq.precio_publico,0) as total_tiquete_utilizados,
+					ROUND(sum(pro.total_ingreso)/inv_tiq.precio_publico,0) as sumas
+						FROM produccion pro 
+							INNER JOIN inventario_tiquete inv_tiq ON inv_tiq.id_ = pro.codigo_inventario_tiquete
+							INNER JOIN catalogo_tiquete_color tiq_color ON tiq_color.id_ = inv_tiq.codigo_tiquete_color
+							WHERE pro.codigo_inventario_tiquete = '$Id_' and pro.codigo_estatus ='02'
+							GROUP BY pro.id_, pro.fecha, pro.codigo_inventario_tiquete, pro.codigo_ruta, pro.total_ingreso,
+							inv_tiq.precio_publico, inv_tiq.existencia, tiq_color.descripcion, inv_tiq.tiraje";
+				// Ejecutamos el query
+				$consulta = $dblink -> query($query_);              
+				// obtener el último dato en este caso el Id_
+					// Validar si hay registros.
+				if($consulta -> rowCount() != 0){  
+					while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+					{
+						$arreglo["data"][] = $listado;	
+					}
+				}
+				break;
+				case "actualizarExistencia":
+					$Id_ = $_REQUEST["Id_"];
+					$totalTiquetes = $_REQUEST["totalTiquetes"];
+					$query_actualizar = "UPDATE inventario_tiquete SET existencia = (tiraje - $totalTiquetes) WHERE id_ = '$Id_'";
+					// Ejecutamos el query
+						$consulta = $dblink -> query($query_actualizar);           
+				break;
 			default:
 				$mensajeError = 'Esta acci�n no se encuentra disponible';
 			break;
@@ -113,9 +145,9 @@ if($errorDbConexion == false){
 else{
 	$mensajeError = 'No se puede establecer conexi�n con la base de datos';}
 // Salida de la Array con JSON.
-	if($_POST["accion"] === "BuscarTodos" or $_POST["accion"] === "BuscarTodosCodigo"){
+	if($_POST["accion"] === "BuscarTodos" or $_POST["accion"] === "BuscarTodosCodigo" or $_POST["accion"] == "BuscarTodosPorId"){
 		echo json_encode($arreglo);	
-	}elseif($_POST["accion"] === "BuscarCodigo" or $_POST["accion"] === "GenerarCodigoNuevo" or $_POST["accion"] === "EditarRegistro"){
+	}elseif($_POST["accion"] === "BuscarCodigo" or $_POST["accion"] === "GenerarCodigoNuevo" or $_POST["accion"] === "EditarRegistro" or $_POST["accion"] === "actualizarExistencia"){
 		echo json_encode($datos);
 		}
 	else{
