@@ -185,10 +185,10 @@ var idioma_espanol = {
 		 };	  
 
 var obtener_data_editar = function(tbody, tabla){
-///////////////////////////////////////////////////////////////////////////////
-//	FUNCION que al dar clic buscar el registro para posterior mente abri una
-// ventana modal. EDITAR REGISTRO
-///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	FUNCION que al dar clic buscar el registro para posterior mente abri una
+	// ventana modal. EDITAR REGISTRO
+	///////////////////////////////////////////////////////////////////////////////
 	$(tbody).on("click","a.editar",function(){
 		var data = tabla.row($(this).parents("tr")).data();
 		//console.log(data); console.log(data[0]);
@@ -210,94 +210,94 @@ var obtener_data_editar = function(tbody, tabla){
 
 	});
 	///////////////////////////////////////////////////////////////////////////////
-//	FUNCION que al dar clic buscar el registro para posterior mente abri una
-// ventana modal. ELIMINAR REGISTRO
-///////////////////////////////////////////////////////////////////////////////
-$(tbody).on("click","a.eliminar",function(){
-	var data = tabla.row($(this).parents("tr")).data();
-	console.log(data); console.log(data[0]);
-	id_ = data[0];
-	fecha = data[1];
-	fecha = $('#FechaProduccion').val();
-			//	ENVIAR MENSAJE CON SWEETALERT 2, PARA CONFIRMAR SI ELIMINA EL REGISTRO.
-			const swalWithBootstrapButtons = Swal.mixin({
-				customClass: {
-				confirmButton: 'btn btn-success',
-				cancelButton: 'btn btn-danger'
-				},
-				buttonsStyling: false
-			})
-	
-			swalWithBootstrapButtons.fire({
-				title: '¿Qué desea hacer?',
-				text: 'Eliminar el Registro Seleccionado!',
-				showCancelButton: true,
-				confirmButtonText: 'Sí, Eliminar!',
-				cancelButtonText: 'No, Cancelar!',
-				reverseButtons: true,
-				allowOutsideClick: false,
-				allowEscapeKey: false,
-				allowEnterKey: false,
-				stopKeydownPropagation: false,
-				closeButtonAriaLabel: 'Cerrar Alerta',
-				type: 'question'
-			}).then((result) => {
-				if (result.value) {
-				// PROCESO PARA ELIMINAR REGISTRO.
-						// ejecutar Ajax.. 
-						$.ajax({
-						cache: false,                     
-						type: "POST",                     
-						dataType: "json",                     
-						url:"php_libs/soporte/ProduccionBuscar.php",                     
-						data: {                     
-								accion_buscar: 'VerEliminarProduccion', codigo_produccion: id_, fecha: fecha,
-								},                     
-						success: function(response) {                     
-								if (response.respuesta === true) {                     		
-									toastr["info"](response.mensaje, "Sistema");
-									window.location.href = 'produccion.php';				                  
-								}                
-						}                     
-						});
-				//////////////////////////////////////
-				} else if (
-				/* Read more about handling dismissals below */
-				result.dismiss === Swal.DismissReason.cancel
-				) {
-				swalWithBootstrapButtons.fire(
-					'Cancelar',
-					'Su Archivo no ha sido Eliminado :)',
-					'error'
-				)
-				}
-			})
-});
-///////////////////////////////////////////////////////////////////////////////
-//	FUNCION que al dar clic buscar el registro para posterior mente abri una
-// ventana modal. EDITAR REGISTRO
-///////////////////////////////////////////////////////////////////////////////
-$(tbody).on("click","a.agregarTalonario",function(){
-	var data = tabla.row($(this).parents("tr")).data();
-	alert(data);
-	console.log(data);
-	id_ = data[0];
-	fecha = data[1];
-	accion = "AgregarTalonario";	// variable global
-	$("#AgregarFechaControl").val(fecha);
-	$("#AgregarNumeroControl").val(id_);
-	//
-	listar_serie_agregar_talonario();
-	//
-	$('#VentanaAgregarPorTalonario').modal("show");
-	$("#lstSerieAgregarTiquete").focus();
-	///////////////////////////////////////////////////////////////////////
+	//	FUNCION que al dar clic buscar el registro para posterior mente abri una
+	// ventana modal. ELIMINAR REGISTRO
+	///////////////////////////////////////////////////////////////////////////////
+	$(tbody).on("click","a.eliminar",function(){
+		var data = tabla.row($(this).parents("tr")).data();
+		console.log(data); console.log(data[0]);
+		id_ = data[0];
+		fecha = data[1];
+		fecha = $('#FechaProduccion').val();
+				//	ENVIAR MENSAJE CON SWEETALERT 2, PARA CONFIRMAR SI ELIMINA EL REGISTRO.
+				const swalWithBootstrapButtons = Swal.mixin({
+					customClass: {
+					confirmButton: 'btn btn-success',
+					cancelButton: 'btn btn-danger'
+					},
+					buttonsStyling: false
+				})
+		
+				swalWithBootstrapButtons.fire({
+					title: '¿Qué desea hacer?',
+					text: 'Eliminar el Registro Seleccionado!',
+					showCancelButton: true,
+					confirmButtonText: 'Sí, Eliminar!',
+					cancelButtonText: 'No, Cancelar!',
+					reverseButtons: true,
+					allowOutsideClick: false,
+					allowEscapeKey: false,
+					allowEnterKey: false,
+					stopKeydownPropagation: false,
+					closeButtonAriaLabel: 'Cerrar Alerta',
+					type: 'question'
+				}).then((result) => {
+					if (result.value) {
+					// PROCESO PARA ELIMINAR REGISTRO.
+							// ejecutar Ajax.. 
+							$.ajax({
+							cache: false,                     
+							type: "POST",                     
+							dataType: "json",                     
+							url:"php_libs/soporte/ProduccionBuscar.php",                     
+							data: {                     
+									accion_buscar: 'VerEliminarProduccion', codigo_produccion: id_, fecha: fecha,
+									},                     
+							success: function(response) {                     
+									if (response.respuesta === true) {                     		
+										toastr["info"](response.mensaje, "Sistema");
+										window.location.href = 'produccion.php';				                  
+									}                
+							}                     
+							});
+					//////////////////////////////////////
+					} else if (
+					/* Read more about handling dismissals below */
+					result.dismiss === Swal.DismissReason.cancel
+					) {
+					swalWithBootstrapButtons.fire(
+						'Cancelar',
+						'Su Archivo no ha sido Eliminado :)',
+						'error'
+					)
+					}
+				})
+	});
+	///////////////////////////////////////////////////////////////////////////////
+	//	FUNCION que al dar clic buscar el registro para posterior mente abri una
+	// ventana modal. EDITAR REGISTRO
+	///////////////////////////////////////////////////////////////////////////////
+	$(tbody).on("click","a.agregarTalonario",function(){
+		var data = tabla.row($(this).parents("tr")).data();
+		alert(data);
+		console.log(data);
+		id_ = data[0];
+		fecha = data[1];
+		accion = "AgregarTalonario";	// variable global
+		$("#AgregarFechaControl").val(fecha);
+		$("#AgregarNumeroControl").val(id_);
+		//
+		listar_serie_agregar_talonario();
+		//
+		$('#VentanaAgregarPorTalonario').modal("show");
+		$("#lstSerieAgregarTiquete").focus();
+		///////////////////////////////////////////////////////////////////////
 
-});
-///////////////////////////////////////////////////////////////////////////////
-//	FUNCION que al dar clic buscar el registro para posterior mente abri una
-// ventana modal. DEVOLUCIONES REGISTRO
-///////////////////////////////////////////////////////////////////////////////
+	});
+	///////////////////////////////////////////////////////////////////////////////
+	//	FUNCION que al dar clic buscar el registro para posterior mente abri una
+	// ventana modal. DEVOLUCIONES REGISTRO
+	///////////////////////////////////////////////////////////////////////////////
 	$(tbody).on("click","a.devolucion",function(){
 		var data = tabla.row($(this).parents("tr")).data();
 		console.log(data); console.log(data[0]);

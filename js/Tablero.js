@@ -4,6 +4,13 @@ var accion_ok = 'noAccion';
 var fecha_desde = "";
 var fecha_hasta = "";
 var mostrarDias = 0;
+//	ARMAR ITEM DE MENU DEPENDIENDO DEL CODIGO DEL USUARIO.
+	// GESTION PRODUCCION
+	var defaultContentMenu = '<div class="dropdown">'
+			+'<button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-wrench"></i></button>'
+			+'<div class="dropdown-menu">'
+				+'<a class="ver dropdown-item" href="#"><i class="fas fa-search"></i> Ver</a>'
+				+'</div></div>';
 // FUNCION RINCIPAL
 $(function(){   
 		///////////////////////////////////////////////////////////////////////////////
@@ -167,6 +174,21 @@ $('#lstSerieBuscarTiquete').on('change', function(){
 				var jsonParseado = JSON.parse(strJson);	// pasearlo
 				var totalTiquetes = 0; totalIngreso = 0;	// variales a 0
 				var tiraje = Number(jsonParseado["data"][0].tiraje);
+				var color = jsonParseado["data"][0].descripcion_tiquete;
+				// CAMBIAR COLOR AL TIQUETE.
+				$("#ColorTiquete").css({"color": "black"}); // <i class="fal fa-ticket-alt" style="color: #ffc0ff;"></i>
+				switch (color) {
+					case "Rosado":
+						$("#FondoTiquete").css({"background": "#ffc0ff"}); // <i class="fal fa-ticket-alt" style="color: #ffc0ff;"></i>
+						break;
+					case "Amarillo":
+						$("#FondoTiquete").css({"background": "#ffff00"}); // <i class="fal fa-ticket-alt" style="color: #ffc0ff;"></i>
+						break;
+				
+					default:
+						$("#FondoTiquete").css({"background": "white"}); // <i class="fal fa-ticket-alt" style="color: #ffc0ff;"></i>
+						break;
+				}
 				//
 				for (let index = 0; index < jsonParseado["data"].length; index++) {
 					const element = jsonParseado["data"][index].total_tiquete_utilizados;
@@ -199,6 +221,11 @@ $('#lstSerieBuscarTiquete').on('change', function(){
 			datatype: "json"
 		},
 		columns:[
+			{
+				data: null,
+				defaultContent: defaultContentMenu,
+				orderable: false
+			},
 		  {data:"codigo_produccion"},
 		  {data:"fecha_"},
 		  {data:"codigo_inventario_tiquete"},
@@ -227,7 +254,7 @@ $('#lstSerieBuscarTiquete').on('change', function(){
    
 		   // Total over all pages
 		   total = api
-			   .column( 5 )
+			   .column( 6 )
 			   .data()
 			   .reduce( function (a, b) {
 				   return intVal(a) + intVal(b);
@@ -236,7 +263,7 @@ $('#lstSerieBuscarTiquete').on('change', function(){
 			   TotalAllPagina = new Intl.NumberFormat('en-US').format(total)
 		   // Total over this page
 		   pageTotal = api
-			   .column( 5, { page: 'current'} )
+			   .column( 6, { page: 'current'} )
 			   .data()
 			   .reduce( function (a, b) {
 				   return intVal(a) + intVal(b);
@@ -244,7 +271,7 @@ $('#lstSerieBuscarTiquete').on('change', function(){
 			   pagina = pageTotal.toFixed(2),
 			   TotalPagina = new Intl.NumberFormat('en-US').format(pagina)
 		   // Update footer
-		   $( api.column( 5 ).footer() ).html(
+		   $( api.column( 6 ).footer() ).html(
 			   '$'+ TotalPagina +' ( $'+ TotalAllPagina +')'
 		   );
 	   },
@@ -262,7 +289,7 @@ $('#lstSerieBuscarTiquete').on('change', function(){
 			  filename: 'Reporte',
 			  title: NombreInstitucion, 
 			  exportOptions: {
-				  columns: [0,1,2,3,4,5 ]
+				  columns: [1,2,3,4,5,6 ]
 			  },
 			  className: 'btn-exportar-excel',
 		  },
@@ -275,7 +302,7 @@ $('#lstSerieBuscarTiquete').on('change', function(){
 			  filename: 'Reporte',
 			  title: NombreInstitucion, 
 			  exportOptions: {
-				  columns: [0,1,2,3,4,5 ]
+				columns: [1,2,3,4,5,6 ]
 			  },
 			  className: 'btn-exportar-pdf',
 		  },
@@ -287,7 +314,7 @@ $('#lstSerieBuscarTiquete').on('change', function(){
 			  className: 'btn btn-md btn-info',
 			  title: NombreInstitucion, 
 			  exportOptions: {
-				  columns: [0, 1,2,3,4,5 ]
+				columns: [1,2,3,4,5,6 ]
 			  },
 			  className:'btn-exportar-print'
 		  },
@@ -295,7 +322,28 @@ $('#lstSerieBuscarTiquete').on('change', function(){
 		  'pageLength'
 		  ],
 	  }); // FINAL DEL DATATABLE.
+	  obtener_data_editar("#listadoPorTiquete tbody", table);
 	}); // FINAL DEL botón.
+
+
+	var obtener_data_editar = function(tbody, table){
+		///////////////////////////////////////////////////////////////////////////////
+		//	FUNCION que al dar clic buscar el registro para posterior mente abri una
+		// ventana modal. EDITAR REGISTRO
+		///////////////////////////////////////////////////////////////////////////////
+		$(tbody).on("click","a.ver",function(){
+			var data = table.row($(this).parents("tr")).data();
+			console.log(data); console.log(data[0]);
+			codigo_produccion = data[0];
+			// Ejecutar Informe
+			varenviar = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion="+codigo_produccion;
+			// Ejecutar la función abre otra pestaña.
+				AbrirVentana(varenviar);	
+// Ejecutar la función abre otra pestaña.
+AbrirVentana(varenviar);
+		});
+	}; // Funcion principal dentro del DataTable.
+
 }); // FINAL DELA FUNCION
 function AbrirVentana(url)
 {

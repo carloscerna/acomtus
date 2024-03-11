@@ -115,7 +115,8 @@ if($errorDbConexion == false){
 							INNER JOIN catalogo_tiquete_color tiq_color ON tiq_color.id_ = inv_tiq.codigo_tiquete_color
 							WHERE pro.codigo_inventario_tiquete = '$Id_' and pro.codigo_estatus ='02'
 							GROUP BY pro.id_, pro.fecha, pro.codigo_inventario_tiquete, pro.codigo_ruta, pro.total_ingreso,
-							inv_tiq.precio_publico, inv_tiq.existencia, tiq_color.descripcion, inv_tiq.tiraje";
+							inv_tiq.precio_publico, inv_tiq.existencia, tiq_color.descripcion, inv_tiq.tiraje
+							ORDER BY pro.id_";
 				// Ejecutamos el query
 				$consulta = $dblink -> query($query_);              
 				// obtener el último dato en este caso el Id_

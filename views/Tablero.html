@@ -257,7 +257,7 @@
                               <label class="col col-md-4 col-form-label form-control-label">Tiquete</label>
                               <div class="col col-md-8">
                                 <div class="input-group">
-                                  <select class="form-select" name="lstSerieBuscarTiquete" id="lstSerieBuscarTiquete" title="Por Tiquete"></select> 
+                                  <select class="form-control" name="lstSerieBuscarTiquete" id="lstSerieBuscarTiquete" title="Por Tiquete"></select> 
                                   <!-- Botón Buscar Tiquete 
                                   <button type="button" class="btn btn-primary" id="goBuscarPorTiquete" data-toggle="tooltip" data-placement="left" title="Buscar"> 
                                     <div style="text-align:center;"><i class="fa fa-search"></i></div>  
@@ -282,7 +282,7 @@
                 </div>
                 <div class="col col-md-4">
                     <div class="info-box mb-3">
-                      <span class="info-box-icon bg-warning elevation-1"><i class="fal fa-ticket-alt"></i></span>
+                      <span class="info-box-icon elevation-1" id="FondoTiquete"><i class="fal fa-ticket-alt" id="ColorTiquete"></i></span>
                       <div class="info-box-content">
                         <span class="info-box-text">Total Tiquete </span>
                         <span class="info-box-number">
@@ -300,6 +300,7 @@
               <table id="listadoPorTiquete" class="table table-condensed table-sm display responsive nowrap" style="width: 100%;">
                 <thead>
                     <tr>
+                      <th>Acción</th>
                       <th>Cod. Prod</th>
                       <th>Fecha</th>
                       <th>Cod. Tiquete</th>
@@ -312,6 +313,7 @@
                   </tbody>
                   <tfoot>
                     <tr>
+                      <th></th>
                       <th></th>
                       <th></th>
                       <th></th>

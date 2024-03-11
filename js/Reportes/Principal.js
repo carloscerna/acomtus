@@ -670,7 +670,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 		   titleAttr: 'Exportar a Excel',
 		   className: 'btn btn-success',
 		   filename: 'Reporte',
-		   title: NombreInstitucion + " " + NombreCodigoPersonal, 
+		   title: NombreInstitucion + " " + NumeroPlaca, 
 		   exportOptions: {
 			   columns: [0,1,2,3,4,5,6,7 ]
 		   },
@@ -683,7 +683,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 		   titleAttr: 'Exportar a PDF',
 		   className: 'btn btn-danger',
 		   filename: 'Reporte',
-		   title: NombreInstitucion + " " + NombreCodigoPersonal,
+		   title: NombreInstitucion + " " + NumeroPlaca,
 		   exportOptions: {
 			   columns: [0,1,2,3,4,5,6,7 ]
 		   },
@@ -695,7 +695,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 		   text: '<i class="fa fa-print"></i>',
 		   titleAttr: 'Imprimir',
 		   className: 'btn btn-md btn-info',
-		   title: NombreInstitucion + " " + NombreCodigoPersonal,
+		   title: NombreInstitucion + " " + NumeroPlaca,
 		   exportOptions: {
 			   columns: [0, 1,2,3,4,5,6,7 ]
 		   },

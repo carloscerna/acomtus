@@ -216,7 +216,7 @@ function FancyTable($header)
             $pdf->SetX(70);
             $pdf->Cell($w1[0],$w2[1],mb_convert_encoding("Código: ","ISO-8859-1","UTF-8") . $codigo_personal,1,0,'L',$fill);
             $pdf->SetX(70+$w1[0]+10);
-            $pdf->Cell($w1[0],$w2[1],mb_convert_encoding("Precio Público: ","ISO-8859-1","UTF-8") . $precio_publico,1,1,'L',$fill);
+            $pdf->Cell($w1[0],$w2[1],mb_convert_encoding("Precio Público: $ ","ISO-8859-1","UTF-8") . $precio_publico,1,1,'L',$fill);
             $pdf->SetX(70);
             $pdf->Cell($w1[0],$w2[1],"Ruta: " . $descripcion_ruta_rg,1,0,'L',$fill);
             $pdf->SetX(70+$w1[0]+10);
@@ -224,7 +224,7 @@ function FancyTable($header)
             $pdf->SetX(70);
             $pdf->Cell($w1[0],$w2[1],"Unidad: " . $numero_equipo . " | " . $numero_placa,1,0,'L',$fill);
             $pdf->SetX(70+$w1[0]+10);
-            $pdf->Cell($w1[0],$w2[1],"Total: " . $total_ingreso_control,1,1,'L',$fill);
+            $pdf->Cell($w1[0],$w2[1],"Total: $ " . $total_ingreso_control,1,1,'L',$fill);
             $pdf->SetX(70);
             $pdf->Cell($w1[0],$w2[1],"Fecha: " . $fecha,1,1,'L',$fill);
             $pdf->SetXY(30,100);
@@ -260,7 +260,7 @@ function FancyTable($header)
             $pdf->SetTextColor(0);  // rgb(0,0,0)
             $pdf->Cell($w[4],$w2[1],$tiquete_desde,1,0,'C',$fill);
             $pdf->Cell($w[5],$w2[1],$tiquete_hasta,1,0,'C',$fill);
-            $pdf->Cell($w[6],$w2[1],$total_ingreso,1,0,'R',$fill);
+            $pdf->Cell($w[6],$w2[1],"$".$total_ingreso,1,0,'R',$fill);
             $pdf->ln();
             $fill=!$fill;
             // solo sumar si estatus es igual a vendido.
