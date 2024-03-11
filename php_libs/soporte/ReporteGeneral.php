@@ -538,7 +538,7 @@ else{
                                     GROUP BY per.codigo, pro.codigo_tiquete_color, 
                                     cat_tc.precio_publico, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, descripcion_ruta,
                                     tc.numero_placa, tc.numero_equipo, pro.id_, per.nombres, per.apellidos, per.foto, per.codigo_genero
-                                    ORDER BY pro.fecha, pro.codigo_ruta, pro.id_ asc";
+                                    ORDER BY pro.id_ ASC";
         }else if($OptBuscarPM == "Todo"){
             // consulta. sólo código personal
            $query_c = "SELECT SUM(pro.total_ingreso) AS total_ingreso_por_bus, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.id_,
@@ -556,7 +556,7 @@ else{
                             GROUP BY pro.id_ ,per.codigo, pro.codigo_tiquete_color, 
                             cat_tc.precio_publico, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, descripcion_ruta,
                             tc.numero_placa, tc.numero_equipo,  per.nombres, per.apellidos, per.foto, per.codigo_genero
-                            ORDER BY pro.fecha, pro.codigo_ruta, pro.id_ asc";
+                            ORDER BY pro.id_ ASC";
         }
         // Ejecutamos el query
             $consulta = $dblink -> query($query_c);              
@@ -628,7 +628,7 @@ else{
                                     GROUP BY per.codigo, pro.codigo_tiquete_color, 
                                     cat_tc.precio_publico, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, descripcion_ruta,
                                     tc.numero_placa, tc.numero_equipo, pro.id_, per.nombres, per.apellidos
-                                    ORDER BY pro.fecha, pro.codigo_ruta, pro.id_ asc";
+                                    ORDER BY pro.id_ ASC";
         }else if($OptBuscarUP == "Todo"){
         // consulta. sólo código personal
             $query_c = "SELECT SUM(pro.total_ingreso) AS total_ingreso_por_bus, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.id_,
@@ -643,10 +643,10 @@ else{
                             INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = pro.codigo_ruta
                             INNER JOIN transporte_colectivo tc ON tc.id_ = pro.codigo_transporte_colectivo
                                 WHERE pro.codigo_transporte_colectivo = '$codigo_up' 
-                                    GROUP BY pro.id_ ,per.codigo, pro.codigo_tiquete_color, 
-                                    cat_tc.precio_publico, pro.codigo_ruta, pro.codigo_transporte_colectivo, pro.fecha, descripcion_ruta,
+                                    GROUP BY pro.id_ , pro.fecha, per.codigo, pro.codigo_tiquete_color, 
+                                    cat_tc.precio_publico, pro.codigo_ruta, pro.codigo_transporte_colectivo, descripcion_ruta,
                                     tc.numero_placa, tc.numero_equipo,  per.nombres, per.apellidos
-                                    ORDER BY pro.fecha, pro.codigo_ruta, pro.id_ asc";
+                                    ORDER BY pro.id_ ASC";
         }
         // Ejecutamos el query
             $consulta = $dblink -> query($query_c);  

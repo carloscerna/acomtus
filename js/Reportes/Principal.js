@@ -6,6 +6,19 @@ var miselect = "";
 var today = "";
 // variables para la busqueda por numero de placa de la unidad.
 var OptBuscarUP = "Todo"; var NombreInstitucion = ""; var OptBuscarPM = "Todo";
+//	ARMAR ITEM DE MENU DEPENDIENDO DEL CODIGO DEL USUARIO.
+	// GESTION PRODUCCION
+	var defaultContentMenuPorMotorista = '<div class="dropdown">'
+			+'<button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-wrench"></i></button>'
+			+'<div class="dropdown-menu">'
+				+'<a class="verPorMotorista dropdown-item" href="#"><i class="fas fa-search"></i> Ver</a>'
+				+'</div></div>';
+	// GESTION PRODUCCION
+	var defaultContentMenuPorNumeroUnidad = '<div class="dropdown">'
+			+'<button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-wrench"></i></button>'
+			+'<div class="dropdown-menu">'
+				+'<a class="verPorNumeroUnidad dropdown-item" href="#"><i class="fas fa-search"></i> Ver</a>'
+				+'</div></div>';
 $(function(){ // iNICIO DEL fUNCTION.
 ///////////////////////////////////////////////////////////////////////////////
 // INICIALIZARA DATATABLE. POR PLACA y NOMBRE MOTORISTA.
@@ -451,8 +464,13 @@ $('body').on('click','#listadoVerControles a',function (e){
 		  datatype: "json"
 		},
 		columns:[
-		  {data:"fecha_"},
+			{
+				data: null,
+				defaultContent: defaultContentMenuPorMotorista,
+				orderable: false
+			},
 		  {data:"id_"},
+		  {data:"fecha_"},
 		  {data:"numero_equipo_placa"},
 		  {data:"descripcion_ruta"},
 		  {data:"precio_publico",
@@ -467,6 +485,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 				}
 			}	/// total ingresos
 		],
+		order: [[1, 'desc']],
 		"footerCallback": function ( row, data, start, end, display ) {
 			var api = this.api(), data;
 
@@ -480,7 +499,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 
 			// Total over all pages
 			total = api
-				.column( 6 )
+				.column( 7 )
 				.data()
 				.reduce( function (a, b) {
 					return intVal(a) + intVal(b);
@@ -489,7 +508,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 				TotalAllPagina = new Intl.NumberFormat('en-US').format(total)
 			// Total over this page
 			pageTotal = api
-				.column( 6, { page: 'current'} )
+				.column( 7, { page: 'current'} )
 				.data()
 				.reduce( function (a, b) {
 					return intVal(a) + intVal(b);
@@ -497,7 +516,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 				pagina = pageTotal.toFixed(2),
 				TotalPagina = new Intl.NumberFormat('en-US').format(pagina)
 			// Update footer
-			$( api.column( 6 ).footer() ).html(
+			$( api.column( 7 ).footer() ).html(
 				'$'+ TotalPagina +' ( $'+ TotalAllPagina +')'
 			);
 		},
@@ -515,7 +534,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 			  filename: 'Reporte',
 			  title: NombreInstitucion + " " + NombreCodigoPersonal,
 			  exportOptions: {
-				  columns: [0,1,2,3,4,5,6,]
+				  columns: [0,1,2,3,4,5,6,7]
 			  },
 			  className: 'btn-exportar-excel',
 		  },
@@ -528,7 +547,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 			  filename: 'Reporte',
 			  title: NombreInstitucion + " " + NombreCodigoPersonal,
 			  exportOptions: {
-				  columns: [0,1,2,3,4,5,6,]
+				columns: [0,1,2,3,4,5,6,7]
 			  },
 			  className: 'btn-exportar-pdf',
 		  },
@@ -540,7 +559,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 			  className: 'btn btn-md btn-info',
 			  title: NombreInstitucion + " " + NombreCodigoPersonal,
 			  exportOptions: {
-				  columns: [0, 1,2,3,4,5,6,]
+				columns: [0,1,2,3,4,5,6,7]
 			  },
 			  className:'btn-exportar-print'
 		  },
@@ -548,6 +567,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 		  'pageLength'
 		  ],
 	  }); // FINAL DEL DATATABLE.
+	  obtener_data_editar("#listadoPorMotorista tbody", table_m);
 		///////////////////////////////////////////////////////////////			
 		// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
 		///////////////////////////////////////////////////////////////
@@ -607,8 +627,13 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 	   datatype: "json"
 	 },
 	 columns:[
-	   {data:"fecha_"},
+		{
+			data: null,
+			defaultContent: defaultContentMenuPorNumeroUnidad,
+			orderable: false
+		},
 	   {data:"id_"},
+	   {data:"fecha_"},
 	   {data:"codigo"},
 	   {data:"nombre_motorista"},
 	   {data:"descripcion_ruta"},
@@ -624,6 +649,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 			}
 		}	/// total ingresos
 	 ],
+	 order: [[2, 'desc']],
 	 "footerCallback": function ( row, data, start, end, display ) {
 		var api = this.api(), data;
 
@@ -637,7 +663,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 
 		// Total over all pages
 		total = api
-			.column( 7 )
+			.column( 8 )
 			.data()
 			.reduce( function (a, b) {
 				return intVal(a) + intVal(b);
@@ -646,7 +672,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 			TotalAllPagina = new Intl.NumberFormat('en-US').format(total)
 		// Total over this page
 		pageTotal = api
-			.column( 7, { page: 'current'} )
+			.column( 8, { page: 'current'} )
 			.data()
 			.reduce( function (a, b) {
 				return intVal(a) + intVal(b);
@@ -654,7 +680,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 			pagina = pageTotal.toFixed(2),
 			TotalPagina = new Intl.NumberFormat('en-US').format(pagina)
 		// Update footer
-		$( api.column( 7 ).footer() ).html(
+		$( api.column( 8 ).footer() ).html(
 			'$'+ TotalPagina +' ( $'+ TotalAllPagina +')'
 		);
 	},
@@ -672,7 +698,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 		   filename: 'Reporte',
 		   title: NombreInstitucion + " " + NumeroPlaca, 
 		   exportOptions: {
-			   columns: [0,1,2,3,4,5,6,7 ]
+			   columns: [0,1,2,3,4,5,6,7,8 ]
 		   },
 		   className: 'btn-exportar-excel',
 	   },
@@ -685,7 +711,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 		   filename: 'Reporte',
 		   title: NombreInstitucion + " " + NumeroPlaca,
 		   exportOptions: {
-			   columns: [0,1,2,3,4,5,6,7 ]
+			columns: [0,1,2,3,4,5,6,7,8 ]
 		   },
 		   className: 'btn-exportar-pdf',
 	   },
@@ -697,7 +723,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 		   className: 'btn btn-md btn-info',
 		   title: NombreInstitucion + " " + NumeroPlaca,
 		   exportOptions: {
-			   columns: [0, 1,2,3,4,5,6,7 ]
+			columns: [0,1,2,3,4,5,6,7,8 ]
 		   },
 		   className:'btn-exportar-print'
 	   },
@@ -705,6 +731,7 @@ $('#goBuscarPorUnidadDeTransporte').on('click', function(){
 	   'pageLength'
 	   ],
    }); // FINAL DEL DATATABLE.
+   obtener_data_editar_("#listadoPorUnidadPlaca tbody", table);
  	///////////////////////////////////////////////////////////////			
 	 // Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
 	 ///////////////////////////////////////////////////////////////
@@ -1293,7 +1320,38 @@ $("#goImprmirProduccionDetalle").on('click', function (e) {
 
 
 });
-
+// variable data de datatable PorMotorista.
+	var obtener_data_editar = function(tbody, table_m){
+		///////////////////////////////////////////////////////////////////////////////
+		//	FUNCION que al dar clic buscar el registro para posterior mente abri una
+		// ventana modal. EDITAR REGISTRO
+		///////////////////////////////////////////////////////////////////////////////
+		$(tbody).on("click","a.verPorMotorista",function(){
+			var data = table_m.row($(this).parents("tr")).data();
+			console.log(data); console.log(data[3]);
+			codigo_produccion = data[3];
+			// Ejecutar Informe
+			varenviar = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion="+codigo_produccion;
+			// Ejecutar la función abre otra pestaña.
+				AbrirVentana(varenviar);	
+		});
+	}
+// variable data de datatable PorNUmeroPlaca.
+var obtener_data_editar_ = function(tbody, table){
+	///////////////////////////////////////////////////////////////////////////////
+	//	FUNCION que al dar clic buscar el registro para posterior mente abri una
+	// ventana modal. EDITAR REGISTRO
+	///////////////////////////////////////////////////////////////////////////////
+	$(tbody).on("click","a.verPorNumeroUnidad",function(){
+		var data = table.row($(this).parents("tr")).data();
+		console.log(data); console.log(data[3]);
+		codigo_produccion = data[3];
+		// Ejecutar Informe
+		varenviar = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion="+codigo_produccion;
+		// Ejecutar la función abre otra pestaña.
+			AbrirVentana(varenviar);	
+	});
+}
 
 });	// final de FUNCTION.
 ///////////////////////////////////////////////////////////////			
