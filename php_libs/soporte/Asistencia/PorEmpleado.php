@@ -274,7 +274,6 @@ if($errorDbConexion == false){
 					$codigo_jornada_vacaciones = '4';
 					$codigo_jornada_descanso = '4';
 					$codigo_jornada_4_extra = '4';
-					$codigo_jornada_nocturnidad = '4';
 				}
 				// VALIDAR VALORES CUANDO ASUETO SEA IGUAL A "SI"
 				if($boolean_asueto == "si"){
@@ -330,7 +329,7 @@ if($errorDbConexion == false){
 							//
 								$respuestaOK = true;
 								$mensajeError = "Se ha Actualizado el registro correctamente";
-								$contenidoOK = '';
+								$contenidoOK = $query_update;
 								break;
 							}else{
 								// SI NO EXISTE AGREGARLO

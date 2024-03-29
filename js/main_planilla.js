@@ -36,6 +36,7 @@ $(document).ready(function(){
 		$("#lstRuta").change(function ()
 		{
 			$("#CodigoRutaResponsable").css("display", "none");
+			$("label[for=CodigoRutaResponsable]").text("");
 		});
 	// Parametros para el lstDepartamentoEmpresa. si el valor cambia.
 	$("#lstDepartamentoEmpresa").change(function ()
@@ -45,11 +46,14 @@ $(document).ready(function(){
 		//
 		$("#lstDepartamentoEmpresa option:selected").each(function () {
 			codigo_cargo = $(this).val();
-			codigo_ruta = "99"
-			$.post("includes/cargar_responsable_asistencia.php", { codigo_ruta: codigo_ruta, codigo_cargo: codigo_cargo },
-			function(data){
-				$("label[for=CodigoRutaResponsable]").text(data[0].CodigoRutaResponsable);
-			}, "json");			
+			codigo_ruta = "999"
+			if(codigo_cargo != "00"){
+				$.post("includes/cargar_responsable_asistencia.php", { codigo_ruta: codigo_ruta, codigo_cargo: codigo_cargo },
+				function(data){
+					$("label[for=CodigoRutaResponsable]").text(data[0].CodigoRutaResponsable);
+				}, "json");			
+			}
+
 		});
 	});
 	// Parametros para el lstruta. si el valor cambia.
@@ -59,12 +63,15 @@ $(document).ready(function(){
 		$("#CodigoRutaResponsable").css("display", "block");	
 		//
 		$("#lstRuta option:selected").each(function () {
-		codigo_ruta = $(this).val();
+			codigo_ruta = $(this).val();
 			codigo_cargo=$("#lstDepartamentoEmpresa").val();
-			$.post("includes/cargar_responsable_asistencia.php", { codigo_ruta: codigo_ruta, codigo_cargo: codigo_cargo },
-			function(data){
-				$("label[for=CodigoRutaResponsable]").text(data[0].CodigoRutaResponsable);
-			}, "json");			
+			if(codigo_ruta != "00"){
+				$.post("includes/cargar_responsable_asistencia.php", { codigo_ruta: codigo_ruta, codigo_cargo: codigo_cargo },
+				function(data){
+					$("label[for=CodigoRutaResponsable]").text(data[0].CodigoRutaResponsable);
+				}, "json");			
+			}
+			
 		});
 	});
 });		

@@ -220,6 +220,13 @@ function Header()
             $this->SetFont('Arial','B',7);
                 $this->Cell(25,6,mb_convert_encoding("Despacho","ISO-8859-1"),0,1,"L",false);
         $this->SetFont('Arial','B',9);
+    }else{
+        // SIN PUNTEO
+        $this->SetFillColor(255,255,100);   // CORAL CLARO
+            $this->Cell(4,4,"",1,0,"L",true);   // cuadro
+        $this->SetFillColor(255,255,100);   //RGB(255,255,100)
+        $this->SetFont('Arial','B',7);
+            $this->Cell(25,6,mb_convert_encoding("Sin Punteo","ISO-8859-1"),0,0,"L",false);
     }
     // Posición en donde va iniciar el texto.
     $this->SetY(25);
@@ -607,6 +614,9 @@ function rellenar($total_dias_quincena){
                                 break;
                             case "0H":  // CUANDO TIENE DESCANSO, PP, F, ISSS, C, V, TV, P, TD.
                                 $JornadaLicenciaPermiso = $CodigoNombreJornada["DescripcionLicencia"][$fila_array]; // VARIABLES CUANDO ES DIFERENTE DE 1T. (1 TANDA)
+                                if($JornadaLicenciaPermiso == "P"){
+                                    $JornadaLicenciaPermiso = "SP";
+                                }
                                 // CAMBIAR EL COLOR
                                 // VERDE: TV, TD, V, D, TDA.
                                 // AZUL: PP, ISSS.
@@ -788,9 +798,14 @@ function CambiarJornadaColor($JornadaLicenciaPermiso, $Fecha, $codigo_personal){
     global $pdf, $fill, $w, $salario, $FechaDDT;
         // CAMBIAR TAMAÑO
         $pdf->SetFont('Arial','B',8); // I : Italica; U: Normal;
-        if($JornadaLicenciaPermiso == "PP" || $JornadaLicenciaPermiso == "ISSS"){
+        if($JornadaLicenciaPermiso == "PP" || $JornadaLicenciaPermiso == "ISSS"   || $JornadaLicenciaPermiso == "SP"){
             $pdf->SetTextColor(0,0,255); // COLOR azul rgb(0,0,255)
             $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["PorDia"];
+            if($JornadaLicenciaPermiso == "SP"){
+                $pdf->SetFillColor(255,255,100);   // CORAL CLARO// rgb(255,255,100); SIN PUNTEO
+                $pdf->SetTextColor(0,0,0);   // COLOR VERDE rgb(0,0,0)
+                $fill = true;
+            }
         }
         if($JornadaLicenciaPermiso == "F" || $JornadaLicenciaPermiso == "C"){
             $pdf->SetTextColor(255,0,0);   // COLOR ROJO rgb(255,0,0)

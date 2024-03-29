@@ -4,6 +4,8 @@ var accion = "todos";
 var tabla = "";
 var miselect = "";
 var fecha = "";
+var codigo_personal = "";
+var codigo_departamento_empresa = "";
 $(function(){ // iNICIO DEL fUNCTION.
 	///////////////////////////////////////////////////////////////////////////////
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
@@ -12,12 +14,17 @@ $(document).ready(function(){
 	// LLAMAR A LA TABLA PERSONAL.
 		codigo_personal = $("#codigo_personal_usuario").val();
 		codigo_departamento_empresa = $("#CodigoDepartamentoEmpresa").val();
-
 	//
 		$('#listadoEmpleadosNomina').append("<tr><td>Buscando Registros... Por Favor Espere.</td></tr>"); 
 	//
 		buscar_personal_departamento_empresa(codigo_personal);
 		CodigoRuta = $("#CodigoRuta").val();
+	// cuando la fecha cambie.
+		$("#FechaAsistencia").change(function(){
+			fecha = $('#FechaAsistencia').val();
+			$('#listadoEmpleadosNomina').append("<tr><td>Buscando Registros... Por Favor Espere.</td></tr>"); 
+			buscar_personal_departamento_empresa(codigo_personal);
+		});
 });
 $(document).ready(function(){
 ///////////////////////////////////////////////////////////////////////////////
@@ -585,4 +592,14 @@ function buscar_personal_departamento_empresa(codigo_personal){
             });            
         }, "json");    
 }
+// Mensaje de Carga de Ajax.
+function configureLoadingScreen(screen){
+	$(document)
+		.ajaxStart(function () {
+			screen.fadeIn();
+		})
+		.ajaxStop(function () {
+			screen.fadeOut();
+		});
+	}
 function delimitNumbers(str) { return (str + "").replace(/\b(\d+)((\.\d+)*)\b/g, function(a, b, c) { return (b.charAt(0) > 0 && !(c || ".").lastIndexOf(".") ? b.replace(/(\d)(?=(\d{3})+$)/g, "$1,") : b) + c; }); } 
