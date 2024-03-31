@@ -5,6 +5,7 @@ var fecha_desde = "";
 var fecha_hasta = "";
 var mostrarDias = 0;
 var CodigoPerfil = "";
+var year = 0;
 //	ARMAR ITEM DE MENU DEPENDIENDO DEL CODIGO DEL USUARIO.
 	// GESTION PRODUCCION
 	var defaultContentMenu = '<div class="dropdown">'
@@ -32,7 +33,7 @@ searching: false
 	var now = new Date();                
 	var day = ("0" + now.getDate()).slice(-2);
 	var month = ("0" + (now.getMonth() + 1)).slice(-2);
-	var year = now.getFullYear();
+	year = now.getFullYear();
 
 //
 	var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
@@ -390,11 +391,22 @@ $('body').on('click','#listadoPorDepartamentoEmpresa a',function (e){
 				 datatype: "json"
 			 },
 			 columns:[
-			   {data:"codigo"},
-			   {data:"nombre_empleado"},
-			   {data:"nombre_departamento_empresa"},
-			   {data:"nombre_cargo"},
-			   {data:"nombre_genero"},
+				{data:"codigo"},
+				{data:"nombre_empleado"},
+				{data:"nombre_departamento_empresa"},
+				{data:"nombre_cargo"},
+				{data:"nombre_genero",
+				render: function(data, type, row){
+					var genero = data;
+
+					if(genero.trim() === 'Masculino'){
+						return `<span class='font-weight-bold text-primary text-right'>`+data+`</span>`;
+					}else{
+						return `<span class='font-weight-bold text-danger text-right'>`+data+`</span>`;
+					}
+					
+				}
+				},
 			   {data:"salario",
 					render: function(data, type, row){
 						return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
@@ -489,7 +501,7 @@ $('body').on('click','#listadoPorDepartamentoEmpresa a',function (e){
 
 
 
-}); // FINAL DELA FUNCION
+}); // FINAL DELA FUNCION ///////////////////////
 function AbrirVentana(url)
 {
     window.open(url, '_blank');
@@ -544,7 +556,6 @@ function GraficoIngresos7dias() {
 		}
 		});         // cierre del gráfico.
 }
-
 function GraficoIngresosPorAño(){
 	/* datas */
 	const months = ["Jan"];
@@ -556,9 +567,37 @@ function GraficoIngresosPorAño(){
 	data: {
 		labels: months,
 		datasets: [{
-		label: '$',
-		backgroundColor: 'orange',
-		data: datas_array
+		label: 'Año ' + year,
+		data: datas_array,
+		borderWidth: 1,
+		backgroundColor: [
+			'RGBA(48,51,80,0.87)',
+			'RGBA(144,213,27,0.87)',
+			'RGBA(48,193,80,0.87)',
+			'RGBA(144,213,234,0.87)',
+			'RGBA(144,156,234,0.87)',
+			'RGBA(91,156,234,0.87)',
+			'RGBA(25,105,234,0.87)',
+			'RGBA(214,105,234,0.87)',
+			'RGBA(214,255,234,0.87)',
+			'RGBA(214,255,75,0.87)',
+			'RGBA(214,45,75,0.87)',
+			'RGBA(47,88,75,0.87)'
+			],
+			borderColor: [
+			'rgb(0,0,0)',
+			'rgb(0,0,0)',
+			'rgb(0,0,0)',
+			'rgb(0,0,0)',
+			'rgb(0,0,0)',
+			'rgb(0,0,0)',
+			'rgb(0,0,0)',
+			'rgb(0,0,0)',
+			'rgb(0,0,0)',
+			'rgb(0,0,0)',
+			'rgb(0,0,0)',
+			'rgb(0,0,0)'
+			],
 		}]
 	},
 	});
