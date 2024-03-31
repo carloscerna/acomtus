@@ -15,10 +15,17 @@ var CodigoPerfil = "";
 // FUNCION RINCIPAL
 $(function(){   
 		///////////////////////////////////////////////////////////////////////////////
-// INICIALIZARA DATATABLE. POR PLACA y NOMBRE MOTORISTA.
+// INICIALIZARA DATATABLE. 
 ///////////////////////////////////////////////////////////////////////////////
 $('#example').DataTable( { searching: false} );
 var table = $('#listadoPorTiquete').DataTable( {
+searching: false
+});
+///////////////////////////////////////////////////////////////////////////////
+// INICIALIZARA DATATABLE. 
+///////////////////////////////////////////////////////////////////////////////
+$('#example').DataTable( { searching: false} );
+var table_personal = $('#listadoPorPersonal').DataTable( {
 searching: false
 });
 // Escribir la fecha actual.
@@ -332,9 +339,7 @@ $('#lstSerieBuscarTiquete').on('change', function(){
 		  ],
 	  }); // FINAL DEL DATATABLE.
 	  obtener_data_editar("#listadoPorTiquete tbody", table);
-	}); // FINAL DEL botón.
-
-
+}); // FINAL DEL botón.
 	var obtener_data_editar = function(tbody, table){
 		///////////////////////////////////////////////////////////////////////////////
 		//	FUNCION que al dar clic buscar el registro para posterior mente abri una
@@ -352,6 +357,137 @@ $('#lstSerieBuscarTiquete').on('change', function(){
 AbrirVentana(varenviar);
 		});
 	}; // Funcion principal dentro del DataTable.
+
+///////////////////////////////////////////////////////////////////////////////	  
+// BLOQUE EXTRAER INFORMACIÓN DEL REGISTROS (PRODUCCION ASIGNADO)
+$('body').on('click','#listadoPorDepartamentoEmpresa a',function (e){
+	e.preventDefault();
+// DATA-ACCION Y HREF
+	id_ = $(this).attr('href');
+	accionAsignacion = $(this).attr('data-accion');
+	
+	// EDTIAR REGISTRO.
+		if(accionAsignacion  == 'BuscarPorDepartamentoEmpresa'){	
+			//
+			buscartodos = "BuscarPorDepartamento";	// variable global
+			if (table_personal != undefined && table_personal != null) 
+			{
+			table_personal.destroy();
+			table_personal = null;
+			} 
+			
+		 // CONFIGURACIÓN DE LA TABLA CON DATATABLE.
+		 table_personal = jQuery("#listadoPorPersonal").DataTable( {
+			 "ajax":{
+				 lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+				 destroy: true,
+				 pageLength: 5,
+				 searching: false,
+				 url:"php_libs/soporte/Tablero.php",
+				 method:"POST",
+				 data: {"accion_buscar": buscartodos, codigo_departamento: id_
+					 },
+				 datatype: "json"
+			 },
+			 columns:[
+			   {data:"codigo"},
+			   {data:"nombre_empleado"},
+			   {data:"nombre_departamento_empresa"},
+			   {data:"nombre_cargo"},
+			   {data:"nombre_genero"},
+			   {data:"salario",
+					render: function(data, type, row){
+						return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
+					}
+				},	// Preico Púyblic.
+			 ],
+			 "footerCallback": function ( row, data, start, end, display ) {
+				var api = this.api(), data;
+		
+				// Remove the formatting to get integer data for summation
+				var intVal = function ( i ) {
+					return typeof i === 'string' ?
+						i.replace(/[\$,]/g, '')*1 :
+						typeof i === 'number' ?
+							i : 0;
+				};
+		
+				// Total over all pages
+				total = api
+					.column( 5 )
+					.data()
+					.reduce( function (a, b) {
+						return intVal(a) + intVal(b);
+					}, 0 );
+					total = total.toFixed(2),
+					TotalAllPagina = new Intl.NumberFormat('en-US').format(total)
+				// Total over this page
+				pageTotal = api
+					.column( 5, { page: 'current'} )
+					.data()
+					.reduce( function (a, b) {
+						return intVal(a) + intVal(b);
+					}, 0 );
+					pagina = pageTotal.toFixed(2),
+					TotalPagina = new Intl.NumberFormat('en-US').format(pagina)
+				// Update footer
+				$( api.column( 5 ).footer() ).html(
+					'$'+ TotalPagina +' ( $'+ TotalAllPagina +')'
+				);
+			},
+			 language:{
+				url: "../acomtus/js/DataTablet/es-ES.json"
+			 },
+			 dom: "Bfrtip",
+			   buttons:[
+				 //'excel',
+				 {
+				   extend: 'excelHtml5',
+				   text: '<i class="fas fa-file-excel"></i>',
+				   titleAttr: 'Exportar a Excel',
+				   className: 'btn btn-success',
+				   filename: 'Reporte',
+				   title: NombreInstitucion, 
+				   exportOptions: {
+					columns: [0,1,2,3,4,5 ]
+				   },
+				   className: 'btn-exportar-excel',
+			   },
+			   //'pdf',
+			   {
+				   extend: 'pdfHtml5',
+				   text: '<i class="fas fa-file-pdf"></i>',
+				   titleAttr: 'Exportar a PDF',
+				   className: 'btn btn-danger',
+				   filename: 'Reporte',
+				   title: NombreInstitucion, 
+				   exportOptions: {
+					columns: [0,1,2,3,4,5 ]
+				   },
+				   className: 'btn-exportar-pdf',
+			   },
+			   //'print'
+			   {
+				   extend: 'print',
+				   text: '<i class="fa fa-print"></i>',
+				   titleAttr: 'Imprimir',
+				   className: 'btn btn-md btn-info',
+				   title: NombreInstitucion, 
+				   exportOptions: {
+					 columns: [0,1,2,3,4,5 ]
+				   },
+				   className:'btn-exportar-print'
+			   },
+			   //extra. Cantidad de registros.
+			   'pageLength'
+			   ],
+		   }); // FINAL DEL DATATABLE.
+			//
+		}
+});   // FINAL DEL IF DE LA CONSULTA QUE PROVIENE DE LA TABLA
+
+
+
 
 }); // FINAL DELA FUNCION
 function AbrirVentana(url)

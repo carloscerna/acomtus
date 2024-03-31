@@ -381,6 +381,7 @@
                     <thead>
                         <tr>
                           <th>Acción</th>
+                          <th>Código</th>
                           <th>Departamento</th>
                           <th>Masculino</th>
                           <th>Femenino</th>
@@ -396,6 +397,7 @@
                           <th></th>
                           <th></th>
                           <th></th>
+                          <th></th>
                         </tr>
                       </tfoot>
                   </table>              
@@ -403,8 +405,37 @@
                 <div class="col col-md-6">
                   <canvas id="GraficoPorDepartamentoEmpresa"></canvas>
                 </div>
+              </div> <!-- FIN DEL CLASS ROW QUE COTIENE LA TABLA Y GRAFICO DE LOS EMPLEADOS DE LA EMPRESA POR DEPARTAMENTO.-->
+              <div class="row">
+                <div class="col">
+                  <!-- DETALLE table DEL PEROSNAL DEPENDIENDO DEL PERSONAL DE LA EMPRESA. -->
+                  <table id="listadoPorPersonal" class="table table-condensed table-sm display responsive nowrap" style="width: 100%;">
+                    <thead>
+                        <tr>
+                          <th>Código</th>
+                          <th>Nombre</th>
+                          <th>Depto. Empresa</th>
+                          <th>Cargo</th>
+                          <th>Genero</th>
+                          <th>Salario</th>
+                        </tr>                
+                    </thead>
+                      <tbody id="listadoPorPersonalOk">
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                        </tr>
+                      </tfoot>
+                  </table>              
+                </div>
+                
               </div>
-
             </div>
           <div class="card-footer bg-gradient-cyan">...</div>
         </div>

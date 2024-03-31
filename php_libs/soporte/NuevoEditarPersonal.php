@@ -377,7 +377,7 @@ if($errorDbConexion == false){
 						$contenidoOK = $query_usuario.$codigo_personal;
 					}
 			break;
-			case 'BuscarCodigo':
+			case "BuscarCodigo":
 				$codigo = trim($_POST['codigo']);
 				// Armamos el query.
 				$query = "SELECT id_personal, codigo FROM personal WHERE codigo = '$codigo'";

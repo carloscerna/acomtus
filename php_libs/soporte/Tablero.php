@@ -255,7 +255,8 @@ if($errorDbConexion == false){
 						$totalActivos[] = $TotalActivos;
 						// tabla
 						$contenidoOK .= "<tr>
-							<td>
+							<td><a data-accion=BuscarPorDepartamentoEmpresa data-toggle=tooltip data-placement=left title='Ver' href=$codigo_departamento_empresa[$i] style='color: white;'><i class='fad fa-search fa-md'></i></a>
+							<td>$codigo_departamento_empresa[$i]
 							<td>$nombre_departamento_empresa[$i]
 							<td>$TotalActivosMasculino
 							<td>$TotalActivosFemenino
@@ -263,6 +264,31 @@ if($errorDbConexion == false){
 							";			
 					} // FIN DEL ROWCOUNT();	
 				}	// FIN DEL FOR();
+			break;
+			case "BuscarPorDepartamento":
+				$codigo_departamento_empresa = $_REQUEST["codigo_departamento"];
+				// Armamos el query.
+				$query = "SELECT p.codigo, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado,
+							cat_dep.descripcion as nombre_departamento_empresa, cat_gen.descripcion as nombre_genero,
+							cat_cargo.descripcion as nombre_cargo,
+							p.salario
+							FROM personal p
+								INNER JOIN catalogo_genero cat_gen ON cat_gen.codigo = p.codigo_genero
+								INNER JOIN catalogo_departamento_empresa cat_dep ON cat_dep.codigo = p.codigo_departamento_empresa
+								INNER JOIN catalogo_cargo cat_cargo ON cat_cargo.codigo = p.codigo_cargo
+									WHERE p.codigo_departamento_empresa = '$codigo_departamento_empresa' and p.codigo_estatus = '01'
+										ORDER BY p.codigo"
+						;
+				// Ejecutamos el Query.
+				$consulta = $dblink -> query($query);
+				// Validar si hay registros.
+				if($consulta -> rowCount() != 0){
+					// convertimos el objeto
+					while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+					{
+						$arreglo["data"][] = $listado;	
+					}
+				}
 			break;
 			default:
 				$mensajeError = 'Esta acci�n no se encuentra disponible';
@@ -275,7 +301,7 @@ if($errorDbConexion == false){
 else{
 	$mensajeError = 'No se puede establecer conexi�n con la base de datos';}
 // Salida de la Array con JSON.
-	if($_POST["accion"] === "BuscarTodos" or $_POST["accion"] === "BuscarTodosCodigo" or $_POST["accion"] == "BuscarTodosPorId"){
+	if($_POST["accion"] === "BuscarTodos" or $_POST["accion"] === "BuscarTodosCodigo" or $_POST["accion"] == "BuscarTodosPorId" or $_POST["accion"] == "BuscarPorDepartamento"){
 		echo json_encode($arreglo);	
 	}elseif($_POST["accion"] === "BuscarCodigo" or $_POST["accion"] === "GenerarCodigoNuevo" or $_POST["accion"] === "EditarRegistro" or $_POST["accion"] === "actualizarExistencia"){
 		echo json_encode($datos);
