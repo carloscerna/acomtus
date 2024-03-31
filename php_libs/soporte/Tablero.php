@@ -21,7 +21,13 @@ $fecha_graficos = array();
 $ingresos = array();
 $ingresoPorMes = array();
 $ingresoPorDia = 0;
-
+$TotalEmpleados = 0;
+$GraficoYear = 0;
+$TotalActivos = 0;
+$TotalActivosMasculino = 0;
+$TotalActivosFemenino = 0;
+$nombre_departamento_empresa = array();
+$totalActivos = array();
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);
 // Incluimos el archivo de funciones y conexi�n a la base de datos
@@ -135,6 +141,129 @@ if($errorDbConexion == false){
 					// Ejecutamos el query
 						$consulta = $dblink -> query($query_actualizar);           
 				break;
+				case "BuscarEmpleados":
+					$query_buscar = "SELECT p.codigo_estatus, cat_est.descripcion as descripcion_estatus, cat_gen.descripcion as descripcion_genero
+								, count(*) FILTER (WHERE p.codigo_estatus = '01') AS activos
+								, count(*) FILTER (WHERE p.codigo_estatus = '02') AS inactivos
+								, count(*) FILTER  (WHERE codigo_genero = '01' and codigo_estatus = '01')AS masculino
+								, count(*) FILTER  (WHERE codigo_genero = '02' and codigo_estatus = '01')AS femenino
+									FROM   personal p
+										INNER JOIN catalogo_estatus cat_est ON cat_est.codigo = p.codigo_estatus
+										INNER JOIN catalogo_genero cat_gen ON cat_gen.codigo = p.codigo_genero
+										GROUP  BY p.codigo_estatus, cat_est.descripcion, p.codigo_genero, cat_gen.descripcion
+										ORDER BY p.codigo_estatus, p.codigo_genero;";
+				// ejecutar consulta.
+					$consulta = $dblink -> query($query_buscar);    
+				// Validar si hay registros.
+				$fila_array = 0;
+				if($consulta -> rowCount() != 0){
+					$respuestaOK = true;
+					$num = 0;
+					// convertimos el objeto
+					while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+					{
+						// Nombres de los campos de la tabla.
+							$activos = trim($listado['activos']);
+							$inactivos = trim($listado['inactivos']);
+							$estatus = trim($listado['descripcion_estatus']);
+							$genero = trim($listado['descripcion_genero']);
+						// total empleados.
+							$TotalEmpleados = $TotalEmpleados + ($activos + $inactivos);
+						// total activos
+							$TotalActivos = $TotalActivos + $activos;
+						// total activos masculino
+							if($estatus == "Activo" && $genero == "Masculino"){
+								$TotalActivosMasculino = $activos;
+							}
+						// total activos femenino
+							if($estatus == "Activo" && $genero == "Femenino"){
+								$TotalActivosFemenino = $activos;
+							}
+					}
+						// Rellenando la array.
+						$datos[$fila_array]["TotalEmpleados"] = $TotalEmpleados;
+						$datos[$fila_array]["TotalActivos"] = $TotalActivos;
+						$datos[$fila_array]["TotalActivosMasculino"] = $TotalActivosMasculino;
+						$datos[$fila_array]["TotalActivosFemenino"] = $TotalActivosFemenino;
+					$mensajeError = "";
+				}
+				else{
+					$respuestaOK = true;
+					$contenidoOK = '';
+					$mensajeError =  '';
+				}      
+				break;
+			case "BuscarEmpleadosPorDepartamento":
+				$respuestaOK = true;
+				$contenidoOK = '';
+				$mensajeError =  '';			
+				//
+				$query_departamento_empresa = "SELECT * FROM catalogo_departamento_empresa";
+				// ejecutar consulta.
+				$consulta = $dblink -> query($query_departamento_empresa);    
+				// Validar si hay registros.
+				$fila_array = 0; $codigo_departamento_empresa = array(); $nombre_departamento_empresa = array();
+				if($consulta -> rowCount() != 0){
+					// convertimos el objeto
+					while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+					{
+						$codigo_departamento_empresa[] = trim($listado["codigo"]);
+						$nombre_departamento_empresa[] = trim($listado["descripcion"]);
+					}
+				}
+				// recorrer for
+				for ($i=0; $i < count($codigo_departamento_empresa); $i++) { 
+					$query = "SELECT p.codigo_estatus, cat_dep.descripcion as descripcion_departamento_empresa, cat_est.descripcion as descripcion_estatus, cat_gen.descripcion as descripcion_genero
+					, count(*) FILTER (WHERE p.codigo_estatus = '01') AS activos
+					, count(*) FILTER (WHERE p.codigo_estatus = '02') AS inactivos
+					, count(*) FILTER  (WHERE codigo_genero = '01' and codigo_estatus = '01')AS masculino
+					, count(*) FILTER  (WHERE codigo_genero = '02' and codigo_estatus = '01')AS femenino
+						FROM   personal p
+						INNER JOIN catalogo_estatus cat_est ON cat_est.codigo = p.codigo_estatus
+						INNER JOIN catalogo_genero cat_gen ON cat_gen.codigo = p.codigo_genero
+						INNER JOIN catalogo_departamento_empresa cat_dep ON cat_dep.codigo = p.codigo_departamento_empresa
+						WHERE p.codigo_departamento_empresa = '$codigo_departamento_empresa[$i]'
+						GROUP  BY p.codigo_estatus, cat_est.descripcion, p.codigo_genero, cat_gen.descripcion, cat_dep.descripcion
+						ORDER BY p.codigo_estatus, p.codigo_genero;";
+					// ejecutar consulta.
+					$consulta = $dblink -> query($query);    
+					//
+					$TotalActivosMasculino = 0; $TotalActivosFemenino = 0; $TotalActivos = 0; 
+					if($consulta -> rowCount() != 0){
+						// convertimos el objeto
+						while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+						{
+							// Nombres de los campos de la tabla.
+							$activos = trim($listado['activos']);
+							$inactivos = trim($listado['inactivos']);
+							$estatus = trim($listado['descripcion_estatus']);
+							$genero = trim($listado['descripcion_genero']);
+							// total empleados.
+								$TotalEmpleados = $TotalEmpleados + ($activos + $inactivos);
+							// total activos
+								$TotalActivos = $TotalActivos + $activos;
+							// total activos masculino
+								if($estatus == "Activo" && $genero == "Masculino"){
+									$TotalActivosMasculino = $activos;
+								}
+							// total activos femenino
+								if($estatus == "Activo" && $genero == "Femenino"){
+									$TotalActivosFemenino = $activos;
+								}
+						}	// FIN DEL WHILE()
+						// información para la matriz.
+						$totalActivos[] = $TotalActivos;
+						// tabla
+						$contenidoOK .= "<tr>
+							<td>
+							<td>$nombre_departamento_empresa[$i]
+							<td>$TotalActivosMasculino
+							<td>$TotalActivosFemenino
+							<td>$TotalActivos
+							";			
+					} // FIN DEL ROWCOUNT();	
+				}	// FIN DEL FOR();
+			break;
 			default:
 				$mensajeError = 'Esta acci�n no se encuentra disponible';
 			break;
@@ -160,7 +289,13 @@ else{
 			"ingresos" => $ingresos,
 			"GraficoYear" => $GraficoYear,
 			"NombreMes" => $meses,
-			"IngresoPorMes" => $ingresoPorMes
+			"IngresoPorMes" => $ingresoPorMes,
+			"TotalEmpleados" => $TotalEmpleados,
+			"TotalActivos" => $TotalActivos,
+			"TotalActivosMasculino" => $TotalActivosMasculino,
+			"TotalActivosFemenino" => $TotalActivosFemenino,
+			"NombreDepartamentoEmpresa" => $nombre_departamento_empresa,
+			"CantidadDepartamentoEmpresa" => $totalActivos
 		);
 		echo json_encode($salidaJson);
 	}

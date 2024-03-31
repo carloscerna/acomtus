@@ -4,6 +4,7 @@ var accion_ok = 'noAccion';
 var fecha_desde = "";
 var fecha_hasta = "";
 var mostrarDias = 0;
+var CodigoPerfil = "";
 //	ARMAR ITEM DE MENU DEPENDIENDO DEL CODIGO DEL USUARIO.
 	// GESTION PRODUCCION
 	var defaultContentMenu = '<div class="dropdown">'
@@ -36,14 +37,22 @@ searching: false
 $(document).ready(function(){
 		//  NOMBRE INSTITUCIÓN
 		NombreInstitucion = $("#NombreInstitucion").val();
+		// CODIGO PERFIL
+		CodigoPerfil = $("#CodigoPerfil").val();
 		//
 	fecha_desde = $("#FechaDesdePD").val();
 	mostrarDias = 7;
-	GraficoIngresosPorAño();	// datos de ingresos por mes del año.
-	GraficoIngresos7dias();		// muestra los últimos 7 días.
-	//
-	listar_serie_tiquete()
-
+	// LISTAR DATOS DEL PERSONAL DE LA EMRPESA.
+	if(CodigoPerfil == "05"){
+		GraficoPorDepartamentoEmpresa();		// muestra datos de los departamento de la empresa (cantidad de empleados masculino y femenino.).
+		listar_empleados();
+	}else{
+		GraficoIngresosPorAño();	// datos de ingresos por mes del año.
+		GraficoIngresos7dias();		// muestra los últimos 7 días.
+		//
+		listar_serie_tiquete()
+	}
+	
 	$("#formProduccionDiaria").submit();		
 });		// documentready
 // Validar Formulario para la buscque de registro segun el criterio.   
@@ -418,6 +427,51 @@ function GraficoIngresosPorAño(){
 	},
 	});
 }
+function GraficoPorDepartamentoEmpresa(){
+	/* datas */
+	const company = ["Departamentos de la Empresa"];
+	const datas_array = [2];
+
+	/* create our chart */
+	myChartPorDepartamentoEmpresa = new Chart('GraficoPorDepartamentoEmpresa', {
+	type: 'pie',
+	data: {
+		labels: company,
+		datasets: [{
+		label: [
+			'Cantidad'
+		],
+		backgroundColor: 'orange',
+		data: datas_array,
+		borderWidth: 1,
+				backgroundColor: [
+					'rgb(105, 99, 1, 0.2)',
+					'rgba(25, 159, 64, 0.9)',
+					'rgba(255, 205, 86, 0.8)',
+					'rgba(75, 192, 192, 0.7)',
+					'rgba(254, 262, 225, 0.7)',
+					'rgba(153, 102, 255, 0.9)',
+					'rgba(203, 207, 0.2)',
+					'rgba(23, 217, 0.2)',
+					'rgba(203, 247, 0.2)',
+					'rgba(201,20, 0.2)'
+				  ],
+				  borderColor: [
+					'rgb(0, 0, 0)',
+					'rgb(0, 0, 0)',
+					'rgb(0, 0, 0)',
+					'rgb(0, 0, 0)',
+					'rgb(0, 0, 0)',
+					'rgb(0, 0, 0)',
+					'rgb(0, 0, 0)',
+					'rgb(0, 0, 0)',
+					'rgb(0, 0, 0)',
+					'rgb(0, 0, 0)'
+				  ],
+		}]
+	},
+	});
+}
 // TODAS LAS TABLAS VAN HA ESTAR EN PRODUCCIONBUSCAR.*******************
 // FUNCION LISTAR TABLA catalogo_tiquete_color, inventario_tiquete
 ////////////////////////////////////////////////////////////
@@ -434,4 +488,57 @@ function listar_serie_tiquete(){
                     miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color + " - " + data[i].precio_publico + '</option>');
             }
     }, "json");    
+}    
+// TODAS LAS TABLAS VAN HA ESTAR EN PRODUCCIONBUSCAR.*******************
+// FUNCION LISTAR TABLA catalogo_tiquete_color, inventario_tiquete
+////////////////////////////////////////////////////////////
+function listar_empleados(){
+			  // PROCESO PARA ELIMINAR REGISTRO.
+			  $.ajax({
+				cache: false,
+				type: "POST",
+				dataType: "json",
+				url:"php_libs/soporte/Tablero.php",
+				data: "accion=" + "BuscarEmpleados",
+				success: function(response){
+					// Validar mensaje de error proporcionado por el response. contenido.
+					if(response.respuesta == false){
+						toastr["error"](response.mensaje, "Sistema ACOMTUS");
+					}
+					else{
+						$("label[for='LblTotalEmpleados']").text(response.TotalEmpleados);
+						$("#TotalActivos").text("Activos: " + response.TotalActivos);
+						//
+						$("label[for='LblTotalActivosMasculino']").text(response.TotalActivosMasculino);
+						$("label[for='LblTotalActivosFemenino']").text(response.TotalActivosFemenino);
+						toastr["success"](response.mensaje, "Sistema ACOMTUS");
+
+						}               
+				},
+			});
+			// DEPARTAMENTO EMPRESA
+			$.ajax({
+			cache: false,
+			type: "POST",
+			dataType: "json",
+			url:"php_libs/soporte/Tablero.php",
+			data: "accion=" + "BuscarEmpleadosPorDepartamento",
+			success: function(response){
+				// Validar mensaje de error proporcionado por el response. contenido.
+				if(response.respuesta == false){
+					toastr["error"](response.mensaje, "Sistema");
+				}
+				else{
+					$("#listadoPorDepartamentoEmpresaOk").empty();
+					$("#listadoPorDepartamentoEmpresaOk").append(response.contenido);
+					toastr["success"](response.mensaje, "Sistema Acomtus");
+					// MUESTRA LA INFOMRACIÓN DEl DEPARTAMENTO POR EMPRESA EMPLEADOS
+					console.log(myChartPorDepartamentoEmpresa); // check the console to see different properities of the current Chart object.. which of course we can set to new values and then update with the .update() function
+					myChartPorDepartamentoEmpresa.config.data.labels = response.NombreDepartamentoEmpresa; //newLabelsArray; // silo down and replace current property with new value
+					myChartPorDepartamentoEmpresa.config.data.datasets[0].data = response.CantidadDepartamentoEmpresa; //newDatasArray;
+					/* update chart */
+					myChartPorDepartamentoEmpresa.update();
+				}               
+			},
+		});
 }    

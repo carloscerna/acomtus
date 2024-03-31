@@ -231,7 +231,6 @@
           </div>
         </form>
         </section>
-
           <!-- BLOQUE DE BUSQUEDAS  TIQUETE INVENTARIO E INFORMACIÓN.-->
         <section class="col m-auto" id="BuscarPorTiquete">
           <div class="card p-0 mt-2">
@@ -291,7 +290,7 @@
                         <div class="progress">
                           <div class="progress-bar bg-info" id="progress-bar-tiquete"></div>
                         </div>
-                        <label for="LblTotalTiquetes" id="LblTotalTiquetes" class="progress-description text-bold text-xs"></label>
+                        <label for="LblTotalTiquetes" id="LblTotalTiquetes" class="progress-description text-bold text-xs" aria="TotalTiquetes"></label>
                       </div>
                     </div>
                 </div>
@@ -326,9 +325,91 @@
             </div>
             <div class="card-footer bg-gradient-cyan">...</div>
           </div>
+        </section>
+        {% endif %} <!-- CUANDO EL USUARIO SEA ROOT -->
+      
+      {% if codigo_perfil == '05' %} <!-- CUANDO EL USUARIO SEA RECURSOS HUMANOS -->
+      <section class="col m-auto" id="PorPersonal">
+        <input type="hidden" name="CodigoPerfil" id="CodigoPerfil" value="{{ codigo_perfil }}">
+        <div class="card p-0 mt-2">
+          <div class="card-header bg-gradient-navy">
+            <h5 class="card-title"><i class="fal fa-users"></i> Por Personal</h5>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Minimizar"><i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+            <div class="card-body">
+              <div class="row">
+                  <div class="col col-md-4">
+                    <div class="info-box mb-3">
+                      <span class="info-box-icon bg-gradient-info elevation-1"><i class="fad fa-users"></i></span>
+                      <div class="info-box-content">
+                        <span class="info-box-text">Empleados</span>
+                        <span class="info-box-number">
+                          <label for="LblTotalEmpleados" style="padding: 0px; font-size: large; color:darkblue; text-align: left;">#</label>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col col-md-4">
+                      <div class="info-box mb-3">
+                        <span class="info-box-icon bg-gradient-success elevation-1"><i class="fal fa-user-check"></i></span>
+                        <div class="info-box-content">
+                          <span class="info-box-text" id="TotalActivos">Activos </span>
+                          <span class="info-box-number">
+                            <div  class="row d-flex justify-content-center">
+                              <div class="col col-md-6">
+                                <i class="fad fa-male fa-lg" ></i>
+                                <label for="LblTotalActivosMasculino" style="padding: 0px; font-size: large; color:darkblue; text-align: left;"></label>
+                              </div>
+                              <div class="col col-md-6">
+                                <i class="fad fa-female fa-lg"></i>
+                                <label for="LblTotalActivosFemenino" style="padding: 0px; font-size: large; color:darkblue; text-align: left;"></label>
+                              </div>            
+                            </div>
+                          </span>
+                        </div>
+                      </div>
+                  </div>
+              </div>
+              <!-- Informacion departamento empresa por masculino y femenino -->
+              <div class="row">
+                <div class="col col-md-6">
+                  <!-- DETALLE table DEPARTAMENTO EMPRESA -->
+                  <table id="listadoPorDepartamentoEmpresa" class="table table-condensed table-sm  table-hover table-dark display responsive nowrap" style="width: 100%;">
+                    <thead>
+                        <tr>
+                          <th>Acción</th>
+                          <th>Departamento</th>
+                          <th>Masculino</th>
+                          <th>Femenino</th>
+                          <th>Total</th>
+                        </tr>                
+                    </thead>
+                      <tbody id="listadoPorDepartamentoEmpresaOk">
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                        </tr>
+                      </tfoot>
+                  </table>              
+                </div>
+                <div class="col col-md-6">
+                  <canvas id="GraficoPorDepartamentoEmpresa"></canvas>
+                </div>
+              </div>
+
+            </div>
+          <div class="card-footer bg-gradient-cyan">...</div>
+        </div>
       </section>
-        {% endif %}
-      <!-- CUANDO EL USUARIO SEA ROOT -->
+      {% endif %}
   </div> <!-- /.content-Wrapper, Contains page content. --> 
   {% endblock %}
 
