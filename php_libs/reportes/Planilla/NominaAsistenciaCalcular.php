@@ -230,6 +230,7 @@ function Header()
     }
     // Posición en donde va iniciar el texto.
     $this->SetY(25);
+
 }
 //Pie de página
 function Footer()
@@ -437,7 +438,7 @@ function FancyTable($header)
     print_r($fecha_periodo_fin);
 exit;
 */
-    $fill=false; $fillFecha = false; $i=1; $m = 0; $f = 0; $suma = 0;
+    $fill=false; $fillFecha = false; $i=1; $m = 0; $f = 0; $suma = 0; $fillaFila = false;
         while($row = $consulta -> fetch(PDO::FETCH_BOTH))
             {
                 // Variables 
@@ -463,20 +464,20 @@ exit;
                     $salario["Extra"] = 0;
                     $salario["TotalExtra"] = 0;
                     $salario["Total"] = 0;
-                    $salario["SalarioQuincena"] = round($total_dias_quincena * $pago_diario,2);
+                    $salario["SalarioQuincena"] = round($total_dias_quincena * $pago_diario,4);
                     $salario["Descuento4HFC"] = 0;
                 // DATOS AL INFORME
                     $pdf->Cell($w[0],6,$i,1,0,'C',$fill);        // núermo correlativo
                     $pdf->Cell($w[1],6,$codigo,1,0,'L',$fill);   // codigo empleado
                     $pdf->SetFont('Arial','',8);
-                        $pdf->Cell($w[2],6,$nombre_completo . ' -$ ' . $salario['Mensual'] . ' - ' . $total_dias_quincena,1,0,'L',$fill); // Nombre, Salario Nominal y días.
+                        $pdf->Cell($w[2],6,$nombre_completo . ' -$ ' . $salario['Mensual'] . ' - ' . $total_dias_quincena,1,0,'L',$fillaFila); // Nombre, Salario Nominal y días.
                     $pdf->SetFont('Arial','',9);
                 // Rellenar los cuadros segun el numero de dias. CALCULANDO DIAS COMPLETOS, MEDIO TIEMPO, ISSS, VACACIONES.
                     rellenar($total_dias_quincena);
                 // VALIDAR EL RELLENAR $I.
                     rellenar_i($i);
                 // ACUMULAR EL VALOR DE $I y establece el fondo de la caja de texto Cell();
-                    //$fill=!$fill;
+                    $fillaFila=!$fillaFila;
                     $i=$i+1;
                     //$pdf->SetFillColor(213, 213, 213);    // SIN FONDO
             }
@@ -808,10 +809,14 @@ function CambiarJornadaColor($JornadaLicenciaPermiso, $Fecha, $codigo_personal){
             }
         }
         if($JornadaLicenciaPermiso == "F" || $JornadaLicenciaPermiso == "C"){
+            $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["PorDia"];
             $pdf->SetTextColor(255,0,0);   // COLOR ROJO rgb(255,0,0)
         }
         if($JornadaLicenciaPermiso == "V" || $JornadaLicenciaPermiso == "D" || $JornadaLicenciaPermiso == "TV" || $JornadaLicenciaPermiso == "TD"){
             $pdf->SetTextColor(0,128,0);   // COLOR VERDE rgb(0,128,0)
+                if($JornadaLicenciaPermiso == "V"){
+                    $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["PorDia"];
+                }
         }
         if($JornadaLicenciaPermiso === "D" || $JornadaLicenciaPermiso == "TD"){
             // Acumular la Fecha ASistencia para luego verificar F, C, para el descuento del septimo.
@@ -1023,11 +1028,14 @@ function VerificarFechaDescuento($codigo_personal){
                     //print "<br>" . "F " . $CantidadF;
                     //print "<br>" . "C " . $CantidadC;
                     // CALCULOS...
-                    if($CantidadH > 1 ){
+                    if($CantidadH > 2 ){
                         $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + $salario["Extra4H"];
                     }
                     //
-                    if($CantidadF == 1 ){
+                    if($CantidadF >= 1 ){
+                        $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * $CantidadF);
+                        //print "<br>" . $salario["Descuento4HFC"];
+                    }else if($CantidadF > 11 ){
                         $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * 2);
                     }
                     //var_dump($salario["Descuento4HFC"]);
