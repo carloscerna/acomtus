@@ -190,7 +190,9 @@ if($errorDbConexion == false){
                             FROM inventario_tiquete it
                             INNER JOIN catalogo_tiquete_serie cat_ts ON cat_ts.id_ = it.codigo_serie
                             INNER JOIN catalogo_tiquete_color cat_tc On cat_tc.id_ = it.codigo_tiquete_color
-                            WHERE it.existencia > 0 and it.id_ = '$id_'";
+                            WHERE it.id_ = '$id_'";
+                            //WHERE it.existencia > 0 and it.id_ = '$id_'";
+                            // REVISAR PORQUE LA EXISTENCIA DA NEGATIVA.
                             // Ejecutamos el Query.
                             $consulta = $dblink -> query($query);
                             // Inicializando el array

@@ -354,8 +354,6 @@ $('#lstSerieBuscarTiquete').on('change', function(){
 			varenviar = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion="+codigo_produccion;
 			// Ejecutar la función abre otra pestaña.
 				AbrirVentana(varenviar);	
-// Ejecutar la función abre otra pestaña.
-AbrirVentana(varenviar);
 		});
 	}; // Funcion principal dentro del DataTable.
 

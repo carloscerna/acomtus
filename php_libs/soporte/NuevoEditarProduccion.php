@@ -167,12 +167,12 @@ if($errorDbConexion == false){
 				// validar desde en asignado. a < 0.
 				if($desde_asignado > $existencia){
 					$mensajeError = "Desde no puede ser mayor que la Existencia  | Tiquete.";
-					break;
+					//break;
 				}
 				// validar hasta en asignado. a < 0.
 				if($hasta_asignado > $existencia){
 					$mensajeError = "Desde no puede ser mayor que la Existencia  | Tiquete.";
-					break;
+					//break;
 				}	
 					///////////////////////////////////////////////////////////////////////////////////////
 					// TABLA PRODUCCION ASIGNADO.
