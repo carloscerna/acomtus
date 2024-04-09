@@ -293,7 +293,8 @@ $("#lstJornada").change(function () {
 // CUANDO SE ENCUENTRA EL CAMBIO DEL DEPARTAMENTO EN LA EMPRESA
 $("#lstTipoLicencia").change(function () {
 	var miselect=$("#lstTipoLicencia");
-
+    $("#CJ").val(4);    // VALOR PREDETERMINADO.
+    
 	$("#lstTipoLicencia option:selected").each(function () {
 			// ELEJIR EL VALOR DEL SELECT
 			TipoLicencia = $(this).val();
