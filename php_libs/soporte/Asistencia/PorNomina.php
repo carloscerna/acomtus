@@ -445,7 +445,7 @@ if($errorDbConexion == false){
 					$codigo_perfil = trim($_POST["CodigoPerfil"]);
 					$codigo_personal_usuario = trim($_POST["CodigoPersonal"]);
 				// 	VERIFICAR QUE TIPO DE USUARIO DESEA MODIFICAR EL REGISTRO DEL PUNTEADO.
-				if($codigo_perfil == '01' || $codigo_perfil == '02' || $codigo_perfil == '05' || $codigo_perfil == '07' || $codigo_perfil == '09' || $codigo_perfil == '10' || $codigo_perfil == '11'){
+				if($codigo_perfil == '01' || $codigo_perfil == '02' || $codigo_perfil == '05' || $codigo_perfil == '07' || $codigo_perfil == '08' || $codigo_perfil == '09' || $codigo_perfil == '10' || $codigo_perfil == '11'){
 					$query_update = "UPDATE personal_asistencia SET
 							codigo_jornada = '$codigo_jornada',
 							codigo_tipo_licencia = '$codigo_tipo_licencia',

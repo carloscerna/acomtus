@@ -306,7 +306,16 @@ $("#lstTipoLicencia").change(function () {
                     $("#CJ").val(4);    // VALOR PREDETERMINADO.
                     $("#CTL").val(TipoLicencia)
                     $("#CJV").val(2);    // valor actual de lstJornadaTV
-			}else if(TipoLicencia == '14' || TipoLicencia == '15'){	// SE HA SELECCIONADO TRABAJO EN DESCANSO
+			}else if(TipoLicencia == '13'){
+				//
+				$("#JornadaTV").hide();
+				$("#JornadaDescanso").hide();
+                $("#JornadaAsueto").hide();
+                // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
+                    $("#CJ").val(4);    // VALOR PREDETERMINADO.
+                    $("#CTL").val(TipoLicencia)
+                    $("#CJV").val(4);    // valor actual de lstJornadaTV
+            }else if(TipoLicencia == '14' || TipoLicencia == '15'){	// SE HA SELECCIONADO TRABAJO EN DESCANSO
                 //
 				$("#JornadaTV").hide();
 				$("#JornadaDescanso").show();
