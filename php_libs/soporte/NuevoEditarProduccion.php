@@ -256,12 +256,12 @@ if($errorDbConexion == false){
 					// validar desde en asignado. a < 0.
 					if($desde_asignado > $existencia){
 						$mensajeError = "Desde no puede ser mayor que la Existencia  | Tiquete.";
-						break;
+						//break;
 					}
 					// validar hasta en asignado. a < 0.
 					if($hasta_asignado > $existencia){
 						$mensajeError = "Desde no puede ser mayor que la Existencia  | Tiquete.";
-						break;
+						//break;
 					}
 					///////////////////////////////////////////////////////////////////////////////////////
 					///////////////////////////////////////////////////////////////////////////////////////
@@ -515,7 +515,7 @@ if($errorDbConexion == false){
 										## EVALUAR SI HAY COLA.
 										##
 											# otra pregunta.... CUANDO EL CODIGO ES IGUAL A VENDIDO PERO TIENE COLA
-										print	$query_prueba3 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+											$query_prueba3 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
 												and codigo_estatus = '05' and procesado = 'true' and tiquete_cola <> 0 ORDER BY fecha DESC LIMIT 1";
 											// Ejecutamos el query
 												$consulta_pa3 = $dblink -> query($query_prueba3);    
@@ -713,12 +713,12 @@ if($errorDbConexion == false){
 				// validar desde en asignado. a < 0.
 				if($desde_asignado > $existencia){
 					$mensajeError = "Desde no puede ser mayor que la Existencia  | Tiquete.";
-					break;
+					//break;
 				}
 				// validar hasta en asignado. a < 0.
 				if($hasta_asignado > $existencia){
 					$mensajeError = "Desde no puede ser mayor que la Existencia  | Tiquete.";
-					break;
+					//break;
 				}	
 					///////////////////////////////////////////////////////////////////////////////////////
 					// TABLA PRODUCCION ASIGNADO.
