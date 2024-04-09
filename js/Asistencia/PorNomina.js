@@ -259,12 +259,13 @@ $("#lstJornada").change(function () {
 	$("#lstJornada option:selected").each(function () {
 			// ELEJIR EL VALOR DEL SELECT
 			    ValorJornada=$(this).val();
-                alert(ValorJornada);
+                //alert(ValorJornada);
             // cabmiar el valor del text o hidden.
                 $('#CJ').val(ValorJornada);  // CODIGO JORNADA
 			// SE HA SELECCIONADO TRABAJÓ EN VACACIÓN
 			if(ValorJornada == '1'){
 				// VOLVER A COLOCAR EN VALOR "si"
+                    $("#CTL").val(1)    // CODIGO JORANDA TIPO LICENCIA.
 	    			$("#JornadaExtra").show();
     				//listar_jornada_cuatro_horas(4);
 			}else if(ValorJornada == "4")
