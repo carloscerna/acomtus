@@ -259,6 +259,7 @@ $("#lstJornada").change(function () {
 	$("#lstJornada option:selected").each(function () {
 			// ELEJIR EL VALOR DEL SELECT
 			    ValorJornada=$(this).val();
+                alert(ValorJornada);
             // cabmiar el valor del text o hidden.
                 $('#CJ').val(ValorJornada);  // CODIGO JORNADA
 			// SE HA SELECCIONADO TRABAJÓ EN VACACIÓN
