@@ -206,6 +206,9 @@ $("#BotonJornada, #BotonLicencia, #BotonCerrar").on('click',function () {
 		//
 		$("#JornadaTV").hide();
 		$("#JornadaDescanso").hide();
+        // Valor por defecto.
+        $('#CJ').val(2);  // CODIGO JORNADA
+        $('#CTL').val(1);  // CODIGO JORNADA
     		listar_jornada();
 	}
 	else if (this.value == "Licencia") {
@@ -218,6 +221,7 @@ $("#BotonJornada, #BotonLicencia, #BotonCerrar").on('click',function () {
 		// Listar tipo licencia.
 			listar_tipo_licencia();
         // Valor por defecto.
+            $('#CJ').val(4);  // CODIGO JORNADA
             $('#CTL').val(2);  // CODIGO JORNADA
 	}else if (this.value == "Cerrar") {
         $('#DivPermisos').hide();
@@ -294,6 +298,8 @@ $("#lstJornada").change(function () {
 $("#lstTipoLicencia").change(function () {
 	var miselect=$("#lstTipoLicencia");
     $("#CJ").val(4);    // VALOR PREDETERMINADO.
+    $("#CTL").val(2);    // VALOR PREDETERMINADO.
+    $("#CJA").val(4);    // VALOR PREDETERMINADO.
     
 	$("#lstTipoLicencia option:selected").each(function () {
 			// ELEJIR EL VALOR DEL SELECT
