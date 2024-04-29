@@ -10,16 +10,18 @@ small.required {
     border-color: transparent !important;
 }
 fieldset {
-	background-color: rgba(245, 245, 184, 0.3);
+	background-color: rgba(244, 244, 234, 0.3);
     border-radius: 6px;
     border: 1px solid #0080FF;
     padding: 10px 10px 10px 10px;
+    color: black;
+    
 }
 legend {
-	background-color: #383a38;
+	background-color: #c2cdc2;
 	border: 1.5px solid #0080FF;
 	border-radius: 4px;
-	color: white;
+	color: black;
 	font-size: 17px;
 	font-weight: bold;
 	padding: 5px 5px 3px 7px;
