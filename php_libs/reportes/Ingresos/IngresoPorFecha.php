@@ -159,7 +159,8 @@ function FancyTable($header)
         $query = "SELECT fecha, round(total_dolares) as total_dolares, round(total_colones) as total_colones, to_char(fecha, 'dy') as nombre_dia, extract('day' from fecha) as numero_dia
                 FROM produccion_diaria WHERE fecha >= '$fecha_inicio' and fecha <= '$fecha_final' ORDER BY fecha";
     }else{
-        $query = "SELECT * FROM produccion_diaria ORDER BY fecha desc limit 7";
+        $query = "SELECT fecha, round(total_dolares) as total_dolares, round(total_colones) as total_colones, to_char(fecha, 'dy') as nombre_dia, extract('day' from fecha) as numero_dia
+        FROM produccion_diaria ORDER BY fecha desc limit 7";
     }
     // crear varialbes array();
         $fecha_a = array(); $total_dolares_a = array(); $total_colones_a = array(); $salto_linea = 0; $dia_numero = 0; $yy = 60; $xx = 10; $y_linea = 0; $yyy = 0;
