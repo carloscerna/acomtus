@@ -173,11 +173,11 @@ $hora_actual = date("h:i:s a");
                 $FechaDescripcionAsueto["Descripcion"][] = $descripcion_asueto;
         }
         //var_dump($FechaDescripcionAsueto);
-        $buscar = array_search("2023-05-10", $FechaDescripcionAsueto['Fecha']);
+      /*  $buscar = array_search("2023-05-10", $FechaDescripcionAsueto['Fecha']);
         if(!empty($buscar)){
             $Fecha = $FechaDescripcionAsueto['Fecha'][$buscar];
             $Descripcion = $FechaDescripcionAsueto['Descripcion'][$buscar];
-        }
+        }*/
 
         //print $buscar . "<br>";
         //echo 'Fecah ' . $Fecha. ' Descripcion ' . $Descripcion;
@@ -206,7 +206,7 @@ function Header()
     // Persona REsponsable del Punteo.
     $this->SetFont('Arial','B',9);
     $this->SetX(30);
-    $this->Cell(160,6,mb_convert_encoding("Responsable del Punteo: " . $reporte_persona_responsable,"ISO-8859-1"),0,0,"L",false);
+    $this->Cell(130,6,mb_convert_encoding("Responsable del Punteo: " . $reporte_persona_responsable,"ISO-8859-1"),0,0,"L",false);
     $this->Cell(4,6,"",0,0,"L",false);
     if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"]){
         // SIN CONTROL
@@ -218,21 +218,27 @@ function Header()
         // JEFE DE LINEA
         $this->SetFillColor(208, 236, 231);   // CORAL CLARO
         $this->Cell(4,4,"",1,0,"L",true);   // cuadro
-            $this->SetFillColor(255,100,100);   //RGB(208,236,231)
+            $this->SetFillColor(176,242,194);   //RGB(176,242,194)
             $this->SetFont('Arial','B',7);
                 $this->Cell(25,6,mb_convert_encoding("Jefe de línea","ISO-8859-1"),0,0,"L",false);
         // DESPACHO
-        $this->SetFillColor(213,245,227);   // CORAL CLARO
+        $this->SetFillColor(141,255,74);   // CORAL CLARO
         $this->Cell(4,4,"",1,0,"L",true);   // cuadro
-            $this->SetFillColor(213, 245, 227);   //RGB(213,245,227)
+            $this->SetFillColor(141,255,74);   //RGB(141,255,74)
             $this->SetFont('Arial','B',7);
-                $this->Cell(25,6,mb_convert_encoding("Despacho","ISO-8859-1"),0,1,"L",false);
+                $this->Cell(25,6,mb_convert_encoding("Despacho","ISO-8859-1"),0,0,"L",false);
         $this->SetFont('Arial','B',9);
+        // SIN PUNTEO
+        $this->SetFillColor(255,255,100);   // CORAL CLARO
+        $this->Cell(4,4,"",1,0,"L",true);   // cuadro
+            $this->SetFillColor(235,235,164);   //RGB(235,235,164)
+            $this->SetFont('Arial','B',7);
+                $this->Cell(25,6,mb_convert_encoding("Sin Punteo","ISO-8859-1"),0,1,"L",false);
     }else{
         // SIN PUNTEO
         $this->SetFillColor(255,255,100);   // CORAL CLARO
             $this->Cell(4,4,"",1,0,"L",true);   // cuadro
-        $this->SetFillColor(255,255,100);   //RGB(255,255,100)
+        $this->SetFillColor(235,235,164);   //RGB(#ecec53)
         $this->SetFont('Arial','B',7);
             $this->Cell(25,6,mb_convert_encoding("Sin Punteo","ISO-8859-1"),0,0,"L",false);
     }
@@ -565,6 +571,7 @@ function rellenar($total_dias_quincena){
                         INNER JOIN catalogo_tipo_licencia_o_permiso cat_lp ON cat_lp.id_ = pa.codigo_tipo_licencia
                             WHERE pa.codigo_personal = '$codigo' and pa.fecha >= '$fecha_periodo_inicio' and pa.fecha <= '$fecha_periodo_fin'
                                 ORDER BY pa.fecha";
+                                
                                 /*
                             // verificar si no hay fechas vacias para rellenar por codigo de empleado.
                             $consulta_asistencia = $dblink -> query($query_asistencia);
@@ -868,7 +875,7 @@ function CambiarJornadaColor($JornadaLicenciaPermiso, $Fecha, $codigo_personal){
             $pdf->SetTextColor(0,0,255); // COLOR azul rgb(0,0,255)
                    $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + $salario["PorDia"];
             if($JornadaLicenciaPermiso == "SP"){
-                $pdf->SetFillColor(255,255,100);   // CORAL CLARO// rgb(255,255,100); SIN PUNTEO
+                $pdf->SetFillColor(235,235,164);   // CORAL CLARO// rgb(235,235,164); SIN PUNTEO
                 $pdf->SetTextColor(0,0,0);   // COLOR VERDE rgb(0,0,0)
                 $fill = true;
             }
@@ -1011,7 +1018,7 @@ function VerificarControl($fecha, $codigo_personal){
                 $codigo_produccion = 0;
             }
             if($codigo_cargo == "17"){  // codigo para el despacho.
-                $pdf->SetFillColor(213, 245, 227);    // CORAL CLARO rgb(213, 245, 227); rgb(255,100,100)
+                $pdf->SetFillColor(141,255,74);    // CORAL CLARO $this->SetFillColor(141,255,74);   //RGB(141,255,74)
                 $fillFecha = true;
                 $fill = false;
                 $codigo_produccion = 0;
@@ -1104,9 +1111,9 @@ function VerificarFechaDescuento($codigo_personal){
                     if($CantidadF !=0 ){
                       $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * 2 * $CantidadF);   // pierde el dìa actual y el septimo.
                     }
-                    // PERMISOS.
-                    if($CantidadPP !=0 ){
-                       // $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * $CantidadPP);
+                    // castigo
+                    if($CantidadC !=0 ){
+                       $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * $CantidadC);
                     }
                     // isss.
                     if($CantidadISSS !=0 ){
