@@ -487,7 +487,7 @@ exit;
                     $pdf->Cell($w[0],6,$i,1,0,'C',$fillaFila);        // núermo correlativo
                     $pdf->Cell($w[1],6,$codigo,1,0,'L',$fillaFila);   // codigo empleado
                     $pdf->SetFont('Arial','',8);
-                        $pdf->Cell($w[2],6,$nombre_completo ."-".$salario["Mensual"],1,0,'L',$fillaFila); // Nombre, Salario Nominal y días.
+                        $pdf->Cell($w[2],6,$nombre_completo ."-",1,0,'L',$fillaFila); // Nombre, Salario Nominal y días.
                     $pdf->SetFont('Arial','',9);
                     // ACUMULAR EL VALOR DE $I y establece el fondo de la caja de texto Cell();
                     $fillaFila=!$fillaFila;
