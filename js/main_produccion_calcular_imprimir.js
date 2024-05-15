@@ -40,7 +40,7 @@ $("#NumeroCorrelativo").on('keyup', function (e) {
 		fecha = $("#FechaProduccion").val();
 		reimprimir = true;
 		// Ejecutar Informe
-			varenviar = "/acomtus/php_libs/reportes/control_tiquete_ingresos_todos.php?codigo_produccion="+codigo_produccion+"&fecha="+fecha+"&reimprimir="+reimprimir;
+			varenviar = "/acomtus/php_libs/reportes/Produccion/TiqueteTodos.php?codigo_produccion="+codigo_produccion+"&fecha="+fecha+"&reimprimir="+reimprimir;
 		// Ejecutar la función abre otra pestaña.
 			AbrirVentana(varenviar);   
       }
@@ -55,7 +55,7 @@ $("#goImprimirProduccionCompleta").on('click', function (e) {
 		fecha = $("#FechaProduccion").val();
 		imprimir = "todos";
 		// Ejecutar Informe
-			varenviar = "/acomtus/php_libs/reportes/control_tiquete_ingresos_todos.php?codigo_produccion="+codigo_produccion+"&fecha="+fecha+"&imprimir="+imprimir;
+			varenviar = "/acomtus/php_libs/reportes/Produccion/TiqueteTodos.php?codigo_produccion="+codigo_produccion+"&fecha="+fecha+"&imprimir="+imprimir;
 		// Ejecutar la función abre otra pestaña.
 			AbrirVentana(varenviar);   
   });

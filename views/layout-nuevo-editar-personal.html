@@ -11,6 +11,13 @@
   <link href="js/plugins/mdb/css/mdb.min.css" rel="stylesheet">
   <!-- Your custom styles (optional) -->
   <link href="js/plugins/mdb/css/style.css" rel="stylesheet">
+  <style>
+    option {
+      width: 150px;
+      white-space:pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
 {% endblock %}
 
 {% block javascripts %}
@@ -26,6 +33,7 @@
   <script type="text/JavaScript" src="js/main_nuevo_editar_personal.js"></script>
   <script type="text/JavaScript" src="js/main_nuevo_editar_personal_portafolio.js"></script>
   <script type="text/JavaScript" src="js/main_nuevo_editar_personal_historial.js"></script>
+  <script type="text/JavaScript" src="js/Personal/Alertas.js"></script>
   <script type="text/javascript" src="js/jquery-mask/jquery.maskedinput.js"></script>
 <!-- JS para esta página. -->
 <script language="javascript">
@@ -58,6 +66,9 @@ $(document).ready(function() {
     listar_ruta();
     listar_socio();
     listar_licencia();
+    listar_CodigoAlertas();
+// Pestaña Personal Alertas.
+
 // configurar el Select2
   $(document).ready(function() {
     $('.personal').select2(
@@ -181,7 +192,7 @@ jQuery(function($){
       <div class="row">
         <div class="col-12">
           <div class="card m-auto">
-            <div class="card-header bg-gradient-navy">
+            <div class="card-header bg-gradient-navy text-white">
                   <h3 class="card-title">
                     <label for="LblNombre"></label>
                   </h3>
@@ -194,23 +205,28 @@ jQuery(function($){
             <div class="card-body">
             <!-- Nav tabs -->
             <div class="container py-2">
-              <ul class="nav nav-tabs border-0" id="myTab" role="list">
-                <li class="nav-item">
-                    <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Empleado</a>
-                </li>
-                <li class="nav-time">
-                    <a class="nav-link border border-secondary border-bottom-0" id="empresa-tab" data-toggle="tab" href="#empresa" role="tab" aria-controls="empresa" aria-selected="true">En la Empresa</a>
-                </li>                
-                <li class="nav-time">
-                  <a class="nav-link border border-secondary border-bottom-0" id="docuemntos-tab" data-toggle="tab" href="#documentos" role="tab" aria-controls="dlcumentos" aria-selected="true">Documentos</a>
-                </li>                
-                <li class="nav-time">
-                  <a class="nav-link border border-secondary border-bottom-0" id="historial-tab" data-toggle="tab" href="#historial" role="tab" aria-controls="historial" aria-selected="true">Historial</a>
-                </li>                
-                <li class="nav-time">
-                  <a class="nav-link border border-secondary border-bottom-0" id="digitalizacion-tab" data-toggle="tab" href="#digitalizacion" role="tab" aria-controls="digitalizacion" aria-selected="true">Portafolio</a>
-                </li>                
-              </ul>
+              <nav id="NavPersonalAlertas">
+                <ul class="nav nav-tabs border-0" id="myTab" role="list">
+                  <li class="nav-item">
+                      <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Empleado</a>
+                  </li>
+                  <li class="nav-time">
+                      <a class="nav-link border border-secondary border-bottom-0" id="empresa-tab" data-toggle="tab" href="#empresa" role="tab" aria-controls="empresa" aria-selected="false">En la Empresa</a>
+                  </li>                
+                  <li class="nav-time">
+                    <a class="nav-link border border-secondary border-bottom-0" id="docuemntos-tab" data-toggle="tab" href="#documentos" role="tab" aria-controls="dlcumentos" aria-selected="false">Documentos</a>
+                  </li>                
+                  <li class="nav-time">
+                    <a class="nav-link border border-secondary border-bottom-0" id="historial-tab" data-toggle="tab" href="#historial" role="tab" aria-controls="historial" aria-selected="false">Historial</a>
+                  </li>                
+                  <li class="nav-time">
+                    <a class="nav-link border border-secondary border-bottom-0" id="digitalizacion-tab" data-toggle="tab" href="#digitalizacion" role="tab" aria-controls="digitalizacion" aria-selected="false">Portafolio</a>
+                  </li>                
+                  <li class="nav-time">
+                    <a class="nav-link border border-secondary border-bottom-0" id="alertas-tab" data-toggle="tab" href="#alertas" role="tab" aria-controls="alertas" aria-selected="false">Alertas</a>
+                  </li>                
+                </ul>
+              </nav>
               <!-- Tab panes -->
               <div class="tab-content">
                 <!-- Tab INFORMACION DEL EMPLEADO -->
@@ -688,6 +704,48 @@ jQuery(function($){
                     </div>
                   </div>
                 </div> <!-- FIN DIGITALACIÓN DOCUMENTACIÓN -->
+                <!-- Tab ALERTAS -->
+                <div class="tab-pane p-2 border border-secondary" id="alertas" role="tabpanel" aria-labelledby="alertas-tab">
+                   <!-- botoneeras y alertas-->
+                   <div class="text-white">
+                      <div class="alert alert-info p-1 m-1" role="alert" id="AlertPersonalAlertas">
+                        <span id="TextoAlertPersonalAlertas">...</span>
+                      </div>
+                  </div>
+                     <!-- NAV TAB FORM - FormPersonalAlertas *INICIO*-->
+                      <form class="form-inline" id="FormPersonalAlertas" name="FormPersonalAlertas">
+                            <div class="form-group mb-1 mx-sm-1">
+                              <label for="lstPersonalAlertas">Conductas</label>
+                              <select class="form-control mx-sm-3" id="lstPersonalAlertas" name="lstPersonalAlertas"></select>
+                            </div>
+                              <button type="button" id="goGuardarPersonalAlertas" aria-label="goGuardarPersonalAlertas" class="btn btn-primary mb-2" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Guardar">
+                                <i class="far fa-save fa-1x"></i>
+                              </button>                          
+                      </form>
+                    <!-- TABLA CON LOS DATOS DEL FormPersonalAlertas. -->  
+                    <div class="bg-info text-white">_Alertas_</div>
+                        <div class="modal-body">
+                              <table id="listadoContenidoPersonalAlertas" class="table table-striped table-bordered table-hover table-condensed">
+                                <thead>
+                                  <tr>
+                                    <th><input type="checkbox" name="checkBoxAllPersonalAlertas" id="checkBoxAllPersonalAlertas" data-toggle="tooltip" data-placement="top" title="Marcar/Desmarcar Todo">
+                                      <button type="button" id="goEliminarPersonalAlertas" aria-label="goEliminarPersonalAlertas" class="btn btn-link" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Eliminar Seleccionados...">
+                                        <i class="fad fa-trash"></i>
+                                      </button>
+                                    </th>
+                                    <th>#</th>
+                                    <th>id</th>
+                                    <th>Código</th>
+                                    <th>Descripción</th>
+                                    <th></th>
+                                  </tr>
+                                </thead>
+                                  <tbody id="listaContenidoPersonalAlertas"></tbody>                            
+                                <tfoot>
+                                </tfoot>
+                            </table>
+                        </div> <!-- TABLA CON LOS DATOS DEL Organización niveles. --> 
+                </div> <!-- FIN ALERTAS -->
               </div> <!-- /.tab-content -->
             </div> <!-- /.container -->
             </div> <!-- /.card-body -->

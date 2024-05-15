@@ -12,6 +12,13 @@ TABLA: catalogo_departamento_empresa
     08	Vigilancia                    
     09	Mantenimiento                 
 */
+//
+// Establecer formato para la fecha.
+// 
+date_default_timezone_set('America/El_Salvador');
+setlocale(LC_TIME,'es_SV');
+//	Hora Actual.
+$hora_actual = date("h:i:s a"); 
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);
 // Archivos que se incluyen.
@@ -166,11 +173,11 @@ TABLA: catalogo_departamento_empresa
                 $FechaDescripcionAsueto["Descripcion"][] = $descripcion_asueto;
         }
         //var_dump($FechaDescripcionAsueto);
-        $buscar = array_search("2023-05-10", $FechaDescripcionAsueto['Fecha']);
+      /*  $buscar = array_search("2023-05-10", $FechaDescripcionAsueto['Fecha']);
         if(!empty($buscar)){
             $Fecha = $FechaDescripcionAsueto['Fecha'][$buscar];
             $Descripcion = $FechaDescripcionAsueto['Descripcion'][$buscar];
-        }
+        }*/
 
         //print $buscar . "<br>";
         //echo 'Fecah ' . $Fecha. ' Descripcion ' . $Descripcion;
@@ -199,7 +206,7 @@ function Header()
     // Persona REsponsable del Punteo.
     $this->SetFont('Arial','B',9);
     $this->SetX(30);
-    $this->Cell(160,6,mb_convert_encoding("Responsable del Punteo: " . $reporte_persona_responsable,"ISO-8859-1"),0,0,"L",false);
+    $this->Cell(130,6,mb_convert_encoding("Responsable del Punteo: " . $reporte_persona_responsable,"ISO-8859-1"),0,0,"L",false);
     $this->Cell(4,6,"",0,0,"L",false);
     if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"]){
         // SIN CONTROL
@@ -211,21 +218,27 @@ function Header()
         // JEFE DE LINEA
         $this->SetFillColor(208, 236, 231);   // CORAL CLARO
         $this->Cell(4,4,"",1,0,"L",true);   // cuadro
-            $this->SetFillColor(255,100,100);   //RGB(208,236,231)
+            $this->SetFillColor(176,242,194);   //RGB(176,242,194)
             $this->SetFont('Arial','B',7);
                 $this->Cell(25,6,mb_convert_encoding("Jefe de línea","ISO-8859-1"),0,0,"L",false);
         // DESPACHO
-        $this->SetFillColor(213,245,227);   // CORAL CLARO
+        $this->SetFillColor(141,255,74);   // CORAL CLARO
         $this->Cell(4,4,"",1,0,"L",true);   // cuadro
-            $this->SetFillColor(213, 245, 227);   //RGB(213,245,227)
+            $this->SetFillColor(141,255,74);   //RGB(141,255,74)
             $this->SetFont('Arial','B',7);
-                $this->Cell(25,6,mb_convert_encoding("Despacho","ISO-8859-1"),0,1,"L",false);
+                $this->Cell(25,6,mb_convert_encoding("Despacho","ISO-8859-1"),0,0,"L",false);
         $this->SetFont('Arial','B',9);
+        // SIN PUNTEO
+        $this->SetFillColor(255,255,100);   // CORAL CLARO
+        $this->Cell(4,4,"",1,0,"L",true);   // cuadro
+            $this->SetFillColor(235,235,164);   //RGB(235,235,164)
+            $this->SetFont('Arial','B',7);
+                $this->Cell(25,6,mb_convert_encoding("Sin Punteo","ISO-8859-1"),0,1,"L",false);
     }else{
         // SIN PUNTEO
         $this->SetFillColor(255,255,100);   // CORAL CLARO
             $this->Cell(4,4,"",1,0,"L",true);   // cuadro
-        $this->SetFillColor(255,255,100);   //RGB(255,255,100)
+        $this->SetFillColor(235,235,164);   //RGB(#ecec53)
         $this->SetFont('Arial','B',7);
             $this->Cell(25,6,mb_convert_encoding("Sin Punteo","ISO-8859-1"),0,0,"L",false);
     }
@@ -465,15 +478,16 @@ exit;
                     $salario["Extra"] = 0;
                     $salario["TotalExtra"] = 0;
                     $salario["Total"] = 0;
-                    $salario["SalarioQuincena"] = round($total_dias_quincena * $pago_diario,4);
+                    $salario["SalarioQuincena"] = round($total_dias_quincena * $salario["PorDia"],4);
                     $salario["Descuento4HFC"] = 0;
+                    $salario["TotalDiasQuincena"] = $total_dias_quincena;
                 // DATOS AL INFORME
                     $pdf->SetFillColor(234, 236, 238);   // CORAL CLARO// rgb(234, 236, 238); SIN PUNTEO
                     $pdf->SetDrawColor(0,0,0);
                     $pdf->Cell($w[0],6,$i,1,0,'C',$fillaFila);        // núermo correlativo
                     $pdf->Cell($w[1],6,$codigo,1,0,'L',$fillaFila);   // codigo empleado
                     $pdf->SetFont('Arial','',8);
-                        $pdf->Cell($w[2],6,$nombre_completo,1,0,'L',$fillaFila); // Nombre, Salario Nominal y días.
+                        $pdf->Cell($w[2],6,$nombre_completo ."-".$salario["Mensual"],1,0,'L',$fillaFila); // Nombre, Salario Nominal y días.
                     $pdf->SetFont('Arial','',9);
                     // ACUMULAR EL VALOR DE $I y establece el fondo de la caja de texto Cell();
                     $fillaFila=!$fillaFila;
@@ -529,19 +543,20 @@ function rellenar($total_dias_quincena){
     // VARIABLES GLOBALES
         global $dblink, $pdf, $salario, $w, $fill, $fecha_periodo_inicio, $fecha_periodo_fin, $codigo, $CalcularDatos,
             $DepartamentoEmpresa, $NombresCodigoDE, $fillFecha, $codigo_produccion, $link, $NocturnaValorUnitario, $JornadaLicenciaPermiso, $FechaDDT,
-            $CodigoNombreJornadaDDT, $FechaDescripcionAsueto, $fecha_periodo, $fillaFila, $codigo_cargo;
+            $CodigoNombreJornadaDDT, $FechaDescripcionAsueto, $fecha_periodo, $fillaFila, $codigo_cargo, $hora_actual;
     // VARIABLES LOCALES
         $CodigoNombreJornada = array(); $ValoresCount = array();
      // DECLARACI{ON DE AMTRICES}
         $FechaDDT = array(); //$descripcion_jornada_a_P2 = array(); $fecha_inicio_adb = array();
             $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
     // BLOQUE EXPERIMENTAL, EXTRAER LOS VALORES DE CADA JORNDAD, PERMISO, ETC. Y PASARLOS A UNA MATRIZ ASOCIATIVA.
-            $query_asistencia = "SELECT pa.codigo_personal, pa.fecha, pa.codigo_jornada, cat_j.descripcion as descripcion_jornada, 
+        $query_asistencia = "SELECT pa.codigo_personal, pa.fecha, pa.codigo_jornada, cat_j.descripcion as descripcion_jornada, 
                 pa.codigo_tipo_licencia, cat_lp.descripcion as descripcion_licencia, 
                 pa.codigo_jornada_descanso, cat_jd.descripcion as descripcion_descanso,
                 pa.codigo_jornada_vacaciones,  cat_jv.descripcion as descripcion_vacacion,
                 pa.codigo_jornada_nocturna, cat_jn.descripcion as descripcion_nocturna,
                 pa.codigo_jornada_e_4h, cat_j4.descripcion as descripcion_e_4h,
+                pa.codigo_personal_encargado,
                 cat_lp.horas as horas_licencia, cat_j.horas,
                 pa.codigo_jornada_asueto, 
                 cat_jn.descripcion as descripcion_jornada_nocturna,
@@ -556,6 +571,44 @@ function rellenar($total_dias_quincena){
                         INNER JOIN catalogo_tipo_licencia_o_permiso cat_lp ON cat_lp.id_ = pa.codigo_tipo_licencia
                             WHERE pa.codigo_personal = '$codigo' and pa.fecha >= '$fecha_periodo_inicio' and pa.fecha <= '$fecha_periodo_fin'
                                 ORDER BY pa.fecha";
+                                
+                                /*
+                            // verificar si no hay fechas vacias para rellenar por codigo de empleado.
+                            $consulta_asistencia = $dblink -> query($query_asistencia);
+                            $count_asistencia = $consulta_asistencia -> rowCount();
+                            if($consulta_asistencia -> rowCount() != 0){
+                                while($listado = $consulta_asistencia -> fetch(PDO::FETCH_BOTH))
+                                {
+                                        $fecha_asistencia = trim($listado['fecha']);
+                                        $codigo_personal_encargado = trim($listado['codigo_personal_encargado']);
+                                        $CodigoNombreJornada['FechaAsistencia'][] = $fecha_asistencia;                        
+    
+                                }   // WHILEE QUE RECORRER LA CONSULTA, CUANDO HAY REGISTROS.    
+                                if($codigo == "00924"){
+                                    for ($i=0; $i < count($fecha_periodo); $i++) { 
+                                        
+                                        $buscar = array_search($fecha_periodo[$i], $CodigoNombreJornada['FechaAsistencia']);
+                                        if(empty($buscar)){
+                                            print "Buscar: " . $buscar ." fecha_periodo " . $fecha_periodo[$i] . "<br>";
+                                            // BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
+                                            $query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo' and fecha = '$fecha_periodo[$i]'";
+                                            // Ejecutamos el Query.
+                                                $consulta_b = $dblink -> query($query_buscar);
+                                                $count_buscar = $consulta_b -> rowCount();
+                                                // Validar si hay registros.
+                                                if($count_buscar != 0){
+                                                    print "<br>";
+                                                    print "fecha a guardar: " . $fecha_periodo[$i];
+                                                    $query_guardar_fecha = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_personal_encargado) 
+                                                    VALUES('$codigo','$fecha_periodo[$i]','$hora_actual','$codigo_personal_encargado')";
+                                                    $consulta = $dblink -> query($query_guardar_fecha);
+                                                }
+                                        }
+                                    }
+                                    exit;
+                                }
+                            }
+                            */
     // EJECUTAR CONSULTA
         $consulta_asistencia = $dblink -> query($query_asistencia);
         // validar si existen archivos en la consulta segun la fecha.
@@ -586,20 +639,6 @@ function rellenar($total_dias_quincena){
                             $CodigoNombreJornada['DescripcionAsueto'][] = $descripcion_asueto;
                             $CodigoNombreJornada['FechaAsistencia'][] = $fecha_asistencia;                        
                 }   // WHILEE QUE RECORRER LA CONSULTA, CUANDO HAY REGISTROS.
-                for ($i=0; $i < count($fecha_periodo) -1; $i++) { 
-                    $buscar = array_search($fecha_periodo[$i], $CodigoNombreJornada['FechaAsistencia']);
-                    if(empty($buscar)){
-                        $CodigoNombreJornada['FechaAsistencia'][] = $fecha_periodo[$i];
-                        $CodigoNombreJornada['DescripcionJornada'][] = "VACIO";
-                        $CodigoNombreJornada['DescripcionLicencia'][] = "";
-                        $CodigoNombreJornada['DescripcionDescanso'][] = "";
-                        $CodigoNombreJornada['DescripcionVacacion'][] = "";
-                        $CodigoNombreJornada['DescripcionNocturna'][] = "";
-                        $CodigoNombreJornada['DescripcionExtra4H'][] = "";
-                        $CodigoNombreJornada['DescripcionAsueto'][] = "";
-                    }
-                }
-
                     /////////////////////////////////////////////////////////////////////////////////////////////////
                     // IMPRIMIR VALORES EN PANTALLA
                     /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -772,7 +811,7 @@ function rellenar($total_dias_quincena){
                     $fillaFila=!$fillaFila;
                     # PRESENTAR SALARIO
                     // VERIFICAR SI ESTA TODA LA ASISTENCIA COMPLETA, PARA DAR UN BUEN DATO DE SALARIO.
-                        $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - ($salario["PorDia"] * ($total_dias_quincena - $count_asistencia));
+                       $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - ($salario["PorDia"] * ($total_dias_quincena - $count_asistencia));
                     // CON EL DESCUENTO
                         $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["Descuento4HFC"];
                     // SALARIO EN PANTALLA
@@ -815,7 +854,7 @@ function rellenar($total_dias_quincena){
                     RellenarSinCalculos();
                 }
             // VACIAR LA VARIABLE DE LA FECHA PARA EL DESCUENTO
-                unset($FechaDDT); unset($CodigoNombreJornadaDDT);
+                unset($FechaDDT); unset($CodigoNombreJornadaDDT); unset($salario);
         } // FIN DEL IF QUE DETERMINA SI HAY REGISTROS.
         else{
             /// RELLENAR CON VALRIOS IS HACEN FALTA
@@ -832,17 +871,17 @@ function CambiarJornadaColor($JornadaLicenciaPermiso, $Fecha, $codigo_personal){
     global $pdf, $fill, $w, $salario, $FechaDDT;
         // CAMBIAR TAMAÑO
         $pdf->SetFont('Arial','B',8); // I : Italica; U: Normal;
-        if($JornadaLicenciaPermiso == "PP" || $JornadaLicenciaPermiso == "ISSS"   || $JornadaLicenciaPermiso == "SP"){
+        if($JornadaLicenciaPermiso == "PP" || $JornadaLicenciaPermiso == "ISSS" || $JornadaLicenciaPermiso == "SP"){
             $pdf->SetTextColor(0,0,255); // COLOR azul rgb(0,0,255)
-            $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["PorDia"];
+                   $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + $salario["PorDia"];
             if($JornadaLicenciaPermiso == "SP"){
-                $pdf->SetFillColor(255,255,100);   // CORAL CLARO// rgb(255,255,100); SIN PUNTEO
+                $pdf->SetFillColor(235,235,164);   // CORAL CLARO// rgb(235,235,164); SIN PUNTEO
                 $pdf->SetTextColor(0,0,0);   // COLOR VERDE rgb(0,0,0)
                 $fill = true;
             }
         }
         if($JornadaLicenciaPermiso == "F" || $JornadaLicenciaPermiso == "C"){
-            $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["PorDia"];
+           // $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["PorDia"];
             $pdf->SetTextColor(255,0,0);   // COLOR ROJO rgb(255,0,0)
         }
         if($JornadaLicenciaPermiso == "V" || $JornadaLicenciaPermiso == "D" || $JornadaLicenciaPermiso == "TV" || $JornadaLicenciaPermiso == "TD"){
@@ -979,7 +1018,7 @@ function VerificarControl($fecha, $codigo_personal){
                 $codigo_produccion = 0;
             }
             if($codigo_cargo == "17"){  // codigo para el despacho.
-                $pdf->SetFillColor(213, 245, 227);    // CORAL CLARO rgb(213, 245, 227); rgb(255,100,100)
+                $pdf->SetFillColor(141,255,74);    // CORAL CLARO $this->SetFillColor(141,255,74);   //RGB(141,255,74)
                 $fillFecha = true;
                 $fill = false;
                 $codigo_produccion = 0;
@@ -988,7 +1027,7 @@ function VerificarControl($fecha, $codigo_personal){
 }
 function VerificarFechaDescuento($codigo_personal){
     global $FechaDDT, $dblink, $salario;
-    $CodigoNombreJornadaDDT = array(); $CantidadC = 0; $CantidadF = 0; $CantidadH = 0;
+    $CodigoNombreJornadaDDT = array(); $CantidadC = 0; $CantidadF = 0; $CantidadH = 0; $CantidadPP = 0; $CantidadISSS = 0;
    //print $codigo_personal . "<br>"; var_dump($FechaDDT);
     //
     // si es motorista catalogo_departamento-empresa 02
@@ -1040,7 +1079,7 @@ function VerificarFechaDescuento($codigo_personal){
             // regrear la variable conteo a 0
                 $conteo_4h = 0; $descuento = 0;
             // Verificar si existen registros.
-                if($consulta_asistencia_buscar_db -> rowCount() != 0 and $cantidad_registros == 7){
+                if($consulta_asistencia_buscar_db -> rowCount() != 0){
                     while($rows = $consulta_asistencia_buscar_db -> fetch(PDO::FETCH_BOTH))
                     {
                         $descripcion_jornada = trim($rows['descripcion_jornada']);
@@ -1053,6 +1092,8 @@ function VerificarFechaDescuento($codigo_personal){
                     $CantidadH = count(array_keys($CodigoNombreJornadaDDT["DescripcionJornada"], "4H"));
                     $CantidadF = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "F"));
                     $CantidadC = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "C"));
+                    $CantidadPP = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "PP"));
+                    $CantidadISSS = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "ISSS"));
                 }   // LAZO IF....
                 // PASAR A MATRIZ F - FALTA Y C - CASTIGO Y 4H MAS DE 4H'S.
                     //var_dump($CodigoNombreJornadaDDT["DescripcionJornada"]);
@@ -1062,22 +1103,35 @@ function VerificarFechaDescuento($codigo_personal){
                     //print "<br>" . "F " . $CantidadF;
                     //print "<br>" . "C " . $CantidadC;
                     // CALCULOS...
+                    // HORAS EXTRAS 4H
                     if($CantidadH > 2 ){
                         $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + $salario["Extra4H"];
                     }
-                    //
-                    if($CantidadF >= 1 ){
-                        $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * $CantidadF);
-                        //print "<br>" . $salario["Descuento4HFC"];
-                    }else if($CantidadF > 11 ){
-                        $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * 2);
+                    // FALTAS
+                    if($CantidadF !=0 ){
+                      $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * 2 * $CantidadF);   // pierde el dìa actual y el septimo.
+                    }
+                    // castigo
+                    if($CantidadC !=0 ){
+                       $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * $CantidadC);
+                    }
+                    // isss.
+                    if($CantidadISSS !=0 ){
+                        //$salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * $CantidadISSS);
                     }
                     //var_dump($salario["Descuento4HFC"]);
-
                     unset($CodigoNombreJornadaDDT);
                     $CodigoNombreJornadaDDT = array();
-                    $CantidadC = 0; $CantidadF = 0; $CantidadH = 0;
-    } // LAZO FOR.
+                    $CantidadC = 0; $CantidadF = 0; $CantidadH = 0; $CantidadPP = 0; $CantidadISSS = 0;
+    } // LAZO FOR. para buscar datos de descuento o faltas.
+
+    if($codigo_personal == '334963'){
+        var_dump($salario);
+       print $query_asistencia_buscar_db;
+       var_dump($BuscarFechaInicio);
+       var_dump($BuscarFechaFin);
+        exit;  
+    }
 }
 function VerificarDescuento($codigo_personal){
     global $FechaDDT;
