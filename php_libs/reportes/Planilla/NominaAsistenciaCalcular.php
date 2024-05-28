@@ -480,6 +480,7 @@ exit;
                     $salario["Total"] = 0;
                     $salario["SalarioQuincena"] = round($total_dias_quincena * $salario["PorDia"],4);
                     $salario["Descuento4HFC"] = 0;
+                    $salario["DescuentoFaltas"] = 0;
                     $salario["TotalDiasQuincena"] = $total_dias_quincena;
                 // DATOS AL INFORME
                     $pdf->SetFillColor(234, 236, 238);   // CORAL CLARO// rgb(234, 236, 238); SIN PUNTEO
@@ -1062,7 +1063,7 @@ function VerificarFechaDescuento($codigo_personal){
             C - CASTIGO Ö
             4H - MAS...
         */
-    for ($bb=0; $bb < count($BuscarFechaInicio) ; $bb++) { 
+    for ($bb=0; $bb < count($BuscarFechaInicio) - 1 ; $bb++) { 
         //print "Fecha Inicio: ". $BuscarFechaInicio[$bb] . " Fecha fin: " . $BuscarFechaFin[$bb];
         // armanr query para buscar si existe la fecha en el perido seleccionar en la tabla personal asisitencia.
             $query_asistencia_buscar_db = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
@@ -1077,7 +1078,7 @@ function VerificarFechaDescuento($codigo_personal){
             // validar si existen archivos en la consulta segun la fecha.
             $cantidad_registros = $consulta_asistencia_buscar_db -> rowCount();
             // regrear la variable conteo a 0
-                $conteo_4h = 0; $descuento = 0;
+                $conteo_4h = 0; $descuento = 0; $CantidadF = 0; $CantidadPP = 0;
             // Verificar si existen registros.
                 if($consulta_asistencia_buscar_db -> rowCount() != 0){
                     while($rows = $consulta_asistencia_buscar_db -> fetch(PDO::FETCH_BOTH))
@@ -1109,7 +1110,8 @@ function VerificarFechaDescuento($codigo_personal){
                     }
                     // FALTAS
                     if($CantidadF !=0 ){
-                      $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * 2 * $CantidadF);   // pierde el dìa actual y el septimo.
+                      $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * (2 * $CantidadF));   // pierde el dìa actual y el septimo.
+                      $salario["DescuentoFaltas"] = $salario["DescuentoFaltas"] + $CantidadF;
                     }
                     // castigo
                     if($CantidadC !=0 ){
@@ -1125,7 +1127,7 @@ function VerificarFechaDescuento($codigo_personal){
                     $CantidadC = 0; $CantidadF = 0; $CantidadH = 0; $CantidadPP = 0; $CantidadISSS = 0;
     } // LAZO FOR. para buscar datos de descuento o faltas.
 
-    if($codigo_personal == '334963'){
+    if($codigo_personal == '021041'){
         var_dump($salario);
        print $query_asistencia_buscar_db;
        var_dump($BuscarFechaInicio);
