@@ -24,6 +24,31 @@ $(document).ready(function(){
 			fecha = $('#FechaAsistencia').val();
 			$('#listadoEmpleadosNomina').append("<tr><td>Buscando Registros... Por Favor Espere.</td></tr>"); 
 			buscar_personal_departamento_empresa(codigo_personal);
+			// LIMPIAR VARIABLES.ab-b-l
+			$("#CodigoPersonal").val("");
+			$("#NombrePersonal").val("");
+			//
+			$("#LblAsistencia").text('');
+			// PERMISO Y JORNADA DIV
+			$('#DivPermisos').hide();
+			$('#DivJornada').hide();
+			$("#JornadaTV").hide();
+			$("#JornadaDescanso").hide();
+			$("input:radio[value='Jornada']").prop('checked',false);
+			$("input:radio[value='Permiso']").prop('checked',false);  
+			//
+			$("#JornadaExtra").hide();
+			$("#JornadaExtra4Horas").hide();
+			$("#JornadaAsueto").hide();
+			// Activar y bloquear Permiso y seleccionar un item.
+			$("#JornadaExtraSi").prop("checked", false);
+			$("#JornadaExtraNo").prop("checked", true);
+			$("#chkNocturnidad").prop("checked", false);
+			$("#lstJornada").prop("readonly", false);
+			// limpiar el control de la foto
+			$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
+			// focus
+			$("#CodigoPersonal").focus();
 		});
 });
 $(document).ready(function(){
@@ -98,6 +123,7 @@ $("#Jornada, #Permiso").change(function () {
 		//
 		$("#JornadaTV").hide();
 		$("#JornadaDescanso").hide();
+		$("#JornadaAsueto").hide();
 		// VOLVER A COLOCAR EN VALOR "no" AMBAS BOOLEAN
 		$("#BooleanTV").val('no');
 		$("#BooleanDescanso").val('no');
@@ -114,6 +140,7 @@ $("#Jornada, #Permiso").change(function () {
 		//
 		$("#JornadaTV").hide();
 		$("#JornadaDescanso").hide();
+		$("#JornadaAsueto").hide();
 		// Listar tipo licencia.
 			listar_tipo_licencia();
 	}
@@ -290,6 +317,8 @@ $("#goEnviar").on('click', function(){
 						$("#JornadaExtraSi").prop("checked", false);
 						$("#JornadaExtraNo").prop("checked", true);
 						$("#chkNocturnidad").prop("checked", false);
+						$("#lstJornada").prop("readonly", false);
+
 						// limpiar el control de la foto
 						$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
 						// focus
@@ -347,13 +376,20 @@ function buscar_personal(codigo_personal){
 					if(data[0].asueto == "si"){
 						$("#BooleanAsueto").val(data[0].asueto);
 						$("#TextAsuetoDescripcion").text(data[0].descripcion);
-						$("#JornadaAsueto").show();
-						listar_jornada_asueto(4);
+						// Mostrar Select. Licencias o Permisos.
+						// listar licencia 9 Asueto.
+							$("#DivPermisos").show();
+								listar_tipo_licencia(16);
+						// Mostrar Select. Jornada Asueto.
+							$("#JornadaAsueto").show();
+								listar_jornada_asueto(4);
 						// Activar y bloquear Permiso y seleccionar un item.
-						$("#Jornada").prop("checked", true);
-						$('#DivJornada').show();
+						$("#Jornada").prop("checked", false);
+						$("#Jornada").prop("disabled", true);
+						$('#DivJornada').hide(); // ventana de la Jornada Normal.
 						listar_jornada(2);
 						$("#Permiso").prop("disabled", false);
+						$("#Permiso").prop("checked", true);
 						$("#lstJornada").prop("readonly", true);
 					}else{
 						$("#TextAsuetoDescripcion").text("");
@@ -361,6 +397,7 @@ function buscar_personal(codigo_personal){
 						listar_jornada_asueto(4);
 						// Activar y bloquear Permiso y seleccionar un item.
 						$("#Jornada").prop("checked", false);
+						$("#Jornada").prop("disabled", false);
 						$("#Permiso").prop("checked", false);
 						$('#DivJornada').hide();
 						$('#DivPermiso').hide();
