@@ -172,16 +172,6 @@ $hora_actual = date("h:i:s a");
                 $FechaDescripcionAsueto["Fecha"][] = $fecha_asueto;
                 $FechaDescripcionAsueto["Descripcion"][] = $descripcion_asueto;
         }
-        //var_dump($FechaDescripcionAsueto);
-      /*  $buscar = array_search("2023-05-10", $FechaDescripcionAsueto['Fecha']);
-        if(!empty($buscar)){
-            $Fecha = $FechaDescripcionAsueto['Fecha'][$buscar];
-            $Descripcion = $FechaDescripcionAsueto['Descripcion'][$buscar];
-        }*/
-
-        //print $buscar . "<br>";
-        //echo 'Fecah ' . $Fecha. ' Descripcion ' . $Descripcion;
-        //exit;
 class PDF extends FPDF
 {
 //Cabecera de página
@@ -488,7 +478,7 @@ exit;
                     $pdf->Cell($w[0],6,$i,1,0,'C',$fillaFila);        // núermo correlativo
                     $pdf->Cell($w[1],6,$codigo,1,0,'L',$fillaFila);   // codigo empleado
                     $pdf->SetFont('Arial','',8);
-                        $pdf->Cell($w[2],6,$nombre_completo ."-",1,0,'L',$fillaFila); // Nombre, Salario Nominal y días.
+                        $pdf->Cell($w[2],6,$nombre_completo ." - ".$pago_mensual,1,0,'L',$fillaFila); // Nombre, Salario Nominal y días.
                     $pdf->SetFont('Arial','',9);
                     // ACUMULAR EL VALOR DE $I y establece el fondo de la caja de texto Cell();
                     $fillaFila=!$fillaFila;
@@ -755,6 +745,7 @@ function rellenar($total_dias_quincena){
                         $ValoresCount['CantidadDescripcionDescanso'] = array_count_values($CodigoNombreJornada['DescripcionDescanso']);
                         $ValoresCount['CantidadDescripcion4H'] = array_count_values($CodigoNombreJornada['DescripcionExtra4H']);
                         $ValoresCount['CantidadDescripcionAsueto'] = array_count_values($CodigoNombreJornada['DescripcionAsueto']);
+                        $ValoresCount['CantidadDescripcionVacacion'] = array_count_values($CodigoNombreJornada['DescripcionVacacion']);
                     //
                         //print_r($ValoresCount);
                         //exit;
@@ -790,6 +781,18 @@ function rellenar($total_dias_quincena){
                         }
                     // BUSCAR LA CANTIDAD DE 1T Ó 1.5T PARA OBTENER EL EXTRA. DE UNA JORNADA DE DESCANSO.
                         foreach ($ValoresCount['CantidadDescripcionAsueto'] as $Jornada => $cantidad) {
+                            if($Jornada == "4H"){
+                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra4H"] * $cantidad);
+                            }
+                            if($Jornada == "1T"){
+                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra1T"] * $cantidad);
+                            }
+                            if($Jornada == "1.5T"){
+                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra15T"] * $cantidad);
+                            }
+                        }
+                        // BUSCAR LA CANTIDAD DE 1T Ó 1.5T PARA OBTENER EL EXTRA. DE UNA JORNADA DE TRABAJO EN VACACION
+                        foreach ($ValoresCount['CantidadDescripcionVacacion'] as $Jornada => $cantidad) {
                             if($Jornada == "4H"){
                                 $salario["Extra"] = $salario["Extra"] + ($salario["Extra4H"] * $cantidad);
                             }
@@ -1027,8 +1030,10 @@ function VerificarControl($fecha, $codigo_personal){
         }
 }
 function VerificarFechaDescuento($codigo_personal){
-    global $FechaDDT, $dblink, $salario;
+    global $FechaDDT, $dblink, $salario, $fecha_periodo_inicio, $fecha_periodo_fin;
     $CodigoNombreJornadaDDT = array(); $CantidadC = 0; $CantidadF = 0; $CantidadH = 0; $CantidadPP = 0; $CantidadISSS = 0;
+    $CodigoNombreJornadaDDT['DescripcionJornada'][] = "";
+    $CodigoNombreJornadaDDT['DescripcionLicencia'][] = "";
    //print $codigo_personal . "<br>"; var_dump($FechaDDT);
     //
     // si es motorista catalogo_departamento-empresa 02
@@ -1063,7 +1068,7 @@ function VerificarFechaDescuento($codigo_personal){
             C - CASTIGO Ö
             4H - MAS...
         */
-    for ($bb=0; $bb < count($BuscarFechaInicio) - 1 ; $bb++) { 
+    for ($bb=0; $bb < count($BuscarFechaInicio) ; $bb++) { 
         //print "Fecha Inicio: ". $BuscarFechaInicio[$bb] . " Fecha fin: " . $BuscarFechaFin[$bb];
         // armanr query para buscar si existe la fecha en el perido seleccionar en la tabla personal asisitencia.
             $query_asistencia_buscar_db = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
@@ -1078,47 +1083,50 @@ function VerificarFechaDescuento($codigo_personal){
             // validar si existen archivos en la consulta segun la fecha.
             $cantidad_registros = $consulta_asistencia_buscar_db -> rowCount();
             // regrear la variable conteo a 0
-                $conteo_4h = 0; $descuento = 0; $CantidadF = 0; $CantidadPP = 0;
+                $conteo_4h = 0; $descuento = 0; $CantidadF = 0; $CantidadPP = 0; $CantidadH = 0;
             // Verificar si existen registros.
                 if($consulta_asistencia_buscar_db -> rowCount() != 0){
                     while($rows = $consulta_asistencia_buscar_db -> fetch(PDO::FETCH_BOTH))
                     {
                         $descripcion_jornada = trim($rows['descripcion_jornada']);
                         $descripcion_licencia = trim($rows['descripcion_licencia']);
+                        $fecha = trim($rows['fecha']);
                         //
-                        $CodigoNombreJornadaDDT['DescripcionJornada'][] = $descripcion_jornada;
-                        $CodigoNombreJornadaDDT['DescripcionLicencia'][] = $descripcion_licencia;
+                        if($fecha >= $fecha_periodo_inicio && $fecha <= $fecha_periodo_fin){
+                            $CodigoNombreJornadaDDT['DescripcionJornada'][] = $descripcion_jornada;
+                            $CodigoNombreJornadaDDT['DescripcionLicencia'][] = $descripcion_licencia;
+                        }
+
                     }   // LAZO WHILE
                     //
-                    $CantidadH = count(array_keys($CodigoNombreJornadaDDT["DescripcionJornada"], "4H"));
-                    $CantidadF = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "F"));
-                    $CantidadC = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "C"));
-                    $CantidadPP = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "PP"));
-                    $CantidadISSS = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "ISSS"));
+                    if(!empty($CodigoNombreJornadaDDT["DescripcionJornada"])){
+                        $CantidadH = count(array_keys($CodigoNombreJornadaDDT["DescripcionJornada"], "4H"));
+                    }
+                    if(!empty($CodigoNombreJornadaDDT["DescripcionLicencia"])){
+                        $CantidadF = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "F"));
+                        $CantidadC = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "C"));
+                        $CantidadPP = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "PP"));
+                        $CantidadISSS = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "ISSS"));
+                    }
                 }   // LAZO IF....
                 // PASAR A MATRIZ F - FALTA Y C - CASTIGO Y 4H MAS DE 4H'S.
-                    //var_dump($CodigoNombreJornadaDDT["DescripcionJornada"]);
-                    //var_dump($CodigoNombreJornadaDDT["DescripcionLicencia"]);
-
-                    //print "<br>" . "4h " . $CantidadH;
-                    //print "<br>" . "F " . $CantidadF;
-                    //print "<br>" . "C " . $CantidadC;
                     // CALCULOS...
                     // HORAS EXTRAS 4H
-                    if($CantidadH > 2 ){
+                    if($CantidadH > 2){
                         $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + $salario["Extra4H"];
                     }
                     // FALTAS
-                    if($CantidadF !=0 ){
+                    if($CantidadF !=0){
+
                       $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * (2 * $CantidadF));   // pierde el dìa actual y el septimo.
                       $salario["DescuentoFaltas"] = $salario["DescuentoFaltas"] + $CantidadF;
                     }
                     // castigo
-                    if($CantidadC !=0 ){
+                    if($CantidadC !=0){
                        $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * $CantidadC);
                     }
                     // isss.
-                    if($CantidadISSS !=0 ){
+                    if($CantidadISSS !=0){
                         //$salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * $CantidadISSS);
                     }
                     //var_dump($salario["Descuento4HFC"]);
@@ -1127,52 +1135,13 @@ function VerificarFechaDescuento($codigo_personal){
                     $CantidadC = 0; $CantidadF = 0; $CantidadH = 0; $CantidadPP = 0; $CantidadISSS = 0;
     } // LAZO FOR. para buscar datos de descuento o faltas.
 
-    if($codigo_personal == '021041'){
+    if($codigo_personal == '102915'){
         var_dump($salario);
        print $query_asistencia_buscar_db;
        var_dump($BuscarFechaInicio);
        var_dump($BuscarFechaFin);
         exit;  
     }
-}
-function VerificarDescuento($codigo_personal){
-    global $FechaDDT;
-    /*
-    // si es motorista catalogo_departamento-empresa 02
-        $primerDias = array(); $ultimoDias = array(); $BuscarFechaInicio = array(); $BuscarFechaFin = array(); $ll = 0;
-        foreach ($FechaDDT as $fecha_dd) {
-            $fecha_actual =$fecha_dd;
-            if($ll == 0){
-                //sumo 7 día
-                $primerDia = date("d-m-Y",strtotime($fecha_actual."- 6 days")); 
-                $primerDias[] = $primerDia;
-                $ultimoDias[] = $fecha_dd;
-                //resto 1 día
-                $ultimoDia = date("d-m-Y",strtotime($fecha_actual."+ 7 days")); 
-                    $primerDias[] = date("d-m-Y",strtotime($fecha_actual."+ 1 days")); ;
-                    $ultimoDias[] = $ultimoDia;
-            }else{
-                $primerDias[] = date("d-m-Y",strtotime($fecha_actual."+ 1 days")); ;
-                $ultimoDia = date("d-m-Y",strtotime($fecha_actual."+ 7 days")); 
-                $ultimoDias[] = $ultimoDia;
-            }
-            $ll++;
-    // pasar valores unico a nuevas matrices para posterioremente buscar en dbf.
-    $BuscarFechaInicio = array_merge(array_unique($primerDias));
-    $BuscarFechaFin = array_merge(array_unique($ultimoDias));
-    */
-       // if($codigo_personal == "00611"){
-         //   $pase++;
-           // if($pase == 2){
-//                print $codigo_personal . "<br>"; var_dump($FechaDDT);
-                print "<br>";
-               // var_dump($BuscarFechaInicio);
-                print "<br>";
-                //var_dump($BuscarFechaFin);
-                $pase = 0;
-              //  exit;
-            //}
-   //}
 }
 function RellenarSinCalculos(){
     global $salario, $pdf, $DepartamentoEmpresa, $NombresCodigoDE, $fill, $w, $CodigoNombreJornada, $NocturnaValorUnitario;
@@ -1197,197 +1166,3 @@ function RellenarSinCalculos(){
 
 }
 ?>
-
-/*********************************************************************************************************************************************************** */
-
-    /*
-    // recorrer la matriz con la fecha inicio y fin
-        for ($bb=0; $bb < count($BuscarFechaInicio) ; $bb++) { 
-            //print "Fecha Inicio: ". $BuscarFechaInicio[$bb] . " Fecha fin: " . $BuscarFechaFin[$bb];
-            // armanr query para buscar si existe la fecha en el perido seleccionar en la tabla personal asisitencia.
-                $query_asistencia_buscar_db = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
-                    pa.codigo_jornada_descanso,
-                    cat_j.descripcion as descripcion_jornada, cat_j.horas,
-                    cat_lp.descripcion as descripcion_licencia, cat_lp.horas as horas_licencia
-                        FROM personal_asistencia pa 
-                        INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = pa.codigo_jornada
-                        INNER JOIN catalogo_tipo_licencia_o_permiso cat_lp ON cat_lp.id_ = pa.codigo_tipo_licencia
-                        WHERE pa.codigo_personal = '$codigo' and pa.fecha >= '$BuscarFechaInicio[$bb]' and pa.fecha <= '$BuscarFechaFin[$bb]' order by pa.fecha";
-                $consulta_asistencia_buscar_db = $dblink -> query($query_asistencia_buscar_db);
-                // validar si existen archivos en la consulta segun la fecha.
-                $cantidad_registros = $consulta_asistencia_buscar_db -> rowCount();
-                // regrear la variable conteo a 0
-                    $conteo_4h = 0; $descuento = 0;
-                // Verificar si existen registros.
-                    if($consulta_asistencia_buscar_db -> rowCount() != 0 and $cantidad_registros == 7){
-                        while($rows = $consulta_asistencia_buscar_db -> fetch(PDO::FETCH_BOTH))
-                        {
-                            // variable para verificar que tipo de permiso o días trabajados.
-                            $codigo_jornada = trim($rows['codigo_jornada']);
-                            $codigo_jornada_asueto = trim($rows['codigo_jornada_asueto']);
-                            $codigo_jornada_vacaciones = trim($rows['codigo_jornada_vacaciones']);
-                            $codigo_jornada_descanso = trim($rows['codigo_jornada_descanso']);
-                            $descripcion_jornada = trim($rows['descripcion_jornada']);
-                            $horas_jornada = trim($rows['horas']);
-                            // hOras
-                            $total_horas_jornada = $total_horas_jornada + $horas_jornada;
-                            $horas_licencia = trim($rows['horas_licencia']);
-                            $codigo_tipo_licencia = trim($rows['codigo_tipo_licencia']);
-                            $descripcion_licencia = trim($rows['descripcion_licencia']);
-                            $fecha_asistencia = trim($rows['fecha']);
-                            // 
-                            if($descripcion_jornada == "0H"){
-                                // CALCULO DEL SALARIO CUANDO HAY PERMISOS
-                                switch ($descripcion_licencia) {
-                                    case 'F':
-                                        // CUANDO SEA FALTA QUE ACCIÓN REALIZAR
-                                        $salario = $salario - (8 * $pago_diario_hora);
-                                        //$total_salario =  $salario + $extra;
-                                        break;
-                                    case 'C':
-                                        // CUANDO SEA CASTIGO QUE ACCIÓN REALIZAR
-                                        $salario = $salario - (8 * $pago_diario_hora);
-                                    }   // LAZO SWICTH...
-                            } // LAZO IF...;
-                                    // 
-                                    if($descripcion_jornada == "4H"){
-                                        $conteo_4h++;
-
-                                        switch ($conteo_4h) {
-                                            case '1':
-                                            // $salario = $salario + (8 * $pago_diario_hora);
-                                                # code...
-                                                break;
-                                                case (($conteo_4h >= 3) && ($conteo_4h <= 7)):
-                                                    $descuento = $descuento + (4 * $pago_diario_hora);
-                                                        break;
-                                            default:
-                                                # code...
-                                                break;
-                                        }
-                                } // LAZO IF...;
-                        }   // LAZO WHILE
-                        //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
-                        $salario = $salario - $descuento;
-                        $total_salario = ($salario + $total_tiempo_extra + $asuetos);
-                    }   // LAZO IF....
-
-                    if($codigo == '001200'){
-                        print "<br>Codigo: " . $codigo;
-                        print "<br>Nombre Completo: " . $nombre_completo;
-                        print "<br>Pago mensual: " . $pago_mensual;
-                        print "<br>Pago diario: $ " . $pago_diario_hora;
-                        print "<br>Descuento: $ " . $descuento;
-                        print "<br>conteo 4h # " . $conteo_4h;
-                        print "<br>Salario: $ " . $salario;
-                        print "<br>Tiempo Extra: $ ". $total_tiempo_extra;
-                        print "<br>Total Salario: $ " . $total_salario;
-                        
-                        print "<br>Consulta: <br>";
-                        print  $query_asistencia_buscar_db;
-                        exit;
-                    }
-
-        } // LAZO FOR.
-    }else{
-    // Array que contiene el nombre del d{ia. apartir de la fecha}
-    $primerDias = array(); $ultimoDias = array(); $BuscarFechaInicio = array(); $BuscarFechaFin = array();
-    foreach ($fecha_inicio_adb as $fecha_dd) {
-        //echo "<br>". $fecha_dd  . "<br>";
-        $fecha = $fecha_dd;
-        $fecha_partial = explode("-",$fecha);
-        $year=$fecha_partial[0];
-        $month=$fecha_partial[1];
-        $day=(int)$fecha_partial[2];
-        //print "Dia: $day Mes: $month Año: $year";
-            # Obtenemos el numero de la semana
-            $semana=date("W",mktime(0,0,0,$month,$day,$year));
-            # Obtenemos el día de la semana de la fecha dada
-            $diaSemana=date("w",mktime(0,0,0,$month,$day,$year));
-            # el 0 equivale al domingo...
-            if($diaSemana==0)
-                $diaSemana=7;
-            # A la fecha recibida, le restamos el dia de la semana y obtendremos el lunes
-            $primerDia = date("d-m-Y",mktime(0,0,0,$month,$day-$diaSemana+1,$year));
-            # A la fecha recibida, le sumamos el dia de la semana menos siete y obtendremos el domingo
-            $ultimoDia = date("d-m-Y",mktime(0,0,0,$month,$day+(7-$diaSemana),$year));
-            $primerDias[] = $primerDia;
-            $ultimoDias[] = $ultimoDia;
-        }
-    // pasar valores unico a nuevas matrices para posterioremente buscar en dbf.
-    $BuscarFechaInicio = array_merge(array_unique($primerDias));
-    $BuscarFechaFin = array_merge(array_unique($ultimoDias));
-    // recorrer la matriz con la fecha inicio y fin
-        for ($bb=0; $bb < count($BuscarFechaInicio) ; $bb++) { 
-            //print "Fecha Inicio: ". $BuscarFechaInicio[$bb] . " Fecha fin: " . $BuscarFechaFin[$bb];
-            // armanr query para buscar si existe la fecha en el perido seleccionar en la tabla personal asisitencia.
-            $query_asistencia_buscar_db = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
-                    pa.codigo_jornada_descanso,
-                    cat_j.descripcion as descripcion_jornada, cat_j.horas,
-                    cat_lp.descripcion as descripcion_licencia, cat_lp.horas as horas_licencia
-                        FROM personal_asistencia pa 
-                        INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = pa.codigo_jornada
-                        INNER JOIN catalogo_tipo_licencia_o_permiso cat_lp ON cat_lp.id_ = pa.codigo_tipo_licencia
-                        WHERE pa.codigo_personal = '$codigo' and pa.fecha >= '$BuscarFechaInicio[$bb]' and pa.fecha <= '$BuscarFechaFin[$bb]'
-                        ORDER BY pa.fecha";
-                $consulta_asistencia_buscar_db = $dblink -> query($query_asistencia_buscar_db);
-                // validar si existen archivos en la consulta segun la fecha.
-                    $cantidad_registros = $consulta_asistencia_buscar_db -> rowCount();
-                // regrear la variable conteo a 0
-                    $conteo_4h = 0; $descuento = 0;
-                // Verificar si existen registros.
-                    if($consulta_asistencia_buscar_db -> rowCount() != 0 and $cantidad_registros == 7)
-                    {
-                        while($rows = $consulta_asistencia_buscar_db -> fetch(PDO::FETCH_BOTH))
-                        {
-                            // variable para verificar que tipo de permiso o días trabajados.
-                            $codigo_jornada = trim($rows['codigo_jornada']);
-                            $codigo_jornada_asueto = trim($rows['codigo_jornada_asueto']);
-                            $codigo_jornada_vacaciones = trim($rows['codigo_jornada_vacaciones']);
-                            $codigo_jornada_descanso = trim($rows['codigo_jornada_descanso']);
-                            $descripcion_jornada = trim($rows['descripcion_jornada']);
-                            $horas_jornada = trim($rows['horas']);
-                            // hOras
-                            //$total_horas_jornada = $total_horas_jornada + $horas_jornada;
-                            $horas_licencia = trim($rows['horas_licencia']);
-                            $codigo_tipo_licencia = trim($rows['codigo_tipo_licencia']);
-                            $descripcion_licencia = trim($rows['descripcion_licencia']);
-                            $fecha_asistencia = trim($rows['fecha']);
-                            // 
-                            if($descripcion_jornada == "0H"){
-                                // CALCULO DEL SALARIO CUANDO HAY PERMISOS
-                                switch ($descripcion_licencia) {
-                                    case 'F':
-                                        // CUANDO SEA FALTA QUE ACCIÓN REALIZAR
-                                        $salario = $salario - (8 * $pago_diario_hora);
-
-                                        break;
-                                    case 'C':
-                                        // CUANDO SEA CASTIGO QUE ACCIÓN REALIZAR
-                                    $salario = $salario - (8 * $pago_diario_hora);
-                                    }   // LAZO SWICTH...
-                            } // LAZO IF...
-                            // 
-                            if($descripcion_jornada == "4H"){
-                                $conteo_4h++;
-
-                                switch ($conteo_4h) {
-                                    case '1':
-                                    // $salario = $salario + (8 * $pago_diario_hora);
-                                        # code...
-                                        break;
-                                    case (($conteo_4h >= 3) && ($conteo_4h <= 7)):
-                                            $descuento = $descuento + (4 * $pago_diario_hora);
-                                                break;
-                                    default:
-                                        # code...
-                                        break;
-                                    }
-                                } // LAZO IF...;
-                        }   // LAZO WHILE
-                            //  CALCULAR EL SALARIO DE ESTE CODIGO DE EMPLEADO.
-                            $total_salario = $salario + $total_tiempo_extra + $asuetos;
-                    }   // LAZO IF....
-        } // LAZO FOR.
-    }   // lazo if para saber como buscar la fecha de descanso.
-    */
