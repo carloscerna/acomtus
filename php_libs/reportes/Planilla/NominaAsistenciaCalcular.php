@@ -891,7 +891,7 @@ function CambiarJornadaColor($JornadaLicenciaPermiso, $Fecha, $codigo_personal){
         if($JornadaLicenciaPermiso == "V" || $JornadaLicenciaPermiso == "D" || $JornadaLicenciaPermiso == "TV" || $JornadaLicenciaPermiso == "TD"){
             $pdf->SetTextColor(0,128,0);   // COLOR VERDE rgb(0,128,0)
                 if($JornadaLicenciaPermiso == "V"){
-                    $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["PorDia"];
+                    //$salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["PorDia"];
                 }
         }
         if($JornadaLicenciaPermiso === "D" || $JornadaLicenciaPermiso == "TD"){
