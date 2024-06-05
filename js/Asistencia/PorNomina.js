@@ -86,9 +86,23 @@ $(function(){ // iNICIO DEL fUNCTION.
                                         }else{
                                             $("#NocturnidadSiNo").hide();
                                         }
-                                    // ocultar
-                                        $('#JornadaExtra').hide();
-                                        $('#JornadaExtra4Horas').hide();
+                                    // ocultar o mostrar depende de la Licencia de Asueto.
+                                        if($("#CTL").val() == "16"){
+                                            $("#BotonJornada").prop("disabled", true);
+                                            $('#JornadaExtra').hide();
+                                            $('#JornadaExtra4Horas').hide();
+                                            $("#DivPermisos").show();
+                                            // listar tipo de licencia.
+                                                listar_tipo_licencia($("#CTL").val());
+                                                $("#JornadaAsueto").show();
+                                                listar_jornada_asueto($("#CJA").val());
+                                        }else{
+                                            $("#BotonJornada").prop("disabled", false);
+                                            $('#JornadaExtra').hide();
+                                            $('#JornadaExtra4Horas').hide();
+                                            $("#DivPermisos").hide();
+                                            $("#JornadaAsueto").hide();
+                                        }
                                     // reestablecer el accion a=ActualizarJOrnada
                                         accion = "ActualizarJornada";
                                 },"json");
