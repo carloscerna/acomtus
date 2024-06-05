@@ -177,7 +177,8 @@ function VerImprimir(){
 // verficar cuantas series hay y asi poder dividirlas
 // Validar si hay registros.ç
 $consulta_serie = $dblink -> query($query_c);      
-$consulta = $dblink -> query($query_c);              
+$consulta = $dblink -> query($query_c);         
+$nombre_serie_ = array();
 if($consulta_serie -> rowCount() != 0){
     $nombre_serie_ = array(); $nombre_serie_contar_valores = array();
     while($listado_serie = $consulta_serie -> fetch(PDO::FETCH_BOTH))
@@ -186,14 +187,20 @@ if($consulta_serie -> rowCount() != 0){
         $nombre_ruta = trim($listado_serie['nombre_ruta']);
     }
 }
-// unica array
-	$nombre_serie_unique = array_unique($nombre_serie_);
-	$nombre_serie_contar_valores = array_count_values($nombre_serie_);
+// unica array validar si no está vacia o nula.
+    if($nombre_serie_ != null){
+        $nombre_serie_unique = array_unique($nombre_serie_);
+        $nombre_serie_contar_valores = array_count_values($nombre_serie_);        
+    }else{
+        $nombre_serie_ = array();
+        $nombre_serie_unique = array();
+        $nombre_serie_contar_valores = 0;
+    }
+
 //	print_r($nombre_serie_contar_valores);
 	if(count($nombre_serie_unique) > 1 && $nombre_ruta == 'Cobradores'){
         // SALTO DE PAGINA.
         $pdf->AddPage(); 
-        //
         //
         // VARIABLES DE COLUMNA, FILA Y TOTAL INGRESO OK
             $pdf->SetY(52);
@@ -202,7 +209,6 @@ if($consulta_serie -> rowCount() != 0){
             $pdf->SetX($colx_1); $linea++;
     //
         foreach($nombre_serie_contar_valores as $key=>$value) {
-			//print "<br>" . $key . " " . $value . "<br>";
 			// consulta.
 			$query_c = "SELECT p.id_ AS id_produccion, p.fecha, p.codigo_inventario_tiquete, p.codigo_personal, p.fecha, p.codigo_ruta,
 			cat_ts.descripcion as nombre_serie,
@@ -217,8 +223,7 @@ if($consulta_serie -> rowCount() != 0){
 				INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = p.codigo_jornada
 				INNER JOIN catalogo_ruta cat_r ON cat_r.id_ruta = p.codigo_ruta
 					WHERE pa.codigo_produccion = '$codigo_produccion_i' and pa.codigo_inventario_tiquete = '$key'
-						ORDER BY pa.id_";
-			
+						ORDER BY pa.id_";	
 			$consulta = $dblink -> query($query_c);              
 				// RECORRER LA CONSULTA
 				while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
@@ -288,7 +293,6 @@ if($consulta_serie -> rowCount() != 0){
                 $pdf->RotatedText(15,120,"Total Entregado: $ ",0);
                 $pdf->RotatedText(58,120,$totalserie,0);
 	}else{
-
         // Ejecutamos el query
             $totalIngresoOK = 0;
             $consulta = $dblink -> query($query_c);      
@@ -323,7 +327,6 @@ if($consulta_serie -> rowCount() != 0){
                         $total = ($listado['total']);
                         $cantidad = ($listado['cantidad']);
                     }
-
                     //
                     $cantidadTiquete = $cantidadTiquete + $cantidad;
                     $fecha = cambiaf_a_normal(trim($listado['fecha']));
@@ -365,5 +368,4 @@ if($consulta_serie -> rowCount() != 0){
             }
         }
 }
-
 ?>
