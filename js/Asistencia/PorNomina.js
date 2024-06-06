@@ -87,7 +87,7 @@ $(function(){ // iNICIO DEL fUNCTION.
                                             $("#NocturnidadSiNo").hide();
                                         }
                                     // ocultar o mostrar depende de la Licencia de Asueto.
-                                        if($("#CTL").val() == "16"){
+                                        if($("#CTL").val() == "16" || $("#CTL").val() == "15"){
                                             $("#BotonJornada").prop("disabled", true);
                                             $('#JornadaExtra').hide();
                                             $('#JornadaExtra4Horas').hide();
@@ -338,7 +338,7 @@ $("#lstTipoLicencia").change(function () {
                     $("#CJ").val(4);    // VALOR PREDETERMINADO.
                     $("#CTL").val(TipoLicencia)
                     $("#CJV").val(4);    // valor actual de lstJornadaTV
-            }else if(TipoLicencia == '14' || TipoLicencia == '15'){	// SE HA SELECCIONADO TRABAJO EN DESCANSO
+            }else if(TipoLicencia == '14'){	// SE HA SELECCIONADO TRABAJO EN DESCANSO
                 //
 				$("#JornadaTV").hide();
 				$("#JornadaDescanso").show();
@@ -348,7 +348,22 @@ $("#lstTipoLicencia").change(function () {
                         $("#CJ").val(4);    // VALOR PREDETERMINADO.
                         $("#CTL").val(TipoLicencia)
                         $("#CJD").val(2);    // valor actual de lstJornadaDescanso
+            }else if(TipoLicencia == '15'){	// SE HA SELECCIONADO TRABAJO EN DESCANSO ASUETO
+                //
+                $("#JornadaTV").hide();
+                $("#JornadaDescanso").hide();
+                $("#JornadaAsueto").show();
+                    listar_jornada_asueto(4); // Una tanda
+                        // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
+                        $("#CJ").val(4);    // VALOR PREDETERMINADO.
+                        $("#CTL").val(TipoLicencia)
+                        $("#CJD").val(4);    // valor actual de lstJornadaDescanso
+                        $("#CJV").val(4);    // valor actual de lstJornadaDescanso
+                        $("#CJA").val(4);    // valor actual de lstJornadaAsueto
+                        $("#CJE4H").val(4);    // valor actual de lstJornadaAsueto
+                        $("#CJN").val(4);    // valor actual de lstJornadaAsueto
 			}else if(TipoLicencia == '19'){	// SE HA SELECCIONADO TRABAJO EN ASUETO
+
                 // presar CHECK BOX NOCTURNIDAD. MANTENIMIENTO Y VIGILANCIA
                 if(codigo_departamento_empresa == "08" || codigo_departamento_empresa == "09"){
                     $("#NocturnidadSiNoAsueto").show();
@@ -375,10 +390,18 @@ $("#lstTipoLicencia").change(function () {
 				$("#JornadaDescanso").hide();
                 $("#JornadaAsueto").show();
                 //
-            }else if(TipoLicencia == "16"){
+            }else if(TipoLicencia == "16"){ // cuado es solo el asueto y ha trabajado.
+                //
+                $("#JornadaTV").hide();
+                $("#JornadaDescanso").hide();
+                $("#JornadaAsueto").show();
                 // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
                 $("#CJ").val(4);    // VALOR PREDETERMINADO.
                 $("#CTL").val(TipoLicencia)
+                listar_jornada_asueto(4); // Una tanda
+                $("#CJA").val(4);    // valor actual de lstJornadaAsueto
+                $("#CJD").val(4);    // valor actual de lstJornadaDescanso
+                $("#CJV").val(4);    // valor actual de lstJornadaTV
             }else{
 				// OCULTAR
 				$("#JornadaDescanso").hide();
@@ -762,13 +785,13 @@ function listar_jornada_asueto(codigo_jornada){
             miselect.empty();
             for (var i=0; i<data.length; i++) {
                 if(codigo_jornada == data[i].codigo){
-                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
+                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
                 }else{
                     if(data[i].codigo == 5)
                     {
 
                     }else{
-                        miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+                        miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " +  data[i].descripcion_completa + '</option>');
                     }
                 }
             }
