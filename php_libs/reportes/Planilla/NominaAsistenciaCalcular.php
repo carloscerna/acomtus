@@ -646,14 +646,14 @@ function rellenar($total_dias_quincena){
                             }
                         // REVISAR SI ANTES HAY DESCANSO EN ASUETO.
                             $JornadaLicenciaPermiso = $CodigoNombreJornada["DescripcionLicencia"][$fila_array]; // VARIABLES CUANDO ES DIFERENTE DE 1T. (1 TANDA)
-                                if($JornadaLicenciaPermiso != "TDA"){
+                                if($JornadaLicenciaPermiso != "TDA" || $JornadaLicenciaPermiso != "DA"){
                                 // REVISAR SI LA FECHA ES DE ASUETO.
                                     $buscar = array_search($CodigoNombreJornada["FechaAsistencia"][$fila_array], $FechaDescripcionAsueto['Fecha']);
                                     if(!empty($buscar)){
                                         $Fecha = $FechaDescripcionAsueto['Fecha'][$buscar];
                                         $Descripcion = $FechaDescripcionAsueto['Descripcion'][$buscar];
                                         //
-                                            $Jornada = "A";  
+                                            //$Jornada = "A";  
                                     }
                                 }
 
@@ -686,6 +686,21 @@ function rellenar($total_dias_quincena){
                                             // Revisar si hay jornada Extra TRABAJO VACACION
                                             $JornadaCodigoExtra = $CodigoNombreJornada["DescripcionVacacion"][$fila_array];
                                             JornadaExtra($JornadaCodigoExtra);
+                                        break;
+                                        case 'A':  // descanso asueto
+                                            // Revisar si hay jornada Extra TRABAJO VACACION
+                                            $JornadaCodigoExtra = $CodigoNombreJornada["DescripcionAsueto"][$fila_array];
+                                                JornadaExtra($JornadaCodigoExtra);
+                                        break;
+                                        case 'TA':  // descanso asueto
+                                            // Revisar si hay jornada Extra TRABAJO VACACION
+                                            $JornadaCodigoExtra = $CodigoNombreJornada["DescripcionAsueto"][$fila_array];
+                                                JornadaExtra($JornadaCodigoExtra);
+                                        break;
+                                        case 'DA':  // descanso asueto
+                                            // Revisar si hay jornada Extra TRABAJO VACACION
+                                            $JornadaCodigoExtra = $CodigoNombreJornada["DescripcionAsueto"][$fila_array];
+                                                JornadaExtra($JornadaCodigoExtra);
                                         break;
                                         case 'TDA':
                                             // Revisar si hay jornada Extra TRABAJO VACACION
@@ -898,9 +913,9 @@ function CambiarJornadaColor($JornadaLicenciaPermiso, $Fecha, $codigo_personal){
             // Acumular la Fecha ASistencia para luego verificar F, C, para el descuento del septimo.
                 $FechaDDT[] = $Fecha;
         }
-        if($JornadaLicenciaPermiso == "A" || $JornadaLicenciaPermiso == "TDA"){
+        if($JornadaLicenciaPermiso == "A" || $JornadaLicenciaPermiso == "TDA" || $JornadaLicenciaPermiso == "DA" || $JornadaLicenciaPermiso == "TA" || $JornadaLicenciaPermiso == "VDA"){
             // Acumular la Fecha ASistencia para luego verificar F, C, para el descuento del septimo.
-                if($JornadaLicenciaPermiso == "TDA"){
+                if($JornadaLicenciaPermiso == "TDA" || $JornadaLicenciaPermiso == "DA"){
                     $FechaDDT[] = $Fecha;
                 }
             // MARCAR EL ASUETO CON UN COLOR.
