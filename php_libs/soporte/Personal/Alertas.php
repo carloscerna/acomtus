@@ -83,7 +83,7 @@ if($errorDbConexion == false){
 							<td>$id_
 							<td>$nombre_alerta
 							<td>$nombre_riesgo
-							<td><a data-accion=EliminarAlerta class='btn btn-xs btn-warning' data-toggle='tooltip' data-placement='top' title='Eliminar' href=$id_><i class='fas fa-trash'></i></a>"
+							<td><a data-accion=eliminarAlertas class='btn btn-xs btn-warning' data-toggle='tooltip' data-placement='top' title='Eliminar' href=$id_><i class='fas fa-trash'></i></a>"
 						;
 					}
 				}else{
@@ -115,10 +115,10 @@ if($errorDbConexion == false){
 					$mensajeError = "Registro Guardado.";
 				}
 			break;
-			case 'EliminarModalidad':
+			case 'eliminarAlertas':
 				// Armamos el query
 				$id_ = $_REQUEST["id_"];
-					$query = "DELETE FROM organizar_ann_lectivo_ciclos WHERE id_organizar_ann_lectivo_ciclos = '$id_'";
+					$query = "DELETE FROM personal_alertas WHERE id_ = '$id_'";
 				// Ejecutamos el query
 					$count = $dblink -> exec($query);
 				// Validamos que se haya actualizado el registro
@@ -143,7 +143,7 @@ else{
 }	// FIN DE LA CONDICON PRINCRIPAL
 // CONDICIONES RESULTADO DEL JSON Y DATA[]
 $CodigoAlertas = $_POST['accion'];
-if($CodigoAlertas == "BuscarAlertas" || $CodigoAlertas == "guardarAlertas")
+if($CodigoAlertas == "BuscarAlertas" || $CodigoAlertas == "guardarAlertas" || $CodigoAlertas == "eliminarAlertas")
 {
 // Armamos array para convertir a JSON
 	$salidaJson = array("respuesta" => $respuestaOK,

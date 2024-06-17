@@ -72,7 +72,7 @@ $(function(){
                                 },"json");
                     }
                     // ELIMINAR REGISTRO Modalidad.
-                    if($(this).attr('data-accion') == 'eliminar_Modalidad'){
+                    if($(this).attr('data-accion') == 'eliminarAlertas'){
                         //	ENVIAR MENSAJE CON SWEETALERT 2, PARA CONFIRMAR SI ELIMINA EL REGISTRO.
                         const swalWithBootstrapButtons = Swal.mixin({
                             customClass: {
@@ -103,38 +103,17 @@ $(function(){
                                     cache: false,                     
                                     type: "POST",                     
                                     dataType: "json",                     
-                                    url:"php_libs/soporte/Mantenimiento/Servicio Educativo/phpAjaxServicioEducativo.php",                     
+                                    url:"php_libs/soporte/Personal/Alertas.php",                     
                                     data: {                     
-                                            accion_buscar: 'eliminar_Modalidad', codigo_id_: Id_Editar_Eliminar,
+                                            accionAlertas: 'eliminarAlertas', id_: Id_Editar_Eliminar,
                                             },                     
                                     success: function(response) {                     
                                             if (response.respuesta === true) {                     		
-                                                // Asignamos valor a la variable acción
-                                                    $('#accion_Modalidad').val('BuscarModalidad');
-                                                    var codigo_se = $("#lstcodigose").val();
-                                                    accion_modalidad = 'BuscarModalidad';
-                                                    //
-                                                    //  CONDICONAR EL SELECT SERVICIO EDUCATIVO.
-                                                    //
-                                                    if(codigo_se == "00"){
-                                                        $("#AlertSE").css("display", "block");
-                                                        return;
-                                                    }
                                                     // Llamar al archivo php para hacer la consulta y presentar los datos.
-                                                    $.post("php_libs/soporte/Mantenimiento/Servicio Educativo/phpAjaxServicioEducativo.php",  {accion: accion_modalidad, codigo_se: codigo_se},
-                                                        function(response) {
-                                                        if (response.respuesta === true) {
-                                                            toastr["info"]('Registros Encontrados', "Sistema");
-                                                        }
-                                                        if (response.respuesta === false) {
-                                                            toastr["warning"]('Registros No Encontrados', "Sistema");
-                                                        }                                                                                    // si es exitosa la operación
-                                                            $('#listaContenidoSE').empty();
-                                                            $('#listaContenidoSE').append(response.contenido);
-                                                        },"json");
+                                                BuscarPersonalAlertas();
                                             }
                                             if (response.respuesta === false) {                     		
-                                                toastr["info"]('Registro no Eliminado... El còdigo está está activo en la Tabla Notas.', "Sistema");
+                                                toastr["info"]('Registro no Eliminado...', "Sistema");
                                             }
                                     }                     
                                     });
@@ -155,15 +134,15 @@ $(function(){
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ACTIVAR Y DESACTIVAR CHECKBOX DE LA TABLA.
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	$("#checkBoxAllSEModalidad").on("change", function () {
-		$("#listadoContenidoSE tbody input[type='checkbox'].case").prop("checked", this.checked);
+	$("#checkBoxAllPersonalAlertas").on("change", function () {
+		$("#listadoContenidoPersonalAlertas tbody input[type='checkbox'].case").prop("checked", this.checked);
 	});
 	
-	$("#listadoContenidoSEModalidad tbody").on("change", "input[type='checkbox'].case", function () {
-	  if ($("#listadoContenidoSEModalidad tbody input[type='checkbox'].case").length == $("#listadoContenidoSEModalidad tbody input[type='checkbox'].case:checked").length) {
-		  $("#checkBoxAllSEModalidad").prop("checked", true);
+	$("#listadoContenidoPersonalAlertas tbody").on("change", "input[type='checkbox'].case", function () {
+	  if ($("#listadoContenidoPersonalAlertas tbody input[type='checkbox'].case").length == $("#listadoContenidoPersonalAlertas tbody input[type='checkbox'].case:checked").length) {
+		  $("#checkBoxAllPersonalAlertas").prop("checked", true);
 	  } else {
-		  $("#checkBoxAllSEModalidad").prop("checked", false);
+		  $("#checkBoxAllPersonalAlertas").prop("checked", false);
 	  }
 	 });	
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
