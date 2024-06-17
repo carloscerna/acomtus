@@ -38,12 +38,19 @@ if($errorDbConexion == false){
 				$statusTipo = array ("01" => "btn-success", "02" => "btn-warning", "03" => "btn-danger");
 				$codigoPersonal = $_POST['codigoPersonal'];
 				// Armamos el query.
-					$query = "SELECT pA.id_, pA.codigo_empleado, pA.codigo_alerta  FROM personal_alertas pA WHERE pA.codigo_empleado = '$codigoPersonal'";
+					$query = "SELECT pA.id_, pA.codigo_empleado, pA.codigo_alerta,
+						cat_c_empleados.descripcion as alerta_descripcion, cat_c_empleados.codigo_clasificacion_riesgo,
+						cat_c_riesgos.descripcion as riesgo_descripcion, cat_c_riesgos.color
+							FROM personal_alertas pA 
+								INNER JOIN catalogo_conductas_empleados cat_c_empleados ON pA.codigo_alerta = cat_c_empleados.codigo
+								INNER JOIN catalogo_clasificacion_riesgos cat_c_riesgos ON cat_c_riesgos.codigo = cat_c_empleados.codigo_clasificacion_riesgo
+									WHERE pA.codigo_empleado = '$codigoPersonal'";
 				// Ejecutamos el Query.
 					$consulta = $dblink -> query($query);
-				//
+				// color por defecto para las filas
+					$colorFila = "#ABEBC6";
 				if($consulta -> rowCount() != 0){
-					$mensaje = "Si Registro";
+					$mensajeError = "Alertas Encontradas.";
 					$respuestaOK = true;
 					$num = 0;
 					// convertimos el objeto
@@ -52,20 +59,35 @@ if($errorDbConexion == false){
 						// variablesç
 						$id_ = trim($listado['id_']);
 						$codigo_empleado = trim($listado['codigo_empleado']);
-						$codigo_alerta = trim($listado['codigo_alerta']);
+						$nombre_alerta = trim($listado['alerta_descripcion']);
+						$nombre_riesgo = trim($listado['riesgo_descripcion']);
+						$color_riesgo = trim($listado['color']);
 						$num++;
+						// cambiar el color de la fila.
+						//	verde, rojo y amarillo.
+							switch ($color_riesgo) {
+								case 'rojo':
+									$colorFila = "#F1948A";
+									break;
+								case 'amarillo':
+									$colorFila = "#F9E79F";
+									break;
+								default:
+									# code...
+									break;
+							}
 					// variables Json
-						$contenidoOK .= "<tr>
+						$contenidoOK .= "<tr style='background: $colorFila'>
 							<td><input type=checkbox class=case name=chk$id_ id=chk$id_>
 							<td>$num
 							<td>$id_
-							<td>$codigo_empleado
-							<td>$nombre_modalidad
-							<td><a data-accion=EliminarModalidad class='btn btn-xs btn-warning' data-toggle='tooltip' data-placement='top' title='Eliminar' href=$id_><i class='fas fa-trash'></i></a>"
+							<td>$nombre_alerta
+							<td>$nombre_riesgo
+							<td><a data-accion=EliminarAlerta class='btn btn-xs btn-warning' data-toggle='tooltip' data-placement='top' title='Eliminar' href=$id_><i class='fas fa-trash'></i></a>"
 						;
 					}
 				}else{
-					$mensaje = "No se encontraron Alertas...";
+					$mensajeError = "No se encontraron Alertas...";
 					$respuestaOK = false;
 				}
 			break;
@@ -121,7 +143,7 @@ else{
 }	// FIN DE LA CONDICON PRINCRIPAL
 // CONDICIONES RESULTADO DEL JSON Y DATA[]
 $CodigoAlertas = $_POST['accion'];
-if($CodigoAlertas == "BuscarAlertas")
+if($CodigoAlertas == "BuscarAlertas" || $CodigoAlertas == "guardarAlertas")
 {
 // Armamos array para convertir a JSON
 	$salidaJson = array("respuesta" => $respuestaOK,

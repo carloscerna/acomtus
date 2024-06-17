@@ -194,7 +194,7 @@ jQuery(function($){
           <div class="card m-auto">
             <div class="card-header bg-gradient-navy text-white">
                   <h3 class="card-title">
-                    <label for="LblNombre"></label>
+                    <label for="LblNombre" class="text-white"></label>
                   </h3>
                   <div class="card-tools">
                     <span class="badge badge-primary" id="txtEdicionNuevo">Edición</span>
@@ -713,7 +713,8 @@ jQuery(function($){
                       </div>
                   </div>
                      <!-- NAV TAB FORM - FormPersonalAlertas *INICIO*-->
-                      <form class="form-inline" id="FormPersonalAlertas" name="FormPersonalAlertas">
+                      <form class="form-inline" id="formPersonalAlertas" name="formPersonalAlertas">
+
                             <div class="form-group mb-1 mx-sm-1">
                               <label for="lstPersonalAlertas">Conductas</label>
                               <select class="form-control mx-sm-3" id="lstPersonalAlertas" name="lstPersonalAlertas"></select>
@@ -735,8 +736,8 @@ jQuery(function($){
                                     </th>
                                     <th>#</th>
                                     <th>id</th>
-                                    <th>Código</th>
                                     <th>Descripción</th>
+                                    <th>Riesgo</th>
                                     <th></th>
                                   </tr>
                                 </thead>
@@ -758,7 +759,9 @@ jQuery(function($){
               </div>              
             </div>
           </div> <!-- /.card -->
-          </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT"S -->
+        </div> <!-- /.col -->
+      </div> <!-- /.row -->
+        </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT"S -->
      </form> <!-- fin del form -->            
     </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->

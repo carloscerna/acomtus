@@ -111,7 +111,7 @@ var NuevoRegistro = function(){
 				function(data){
 				// Cargar valores a los objetos Llenar el formulario con los datos del registro seleccionado.
 				// Modificar label en la tabs-8.
-					$("label[for='LblNombre']").text(data[0].nombre_empleado);
+					$("label[for='LblNombre']").text(data[0].nombre_empleado + " - Código: " + data[0].codigo);
 					$("label[for='LblFianza']").text('$ ' + data[0].saldo_fianza);
 					$("label[for='LblPrestamo']").text('$ ' + data[0].saldo_prestamo);
                 // datos para el card TITLE - INFORMACIÓN GENERAL

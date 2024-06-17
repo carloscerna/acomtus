@@ -209,6 +209,7 @@ $(function(){
                         },
                     submitHandler: function(){	
                         var str = $('#formPersonalAlertas').serialize();
+                        accionAlertas = "guardarAlertas";
                         //alert(str);
                     ///////////////////////////////////////////////////////////////			
                     // Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
@@ -304,13 +305,15 @@ function listar_CodigoAlertas(CodigoPersonalAlertas){
                     $("#AlertPersonalAlertas").css("display", "block");
                     $("#AlertPersonalAlertas").css("alert", "alert-danger");
                     $("#TextoAlertPersonalAlertas").text("No hay Alertas.");
+                    $("#alertas-tab").css("background-color", "#00ff00");
                 }
-                else{
-                    // Ver el Historial.
+                if(response.respuesta == true){
+                    // Ver Alertas.
                     $("#listaContenidoPersonalAlertas").append(response.contenido);
                     toastr["warning"](response.mensaje, "Sistema");
                     $("#AlertPersonalAlertas").css("display", "block");
                     $("#TextoAlertPersonalAlertas").text("Alertas encontradas.");
+                    $("#alertas-tab").css("background-color", "#F7DC6F");
                     }               
             },
         });
