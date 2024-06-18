@@ -4,7 +4,7 @@
 
 {% block javascripts %}
   <!-- JS para esta página. -->
-    <script type="text/JavaScript" src="js/main_personal.js"></script>
+    <script type="text/JavaScript" src="js/Personal/personalBuscar.js"></script>
     <script>   
         (function(){
             function removeAccents ( data ) {
@@ -64,7 +64,7 @@
   <!-- Small boxes (Stat box) -->
   <div class="col-md-12">
     <div class="card m-auto">
-      <div class="card-header bg-gradient-navy">
+      <div class="card-header bg-gradient-navy p-1">
           <!-- /.INPUT PARA EL MENU CONTEXTUAL   -->
           <input type="hidden" id="MenuContextual" value="{{ codigo_perfil }}">
           <!-- /.card-tools -->
@@ -74,39 +74,26 @@
             </div>
             
             <div class="col-md-4 col-lg-4 col-xl-4  d-flex justify-content-end">
+              <button type="button" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="top" title="Nuevo" id = "goNuevoUser">
+                <span class="fas fa-user-plus"></span>
+              </button>
               <button class="btn btn-info" type="button" id="goFianzasPrestamosImportar" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Importar - Fianzas y Prestamos"><span class="fal fa-file-import"></span></button>
             </div>
           </div>
         <!-- /.card-tools -->
       </div>
       <!-- /.card-header -->
-      <div class="card-body">
         <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
         <div class="card-body">
-          <div class="form-group">
-            <div class="row">
-                <div class="col-lg-10">
-                    <div class="input-group">
-                        <input type="text" class="global_filter form-control" id="global_filter" placeholder="Ingresar dato a buscar" autofocus="autofocus">
-                        <span class="input-group-addon"><i class="fa fa-search"></i></span>
-                    </div>
-                </div>
-                <div class="col-lg-2">
-                    <button type="button" class="btn btn-success" style="width:100%" data-toggle="tooltip" data-placement="top" title="Nuevo" id = "goNuevoUser">
-                      <span class="fas fa-user-plus"> Nuevo Registro</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-          <table id="listado" class="table display responsive nowrap" style="width: 100%;">
+          <table id="listado" class="table table-bordered table-hover table-responsive nowrap">
             <thead>
                 <tr>
                   <th>Acción</th>
                   <th>Id</th>
                   <th>Código</th>
                   <th>Nombre</th>
-                  <th>Teléfono</th>
-                  <th>Fecha Nacimiento</th>
+                  <th>Nº <i class="fas fa-mobile-alt"></i></th>
+                  <th>Nacimiento <i class="fad fa-calendar-alt"></i></th>
                   <th>Edad</th>
                   <th>Estatus</th>
                 </tr>                
@@ -114,20 +101,10 @@
               <tbody id="listadoOk">
               </tbody>
               <tfoot>
-                <tr>
-                    <th>Acción</th>
-                    <th>Id</th>
-                    <th>Código</th>
-                    <th>Nombre</th>
-                    <th>Teléfono</th>
-                    <th>Fecha Nacimiento</th>
-                    <th>Edad</th>
-                    <th>Estatus</th>
-                </tr>
+
               </tfoot>
           </table>
         </div> <!-- /.card-body -->
-      </div>        <!-- /.card-body -->
     </div>      <!-- /.card -->
   </div>
 </div> <!-- /.content-Wrapper, Contains page content. -->

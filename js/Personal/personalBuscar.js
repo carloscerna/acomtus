@@ -37,14 +37,12 @@ var listar = function(){
 			tabla = jQuery("#listado").DataTable({
 				"lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
 				"destroy": true,
-				"pageLength": 10,
-				"bLengthChange":false,
-				"searching":{"regex": true},
+				"pageLength": 5,
 				"async": false ,
 				"processing": true,
 				"ajax":{
 					method:"POST",
-					url:"php_libs/soporte/PersonalBuscar.php",
+					url:"php_libs/soporte/Personal/PersonalBuscar.php",
 					data: {"accion_buscar": buscartodos}
 				},
 				"columns":[
@@ -56,7 +54,7 @@ var listar = function(){
 					{"data":"id_personal"},
                     {"data":"codigo"},
                     {"data":"nombre_empleado"},
-                    {"data":"telefono_residencia"},
+					{"data":"telefono_celular"},
                     {"data":"fecha_nacimiento"},
                     {"data":"edad"},
 					{"data":"codigo_estatus",
@@ -69,47 +67,13 @@ var listar = function(){
 						}
 					},
 				],
-				// LLama a los diferentes mensajes que están en español.
-				"language": idioma_espanol
+				language:{
+					url: "../acomtus/js/DataTablet/es-ES.json"
+				  },
 		});
 			obtener_data_editar("#listado tbody", tabla);
-			// CONFIGURAR EL FILTER A OTRO OBJETO.
-			document.getElementById("listado_filter").style.display="none";
-			$('input.global_filter').on( 'keyup click', function () {
-				 filterGlobal();
-			 } );
-			 $('input.column_filter').on( 'keyup click', function () {
-				 filterColumn( $(this).parents('tr').attr('data-column') );
-			 });
 		};
-///////////////////////////////////////////////////////////////////////////////
-// CONFIGURACIÓN DEL IDIOMA AL ESPAÑOL.
-///////////////////////////////////////////////////////////////////////////////	
-var idioma_espanol = {
-			"sProcessing":     "Procesando...",
-			"sLengthMenu":     "Mostrar _MENU_ registros",
-			"sZeroRecords":    "No se encontraron resultados",
-			"sEmptyTable":     "Ningún dato disponible en esta tabla",
-			"sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-			"sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
-			"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-			"sInfoPostFix":    "",
-			"sSearch":         "Buscar:",
-			"sUrl":            "",
-			"sInfoThousands":  ",",
-			"sLoadingRecords": "Cargando...",
-			"oPaginate": {
-			"sFirst":    "Primero",
-			"sLast":     "Último",
-			"sNext":     "Siguiente",
-			"sPrevious": "Anterior"
-			},
-			"oAria": {
-			    "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-			    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-			}
-		 };	  
-
+// 
 var obtener_data_editar = function(tbody, tabla){
 ///////////////////////////////////////////////////////////////////////////////
 //	FUNCION que al dar clic buscar el registro para posterior mente abri una
@@ -224,16 +188,9 @@ $('#goFianzasPrestamosImportar').on( 'click', function () {
 		window.location.href = 'fianzas_prestamos_importar.php?';
 });	
 });	// final de FUNCTION.
-
+// Abrir Ventana
 function AbrirVentana(url)
 {
     window.open(url, '_blank');
     return false;
-}
-///////////////////////////////////////////////////////////////////////////////
-//	FUNCION PARA CAMBIAR LA FORMA DE BUSQUEDA
-function filterGlobal() {
-    $('#listado').DataTable().search(
-        $('#global_filter').val(),
-    ).draw();
 }
