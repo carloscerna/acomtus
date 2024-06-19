@@ -1,0 +1,332 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<!-- CSS ESTILO PLANTILLA PERSONAL -->
+<link rel="stylesheet" href="css/estilo_personal.css">
+{% endblock %}
+
+{% block javascripts %}
+<!-- JS para esta página. -->
+  <script type="text/JavaScript" src="js/Clientes/NuevoEditarCliente.js"></script>
+  <script type="text/javascript" src="js/calcular_edad.js"></script>
+  <script type="text/javascript" src="js/jquery-mask/jquery.maskedinput.js"></script>
+<!-- JS para esta página. -->
+<script language="javascript">
+// VALIDAR LOS ENTER EN EL FORMULARIO.
+$(document).ready(function() {
+  $('form').keypress(function(e){   
+    if(e == 13){
+      return false;
+    }
+  });
+
+  $('input').keypress(function(e){
+    if(e.which == 13){
+      return false;
+    }
+  });
+// Llenas LISTAS DESPLEGABLES.
+    var codigo_departamento = '02';
+    codigo_municipio = "10";
+    listar_departamento(codigo_departamento);  // LLENAR CATALOGO PERFIL.
+    listar_municipio(codigo_departamento, codigo_municipio); // LLENAR CATALOGO ESTATUS.
+    listar_genero();
+    listar_estado_civil();
+    listar_estatus();
+    listar_estudios();
+    listar_vivienda();
+    listar_nacionalidad();
+// configurar el Select2
+  $(document).ready(function() {
+    $('.personal').select2(
+      {
+        theme: "classic"
+      }
+    );
+  });
+// Jquery-mask - entrado de datos.
+jQuery(function($){
+    // Form Users Agregar.
+      $("#telefono_fijo").mask("9999-9999");
+      $("#telefono_movil").mask("9999-9999");
+
+      $("#txtDui").mask("99999999-9");
+      $("#txtPasaporte").mask("9999999999");
+     //$("#").mask("");
+  }); 
+});
+</script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header p-0">
+      <div class="container-fluid">
+        <!-- <div class="row">
+          <div class="col">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="clientes.php" data-toggle="tooltip" data-placement="left" title="Clientes">Buscar</a></li>
+              <li class="breadcrumb-item active"><label for="iEdicionNuevo">Editar</label></li>
+            </ol>
+          </div>
+        </div> -->
+      </div><!-- /.container-fluid -->
+    </section>
+
+  <!-- Main content -->
+    <section class="content">
+     <!-- FORM PRINCIPAL -->
+     <form action="" method="post" id="formUsers" name="formUsers" role="form" enctype="multipart/form-data">
+     <div class="tab-content tab-validate"> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+        <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            
+        <input type="hidden" id="accion_buscar" name="accion_buscar" value = "GenerarCodigoNuevo" class="{required:true}">-->            
+        <input type="text" id="id_user" name="id_user" value = "{{ id }}">            
+        <input type="text" id="accion" name="accion" value = "{{ accion }}">            
+        <input type="text" id="txtId" name="txtId" value = "">   
+        <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
+        <input type="text" id="MenuTab" value="{{ codigo_perfil }}">         
+        <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card m-auto">
+            <div class="card-header bg-gradient-navy text-white m-1 p-1">
+              <div class="d-flex flex-row w-100 justify-content-between">
+                <div>
+                  <h3 class="card-title">
+                    <label for="txtEdicionNuevo" class="text-white">Edición</label>
+                    <label for="LblNombre" class="text-white"></label>
+                  </h3>
+                </div>
+                <div class="m-0 p-0">
+                  <button type="button" id="goGuardar" aria-label="goGuardar" class="btn btn-primary mb-0 mx-sm-1" tabindex="-1" data-toggle="tooltip" data-placement="left" title="Guardar">
+                    <i class="fal fa-save"></i>
+                  </button>
+                  <button type="button" id="goBuscar" aria-label="goBuscar" class="btn btn-secondary mb-0 mx-sm-1" tabindex="-1" data-toggle="tooltip" data-placement="bottom" title="Buscar">
+                    <i class="fal fa-search"></i>
+                  </button>
+                </div>
+              </div>
+                  
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+            <!-- Nav tabs -->
+            <div class="container py-2">
+              <nav id="NavPersonalAlertas">
+                <ul class="nav nav-tabs border-0" id="myTab" role="list">
+                  <li class="nav-item">
+                      <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tablist" aria-controls="home" aria-selected="true">Cliente</a>
+                  </li>             
+                </ul>
+              </nav>
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <!-- Tab INFORMACION DEL EMPLEADO -->
+                <div class="tab-pane p-2 active border border-primary" id="home" role="tabpanel" aria-labelledby="home-tab">
+                  <div class="row">
+                    <div class="col-lg-4">
+                      <!-- EDITAR CODIGO EMPLEADO -->
+                          <div class="input-group">
+                            <div class="input-group-prepend">
+                              <span class="icheck-primary d-inline">
+                                <input type="checkbox" id="ActivarEditarCodigo" name="ActivarEditarCodigo">
+                                <label for="ActivarEditarCodigo">
+                                  Editar Código
+                                </label>
+                              </span>
+                            </div>
+                                <input type="text" class="form-control text-primary text-bold text-right" id="txtcodigo" maxlength="5" name="txtcodigo" alt="Activar Código para Edición" readonly="readonly" title="Código">
+                          </div>
+                  </div>
+                    <div class="col-lg-8">
+                      <!-- ESTATUS -->
+                        <div class="form-group row">
+                          <label class="col-lg-3 col-form-label form-control-label text-right">Estatus</label>
+                          <div class="col-lg-3">
+                            <select class="custom-select" id="lstestatus" name="lstestatus" title="Estatus"></select>
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+                  <!-- MODAL BODY ROW -->
+                      <div class="modal-body row">
+                        <div class="col-md-12">  
+                            <!-- INICIO DEL FORMULARIO -->
+                            <fieldset>
+                                <legend>Información General</legend>
+                                <!-- NOMBRES  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Nombres</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtnombres" name="txtnombres" title="Nombre" maxlength="80" required="required" placeholder="" autocomplete = "off" onchange="conMayusculas(this);" autofocus="autofocus">
+                                      </div>
+                                    </div>
+                                <!-- PRIMER APELLIDO  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Primer apellido</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtprimerapellido" name="txtprimerapellido" title="Primer Apellido" maxlength="40" required="required" placeholder="" autocomplete = "off" onchange="conMayusculas(this);">
+                                      </div>
+                                    </div>
+                                <!-- SEGUNDO APELLIDO  -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Segundo Apellido</label>
+                                    <div class="col-lg-9">
+                                      <input class="form-control" type="text" id="txtsegundoapellido" name="txtsegundoapellido" title="SegundoApellido" maxlength="40" required="required" placeholder="" autocomplete = "off" onchange="conMayusculas(this);">
+                                    </div>
+                                  </div>
+                                <!-- GÉNERO -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Género</label>
+                                    <div class="col-lg-3">
+                                      <select class="custom-select" id="lstgenero" name="lstgenero" title="Genero"></select>
+                                    </div>
+                                  </div>
+                                <!-- DUI Y PASAPORTE-->
+                                  <div class="form-group row">
+                                    <label class="col-lg-12 col-form-label form-control-label text-danger">Tipo de Identificación:</label>
+                                    <label class="col-lg-3 col-form-label form-control-label">Nº. DUI</label>
+                                    <div class="col-lg-3">
+                                      <input class="form-control" type="text" id="txtDui" name="txtDui" title="N.º de DUI" maxlength="10" placeholder="" autocomplete = "off">
+                                    </div>
+                                      <label class="col-lg-3 col-form-label form-control-label">Nº. Pasaporte</label>
+                                      <div class="col-lg-3">
+                                        <input class="form-control" type="text" id="txtPasaporte" name="txtPasaporte" title="N.º de Pasaporte" maxlength="10" placeholder="" autocomplete = "off">
+                                      </div>
+                                  </div>
+                                <!-- NACIONALIDAD -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Nacionalidad</label>
+                                  <div class="col-lg-3">
+                                    <select class="custom-select" id="lstNacionalidad" name="lstNacionalidad" title="Nacionalidad"></select>
+                                  </div>
+                                </div>
+                                <!-- ESTADO CIVIL -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Estado Civil</label>
+                                  <div class="col-lg-3">
+                                    <select class="custom-select" id="lstEstadoCivil" name="lstEstadoCivil" title="Estado Civil"></select>
+                                  </div>
+                                </div>
+                                    <!-- DEPARTAMENTO NACIMIENTO -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Departamento Nacimiento</label>
+                                      <div class="col-lg-3">
+                                        <select id="lstdepartamentoNacimiento" name="lstdepartamentoNacimiento" title="Departamento" class="custom-select" onchange="listar_municipio(this.value)"></select>
+                                      </div>
+                                    <!--  MUNICIPIOS NACIMIENTO-->
+                                      <label class="col-lg-3 col-form-label form-control-label text-right">Municipio Nacimiento</label>
+                                      <div class="col-lg-3">
+                                        <select id="lstmunicipioNacimiento" name="lstmunicipioNacimiento" title="Municipio" class="custom-select"></select>
+                                      </div>
+                                    </div>
+                                <!-- FECHA DE NACIMIENTO -->
+                                      <div class="form-group row">
+                                        <label class="col-lg-3 col-form-label form-control-label">Fecha Nacimiento</label>
+                                        <div class="col-lg-4">
+                                          <input class="form-control" type="date" id="txtfechanacimiento" name="fechanacimiento" title="Fecha Nacimiento" onblur="calcular_edad(this.value);">
+                                        </div>
+                                      <!-- EDAD -->        
+                                        <label class="col-lg-2 col-form-label form-control-label text-right">Edad</label>
+                                        <div class="col-lg-3">
+                                          <input class="form-control text-right" type="text" id="txtedad" name="txtedad" title="Edad" value = "0" readonly="readonly">
+                                          <input type="hidden" name= "edad_enviar" id="edad_enviar" value = "00" class="form-control">
+                                        </div>
+                                      </div>
+                                      <div class="form-group row">
+                                        <div class="col-lg-3"></div>
+                                        <div class="col-lg-9">
+                                          <label for="lbl_edad_y_mes" class="control-label" style="color: blue;"></label>
+                                        </div>
+                                      </div>
+                                    <!-- DEPARTAMENTO RESIDENCIA-->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Departamento</label>
+                                      <div class="col-lg-3">
+                                        <select id="lstdepartamento" name="lstdepartamento" title="Departamento" class="custom-select" onchange="listar_municipio(this.value)"></select>
+                                      </div>
+                                    <!--  MUNICIPIOS RESIDENCIA-->
+                                      <label class="col-lg-3 col-form-label form-control-label text-right">Municipio</label>
+                                      <div class="col-lg-3">
+                                        <select id="lstmunicipio" name="lstmunicipio" title="Municipio" class="custom-select"></select>
+                                      </div>
+                                    </div>
+                                  <!-- DIRECCIÓN -->
+                                      <div class="form-group row">
+                                        <label for="" class="col-lg-3 col-form-label form-control-label">Dirección</label>
+                                        <div class="col-lg-9">
+                                          <textarea style="height: 60px;" id="direccion" name="direccion" title="Direccion" class="form-control"></textarea>
+                                        </div>
+                                      </div>
+                                <!-- LA RESIDENCIA ES -->        
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Tipo residencia</label>
+                                    <div class="col-lg-3">
+                                      <select class="form-control" aria-describedby="basic-addon1" id="lstResidencia" name="lstResidencia" title="Residencia"></select>
+                                    </div>
+                                  </div>
+
+                                    <!-- TELEFONO FIJO -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Teléfono Residencia</label>
+                                      <div class="col-lg-3">
+                                        <input class="form-control" type="text" name="telefono_fijo" title="Telefono" id="telefono_fijo">
+                                      </div>
+                                    <!--  TELEFONO MOVIL -->
+                                      <label class="col-lg-3 col-form-label form-control-label text-right">Teléfono Móvil</label>
+                                      <div class="col-lg-3">
+                                        <input class="form-control" type="text" name="telefono_movil" id="telefono_movil" title="Telefono Movil">
+                                      </div>
+                                    </div>
+                                <!-- CORREO ELECTRICO -->
+                                    <div class="form-group row">
+                                        <label class="col-lg-3 col-form-label form-control-label">Correo Electrónico</label>
+                                        <div class="col-lg-9">
+                                            <input type="text" name="correo_electronico" id="correo_electronico" title="correo" placeholder="" class="form-control">
+                                        </div>
+                                    </div>
+
+                                  <!-- NOMBRE DEL CÓNYUGE  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Nombre del Cónyuge</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" aria-describedby="basic-addon1 sizing-addon2" type="text" id="txtConyuge" name="txtConyuge" placeholder="nombre del conyuge" autofocus class='{required:false,minlength:3,maxlength:40} span3 form-control' onchange="conMayusculas(this)">
+                                      </div>
+                                    </div>
+                              </fieldset>
+                        </div>
+
+                            <!-- INICIO DEL FORMULARIO CONTACTO-->
+                            <div class="col-md-12">
+                            <fieldset>
+                                <legend>Residencia y Contacto</legend>
+
+                            </fieldset>
+
+                            <!-- INICIO DEL FORMULARIO -->
+                        </div>
+                      </div><!-- FIN MODAL BODY INFORMACIÓN GENERAL-->
+                </div>
+              </div> <!-- /.tab-content -->
+            </div> <!-- /.container -->
+            </div> <!-- /.card-body -->
+            <!-- /.card-footer -->
+            <div class="card-footer">
+
+            </div>
+          </div> <!-- /.card -->
+        </div> <!-- /.col -->
+      </div> <!-- /.row -->
+        </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT"S -->
+     </form> <!-- fin del form -->            
+    </section>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include "layout-login-user.html" %} -->
+{% endblock %}
