@@ -24,7 +24,7 @@ $(function(){ // INICIO DEL FUNCTION.
 			// Variables Principales.
 			id_ = $("#id_user").val();
 			accion = $("#accion").val();
-            $("#txtEdicionNuevo").text("Edición");
+            $("#txtEdicionNuevo").text("Edición: ");
             // Llamar a la función listar.
                 listar();
 		}
@@ -84,19 +84,22 @@ var NuevoRegistro = function(){
 //////////////////////////////////////////////////////////////////////////////////
 	var listar = function(){
 		// DETARMINAR QUE SE VA EJECUTAR.	
-			$.post("php_libs/soporte/NuevoEditarCliente.php",  { id_x: id_, accion: 'BuscarPorId' },
+			$.post("php_libs/soporte/Clientes/NuevoEditarCliente.php",  { id_x: id_, accion: 'BuscarPorId' },
 				function(data){
 				// Cargar valores a los objetos Llenar el formulario con los datos del registro seleccionado.
 				// Modificar label en la tabs-8.
-					$("label[for='LblNombre']").text(data[0].nombre_empleado + " - Código: " + data[0].codigo);
-					$("label[for='LblFianza']").text('$ ' + data[0].saldo_fianza);
-					$("label[for='LblPrestamo']").text('$ ' + data[0].saldo_prestamo);
+					$("label[for='LblNombre']").text(data[0].nombre_cliente + " - Código: " + data[0].codigo);
                 // datos para el card TITLE - INFORMACIÓN GENERAL
 					$('#txtId').val(id_);
 					$('#txtcodigo').val(data[0].codigo);
                     $('#txtnombres').val(data[0].nombre);
-                    $('#txtapellido').val(data[0].apellido);
-					
+                    $('#txtprimerapellido').val(data[0].primer_apellido);
+                    $('#txtsegundoapellido').val(data[0].segundo_apellido);
+                    $('#lstNacionalidad').val(data[0].codigo_nacionalidad);
+				// ACTUALIZAR DEPARTAMENTO Y MUNICIPIO.
+                    listar_municipio(data[0].codigo_departamento, data[0].codigo_municipio)
+                        $('#lstdepartamentoNacimiento').val(data[0].codigo_departamento);
+                        $('#lstmunicipioNacimiento').val(data[0].codigo_municipio);					
                     $('#txtfechanacimiento').val(data[0].fecha_nacimiento);
                     $('#txtedad').val(data[0].edad);
                     if(data[0].edad==''){
@@ -104,12 +107,20 @@ var NuevoRegistro = function(){
                         $('#txtedad').val(edades);    
                     }
 					$('#lstgenero').val(data[0].codigo_genero);
+                    $('#txtDui').val(data[0].dui);
+                    $('#txtPasaporte').val(data[0].pasaporte);
+
 					$('#lstEstadoCivil').val(data[0].codigo_estado_civil);
-					$('#txtTipoSangre').val(data[0].tipo_sangre);
 					$('#lstEstudios').val(data[0].codigo_estudio);
-					$('#lstVivienda').val(data[0].codigo_vivienda);
-					$('#lstAfp').val(data[0].codigo_afp);
-					$('#txtConyuge').val(data[0].nombre_conyuge);
+					$('#lstResidencia').val(data[0].codigo_vivienda);
+					$('#txtnombresConyuge').val(data[0].nombre_conyuge);
+
+                    $('#txtprimerapellidoConyuge').val(data[0].primer_apellido_conyuge);
+                    $('#txtsegundoapellidoConyuge').val(data[0].segundo_apellido_conyuge);
+                    $('#txtDuiConyuge').val(data[0].dui_conyuge);
+                    $('#txtPasaporteConyuge').val(data[0].pasaporte_conyuge);
+                    $('#txtTelefonoCelularConyuge').val(data[0].telefono_conyuge);
+                    $('#lstNacionalidadConyuge').val(data[0].codigo_nacionalidad_conyuge);
 
 				// ACTUALIZAR DEPARTAMENTO Y MUNICIPIO.
 						listar_municipio(data[0].codigo_departamento, data[0].codigo_municipio)
@@ -117,50 +128,10 @@ var NuevoRegistro = function(){
 								$('#lstmunicipio').val(data[0].codigo_municipio);
 					//
 					$('#direccion').val(data[0].direccion);
-                    $('#telefono_fijo').val(data[0].telefono_fijo);
+                    $('#telefono_fijo').val(data[0].telefono_domicilio);
                     $('#telefono_movil').val(data[0].telefono_movil);
                     $('#correo_electronico').val(data[0].correo_electronico);
-                    $('#lstCargo').val(data[0].codigo_cargo);
-					if(data[0].codigo_cargo == ''){
-                        var codigo_cargo = 54;
-                        $('#lstCargo').val(codigo_cargo);
-                    }
-					$('#txtFechaIngreso').val(data[0].fecha_ingreso);
-					$('#txtFechaRetiro').val(data[0].fecha_retiro);
-					$('#lstCargoDepartamento').val(data[0].cargo_departamento);
-					$('#lstTaller').val(data[0].cargo_taller);
-					if(data[0].cargo_taller == ''){
-                        var cargo_taller = '09';
-                        $('#lstTaller').val(cargo_taller);
-                    }
-					$('#lstRuta').val(data[0].codigo_ruta);
-					$('#lstSocio').val(data[0].codigo_socio);
-                    $('#txtCuentaAhorro').val(data[0].numero_cuenta);
-                    
-                    $('#PagoDiario').val(data[0].pago_diario);
-                    $('#Salario').val(data[0].salario);
 
-
-					$('#lstClaseLicencia').val(data[0].codigo_licencia);
-					$('#txtNumeroLicencia').val(data[0].numero_licencia);
-					$('#txtDui').val(data[0].dui);
-					$('#txtIsss').val(data[0].isss);
-					$('#txtNit').val(data[0].nit);
-					$('#txtNup').val(data[0].afp);
-					$('#txtComentario').val(data[0].comentario);
-
-                    //$('#').val(data[0].);
-				// FOTO DEL ALUMNO.
-					if(data[0].url_foto == "")
-					{
-						if(data[0].codigo_genero == "01"){
-							$(".card-img-top").attr("src", "../acomtus/img/avatar_masculino.png");
-						}else{
-							$(".card-img-top").attr("src", "../acomtus/img/avatar_femenino.png");
-						}
-					}else{
-						$(".card-img-top").attr("src", "../acomtus/img/fotos/" + data[0].url_foto);	
-					}
                 }, "json");                				
 	}; /* FINAL DE LA FUNCION LISTAR(); */
 ////////////////////////////////////////////////////
@@ -181,9 +152,10 @@ $("#goBuscar").click(function() {
 	$('#formUsers').validate({
 		ignore:"",
 		rules:{
-                txtnombres: {required: true, minlength: 80},
-                txtprimerapellido: {required: true, minlength: 40},
+                txtnombres: {required: true, minlength: 2, maxlength:80},
+                txtprimerapellido: {required: true, minlength: 2, maxlength: 40},
                 txtcodigo: {required: true, minlength: 5, maxlength: 5},
+                correo_electronico: {email: true},
                 },
 		        errorElement: "em",
 		        errorPlacement: function ( error, element ) {
@@ -437,14 +409,18 @@ function listar_vivienda(){
 ////////////////////////////////////////////////////////////
 function listar_nacionalidad(){
     var miselect=$("#lstNacionalidad");
+    var miselectConyuge=$("#lstNacionalidadConyuge");
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    miselectConyuge.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
     $.post("includes/cargar_nacionalidad.php",
         function(data) {
             miselect.empty();
+            miselectConyuge.empty();
             for (var i=0; i<data.length; i++) {
                 miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+                miselectConyuge.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
             }
     }, "json");    
 }

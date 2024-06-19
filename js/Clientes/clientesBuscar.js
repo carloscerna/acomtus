@@ -52,7 +52,7 @@ var listar = function(){
 					},
 					{"data":"id_"},
 					{"data":"codigo"},
-                    {"data":"nombre_empleado"},
+                    {"data":"nombre_cliente"},
 					{"data":"telefono_celular"},
                     {"data":"fecha_nacimiento"},
 					{"data":"codigo_estatus",

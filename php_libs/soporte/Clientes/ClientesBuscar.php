@@ -34,7 +34,7 @@ if($errorDbConexion == false){
 		switch ($_POST['accion']) {
 		case 'BuscarTodos':
 				// Armamos el query.
-				$query = "SELECT c.id_ c.codigo, btrim(c.nombres || CAST(' ' AS VARCHAR) || c.primer_apellido || CAST(' ' AS VARCHAR) || c.segundo_apellido) AS nombre_cliente, c.telefono_domicilio, c.telefono_celular,
+				$query = "SELECT c.id_, c.codigo, btrim(c.nombres || CAST(' ' AS VARCHAR) || c.primer_apellido || CAST(' ' AS VARCHAR) || c.segundo_apellido) AS nombre_cliente, c.telefono_domicilio, c.telefono_celular,
                             to_char(c.fecha_nacimiento,'dd/mm/yyyy') as fecha_nacimiento, c.codigo_estatus
                                 FROM clientes c
                                         ORDER BY c.id_ DESC, c.codigo_estatus ASC";

@@ -54,6 +54,8 @@ jQuery(function($){
 
       $("#txtDui").mask("99999999-9");
       $("#txtPasaporte").mask("9999999999");
+      $("#txtDuiConyuge").mask("99999999-9");
+      $("#txtTelefonoCelularConyuge").mask("9999-9999");
      //$("#").mask("");
   }); 
 });
@@ -84,11 +86,11 @@ jQuery(function($){
      <div class="tab-content tab-validate"> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
         <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            
         <input type="hidden" id="accion_buscar" name="accion_buscar" value = "GenerarCodigoNuevo" class="{required:true}">-->            
-        <input type="text" id="id_user" name="id_user" value = "{{ id }}">            
-        <input type="text" id="accion" name="accion" value = "{{ accion }}">            
-        <input type="text" id="txtId" name="txtId" value = "">   
+        <input type="hidden" id="id_user" name="id_user" value = "{{ id }}">            
+        <input type="hidden" id="accion" name="accion" value = "{{ accion }}">            
+        <input type="hidden" id="txtId" name="txtId" value = "">   
         <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
-        <input type="text" id="MenuTab" value="{{ codigo_perfil }}">         
+        <input type="hidden" id="MenuTab" value="{{ codigo_perfil }}">         
         <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
       <div class="row">
         <div class="col-12">
@@ -168,15 +170,13 @@ jQuery(function($){
                                 <!-- PRIMER APELLIDO  -->
                                     <div class="form-group row">
                                       <label class="col-lg-3 col-form-label form-control-label">Primer apellido</label>
-                                      <div class="col-lg-9">
+                                      <div class="col-lg-3">
                                         <input class="form-control" type="text" id="txtprimerapellido" name="txtprimerapellido" title="Primer Apellido" maxlength="40" required="required" placeholder="" autocomplete = "off" onchange="conMayusculas(this);">
                                       </div>
-                                    </div>
                                 <!-- SEGUNDO APELLIDO  -->
-                                  <div class="form-group row">
                                     <label class="col-lg-3 col-form-label form-control-label">Segundo Apellido</label>
-                                    <div class="col-lg-9">
-                                      <input class="form-control" type="text" id="txtsegundoapellido" name="txtsegundoapellido" title="SegundoApellido" maxlength="40" required="required" placeholder="" autocomplete = "off" onchange="conMayusculas(this);">
+                                    <div class="col-lg-3">
+                                      <input class="form-control" type="text" id="txtsegundoapellido" name="txtsegundoapellido" title="SegundoApellido" maxlength="40" placeholder="" autocomplete = "off" onchange="conMayusculas(this);">
                                     </div>
                                   </div>
                                 <!-- GÉNERO -->
@@ -204,9 +204,7 @@ jQuery(function($){
                                   <div class="col-lg-3">
                                     <select class="custom-select" id="lstNacionalidad" name="lstNacionalidad" title="Nacionalidad"></select>
                                   </div>
-                                </div>
                                 <!-- ESTADO CIVIL -->
-                                <div class="form-group row">
                                   <label class="col-lg-3 col-form-label form-control-label">Estado Civil</label>
                                   <div class="col-lg-3">
                                     <select class="custom-select" id="lstEstadoCivil" name="lstEstadoCivil" title="Estado Civil"></select>
@@ -269,46 +267,103 @@ jQuery(function($){
                                       <select class="form-control" aria-describedby="basic-addon1" id="lstResidencia" name="lstResidencia" title="Residencia"></select>
                                     </div>
                                   </div>
-
                                     <!-- TELEFONO FIJO -->
                                     <div class="form-group row">
-                                      <label class="col-lg-3 col-form-label form-control-label">Teléfono Residencia</label>
+                                      <label class="col-lg-3 col-form-label form-control-label">N.º Teléfono Residencia</label>
                                       <div class="col-lg-3">
                                         <input class="form-control" type="text" name="telefono_fijo" title="Telefono" id="telefono_fijo">
                                       </div>
                                     <!--  TELEFONO MOVIL -->
-                                      <label class="col-lg-3 col-form-label form-control-label text-right">Teléfono Móvil</label>
+                                      <label class="col-lg-3 col-form-label form-control-label text-right">N.º Teléfono Móvil</label>
                                       <div class="col-lg-3">
                                         <input class="form-control" type="text" name="telefono_movil" id="telefono_movil" title="Telefono Movil">
                                       </div>
                                     </div>
-                                <!-- CORREO ELECTRICO -->
+                                <!-- CORREO ELECTRONICO -->
                                     <div class="form-group row">
                                         <label class="col-lg-3 col-form-label form-control-label">Correo Electrónico</label>
                                         <div class="col-lg-9">
-                                            <input type="text" name="correo_electronico" id="correo_electronico" title="correo" placeholder="" class="form-control">
+                                            <input type="email" name="correo_electronico" id="correo_electronico" title="correo" placeholder="" class="form-control">
                                         </div>
                                     </div>
-
-                                  <!-- NOMBRE DEL CÓNYUGE  -->
-                                    <div class="form-group row">
-                                      <label class="col-lg-3 col-form-label form-control-label">Nombre del Cónyuge</label>
-                                      <div class="col-lg-9">
-                                        <input class="form-control" aria-describedby="basic-addon1 sizing-addon2" type="text" id="txtConyuge" name="txtConyuge" placeholder="nombre del conyuge" autofocus class='{required:false,minlength:3,maxlength:40} span3 form-control' onchange="conMayusculas(this)">
-                                      </div>
-                                    </div>
+                                <!-- INDICAR TITULO PROFESI8ONAL -->        
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Título Profesional</label>
+                                  <div class="col-lg-3">
+                                    <select class="form-control" aria-describedby="basic-addon1" id="lstEstudios" name="lstEstudios" title="Estudios"></select>
+                                  </div>
+                                </div>
+                                <!-- NOMBRES  INFORMACION CONYUGE-->
+                                <div class="form-group row">
+                                  <label class="col-lg-12 col-form-label form-control-label text-danger">Información del Conyuge</label>
+                                  <label class="col-lg-3 col-form-label form-control-label">Nombres</label>
+                                  <div class="col-lg-9">
+                                    <input class="form-control" type="text" id="txtnombresConyuge" name="txtnombresConyuge" title="Nombre" maxlength="80" placeholder="" autocomplete = "off" onchange="conMayusculas(this);" autofocus="autofocus">
+                                  </div>
+                                </div>
+                            <!-- PRIMER APELLIDO  -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Primer apellido</label>
+                                  <div class="col-lg-3">
+                                    <input class="form-control" type="text" id="txtprimerapellidoConyuge" name="txtprimerapellidoConyuge" title="Primer Apellido" maxlength="40" placeholder="" autocomplete = "off" onchange="conMayusculas(this);">
+                                  </div>
+                            <!-- SEGUNDO APELLIDO  -->
+                                <label class="col-lg-3 col-form-label form-control-label">Segundo Apellido</label>
+                                <div class="col-lg-3">
+                                  <input class="form-control" type="text" id="txtsegundoapellidoConyuge" name="txtsegundoapellidoConyuge" title="SegundoApellido" maxlength="40" placeholder="" autocomplete = "off" onchange="conMayusculas(this);">
+                                </div>
+                              </div>
+                            <!-- DUI Y PASAPORTE-->
+                            <div class="form-group row">
+                              <label class="col-lg-12 col-form-label form-control-label text-danger">Tipo de Identificación:</label>
+                              <label class="col-lg-3 col-form-label form-control-label">Nº. DUI</label>
+                              <div class="col-lg-3">
+                                <input class="form-control" type="text" id="txtDuiConyuge" name="txtDuiConyuge" title="N.º de DUI" maxlength="10" placeholder="" autocomplete = "off">
+                              </div>
+                                <label class="col-lg-3 col-form-label form-control-label">Nº. Pasaporte</label>
+                                <div class="col-lg-3">
+                                  <input class="form-control" type="text" id="txtPasaporteConyuge" name="txtPasaporteConyuge" title="N.º de Pasaporte" maxlength="10" placeholder="" autocomplete = "off">
+                                </div>
+                            </div>
+                              <!-- NACIONALIDAD -->
+                              <div class="form-group row">
+                                <label class="col-lg-3 col-form-label form-control-label">Nacionalidad</label>
+                                <div class="col-lg-3">
+                                  <select class="custom-select" id="lstNacionalidadConyuge" name="lstNacionalidadConyuge" title="Nacionalidad"></select>
+                                </div>
+                              <!-- TELEFONO MOVIL-->
+                                <label class="col-lg-3 col-form-label form-control-label">N.º móvil</label>
+                                <div class="col-lg-3">
+                                  <input class="form-control" type="text" id="txtTelefonoCelularConyuge" name="txtTelefonoCelularConyuge" title="Nº. Telefono" maxlength="9" placeholder="" autocomplete = "off">
+                                </div>
+                              </div>
                               </fieldset>
                         </div>
-
-                            <!-- INICIO DEL FORMULARIO CONTACTO-->
-                            <div class="col-md-12">
+                        <!-- INICIO INFORMACION LABORAL-->
+                          <div class="col-md-12">
                             <fieldset>
-                                <legend>Residencia y Contacto</legend>
+                                <legend>Información Laboral</legend>
 
                             </fieldset>
+                            <!-- FIN INFORMACION LABORAL -->
+                          </div>
+                          <!-- INICIO DETALLE DE INGRESOS-->
+                          <div class="col-md-12">
+                            <fieldset>
+                                <legend>Detalle de Ingresos</legend>
 
-                            <!-- INICIO DEL FORMULARIO -->
-                        </div>
+                            </fieldset>
+                          </div>
+                            <!-- FIN DETALLE DE INGRESOS -->
+                                <!-- INICIO DATOS DE FACTURACION ELECTRONICA-->
+                                <div class="col-md-12">
+                                  <fieldset>
+                                      <legend>Datos de Facturación Electrónica</legend>
+      
+                                  </fieldset>
+                                  <!-- FIN DATOS DE FACTURACION ELECTRONICA -->
+                                </div>
+
                       </div><!-- FIN MODAL BODY INFORMACIÓN GENERAL-->
                 </div>
               </div> <!-- /.tab-content -->
