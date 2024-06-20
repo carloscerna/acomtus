@@ -4,7 +4,7 @@
 // Incluimos el archivo de funciones y conexi�n a la base de datos
   include($path_root."/acomtus/includes/mainFunctions_conexion.php");
 // armando el Query.
-  $query = "SELECT codigo, descripcion FROM catalogo_genero";
+  $query = "SELECT codigo, nombre FROM catalogo_actividad_economica";
 // Ejecutamos el Query.
   $consulta = $dblink -> query($query);
 // Inicializando el array
@@ -13,7 +13,7 @@
   while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
   {
     // Nombres de los campos de la tabla.
-    $codigo = trim($listado['codigo']); $descripcion = $listado['descripcion'];
+    $codigo = trim($listado['codigo']); $descripcion = $listado['nombre'];
     // Rellenando la array.
     $datos[$fila_array]["codigo"] = $codigo;
     $datos[$fila_array]["descripcion"] = ($descripcion);

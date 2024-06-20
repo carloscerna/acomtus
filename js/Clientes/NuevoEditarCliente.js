@@ -424,3 +424,18 @@ function listar_nacionalidad(){
             }
     }, "json");    
 }
+// FUNCION LISTAR ACTIVIDAD ECONOMICA
+////////////////////////////////////////////////////////////
+function listar_actividad_economica(){
+    var miselect=$("#lstActividadEconomicaEmpresa");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_actividad_economica.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+            }
+    }, "json");    
+}

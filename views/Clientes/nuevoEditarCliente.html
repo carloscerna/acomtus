@@ -38,6 +38,12 @@ $(document).ready(function() {
     listar_estudios();
     listar_vivienda();
     listar_nacionalidad();
+    //listar_si_no();
+    listar_actividad_economica();
+    //listar_referencia_laboral();
+    //listar_entidad_laboral();
+    //listar_sector_economico();
+    
 // configurar el Select2
   $(document).ready(function() {
     $('.personal').select2(
@@ -342,8 +348,70 @@ jQuery(function($){
                         <!-- INICIO INFORMACION LABORAL-->
                           <div class="col-md-12">
                             <fieldset>
-                                <legend>Información Laboral</legend>
-
+                                <legend>Información Laboral (Empresa)</legend>
+                                  <!-- CONDICIION O REFERENCIA LBORAL -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Condición o Referencia Laboral</label>
+                                    <div class="col-lg-3">
+                                      <select class="custom-select" id="lstReferenciaLaboral" name="lstReferenciaLaboral" title="ReferenciaLaboral"></select>
+                                    </div>
+                                  <!-- NOMBRE DE LA EMPREWSA-->
+                                    <label class="col-lg-3 col-form-label form-control-label">Nombre </label>
+                                    <div class="col-lg-3">
+                                      <input class="form-control" type="text" id="txtNombreEmpresa" name="txtNombreEmpresa" title="Nombre Empresa" maxlength="80" placeholder="" autocomplete = "off">
+                                    </div>
+                                  </div>
+                                  <!-- CARGO QUE DESEMPEÑA -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Cargo</label>
+                                    <div class="col-lg-3">
+                                      <select class="custom-select" id="LstCargoEmpresa" name="LstCargoEmpresa" title="Cargo Empresa"></select>
+                                    </div>
+                                  <!-- DIRECCION DE LA EMPRESA -->
+                                    <label class="col-lg-3 col-form-label form-control-label">Dirección</label>
+                                    <div class="col-lg-3">
+                                      <textarea style="height: 60px;" id="direccionEmpresa" name="direccionEmpresa" title="Direccion Empresa" class="form-control"></textarea>
+                                    </div>
+                                  </div>
+                                  <!-- CORREO ELECTRONICO -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Correo Electrónico</label>
+                                    <div class="col-lg-3">
+                                      <input class="form-control" type="email" id="correoElectronicoEmpresa" name="correoElectronicoEmpresa" title="Correo Electrónico Empresa" maxlength="80" placeholder="" autocomplete = "off">
+                                    </div>
+                                  <!-- TELEFONO EMPRESA-->
+                                    <label class="col-lg-3 col-form-label form-control-label">Teléfono </label>
+                                    <div class="col-lg-3">
+                                      <input class="form-control" type="text" id="txtTelefonoEmpresa" name="txtTelefonoEmpresa" title="Telefono Empresa" maxlength="10" placeholder="" autocomplete = "off">
+                                    </div>
+                                  </div>
+                                  <!-- TRABAJA EN EMPRESA -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Trabaja en entidad</label>
+                                    <div class="col-lg-3">
+                                      <select class="custom-select" id="lstEntidadEmpresa" name="lstEntidadEmpresa" title="Entidad Empresa"></select>                                    
+                                    </div>
+                                  <!-- SECTOR ECONOMICO EMPRESA-->
+                                    <label class="col-lg-3 col-form-label form-control-label">Sector económico al que pertenece la empresa en donde trabaja </label>
+                                    <div class="col-lg-3">
+                                      <select class="custom-select" id="lstSectorEconomicoEmpresa" name="lstSectorEconomicoEmpresa" title="SectorEconomico Empresa"></select>                                    
+                                    </div>
+                                  </div>
+                                  <!-- ACTIVIDAD ECONOMICA EN EMPRESA -->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Actividad Económica</label>
+                                    <div class="col-lg-3">
+                                      <select class="custom-select" id="lstActividadEconomicaEmpresa" name="lstActividadEconomicaEmpresa" title="Actividad Economica Empresa"></select>                                    
+                                    </div>
+                                  </div>
+                                  <!-- DUI Y PASAPORTE-->
+                                    <div class="form-group row">
+                                      <label class="col-lg-12 col-form-label form-control-label text-danger">Si trabaja en el sector público:</label>
+                                      <label class="col-lg-3 col-form-label form-control-label">Maneja recursos públicos</label>
+                                      <div class="col-lg-3">
+                                        <select class="custom-select" id="lstRecursosPublicos" name="lstRecursosPublicos" title="Recursos públicos"></select>                                    
+                                      </div>
+                                    </div>
                             </fieldset>
                             <!-- FIN INFORMACION LABORAL -->
                           </div>
