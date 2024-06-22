@@ -38,11 +38,12 @@ $(document).ready(function() {
     listar_estudios();
     listar_vivienda();
     listar_nacionalidad();
-    //listar_si_no();
+    listar_si_no();
     listar_actividad_economica();
-    //listar_referencia_laboral();
-    //listar_entidad_laboral();
-    //listar_sector_economico();
+    listar_referencia_laboral();
+    listar_cargo();
+    listar_entidad_laboral();
+    listar_sector_economico();
     
 // configurar el Select2
   $(document).ready(function() {
@@ -56,12 +57,14 @@ $(document).ready(function() {
 jQuery(function($){
     // Form Users Agregar.
       $("#telefono_fijo").mask("9999-9999");
+      $("#txtTelefonoEmpresa").mask("9999-9999");
       $("#telefono_movil").mask("9999-9999");
-
+      
       $("#txtDui").mask("99999999-9");
       $("#txtPasaporte").mask("9999999999");
       $("#txtDuiConyuge").mask("99999999-9");
       $("#txtTelefonoCelularConyuge").mask("9999-9999");
+
      //$("#").mask("");
   }); 
 });

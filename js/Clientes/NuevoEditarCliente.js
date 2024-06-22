@@ -131,6 +131,19 @@ var NuevoRegistro = function(){
                     $('#telefono_fijo').val(data[0].telefono_domicilio);
                     $('#telefono_movil').val(data[0].telefono_movil);
                     $('#correo_electronico').val(data[0].correo_electronico);
+                // INFORMACIÓN LABORAL.
+                    $('#lstReferenciaLaboral').val(data[0].referencia_laboral);
+                    $('#txtNombreEmpresa').val(data[0].nombre_empresa);
+                    $('#LstCargoEmpresa').val(data[0].cargo_empresa);
+                    $('#direccionEmpresa').val(data[0].direccion_empresa);
+                    $('#correoElectronicoEmpresa').val(data[0].email_empresa);
+                    $('#txtTelefonoEmpresa').val(data[0].telefono_empresa);
+                    $('#lstEntidadEmpresa').val(data[0].entidad_empresa);
+                    $('#lstSectorEconomicoEmpresa').val(data[0].sector_empresa);
+                    $('#lstActividadEconomicaEmpresa').val(data[0].actividad_economica_empresa);
+                    $('#lstRecursosPublicos').val(data[0].recursos_publicos);
+
+
 
                 }, "json");                				
 	}; /* FINAL DE LA FUNCION LISTAR(); */
@@ -156,6 +169,7 @@ $("#goBuscar").click(function() {
                 txtprimerapellido: {required: true, minlength: 2, maxlength: 40},
                 txtcodigo: {required: true, minlength: 5, maxlength: 5},
                 correo_electronico: {email: true},
+                correoElectronicoEmpresa: {email: true},
                 },
 		        errorElement: "em",
 		        errorPlacement: function ( error, element ) {
@@ -200,7 +214,7 @@ $("#goBuscar").click(function() {
 		            	}
 		            	else{
                             toastr["success"](response.mensaje, "Sistema");
-							    window.location.href = 'clientes.php';
+							   // window.location.href = 'clientes.php';
                             }               
 		            },
 		        });
@@ -432,6 +446,81 @@ function listar_actividad_economica(){
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
     $.post("includes/cargar_actividad_economica.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+            }
+    }, "json");    
+}
+// FUNCION LISTAR si o no
+////////////////////////////////////////////////////////////
+function listar_si_no(){
+    var miselect=$("#lstRecursosPublicos");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_si_no.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+            }
+    }, "json");    
+}
+// FUNCION LISTAR REFERENCIA LABORAL
+////////////////////////////////////////////////////////////
+function listar_referencia_laboral(){
+    var miselect=$("#lstReferenciaLaboral");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_referencia_laboral.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+            }
+    }, "json");    
+}
+// FUNCION LISTAR CARGO
+////////////////////////////////////////////////////////////
+function listar_cargo(){
+    var miselect=$("#LstCargoEmpresa");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_cargo.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+            }
+    }, "json");    
+}
+// FUNCION LISTAR 
+////////////////////////////////////////////////////////////
+function listar_entidad_laboral(){
+    var miselect=$("#lstEntidadEmpresa");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_entidad_laboral.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+            }
+    }, "json");    
+}
+// FUNCION LISTAR 
+////////////////////////////////////////////////////////////
+function listar_sector_economico(){
+    var miselect=$("#lstSectorEconomicoEmpresa");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_sector_economico.php",
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {

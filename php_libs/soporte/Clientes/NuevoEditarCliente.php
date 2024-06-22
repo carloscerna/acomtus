@@ -87,7 +87,7 @@ if($errorDbConexion == false){
 			case 'BuscarPorId':
 				$id_ = trim($_POST['id_x']);
 				// Armamos el query.
-				$query = "SELECT *FROM clientes c
+				$query = "SELECT * FROM clientes c
 							WHERE codigo <> '' and id_ = '$id_'"
 						;
 				// Ejecutamos el Query.
@@ -135,7 +135,17 @@ if($errorDbConexion == false){
                             $telefono_domicilio = trim($listado['telefono_domicilio']);
                             $telefono_movil = trim($listado['telefono_celular']);
 							$correo_electronico = trim($listado['correo_electronico']);
-
+							// INFORMACIÓN LABORAL.
+							$codigo_referencia_laboral = trim($listado['codigo_referencia_laboral']);
+							$nombre_empresa = trim($listado['nombre_empresa']);
+							$cargo_empresa = trim($listado['codigo_cargo_empresa']);
+							$direccion_empresa = trim($listado['direccion_empresa']);
+							$email_empresa = trim($listado['correo_electronico_empresa']);
+							$telefono_empresa = trim($listado['telefono_empresa']);
+							$entidad_empresa = trim($listado['codigo_entidad_laboral']);
+							$sector_economico_empresa = trim($listado['codigo_sector_economico']);
+							$actividad_economica_empresa = trim($listado['codigo_actividad_economica']);
+							$recursos_publicos = trim($listado['codigo_recursos_publicos']);
 							//$ = trim($listado['']);
 							//$ = trim($listado['']);
 						// Rellenando la array.
@@ -174,7 +184,17 @@ if($errorDbConexion == false){
                             $datos[$fila_array]["telefono_domicilio"] = $telefono_domicilio;
                             $datos[$fila_array]["telefono_movil"] = $telefono_movil;
 							$datos[$fila_array]["correo_electronico"] = $correo_electronico;
-
+							// INFORMACION LABORAL
+							$datos[$fila_array]["referencia_laboral"] = $codigo_referencia_laboral;
+							$datos[$fila_array]["nombre_empresa"] = $nombre_empresa;
+							$datos[$fila_array]["cargo_empresa"] = $cargo_empresa;
+							$datos[$fila_array]["direccion_empresa"] = $direccion_empresa;
+							$datos[$fila_array]["telefono_empresa"] = $telefono_empresa;
+							$datos[$fila_array]["entidad_empresa"] = $entidad_empresa;
+							$datos[$fila_array]["sector_empresa"] = $sector_economico_empresa;
+							$datos[$fila_array]["actividad_economica_empresa"] = $actividad_economica_empresa;
+							$datos[$fila_array]["recursos_publicos"] = $recursos_publicos;
+							$datos[$fila_array]["email_empresa"] = $email_empresa;
 							//$datos[$fila_array][""] = $;
 
 					}
@@ -226,7 +246,17 @@ if($errorDbConexion == false){
                     $pasaporte_conyuge = trim($_POST['txtPasaporteConyuge']);
                     $nacionalidad_conyuge = trim($_POST['lstNacionalidadConyuge']);
                     $telefono_movil_conyuge = trim($_POST['txtTelefonoCelularConyuge']);
-					
+					// INFORMACIÓN LABORAL.
+					$codigo_referencia_laboral = trim($_POST['lstReferenciaLaboral']);
+					$nombre_empresa = trim($_POST['txtNombreEmpresa']);
+					$cargo_empresa = trim($_POST['LstCargoEmpresa']);
+					$direccion_empresa = trim($_POST['direccionEmpresa']);
+					$email_empresa = trim($_POST['correoElectronicoEmpresa']);
+					$telefono_empresa = trim($_POST['txtTelefonoEmpresa']);
+					$entidad_empresa = trim($_POST['lstEntidadEmpresa']);
+					$sector_economico_empresa = trim($_POST['lstSectorEconomicoEmpresa']);
+					$actividad_economica_empresa = trim($_POST['lstActividadEconomicaEmpresa']);
+					$recursos_publicos = trim($_POST['lstRecursosPublicos']);
 
 				// Query
 					$query = "INSERT INTO clientes (codigo, codigo_estatus, nombres, primer_apellido, segundo_apellido,
@@ -234,14 +264,18 @@ if($errorDbConexion == false){
                         codigo_municipio, direccion, codigo_vivienda, telefono_domicilio, telefono_celular, correo_electronico,
                         codigo_estudio, nombre_conyuge, primer_apellido_conyuge, segundo_apellido_conyuge, dui_conyuge, pasaporte_conyuge,
                         codigo_nacionalidad_conyuge, telefono_conyuge, edad, codigo_departamento_nacimiento, codigo_municipio_nacimiento,
-                        fecha_nacimiento
+                        fecha_nacimiento,
+						codigo_referencia_laboral, nombre_empresa, codigo_cargo_empresa, direccion_empresa, correo_electronico_empresa, telefono_empresa,
+						codigo_entidad_laboral, codigo_sector_economico, codigo_actividad_economica, codigo_recursos_publicos
                         )
 						VALUES ('$codigo_cliente','$codigo_estatus','$nombres','$primer_apellido','$segundo_apellido',
                         '$codigo_genero','$dui','$pasaporte','$nacionalidad','$codigo_estado_civil','$codigo_departamento','$codigo_municipio',
                         '$direccion','$codigo_tipo_vivienda','$telefono_fijo','$telefono_movil','$email',
                         '$codigo_estudios','$nombre_conyuge','$primer_apellido_conyuge','$segundo_apellido_conyuge','$dui_conyuge','$pasaporte_conyuge',
                         '$nacionalidad_conyuge','$telefono_movil_conyuge','$edad','$codigo_departamento_nacimiento','$codigo_municipio_nacimiento',
-                        '$fecha_nacimiento'
+                        '$fecha_nacimiento',
+						'$codigo_referncia_laboral','$nombre_empresa','$cargo_empresa','$direccion_empresa','$email_empresa','$telefono_empresa',
+						'$entidad_empresa','$sector_economico_empresa','$actividad_economica_empresa','$recursos_publicos'
                         )";
 					// Ejecutamos el query
 						$resultadoQuery = $dblink -> query($query);              
@@ -295,6 +329,17 @@ if($errorDbConexion == false){
                 $pasaporte_conyuge = trim($_POST['txtPasaporteConyuge']);
                 $codigo_nacionalidad_conyuge = trim($_POST['lstNacionalidadConyuge']);
                 $telefono_movil_conyuge = trim($_POST['txtTelefonoCelularConyuge']);
+				// INFORMACIÓN LABORAL.
+				$codigo_referencia_laboral = trim($_POST['lstReferenciaLaboral']);
+				$nombre_empresa = trim($_POST['txtNombreEmpresa']);
+				$cargo_empresa = trim($_POST['LstCargoEmpresa']);
+				$direccion_empresa = trim($_POST['direccionEmpresa']);
+				$email_empresa = trim($_POST['correoElectronicoEmpresa']);
+				$telefono_empresa = trim($_POST['txtTelefonoEmpresa']);
+				$entidad_empresa = trim($_POST['lstEntidadEmpresa']);
+				$sector_economico_empresa = trim($_POST['lstSectorEconomicoEmpresa']);
+				$actividad_economica_empresa = trim($_POST['lstActividadEconomicaEmpresa']);
+				$recursos_publicos = trim($_POST['lstRecursosPublicos']);
                 // Query
 					// QUERY UPDATE.
 						$query_usuario = "UPDATE clientes SET codigo_estatus = '$codigo_estatus',
@@ -306,7 +351,17 @@ if($errorDbConexion == false){
                         dui_conyuge = '$dui_conyuge', pasaporte_conyuge = '$pasaporte_conyuge',
                         codigo_nacionalidad_conyuge = '$codigo_nacionalidad_conyuge', telefono_conyuge= '$telefono_movil_conyuge', edad = '$edad', 
                         codigo_departamento_nacimiento = '$codigo_departamento_nacimiento', codigo_municipio_nacimiento = '$codigo_municipio_nacimiento',
-                        fecha_nacimiento = '$fecha_nacimiento'
+                        fecha_nacimiento = '$fecha_nacimiento',
+						codigo_referencia_laboral = '$codigo_referencia_laboral',
+						nombre_empresa = '$nombre_empresa',
+						codigo_cargo_empresa = '$cargo_empresa',
+						direccion_empresa = '$direccion_empresa',
+						telefono_empresa = '$telefono_empresa',
+						codigo_entidad_laboral = '$entidad_empresa',
+						codigo_sector_economico = '$sector_economico_empresa',
+						codigo_actividad_economica = '$actividad_economica_empresa',
+						codigo_recursos_publicos = '$recursos_publicos',
+						correo_electronico_empresa = '$email_empresa'
                         WHERE id_ = '$id_'
                         ";
 
