@@ -295,7 +295,7 @@ if($errorDbConexion == false){
                         '$codigo_estudios','$nombre_conyuge','$primer_apellido_conyuge','$segundo_apellido_conyuge','$dui_conyuge','$pasaporte_conyuge',
                         '$nacionalidad_conyuge','$telefono_movil_conyuge','$edad','$codigo_departamento_nacimiento','$codigo_municipio_nacimiento',
                         '$fecha_nacimiento',
-						'$codigo_referncia_laboral','$nombre_empresa','$cargo_empresa','$direccion_empresa','$email_empresa','$telefono_empresa',
+						'$codigo_referencia_laboral','$nombre_empresa','$cargo_empresa','$direccion_empresa','$email_empresa','$telefono_empresa',
 						'$entidad_empresa','$sector_economico_empresa','$actividad_economica_empresa','$recursos_publicos',
 						'$monto_ingresos','$codigoEmisionFe','$nombreRazonSocialFe','$correoElectronicoFe','$telefonoCelularFe'
                         )";
