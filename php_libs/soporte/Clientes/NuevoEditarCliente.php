@@ -146,7 +146,13 @@ if($errorDbConexion == false){
 							$sector_economico_empresa = trim($listado['codigo_sector_economico']);
 							$actividad_economica_empresa = trim($listado['codigo_actividad_economica']);
 							$recursos_publicos = trim($listado['codigo_recursos_publicos']);
-							//$ = trim($listado['']);
+							//DETALLE DE INGRESOS
+							$monto_ingresos = trim($listado['codigo_monto_ingresos']);
+							// DATOS DE COMPROBANTE DE FACTURACIÓN ELECTRÓNIC.
+							$codigoEmisionFe = trim($listado['codigo_emision_f_e']);
+							$nombreRazonSocialFe = trim($listado['nombre_razon_social_f_e']);
+							$correoElectronicoFe = trim($listado['correo_electronico_f_e']);
+							$telefonoCelularFe = trim($listado['telefono_celular_f_e']);
 							//$ = trim($listado['']);
 						// Rellenando la array.
 							$datos[$fila_array]["codigo"] = $codigo;
@@ -195,6 +201,13 @@ if($errorDbConexion == false){
 							$datos[$fila_array]["actividad_economica_empresa"] = $actividad_economica_empresa;
 							$datos[$fila_array]["recursos_publicos"] = $recursos_publicos;
 							$datos[$fila_array]["email_empresa"] = $email_empresa;
+							// MONTO INGRESOS
+							$datos[$fila_array]["monto_ingresos"] = $monto_ingresos;
+							// DATOS DE COMPROBANTE FACTURACION ELECTRONICA
+							$datos[$fila_array]["codigoEmisionFe"] = $codigoEmisionFe;
+							$datos[$fila_array]["nombreRazonSocialFe"] = $nombreRazonSocialFe;
+							$datos[$fila_array]["correoElectronicoFe"] = $correoElectronicoFe;
+							$datos[$fila_array]["telefonoCelularFe"] = $telefonoCelularFe;
 							//$datos[$fila_array][""] = $;
 
 					}
@@ -257,7 +270,13 @@ if($errorDbConexion == false){
 					$sector_economico_empresa = trim($_POST['lstSectorEconomicoEmpresa']);
 					$actividad_economica_empresa = trim($_POST['lstActividadEconomicaEmpresa']);
 					$recursos_publicos = trim($_POST['lstRecursosPublicos']);
-
+					// DETALLE DE INGRESOS
+					$monto_ingresos = trim($_POST['lstMontoIngresos']);
+					// DATOS DE COMPROBANTE DE FACTURACIÓN ELECTRÓNIC.
+					$codigoEmisionFe = trim($_POST['lstEmisionFe']);
+					$nombreRazonSocialFe = trim($_POST['txtnombresFe']);
+					$correoElectronicoFe = trim($_POST['correoElectronicoFe']);
+					$telefonoCelularFe = trim($_POST['txtTelefonoFe']);
 				// Query
 					$query = "INSERT INTO clientes (codigo, codigo_estatus, nombres, primer_apellido, segundo_apellido,
                         codigo_genero, dui, pasaporte, codigo_nacionalidad, codigo_estado_civil, codigo_departamento,
@@ -266,7 +285,9 @@ if($errorDbConexion == false){
                         codigo_nacionalidad_conyuge, telefono_conyuge, edad, codigo_departamento_nacimiento, codigo_municipio_nacimiento,
                         fecha_nacimiento,
 						codigo_referencia_laboral, nombre_empresa, codigo_cargo_empresa, direccion_empresa, correo_electronico_empresa, telefono_empresa,
-						codigo_entidad_laboral, codigo_sector_economico, codigo_actividad_economica, codigo_recursos_publicos
+						codigo_entidad_laboral, codigo_sector_economico, codigo_actividad_economica, codigo_recursos_publicos,
+						codigo_monto_ingresos, 
+						codigo_emision_f_e, nombre_razon_social_f_e, correo_electronico_f_e, telefono_celular_f_e
                         )
 						VALUES ('$codigo_cliente','$codigo_estatus','$nombres','$primer_apellido','$segundo_apellido',
                         '$codigo_genero','$dui','$pasaporte','$nacionalidad','$codigo_estado_civil','$codigo_departamento','$codigo_municipio',
@@ -275,7 +296,8 @@ if($errorDbConexion == false){
                         '$nacionalidad_conyuge','$telefono_movil_conyuge','$edad','$codigo_departamento_nacimiento','$codigo_municipio_nacimiento',
                         '$fecha_nacimiento',
 						'$codigo_referncia_laboral','$nombre_empresa','$cargo_empresa','$direccion_empresa','$email_empresa','$telefono_empresa',
-						'$entidad_empresa','$sector_economico_empresa','$actividad_economica_empresa','$recursos_publicos'
+						'$entidad_empresa','$sector_economico_empresa','$actividad_economica_empresa','$recursos_publicos',
+						'$monto_ingresos','$codigoEmisionFe','$nombreRazonSocialFe','$correoElectronicoFe','$telefonoCelularFe'
                         )";
 					// Ejecutamos el query
 						$resultadoQuery = $dblink -> query($query);              
@@ -340,6 +362,13 @@ if($errorDbConexion == false){
 				$sector_economico_empresa = trim($_POST['lstSectorEconomicoEmpresa']);
 				$actividad_economica_empresa = trim($_POST['lstActividadEconomicaEmpresa']);
 				$recursos_publicos = trim($_POST['lstRecursosPublicos']);
+				// DETALLE DE INGRESOS
+				$monto_ingresos = trim($_POST['lstMontoIngresos']);
+				// DATOS DE COMPROBANTE DE FACTURACIÓN ELECTRÓNIC.
+				$codigoEmisionFe = trim($_POST['lstEmisionFe']);
+				$nombreRazonSocialFe = trim($_POST['txtnombresFe']);
+				$correoElectronicoFe = trim($_POST['correoElectronicoFe']);
+				$telefonoCelularFe = trim($_POST['txtTelefonoFe']);
                 // Query
 					// QUERY UPDATE.
 						$query_usuario = "UPDATE clientes SET codigo_estatus = '$codigo_estatus',
@@ -361,7 +390,12 @@ if($errorDbConexion == false){
 						codigo_sector_economico = '$sector_economico_empresa',
 						codigo_actividad_economica = '$actividad_economica_empresa',
 						codigo_recursos_publicos = '$recursos_publicos',
-						correo_electronico_empresa = '$email_empresa'
+						correo_electronico_empresa = '$email_empresa',
+						codigo_monto_ingresos = '$monto_ingresos',
+						codigo_emision_f_e = '$codigoEmisionFe',
+						nombre_razon_social_f_e = '$nombreRazonSocialFe',
+						correo_electronico_f_e = '$correoElectronicoFe',
+						telefono_celular_f_e = '$telefonoCelularFe'
                         WHERE id_ = '$id_'
                         ";
 

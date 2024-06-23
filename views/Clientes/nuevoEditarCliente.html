@@ -44,6 +44,7 @@ $(document).ready(function() {
     listar_cargo();
     listar_entidad_laboral();
     listar_sector_economico();
+    listar_monto_ingresos();
     
 // configurar el Select2
   $(document).ready(function() {
@@ -59,6 +60,7 @@ jQuery(function($){
       $("#telefono_fijo").mask("9999-9999");
       $("#txtTelefonoEmpresa").mask("9999-9999");
       $("#telefono_movil").mask("9999-9999");
+      $("#txtTelefonoFe").mask("9999-9999");
       
       $("#txtDui").mask("99999999-9");
       $("#txtPasaporte").mask("9999999999");
@@ -407,7 +409,7 @@ jQuery(function($){
                                       <select class="custom-select" id="lstActividadEconomicaEmpresa" name="lstActividadEconomicaEmpresa" title="Actividad Economica Empresa"></select>                                    
                                     </div>
                                   </div>
-                                  <!-- DUI Y PASAPORTE-->
+                                  <!-- RECURSOS PUBLICOS-->
                                     <div class="form-group row">
                                       <label class="col-lg-12 col-form-label form-control-label text-danger">Si trabaja en el sector público:</label>
                                       <label class="col-lg-3 col-form-label form-control-label">Maneja recursos públicos</label>
@@ -422,7 +424,13 @@ jQuery(function($){
                           <div class="col-md-12">
                             <fieldset>
                                 <legend>Detalle de Ingresos</legend>
-
+                                  <!-- MONTO INGRESOS PRINCIPALES-->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Ingresos Provenientes de Actividad Económica</label>
+                                    <div class="col-lg-3">
+                                      <select class="custom-select" id="lstMontoIngresos" name="lstMontoIngresos" title="Ingresos"></select>                                    
+                                    </div>
+                                  </div>
                             </fieldset>
                           </div>
                             <!-- FIN DETALLE DE INGRESOS -->
@@ -430,7 +438,32 @@ jQuery(function($){
                                 <div class="col-md-12">
                                   <fieldset>
                                       <legend>Datos de Facturación Electrónica</legend>
-      
+                                        <!-- Acepto la emisión-->
+                                        <div class="form-group row">
+                                          <label class="col-lg-9 col-form-label form-control-label">Acepto la emisión y recepción de comprobantes electrónicos por correo electrónico.</label>
+                                          <div class="col-lg-3">
+                                            <select class="custom-select" id="lstEmisionFe" name="lstEmisionFe" title="Emisión Facturación Electrónica"></select>                                    
+                                          </div>
+                                        </div>
+                                        <!-- NOMBRES  O RAZON SOCIAL-->
+                                        <div class="form-group row">
+                                          <label class="col-lg-3 col-form-label form-control-label">Nombre o razón social</label>
+                                          <div class="col-lg-9">
+                                            <input class="form-control" type="text" id="txtnombresFe" name="txtnombresFe" title="Nombre DTE" maxlength="80" placeholder="" autocomplete = "off" onchange="conMayusculas(this);" autofocus="autofocus">
+                                          </div>
+                                        </div>
+                                    <!-- CORREO ELECTRONICO -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">Correo Electrónico</label>
+                                      <div class="col-lg-3">
+                                          <input type="email" name="correoElectronicoFe" id="correoElectronicoFe" title="Correo DTE" placeholder="" class="form-control">
+                                      </div>
+                                      <!-- TELEFONO -->
+                                    <label class="col-lg-3 col-form-label form-control-label">N.º Celular</label>
+                                    <div class="col-lg-3">
+                                      <input class="form-control" type="text" id="txtTelefonoFe" name="txtTelefonoFe" title="N.º Celuluar DTE" maxlength="10" placeholder="" autocomplete = "off">
+                                    </div>
+                                  </div>
                                   </fieldset>
                                   <!-- FIN DATOS DE FACTURACION ELECTRONICA -->
                                 </div>

@@ -142,9 +142,13 @@ var NuevoRegistro = function(){
                     $('#lstSectorEconomicoEmpresa').val(data[0].sector_empresa);
                     $('#lstActividadEconomicaEmpresa').val(data[0].actividad_economica_empresa);
                     $('#lstRecursosPublicos').val(data[0].recursos_publicos);
-
-
-
+                // DETALLE DE INGRESOS
+                    $('#lstMontoIngresos').val(data[0].monto_ingresos);
+                //  DATELLE DE COMPROBANTE DE FACTURACIÓN ELECTRÓNICA.
+                    $('#lstEmisionFe').val(data[0].codigoEmisionFe);
+                    $('#txtnombresFe').val(data[0].nombreRazonSocialFe);
+                    $('#correoElectronicoFe').val(data[0].correoElectronicoFe);
+                    $('#txtTelefonoFe').val(data[0].telefonoCelularFe);
                 }, "json");                				
 	}; /* FINAL DE LA FUNCION LISTAR(); */
 ////////////////////////////////////////////////////
@@ -170,6 +174,7 @@ $("#goBuscar").click(function() {
                 txtcodigo: {required: true, minlength: 5, maxlength: 5},
                 correo_electronico: {email: true},
                 correoElectronicoEmpresa: {email: true},
+                correoElectronicoFe: {email: true},
                 },
 		        errorElement: "em",
 		        errorPlacement: function ( error, element ) {
@@ -457,14 +462,19 @@ function listar_actividad_economica(){
 ////////////////////////////////////////////////////////////
 function listar_si_no(){
     var miselect=$("#lstRecursosPublicos");
+    var miselectFe=$("#lstEmisionFe");
+    
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    miselectFe.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
     $.post("includes/cargar_si_no.php",
         function(data) {
             miselect.empty();
+            miselectFe.empty();
             for (var i=0; i<data.length; i++) {
                 miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+                miselectFe.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
             }
     }, "json");    
 }
@@ -521,6 +531,21 @@ function listar_sector_economico(){
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
     $.post("includes/cargar_sector_economico.php",
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
+            }
+    }, "json");    
+}
+// FUNCION LISTAR 
+////////////////////////////////////////////////////////////
+function listar_monto_ingresos(){
+    var miselect=$("#lstMontoIngresos");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("includes/cargar_monto_ingresos.php",
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
