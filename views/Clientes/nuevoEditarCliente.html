@@ -3,13 +3,14 @@
 {% extends 'default_layout.html' %}
 
 {% block extraCSS %}
-<!-- CSS ESTILO PLANTILLA PERSONAL -->
+<!-- CSS ESTILO PLANTILLA Cliente -->
 <link rel="stylesheet" href="css/estilo_personal.css">
 {% endblock %}
 
 {% block javascripts %}
 <!-- JS para esta página. -->
   <script type="text/JavaScript" src="js/Clientes/NuevoEditarCliente.js"></script>
+  <script type="text/JavaScript" src="js/Clientes/Alertas.js"></script>
   <script type="text/javascript" src="js/calcular_edad.js"></script>
   <script type="text/javascript" src="js/jquery-mask/jquery.maskedinput.js"></script>
 <!-- JS para esta página. -->
@@ -45,6 +46,7 @@ $(document).ready(function() {
     listar_entidad_laboral();
     listar_sector_economico();
     listar_monto_ingresos();
+    listar_CodigoAlertas();
     
 // configurar el Select2
   $(document).ready(function() {
@@ -129,11 +131,14 @@ jQuery(function($){
             <div class="card-body">
             <!-- Nav tabs -->
             <div class="container py-2">
-              <nav id="NavPersonalAlertas">
+              <nav id="NavClienteAlertas">
                 <ul class="nav nav-tabs border-0" id="myTab" role="list">
                   <li class="nav-item">
                       <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tablist" aria-controls="home" aria-selected="true">Cliente</a>
-                  </li>             
+                  </li>        
+                  <li class="nav-time">
+                    <a class="nav-link border border-secondary border-bottom-0" id="alertas-tab" data-toggle="tab" href="#alertas" role="tab" aria-controls="alertas" aria-selected="false">Alertas</a>
+                  </li>                
                 </ul>
               </nav>
               <!-- Tab panes -->
@@ -420,7 +425,7 @@ jQuery(function($){
                             </fieldset>
                             <!-- FIN INFORMACION LABORAL -->
                           </div>
-                          <!-- INICIO DETALLE DE INGRESOS-->
+                        <!-- INICIO DETALLE DE INGRESOS-->
                           <div class="col-md-12">
                             <fieldset>
                                 <legend>Detalle de Ingresos</legend>
@@ -433,43 +438,89 @@ jQuery(function($){
                                   </div>
                             </fieldset>
                           </div>
-                            <!-- FIN DETALLE DE INGRESOS -->
-                                <!-- INICIO DATOS DE FACTURACION ELECTRONICA-->
-                                <div class="col-md-12">
-                                  <fieldset>
-                                      <legend>Datos de Facturación Electrónica</legend>
-                                        <!-- Acepto la emisión-->
-                                        <div class="form-group row">
-                                          <label class="col-lg-9 col-form-label form-control-label">Acepto la emisión y recepción de comprobantes electrónicos por correo electrónico.</label>
-                                          <div class="col-lg-3">
-                                            <select class="custom-select" id="lstEmisionFe" name="lstEmisionFe" title="Emisión Facturación Electrónica"></select>                                    
-                                          </div>
-                                        </div>
-                                        <!-- NOMBRES  O RAZON SOCIAL-->
-                                        <div class="form-group row">
-                                          <label class="col-lg-3 col-form-label form-control-label">Nombre o razón social</label>
-                                          <div class="col-lg-9">
-                                            <input class="form-control" type="text" id="txtnombresFe" name="txtnombresFe" title="Nombre DTE" maxlength="80" placeholder="" autocomplete = "off" onchange="conMayusculas(this);" autofocus="autofocus">
-                                          </div>
-                                        </div>
-                                    <!-- CORREO ELECTRONICO -->
-                                    <div class="form-group row">
-                                      <label class="col-lg-3 col-form-label form-control-label">Correo Electrónico</label>
-                                      <div class="col-lg-3">
-                                          <input type="email" name="correoElectronicoFe" id="correoElectronicoFe" title="Correo DTE" placeholder="" class="form-control">
-                                      </div>
-                                      <!-- TELEFONO -->
-                                    <label class="col-lg-3 col-form-label form-control-label">N.º Celular</label>
+                        <!-- FIN DETALLE DE INGRESOS -->
+                        <!-- INICIO DATOS DE FACTURACION ELECTRONICA-->
+                          <div class="col-md-12">
+                            <fieldset>
+                                <legend>Datos de Facturación Electrónica</legend>
+                                  <!-- Acepto la emisión-->
+                                  <div class="form-group row">
+                                    <label class="col-lg-9 col-form-label form-control-label">Acepto la emisión y recepción de comprobantes electrónicos por correo electrónico.</label>
                                     <div class="col-lg-3">
-                                      <input class="form-control" type="text" id="txtTelefonoFe" name="txtTelefonoFe" title="N.º Celuluar DTE" maxlength="10" placeholder="" autocomplete = "off">
+                                      <select class="custom-select" id="lstEmisionFe" name="lstEmisionFe" title="Emisión Facturación Electrónica"></select>                                    
                                     </div>
                                   </div>
-                                  </fieldset>
-                                  <!-- FIN DATOS DE FACTURACION ELECTRONICA -->
+                                  <!-- NOMBRES  O RAZON SOCIAL-->
+                                  <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Nombre o razón social</label>
+                                    <div class="col-lg-9">
+                                      <input class="form-control" type="text" id="txtnombresFe" name="txtnombresFe" title="Nombre DTE" maxlength="80" placeholder="" autocomplete = "off" onchange="conMayusculas(this);" autofocus="autofocus">
+                                    </div>
+                                  </div>
+                              <!-- CORREO ELECTRONICO -->
+                              <div class="form-group row">
+                                <label class="col-lg-3 col-form-label form-control-label">Correo Electrónico</label>
+                                <div class="col-lg-3">
+                                    <input type="email" name="correoElectronicoFe" id="correoElectronicoFe" title="Correo DTE" placeholder="" class="form-control">
                                 </div>
-
+                                <!-- TELEFONO -->
+                              <label class="col-lg-3 col-form-label form-control-label">N.º Celular</label>
+                              <div class="col-lg-3">
+                                <input class="form-control" type="text" id="txtTelefonoFe" name="txtTelefonoFe" title="N.º Celuluar DTE" maxlength="10" placeholder="" autocomplete = "off">
+                              </div>
+                            </div>
+                            </fieldset>
+                            <!-- FIN DATOS DE FACTURACION ELECTRONICA -->
+                          </div>
                       </div><!-- FIN MODAL BODY INFORMACIÓN GENERAL-->
-                </div>
+                </div> <!-- TAB INFORMACION DEL CLIENTE-->
+                 <!-- Tab ALERTAS -->
+                 <div class="tab-pane p-2 border border-secondary" id="alertas" role="tabpanel" aria-labelledby="alertas-tab">
+                  <form>
+
+                  </form>
+                  <form action="" id="formClienteAlertas" name="formClienteAlertas">
+                        <!-- botoneeras y alertas-->
+                        <div class="text-white">
+                          <div class="alert alert-info p-1 m-1" role="alert" id="AlertClienteAlertas">
+                            <span id="TextoAlertClienteAlertas">...</span>
+                          </div>
+                        </div>
+                          <!-- NAV TAB FORM - FormPersonalAlertas *INICIO*-->
+                          <div class="form-group mb-1 mx-sm-1">
+                            <label for="lstClienteAlertas">Conductas</label>
+                            <select class="form-control mx-sm-3" id="lstClienteAlertas" name="lstClienteAlertas"></select>
+                          </div>
+
+                                <button type="button" id="goGuardarClienteAlertas" aria-label="goGuardarClienteAlertas" class="btn btn-primary mb-2" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Guardar">
+                                  <i class="far fa-save fa-1x"></i>
+                                </button>                          
+
+                        <!-- TABLA CON LOS DATOS DEL FormClienteAlertas. -->  
+                        <div class="bg-info text-white">_Alertas_</div>
+                            <div class="modal-body">
+                                  <table id="listadoContenidoClienteAlertas" class="table table-striped table-bordered table-hover table-condensed">
+                                    <thead>
+                                      <tr>
+                                        <th><input type="checkbox" name="checkBoxAllClienteAlertas" id="checkBoxAllClienteAlertas" data-toggle="tooltip" data-placement="top" title="Marcar/Desmarcar Todo">
+                                          <button type="button" id="goEliminarClienteAlertas" aria-label="goEliminarClienteAlertas" class="btn btn-link" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Eliminar Seleccionados...">
+                                            <i class="fad fa-trash"></i>
+                                          </button>
+                                        </th>
+                                        <th>#</th>
+                                        <th>id</th>
+                                        <th>Descripción</th>
+                                        <th>Riesgo</th>
+                                        <th></th>
+                                      </tr>
+                                    </thead>
+                                      <tbody id="listaContenidoClienteAlertas"></tbody>                            
+                                    <tfoot>
+                                    </tfoot>
+                                </table>
+                            </div> <!-- TABLA CON LOS DATOS DEL Organización niveles. --> 
+                  </form>
+                </div> <!-- FIN ALERTAS -->
               </div> <!-- /.tab-content -->
             </div> <!-- /.container -->
             </div> <!-- /.card-body -->

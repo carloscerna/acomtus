@@ -4,7 +4,7 @@
 // Incluimos el archivo de funciones y conexi�n a la base de datos
     include($path_root."/acomtus/includes/mainFunctions_conexion.php");
 // armando el Query.
-    $query = "SELECT codigo, descripcion from catalogo_conductas_empleados ORDER BY codigo";
+    $query = "SELECT codigo, descripcion from catalogo_conductas_clientes_proveedores ORDER BY codigo";
 // Ejecutamos el Query.
     $consulta = $dblink -> query($query);
 // Inicializando el array
