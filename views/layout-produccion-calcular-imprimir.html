@@ -3,6 +3,7 @@
 {% extends 'default_layout.html' %}
 
 {% block extraCSS %}
+<link href="css/styles-loading.css" rel="stylesheet">
 <style>
   /* mensajes de error para el validate de los form de input*/
    input.error {
@@ -42,6 +43,13 @@
 {% block javascripts %}
     <!-- JS para esta página. -->
     <script type="text/JavaScript" src="js/main_produccion_calcular_imprimir.js"></script>
+<!-- DEINIR EL AJAX START- STOP Y ERROR -->
+  <script>
+    $(document).ready(function () { 
+      var screen = $('#loading-screen');
+        configureLoadingScreen(screen);
+    })
+  </script>
 {% endblock %}
 
 {% block contenidos %}
@@ -270,6 +278,16 @@
     </div>      <!-- /.card -->
   </div>
 </div> <!-- /.content-Wrapper, Contains page content. -->
+
+<!-- plantilla loading-screen . -->
+<div id="loading-screen" style="display:none">
+  <img src="img/spinning-circles.svg">
+  <h3>
+    <label for="LblDescripcion" class="bg-gradiente-gray" id="LblDescripcionMensaje">Por Favor Espere...</label>
+  </h3>
+</div>
+
+
 {% endblock %}
 
 {% block loginUser %}
