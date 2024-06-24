@@ -412,14 +412,17 @@ if($errorDbConexion == false){
 						$contenidoOK = $query_usuario;
 					}
 			break;
-			case 'EliminarRegistro':
+			case 'eliminarRegistro1':
 				// Armamos el query
-				// pendiente de crear....
-				$query = "DELETE FROM clientes WHERE id_ = $_POST[id_user]";
+				$id_ = $_POST["id_user"];
+				$codigo_cliente = $_POST["codigo_cliente"];
+				$query = "DELETE FROM clientes WHERE id_ = '$id_'";
+				$query_clientes_alertas = "DELETE FROM clientes_alertas WHERE codigo_cliente = '$codigo_cliente'";
+
 
 				// Ejecutamos el query
 					$count = $dblink -> exec($query);
-				
+					$count_1 = $dblink -> exec($query_clientes_alertas);
 				// Validamos que se haya actualizado el registro
 				if($count != 0){
 					$respuestaOK = true;

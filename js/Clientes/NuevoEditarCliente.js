@@ -219,7 +219,7 @@ $("#goBuscar").click(function() {
 		            	}
 		            	else{
                             toastr["success"](response.mensaje, "Sistema");
-							   // window.location.href = 'clientes.php';
+							   window.location.href = 'clientes.php';
                             }               
 		            },
 		        });

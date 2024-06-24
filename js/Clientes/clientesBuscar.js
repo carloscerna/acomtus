@@ -2,6 +2,7 @@
 var id_ = 0;
 var MenuEmergente = "";
 var tabla = "";
+var codigoCliente = 0;
 //	ARMAR ITEM DE MENU DEPENDIENDO DEL CODIGO DEL USUARIO.
 	// GESTION PERSONAL
 	var defaultContentMenu = '<div class="dropdown">'
@@ -82,6 +83,7 @@ var obtener_data_editar = function(tbody, tabla){
 		console.log(data); console.log(data[0]);
 		
 		id_ = data[0];
+		codigoCliente = data[1];
 		accion = "EditarRegistro";	// variable global
 			window.location.href = 'editar_Nuevo_Cliente.php?id='+id_+"&accion="+accion;
 	});
@@ -94,7 +96,7 @@ var obtener_data_editar = function(tbody, tabla){
 		console.log(data); console.log(data[0]);
 		
 		id_ = data[0];
-		nombre = data[1];
+		codigoCliente = data[1];
 		accion = "EliminarRegistro";	// variable global
 //	ENVIAR MENSAJE CON SWEETALERT 2, PARA CONFIRMAR SI ELIMINA EL REGISTRO.
 		const swalWithBootstrapButtons = Swal.mixin({
@@ -125,8 +127,8 @@ var obtener_data_editar = function(tbody, tabla){
 				cache: false,
 				type: "POST",
 				dataType: "json",
-				url:"php_libs/soporte/NuevoEditarPersonal.php",
-				data: "id_user=" + id_ + "&accion=" + accion + "&nombre=" + nombre,
+				url:"php_libs/soporte/Clientes/ClientesBuscar.php",
+				data: "id_user=" + id_ + "&accion=" + accion + "&codigo_cliente=" + codigoCliente,
 				success: function(response){
 					// Validar mensaje de error proporcionado por el response. contenido.
 					if(response.respuesta == false){
@@ -134,7 +136,7 @@ var obtener_data_editar = function(tbody, tabla){
 					}
 					else{
 						toastr["success"](response.mensaje, "Sistema");
-							window.location.href = 'personal.php';
+							window.location.href = 'clientes.php';
 						}               
 				},
 			});

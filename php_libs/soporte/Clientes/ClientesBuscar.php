@@ -64,23 +64,27 @@ if($errorDbConexion == false){
 				}
 			break;
 
-			case 'eliminarA':
-				// Armamos el query
-				$query = "DELETE FROM alumno WHERE id_alumno = $_POST[id_user]";
-
-				// Ejecutamos el query
-					$count = $dblink -> exec($query);
-				
-				// Validamos que se haya actualizado el registro
-				if($count != 0){
-					$respuestaOK = true;
-					$mensajeError = 'Se ha eliminado el registro correctamente'.$query;
-
-					$contenidoOK = 'Se ha Eliminado '.$count.' Registro(s).';
-
-				}else{
-					$mensajeError = 'No se ha eliminado el registro'.$query;
-				}
+			case 'EliminarRegistro':
+					// Armamos el query
+					$id_ = $_POST["id_user"];
+					$codigo_cliente = trim($_POST["codigo_cliente"]);
+					$query = "DELETE FROM clientes WHERE id_ = '$id_'";
+					$query_clientes_alertas = "DELETE FROM clientes_alertas WHERE codigo_cliente = '$codigo_cliente'";
+	
+	
+					// Ejecutamos el query
+						$count = $dblink -> exec($query);
+						$count_1 = $dblink -> exec($query_clientes_alertas);
+					// Validamos que se haya actualizado el registro
+					if($count != 0){
+						$respuestaOK = true;
+						$mensajeError = 'Se ha Eliminado '.$count.' Registro(s).';
+	
+						$contenidoOK = '';
+	
+					}else{
+						$mensajeError = 'No se ha eliminado el registro';
+					}
 			break;
         
 			default:
@@ -106,4 +110,3 @@ else{
 			"contenido" => $contenidoOK);
 		echo json_encode($salidaJson);
 	}
-?>

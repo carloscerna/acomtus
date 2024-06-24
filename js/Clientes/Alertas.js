@@ -45,6 +45,7 @@ $(function(){
 			// Id Usuario
     			Id_Editar_Eliminar = $(this).attr('href');
 	    		accion_ok = $(this).attr('data-accion');
+                codigoCliente = $("#txtcodigo").val();
                     // EDITAR LA Modalidad
                     if($(this).attr('data-accion') == 'EditarModalidad'){
                         // Valor de la acción
@@ -105,7 +106,7 @@ $(function(){
                                     dataType: "json",                     
                                     url:"php_libs/soporte/Clientes/Alertas.php",                     
                                     data: {                     
-                                            accionAlertas: 'eliminarAlertas', id_: Id_Editar_Eliminar,
+                                            accionAlertas: 'eliminarAlertas', id_: Id_Editar_Eliminar, codigo_cliente: codigoCliente,
                                             },                     
                                     success: function(response) {                     
                                             if (response.respuesta === true) {                     		
