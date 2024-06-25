@@ -11,7 +11,7 @@ if(empty($_SESSION['userNombre']))
 $root = '';
     include('includes/templateEngine.inc.php');
 
-    $twig->display('layout-proveedores.html',array(
+    $twig->display('Proveedores/ProveedoresBuscar.html',array(
         "userName" => $_SESSION['userNombre'],
         "userID" => $_SESSION['userID'],
         "codigo_perfil" => $_SESSION['codigo_perfil'],
@@ -23,4 +23,3 @@ $root = '';
         "foto_personal" => $_SESSION['foto_personal']
     ));
 }
-?>

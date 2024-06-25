@@ -24,4 +24,3 @@ $root = '';
         "foto_personal" => $_SESSION['foto_personal']
     ));
 }
-?>

@@ -1,0 +1,228 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+<!-- CSS ESTILO PLANTILLA Cliente -->
+<link rel="stylesheet" href="css/estilo_personal.css">
+{% endblock %}
+
+{% block javascripts %}
+<!-- JS para esta página. -->
+  <script type="text/JavaScript" src="js/Proveedores/Alertas.js"></script>
+  <script type="text/JavaScript" src="js/Proveedores/NuevoEditarProveedores.js"></script>
+  <script type="text/javascript" src="js/jquery-mask/jquery.maskedinput.js"></script>
+
+
+<script language="javascript">
+	// VALIDAR LOS ENTER EN EL FORMULARIO.
+$(document).ready(function() {
+  $('form').keypress(function(e){   
+    if(e == 13){
+      return false;
+    }
+  });
+
+  $('input').keypress(function(e){
+    if(e.which == 13){
+      return false;
+    }
+  });
+// Jquery-mask - entrado de datos.
+jQuery(function($){
+    // Form Users Agregar.
+     $("#txtTelefonoUno").mask("9999-9999");
+     $("#txtTelefonoDos").mask("9999-9999");
+     $("#txtTelefonoCelular").mask("9999-9999");
+
+     //$("#").mask("");
+  }); 
+//  LLENAR LISTAS DESPLEGABLES.
+listar_CodigoAlertas();
+
+});
+</script>
+{% endblock %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header p-0">
+      <div class="container-fluid">
+
+      </div><!-- /.container-fluid -->
+    </section>
+
+  <!-- Main content -->
+    <section class="content">
+     <!-- FORM PRINCIPAL -->
+     <form action="" method="post" id="formUsers" name="formUsers" role="form" enctype="multipart/form-data">
+     <div class="tab-content tab-validate"> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+        <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            
+        <input type="hidden" id="accion_buscar" name="accion_buscar" value = "GenerarCodigoNuevo" class="{required:true}">-->            
+        <input type="hidden" id="id_user" name="id_user" value = "{{ id }}">            
+        <input type="hidden" id="accion" name="accion" value = "{{ accion }}">            
+        <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card m-auto">
+            <div class="card-header bg-gradient-navy text-white m-1 p-1">
+              <div class="d-flex flex-row w-100 justify-content-between">
+                <div>
+                  <h3 class="card-title">
+                    <label for="txtEdicionNuevo" class="text-white">Edición: </label>
+                    <label for="LblNombre" class="text-white"></label>
+                  </h3>
+                </div>
+                <div class="m-0 p-0">
+                  <button type="button" id="goGuardar" aria-label="goGuardar" class="btn btn-primary mb-0 mx-sm-1" tabindex="-1" data-toggle="tooltip" data-placement="left" title="Guardar">
+                    <i class="fal fa-save"></i>
+                  </button>
+                  <button type="button" id="goBuscar" aria-label="goBuscar" class="btn btn-secondary mb-0 mx-sm-1" tabindex="-1" data-toggle="tooltip" data-placement="bottom" title="Buscar">
+                    <i class="fal fa-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+            <!-- Nav tabs -->
+            <div class="container py-2">
+              <nav id="NavProveedoresAlertas">
+                <ul class="nav nav-tabs border-0" id="myTab" role="list">
+                  <li class="nav-item">
+                      <a class="nav-link active border border-primary border-bottom-0" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Proveedores</a>
+                  </li>
+                  <li class="nav-time">
+                    <a class="nav-link border border-secondary border-bottom-0" id="alertas-tab" data-toggle="tab" href="#alertas" role="tab" aria-controls="alertas" aria-selected="false">Alertas</a>
+                  </li>   
+                </ul>
+              </nav>
+              
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <div class="tab-pane p-2 active border border-primary" id="home" role="tabpanel" aria-labelledby="home-tab">
+                      <!-- MODAL BODY ROW -->
+                      <div class="modal-body row">
+                        <div class="col-md-12">
+                            <!-- INICIO DEL FORMULARIO -->
+                            <fieldset>
+                                <legend>Información General</legend>
+                                <!-- codigo tipo transporte. -->
+                                <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Nombre Empresa o Persona</label>
+                                    <div class="col-lg-9">
+                                      <input type="text" class="form-control" id="txtNombreProveedor" name="txtNombreProveedor">
+                                    </div>
+                                  </div>
+                                <!-- NUMERO TELEFONO 1 -->
+                                <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">N.º Teléfono 1</label>
+                                    <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtTelefonoUno" name="txtTelefonoUno">
+                                    </div>
+                                  </div>
+                                <!-- NUMERO TELEFONO 2  -->
+                                    <div class="form-group row">
+                                      <label class="col-lg-3 col-form-label form-control-label">N.º Teléfono 2</label>
+                                      <div class="col-lg-9">
+                                        <input class="form-control" type="text" id="txtTelefonoDos" name="txtTelefonoDos">
+                                      </div>
+                                    </div>
+                                <!-- NUMERO TELEFONO CELULAR  -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">N.º Celular</label>
+                                  <div class="col-lg-9">
+                                    <input class="form-control" type="text" id="txtTelefonoCelular" name="txtTelefonoCelular">
+                                  </div>
+                                </div>
+                                <!-- NOMBRE CONTACTO -->
+                                <div class="form-group row">
+                                  <label class="col-lg-3 col-form-label form-control-label">Nombre Contacto</label>
+                                  <div class="col-lg-9">
+                                    <input class="form-control" type="text" id="txtNombreContacto" name="txtNombreContacto">
+                                  </div>
+                                </div>
+                                <!-- DESCRIPCION -->
+                                <div class="form-group row">
+                                    <label class="col-lg-3 col-form-label form-control-label">Dirección</label>
+                                    <div class="col-lg-9">
+                                      <textarea name="txtDireccion" id="txtDireccion" class="form-control" cols="100" rows="4"></textarea>
+                                    </div>
+                                  </div>
+                              </fieldset>
+                            <!-- INICIO DEL FORMULARIO -->
+                        </div>
+                      </div><!-- FIN MODAL BODY INFORMACIÓN GENERAL-->
+                  </div>
+                <!-- Tab ALERTAS -->
+                <div class="tab-pane p-2 border border-secondary" id="alertas" role="tabpanel" aria-labelledby="alertas-tab">
+                  <form>
+
+                  </form>
+                  <form action="" id="formProveedoresAlertas" name="formProveedoresAlertas">
+                        <!-- botoneeras y alertas-->
+                        <div class="text-white">
+                          <div class="alert alert-info p-1 m-1" role="alert" id="AlertProveedoresAlertas">
+                            <span id="TextoAlertProveedoresAlertas">...</span>
+                          </div>
+                        </div>
+                          <!-- NAV TAB FORM - FormPersonalAlertas *INICIO*-->
+                          <div class="form-group mb-1 mx-sm-1">
+                            <label for="lstProveedoresAlertas">Conductas</label>
+                            <select class="form-control mx-sm-3" id="lstProveedoresAlertas" name="lstProveedoresAlertas"></select>
+                          </div>
+
+                                <button type="button" id="goGuardarProveedoresAlertas" aria-label="goGuardarProveedoresAlertas" class="btn btn-primary mb-2" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Guardar">
+                                  <i class="far fa-save fa-1x"></i>
+                                </button>                          
+
+                        <!-- TABLA CON LOS DATOS DEL FormProveedoresAlertas. -->  
+                        <div class="bg-info text-white">_Alertas_</div>
+                            <div class="modal-body">
+                                  <table id="listadoContenidoProveedoresAlertas" class="table table-striped table-bordered table-hover table-condensed">
+                                    <thead>
+                                      <tr>
+                                        <th><input type="checkbox" name="checkBoxAllProveedoresAlertas" id="checkBoxAllProveedoresAlertas" data-toggle="tooltip" data-placement="top" title="Marcar/Desmarcar Todo">
+                                          <button type="button" id="goEliminarProveedoresAlertas" aria-label="goEliminarProveedoresAlertas" class="btn btn-link" tabindex="-1" data-toggle="tooltip" data-placement="top" title="Eliminar Seleccionados...">
+                                            <i class="fad fa-trash"></i>
+                                          </button>
+                                        </th>
+                                        <th>#</th>
+                                        <th>id</th>
+                                        <th>Descripción</th>
+                                        <th>Riesgo</th>
+                                        <th></th>
+                                      </tr>
+                                    </thead>
+                                      <tbody id="listaContenidoProveedoresAlertas"></tbody>                            
+                                    <tfoot>
+                                    </tfoot>
+                                </table>
+                            </div> <!-- TABLA CON LOS DATOS DEL Organización niveles. --> 
+                  </form>
+                </div> <!-- FIN ALERTAS -->
+              </div> <!-- /.tab-content -->
+            </div> <!-- /.container -->
+            </div> <!-- /.card-body -->
+            <!-- /.card-footer -->
+            <div class="card-footer">
+              <div class="form-group row">
+               <div class="col d-flex justify-content-center">
+                <input class="btn btn-primary btn" type="submit" value="Guardar" name="Guardar">
+               </div>
+              </div>              
+            </div>
+          </div> <!-- /.card -->
+          </div> <!-- VALIDATE DE TODO EL DIV PARA LOS DIFERENTES INPUT'S -->
+          </div>
+          </div>
+     </form> <!-- fin del form -->            
+    </section>
+</div> <!-- /.content-Wrapper, Contains page content. -->
+{% endblock %}
+
+{% block loginUser %}
+<!--	{% include 'layout-login-user.html' %} -->
+{% endblock %}

@@ -20,8 +20,8 @@ $(function(){ // INICIO DEL FUNCTION.
 			id_ = $("#id_user").val();
 			accion = $("#accion").val();
 			// cambiar texto de label y enlace.
-			$("label[for='txtEdicionNuevo']").text("Actualizar - Empresa o Persona ");
-            $("label[for='iEdicionNuevo']").text("Edición");
+			//$("label[for='txtEdicionNuevo']").text("Actualizar - Empresa o Persona ");
+            //$("label[for='iEdicionNuevo']").text("Edición");
             // Llamar a la función listar.
                 listar();
 		}
@@ -29,6 +29,7 @@ $(function(){ // INICIO DEL FUNCTION.
             NuevoRegistro();
 			// Variables accion para guardar datos.
 			accion = $("#accion").val();
+			$("#alertas-tab").hide();
 			// cambiar texto de label y enlace.
 			$("label[for='txtEdicionNuevo']").text("Nuevo - Empresa o Persona ");
 			$("label[for='iEdicionNuevo']").text("Agregar");
@@ -50,7 +51,7 @@ var NuevoRegistro = function(){
 				function(data){
 				// Cargar valores a los objetos Llenar el formulario con los datos del registro seleccionado.
 				// Modificar label en la tabs-8.
-                    $("label[for='NombreUser']").text(data[0].nombre_proveedor);
+                    $("label[for='LblNombre']").text(data[0].nombre_proveedor);
                 // datos para el card TITLE - INFORMACIÓN GENERAL
                     $('#txtId').val(id_);
                     $('#txtNombreProveedor').val(data[0].nombre_proveedor);
@@ -61,6 +62,18 @@ var NuevoRegistro = function(){
                     $('#txtDireccion').val(data[0].direccion);
                 }, "json");                				
 	}; /* FINAL DE LA FUNCION LISTAR(); */
+////////////////////////////////////////////////////
+////// SUBMIT para el botón buscar
+////////////////////////////////////////////////////
+	$("#goBuscar").click(function() {     
+		window.location.href = 'proveedores.php';
+	});
+////////////////////////////////////////////////////
+////// SUBMIT para el botón guardar
+////////////////////////////////////////////////////
+	$("#goGuardar").click(function() {     
+		$("#formUsers").submit();
+	});
 ///////////////////////////////////////////////////////
 // Validar Formulario, para posteriormente Guardar o Modificarlo.
  //////////////////////////////////////////////////////

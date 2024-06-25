@@ -29,4 +29,3 @@ $_SESSION['Id_A'] = $_REQUEST['id'];
         "accion" => $accion
     ));
 }
-?>

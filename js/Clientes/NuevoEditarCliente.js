@@ -25,6 +25,7 @@ $(function(){ // INICIO DEL FUNCTION.
 			id_ = $("#id_user").val();
 			accion = $("#accion").val();
             $("#txtEdicionNuevo").text("Edición: ");
+            
             // Llamar a la función listar.
                 listar();
 		}
@@ -35,6 +36,7 @@ $(function(){ // INICIO DEL FUNCTION.
 			// cambiar texto de label y enlace.
             $("#txtEdicionNuevo").text("Nuevo");
             $("label[for='iEdicionNuevo']").text("Agregar");
+            $("#alertas-tab").hide();
         }
         if($('#MenuTab').val() == '0'){
             //$("#").attr('readonly',true);
@@ -154,15 +156,15 @@ var NuevoRegistro = function(){
 ////////////////////////////////////////////////////
 ////// SUBMIT para el botón buscar
 ////////////////////////////////////////////////////
-$("#goBuscar").click(function() {     
-    window.location.href = 'clientes.php';
-});
-	////////////////////////////////////////////////////
-	////// SUBMIT para el botón guardar
-	////////////////////////////////////////////////////
-	$("#goGuardar").click(function() {     
-		$("#formUsers").submit();
-	});
+    $("#goBuscar").click(function() {     
+        window.location.href = 'clientes.php';
+    });
+////////////////////////////////////////////////////
+////// SUBMIT para el botón guardar
+////////////////////////////////////////////////////
+    $("#goGuardar").click(function() {     
+        $("#formUsers").submit();
+    });
 ///////////////////////////////////////////////////////
 // Validar Formulario, para posteriormente Guardar o Modificarlo.
  //////////////////////////////////////////////////////
