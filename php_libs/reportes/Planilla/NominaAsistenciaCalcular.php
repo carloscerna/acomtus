@@ -470,6 +470,7 @@ exit;
                     $salario["Total"] = 0;
                     $salario["SalarioQuincena"] = round($total_dias_quincena * $salario["PorDia"],4);
                     $salario["Descuento4HFC"] = 0;
+                    $salario["Descuento4H"] = 0;
                     $salario["DescuentoFaltas"] = 0;
                     $salario["TotalDiasQuincena"] = $total_dias_quincena;
                 // DATOS AL INFORME
@@ -833,6 +834,8 @@ function rellenar($total_dias_quincena){
                        $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - ($salario["PorDia"] * ($total_dias_quincena - $count_asistencia));
                     // CON EL DESCUENTO
                         $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["Descuento4HFC"];
+                    // CON MAS DE 4H.
+                        $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - (($salario["Descuento4H"] - 2) * $salario["Extra4H"]);
                     // SALARIO EN PANTALLA
                         $salario_pantalla = number_format($salario["SalarioQuincena"],2,'.',',');
                         $pdf->SetTextColor(72,61,139);   // COLOR AZUL OSCURO rgb(72,61,139)
@@ -1098,7 +1101,7 @@ function VerificarFechaDescuento($codigo_personal){
             // validar si existen archivos en la consulta segun la fecha.
             $cantidad_registros = $consulta_asistencia_buscar_db -> rowCount();
             // regrear la variable conteo a 0
-                $conteo_4h = 0; $descuento = 0; $CantidadF = 0; $CantidadPP = 0; $CantidadH = 0;
+                $conteo_4h = 0; $descuento = 0; $CantidadF = 0; $CantidadPP = 0; $CantidadH = 0; $Descuento4H = 0;
             // Verificar si existen registros.
                 if($consulta_asistencia_buscar_db -> rowCount() != 0){
                     while($rows = $consulta_asistencia_buscar_db -> fetch(PDO::FETCH_BOTH))
@@ -1116,6 +1119,7 @@ function VerificarFechaDescuento($codigo_personal){
                     //
                     if(!empty($CodigoNombreJornadaDDT["DescripcionJornada"])){
                         $CantidadH = count(array_keys($CodigoNombreJornadaDDT["DescripcionJornada"], "4H"));
+                        $salario["Descuento4H"] = $salario["Descuento4H"] + $CantidadH;
                     }
                     if(!empty($CodigoNombreJornadaDDT["DescripcionLicencia"])){
                         $CantidadF = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "F"));
@@ -1128,13 +1132,15 @@ function VerificarFechaDescuento($codigo_personal){
                     // CALCULOS...
                     // HORAS EXTRAS 4H
                     if($CantidadH > 2){
-                        $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + $salario["Extra4H"];
+
+                      //  $Descuento4H = $Descuento4H + $CantidadH;
+                        //$salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["Extra4H"] * $Descuento4H);
                     }
                     // FALTAS
                     if($CantidadF !=0){
 
                       $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * (2 * $CantidadF));   // pierde el dìa actual y el septimo.
-                      $salario["DescuentoFaltas"] = $salario["DescuentoFaltas"] + $CantidadF;
+                      //$salario["DescuentoFaltas"] = $salario["DescuentoFaltas"] + $CantidadF;
                     }
                     // castigo
                     if($CantidadC !=0){
@@ -1147,10 +1153,10 @@ function VerificarFechaDescuento($codigo_personal){
                     //var_dump($salario["Descuento4HFC"]);
                     unset($CodigoNombreJornadaDDT);
                     $CodigoNombreJornadaDDT = array();
-                    $CantidadC = 0; $CantidadF = 0; $CantidadH = 0; $CantidadPP = 0; $CantidadISSS = 0;
+                    $CantidadC = 0; $CantidadF = 0; $CantidadPP = 0; $CantidadISSS = 0;
     } // LAZO FOR. para buscar datos de descuento o faltas.
-
-    if($codigo_personal == '102915'){
+    
+    if($codigo_personal == '0217'){
         var_dump($salario);
        print $query_asistencia_buscar_db;
        var_dump($BuscarFechaInicio);
@@ -1180,4 +1186,3 @@ function RellenarSinCalculos(){
                 $pdf->ln();
 
 }
-?>
