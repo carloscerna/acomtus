@@ -55,8 +55,8 @@ var listar = function(){
                     {"data":"codigo"},
                     {"data":"nombre_empleado"},
 					{"data":"telefono_celular"},
-                    {"data":"fecha_nacimiento"},
-                    {"data":"edad"},
+                    {"data":"saldo_fianza"},
+                    {"data":"saldo_prestamo"},
 					{"data":"codigo_estatus",
 						render: function(data, type, row){
 							if(data == '01'){

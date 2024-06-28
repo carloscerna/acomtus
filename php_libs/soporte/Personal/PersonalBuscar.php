@@ -34,20 +34,20 @@ if($errorDbConexion == false){
 		switch ($_POST['accion']) {
 		case 'BuscarTodos':
 				// Armamos el query.
-				$query = "SELECT p.id_personal, p.codigo, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado, p.telefono_residencia, telefono_celular,
+				/*$query = "SELECT p.id_personal, p.codigo, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado, p.telefono_residencia, telefono_celular,
                             to_char(p.fecha_nacimiento,'dd/mm/yyyy') as fecha_nacimiento, p.edad, p.codigo_estatus
                                 FROM personal p
                                     WHERE p.codigo <> ''
                                         ORDER BY p.id_personal DESC, p.codigo_estatus ASC
-						";
-                /*$query = "SELECT p.id_personal, p.codigo, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado, p.telefono_residencia, telefono_celular,
+						";*/
+                $query = "SELECT p.id_personal, p.codigo, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado, p.telefono_residencia, telefono_celular,
                             to_char(p.fecha_nacimiento,'dd/mm/yyyy') as fecha_nacimiento, p.edad, p.codigo_estatus,
                             (SELECT SUM(fianza)-SUM(devolucion) as saldo_fianza from fianzas where codigo = p.codigo),
                             (SELECT SUM(prestamos)-SUM(descuentos) as saldo_prestamo from prestamos where codigo = p.codigo)
                                 FROM personal p
                                     WHERE p.codigo <> '' and p.codigo_estatus = '01'
                                         ORDER BY nombre_empleado
-						";*/
+						";
 				// Ejecutamos el Query.
 				$consulta = $dblink -> query($query);
 				// Validar si hay registros.
