@@ -45,6 +45,12 @@ var listar = function(){
 					url:"php_libs/soporte/Personal/PersonalBuscar.php",
 					data: {"accion_buscar": buscartodos}
 				},
+				"columnDefs": [
+					{
+						"targets": [ 5,6 ],
+						 render: $.fn.dataTable.render.number( ',', '.', 2, '$' )             
+					}, 
+				],
 				"columns":[
 					{
 						data: null,

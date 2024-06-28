@@ -2,6 +2,22 @@
 
 {% extends 'default_layout.html' %}
 
+
+{% block extraCSS %}
+<!-- CSS ESTILO PLANTILLA Cliente -->
+<style>
+  table th:nth-child(6),
+  table td:nth-child(6) {
+      background: rgba(226, 248, 232, 0.807);
+  }
+  table th:nth-child(7),
+  table td:nth-child(7) {
+      background: #e8d5d5ec;
+  }
+</style>
+
+{% endblock %}
+
 {% block javascripts %}
   <!-- JS para esta página. -->
     <script type="text/JavaScript" src="js/Personal/personalBuscar.js"></script>
@@ -93,7 +109,7 @@
                   <th>Código</th>
                   <th>Nombre</th>
                   <th>Nº <i class="fas fa-mobile-alt"></i></th>
-                  <th>Fianzas <i class="fad fa-dollar-sign"></i></th>
+                  <th class="text-center">Fianzas <i class="fad fa-dollar-sign"></i></th>
                   <th>Prestamos<i class="fad fa-dollar-sign"></i></th>
                   <th>Estatus</th>
                 </tr>                
