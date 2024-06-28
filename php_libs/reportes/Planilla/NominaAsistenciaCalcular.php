@@ -504,22 +504,23 @@ exit;
 /////////////////////////////////////////////////////////////////////////////////////
 //************* */ FUNCIONES.*******************************************************
 /////////////////////////////////////////////////////////////////////////////////////
-function rellenar_i($i){
-    global $pdf, $fill, $w, $w1, $header, $i, $total_dias_quincena, $total_lineas;
-    // SALTO DE PAGINA QUE DEPENDE DEL NUMERO DE LINEAS.
-    if($i==25 || $i == 51 || $i == 65){
-        $pdf->Cell($w[0],6,'','T',0,'C',$fill);    // núermo correlativo
-        $pdf->Cell($w[1],6,'','T',0,'L',$fill);    // codigo empleado
-        $pdf->Cell($w[2],6,'','T',0,'L',$fill);    // Nombre + apellido_materno + apellido_paterno
-        $pdf->Cell($w1[0]*$total_dias_quincena,6,'','T',0,'L',$fill);    // Total de dias
-        if($total_lineas > 25){
-            $pdf->AddPage();
-            // Posición en donde va iniciar el texto.
-            $pdf->SetY(30);
-            $pdf->FancyTable($header);
-        }
-    }    
-}
+function rellenar_i($i)
+    {
+        global $pdf, $fill, $w, $w1, $header, $i, $total_dias_quincena, $total_lineas;
+        // SALTO DE PAGINA QUE DEPENDE DEL NUMERO DE LINEAS.
+        if($i==25 || $i == 51 || $i == 65){
+            $pdf->Cell($w[0],6,'','T',0,'C',$fill);    // núermo correlativo
+            $pdf->Cell($w[1],6,'','T',0,'L',$fill);    // codigo empleado
+            $pdf->Cell($w[2],6,'','T',0,'L',$fill);    // Nombre + apellido_materno + apellido_paterno
+            $pdf->Cell($w1[0]*$total_dias_quincena,6,'','T',0,'L',$fill);    // Total de dias
+            if($total_lineas > 25){
+                $pdf->AddPage();
+                // Posición en donde va iniciar el texto.
+                $pdf->SetY(30);
+                $pdf->FancyTable($header);
+            }
+        }    
+    }
 // POR EL MOMENTO NO EJECUTA NADA.
 function rellenar_datos($linea){
     global $i, $pdf, $w, $w1, $total_dias_quincena, $fill;
@@ -836,7 +837,7 @@ function rellenar($total_dias_quincena){
                     // CON EL DESCUENTO
                         $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["Descuento4HFC"];
                     // CON MAS DE 4H.
-                        $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - (($salario["Descuento4H"] - 2) * $salario["Extra4H"]);
+                        //$salario["SalarioQuincena"] = $salario["SalarioQuincena"] - (($salario["Descuento4H"] - 2) * $salario["Extra4H"]);
                     // SALARIO EN PANTALLA
                         $salario_pantalla = number_format($salario["SalarioQuincena"],2,'.',',');
                         $pdf->SetTextColor(72,61,139);   // COLOR AZUL OSCURO rgb(72,61,139)
