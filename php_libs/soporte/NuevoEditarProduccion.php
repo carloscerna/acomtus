@@ -368,7 +368,7 @@ if($errorDbConexion == false){
 						$mensajeError = "Se ha agregado el registro correctamente";
 						$contenidoOK = '';
 						$IdProduccionOK = $codigo_produccion;
-
+						// listar registros
 						ListadoAsignado();
 					}
 					else{
@@ -377,6 +377,7 @@ if($errorDbConexion == false){
 			break;
 			case ($AccionBuscar == 'GuardarControlIngreso' || $AccionBuscar == "ActualizarControlIngreso"):
 				# VARIABLES.
+					$CountAgregados = 0;
 					$fecha_produccion = trim($_POST['FechaProduccion']);
 					$codigo_produccion = trim($_POST['NumeroCorrelativo']);
 					$codigo_ruta = trim($_POST['codigo_ruta']);
@@ -416,7 +417,7 @@ if($errorDbConexion == false){
 								$resultadoQuery = $dblink -> query($query_update_p);              	             
 						}
 				# RECORRER LA TABLA PRODUCCION ASIGNADO TEMP.
-					$query_temp = "SELECT tiquete_desde, tiquete_hasta, total, cantidad, codigo_inventario_tiquete, codigo_personal 
+					$query_temp = "SELECT tiquete_desde, tiquete_hasta, total, cantidad, codigo_inventario_tiquete, codigo_personal, codigo_produccion_asignado
 						FROM produccion_asignado_temp WHERE codigo_produccion = '$codigo_produccion' and codigo_personal = '$codigo_personal' ORDER BY id_";
 				// Ejecutamos el query
 					$resultadoQuery_temp = $dblink -> query($query_temp);
@@ -439,21 +440,30 @@ if($errorDbConexion == false){
 								}
 							// Evaluar Actualizar control ingreso.
 								if($AccionBuscar == "ActualizarControlIngreso"){
-									$consultaBuscarProduccionAsignado = 0;
 									// Armar query.
 										$queryBuscarProduccionAsignado = "SELECT * FROM produccion_asignado	WHERE  id_ = '$codigo_produccion_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'";
 									// Ejecutamos el query
-										$consultaBuscarProduccionAsignado = $dblink -> query($queryBuscarProduccionAsignado);								
+										$consultaBuscarProduccionAsignado = $dblink -> query($queryBuscarProduccionAsignado);	
+										$ValorBusqueda = $consultaBuscarProduccionAsignado -> rowCount();
 									// Validar si hay registros.
-										if($consultaBuscarProduccionAsignado -> rowCount() == 0){        
-										}
+										if($ValorBusqueda == 0){        
 											// Armar query QueryGuardarProduccionAsignado
-												$queryGuardarProduccionAsignado = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
+													$queryGuardarProduccionAsignado = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
 													VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
 											// Ejecutamos el query
-												$resultadoQuery = $dblink -> query($queryGuardarProduccionAsignado);    			
+												$queryAgregado = $dblink -> query($queryGuardarProduccionAsignado);    			
+											// $agregados.
+											$CountAgregados = $CountAgregados + $queryAgregado -> rowCount();
 										}
+								}	// if acceionBsucar
 							}	// while asignacion temp.
+							// Validamos que se haya actualizado el registro
+						if($CountAgregados != 0){
+							$respuestaOK = true;
+							$mensajeError = 'Se ha Agregado '.$CountAgregados.' Talonario(s).';
+						}else{
+							$mensajeError = 'El Control no ha sido Modificado.';
+						}
 				break;
 			case 'BuscarControlIngreso':
 				$codigo_produccion = trim($_POST['NumeroCorrelativo']);

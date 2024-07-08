@@ -329,7 +329,7 @@ $("#DesdeAsignado").on('keyup', function (e) {
     }
       // LIMPIAR ACCION Y CORRELATIVO PARA UNO NUEVO. flecha hacia arriba.
       if (keycode === 38){
-        var r = confirm("Guardar Control de Ingresos");
+        var r = confirm("¿Guardar Control de Ingresos?");
         if (r == true) {
          // NUEVA PRODUCCIÓN.
 			 // Limpiar datos
@@ -372,9 +372,10 @@ $("#DesdeAsignado").on('keyup', function (e) {
                             }
                         // Validar mensaje de error
                         if(response.respuesta == true){
-                        
+                            toastr["info"](response.mensaje, "Sistema");
                         }
                         if(response.respuesta == false){
+                            toastr["info"](response.mensaje, "Sistema");
                          }
                     },
                 });
@@ -399,7 +400,7 @@ $("#DesdeAsignado").on('keyup', function (e) {
                  //$("#NumeroCorrelativo").val(id_);
                  $("#accion").val(accion);
                  $("#id_user").val(id_);
-                 toastr["info"]("Control de Ingresos, Guardado.", "Sistema");
+
                  // cambiar el valor del ingreso.
                  $("label[for='LblIngreso']").text('Total Entregado $ ');
                  $("label[for='LblCantidad']").text('Total Tiquete: ' );
