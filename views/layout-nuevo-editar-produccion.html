@@ -200,10 +200,10 @@ document.querySelectorAll('select').forEach((input) => {
      <!-- FORM PRINCIPAL -->
      <form action="" method="post" id="formUsers" name="formUsers" role="form" enctype="multipart/form-data">
         <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
-        <input type="hidden" id="id_user" name="id_user" value = '{{ id }}'>            
-        <input type="hidden" id="accion" name="accion" value = '{{ accion }}'>            
+        <input type="hidden" id="id_user" name="id_user" value = "{{ id }}">            
+        <input type="text" id="accion" name="accion" value = "{{ accion }}">            
         <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
-        <input type="hidden" id="cp" name="cp" value = '{{ codigo_personal }}'>            
+        <input type="hidden" id="cp" name="cp" value = "{{ codigo_personal }}">            
         <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
           <div class="card">
             <div class="card-header bg-gradient-navy">

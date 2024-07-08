@@ -836,7 +836,7 @@ function rellenar($total_dias_quincena){
                     // CON EL DESCUENTO
                         $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["Descuento4HFC"];
                     // CON MAS DE 4H.
-                        $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - (($salario["Descuento4H"] - 2) * $salario["Extra4H"]);
+                       // $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - (($salario["Descuento4H"] - 2) * $salario["Extra4H"]);
                     // SALARIO EN PANTALLA
                         $salario_pantalla = number_format($salario["SalarioQuincena"],2,'.',',');
                         $pdf->SetTextColor(72,61,139);   // COLOR AZUL OSCURO rgb(72,61,139)

@@ -261,16 +261,16 @@ $("#DesdeAsignadoPartial01").on('keyup', function (e) {
 $("#DesdeAsignado").on('keyup', function (e) {
     var keycode = e.keyCode || e.which;
     console.log(keycode);
-
           // CALCULOS -tecla el punto 
           if (keycode == 190 || keycode == 189) {
             // Pasar foco.
                 $("#DesdeAsignado").val("");
                 $("#DesdeAsignado").focus().select();
           }
-
              // CALCULOS -tecla SUPRIMIR O ELIMINAR 
-               if (keycode == 46) {
+               if (keycode == 46)
+               {
+                // Extraer 
                 codigo_produccion = $('#NumeroCorrelativo').val();
                 // ejecutar Ajax.. ACTUALIZAR ULITMO REGISTROS
                 $.ajax({
@@ -295,7 +295,7 @@ $("#DesdeAsignado").on('keyup', function (e) {
                             }                
                     }                     
                     });
-                      }
+                }
       // CUANDO EL VALOR ESTE VACIO O SEA IGUAL A CERO
     /*  if(contar.trim() == 2){
         if (keycode == 48 || keycode == 32 || $("#DesdeAsignado").val()== null) {

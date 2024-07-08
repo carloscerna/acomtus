@@ -35,7 +35,6 @@ $NoGuardado = 0;
 $QueryLista = "";
 $vendido = false;
 $CreadoTemp = false;
-$AccionBuscar = "";
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);
 // Incluimos el archivo de funciones y conexi�n a la base de datos
@@ -49,8 +48,7 @@ if($errorDbConexion == false){
 			$_POST['accion'] = $_POST['accion_buscar'];
 		}
 		// Verificamos las variables de acci�n
-			$AccionBuscar = $_POST['accion'];
-		switch ($AccionBuscar) {
+		switch ($_POST['accion']) {
 			case 'BuscarPorId':
 				$id_x = trim($_POST['id_x']);
 				// Armamos el query.
@@ -115,7 +113,7 @@ if($errorDbConexion == false){
 						$respuestaOK = true;
 					}
 			break;
-			case ($AccionBuscar == "AgregarNuevoTemp" || $AccionBuscar == "ActualizarTemp"):
+			case 'AgregarNuevoTemp':
 				// TABS-1 - tabla produccion.
 				$fecha_produccion = trim($_POST['FechaProduccion']);
 				$NumeroCorrelativo = trim($_POST['NumeroCorrelativo']);
@@ -375,7 +373,7 @@ if($errorDbConexion == false){
 						$mensajeError = "No se puede guardar el registro en la base de datos ";
 					}
 			break;
-			case ($AccionBuscar == 'GuardarControlIngreso' || $AccionBuscar == "ActualizarControlIngreso"):
+			case 'GuardarControlIngreso':
 				# VARIABLES.
 					$fecha_produccion = trim($_POST['FechaProduccion']);
 					$codigo_produccion = trim($_POST['NumeroCorrelativo']);
@@ -384,77 +382,333 @@ if($errorDbConexion == false){
 					$codigo_inventario_tiquete = trim($_POST['codigo_serie']);
 					$codigo_tiquete_color = trim($_POST['codigo_tiquete_color']);
 					$codigo_personal = trim($_POST['codigo_personal']);
-					// Evaluar si es GUARDAR o ACTUALIZAR.
-						if($AccionBuscar == "GuardarControlIngreso"){
-							# GUARAR DATOS EN LA TABLA PRODUCCIÓN.
-								$query = "INSERT INTO produccion (fecha, codigo_jornada, codigo_ruta, codigo_inventario_tiquete, hora, codigo_tiquete_color)
-									VALUES ('$fecha_produccion','$codigo_jornada','$codigo_ruta','$codigo_inventario_tiquete', '$hora_actual', '$codigo_tiquete_color')";
-							// Ejecutamos el query
-								$resultadoQuery = $dblink -> query($query);              
-							// obtener el último dato en este caso el Id_
-								$query = "SELECT lastval()";
-								$consulta = $dblink -> query($query);              
-								while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-								{
-									$codigo_produccion_last = $listado['lastval'];
-								}
-								## evaluar si son iguales.
-									if($codigo_produccion != $codigo_produccion_last){
-										$query_actualizar_codigo_temp = "UPDATE produccion_asignado_temp SET codigo_produccion = '$codigo_produccion_last'
-												WHERE codigo_produccion = '$codigo_produccion'";
-													$consulta_actualizar_codigo_temp = $dblink -> query($query_actualizar_codigo_temp);              
-										## Cambiar el valor de <codigo_produccion class="
-											$codigo_produccion = $codigo_produccion_last;
-									}
+				# GUARAR DATOS EN LA TABLA PRODUCCIÓN.
+					$query = "INSERT INTO produccion (fecha, codigo_jornada, codigo_ruta, codigo_inventario_tiquete, hora, codigo_tiquete_color)
+						VALUES ('$fecha_produccion','$codigo_jornada','$codigo_ruta','$codigo_inventario_tiquete', '$hora_actual', '$codigo_tiquete_color')";
+				// Ejecutamos el query
+					$resultadoQuery = $dblink -> query($query);              
+				// obtener el último dato en este caso el Id_
+					$query = "SELECT lastval()";
+					$consulta = $dblink -> query($query);              
+					while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+					{
+						$codigo_produccion_last = $listado['lastval'];
+					}
+					## evaluar si son iguales.
+						if($codigo_produccion != $codigo_produccion_last){
+							$query_actualizar_codigo_temp = "UPDATE produccion_asignado_temp SET codigo_produccion = '$codigo_produccion_last'
+									 WHERE codigo_produccion = '$codigo_produccion'";
+										$consulta_actualizar_codigo_temp = $dblink -> query($query_actualizar_codigo_temp);              
+							## Cambiar el valor de <codigo_produccion class="
+								$codigo_produccion = $codigo_produccion_last;
 						}
-					// Evaluar Actualizar control ingreso.
-						if($AccionBuscar == "ActualizarControlIngreso"){
-							// ACTULIZAR CIERTOS CAMPOS DE LA PRODUCCIÓN.
-								$query_update_p = "UPDATE produccion SET codigo_inventario_tiquete = '$codigo_inventario_tiquete', codigo_tiquete_color = '$codigo_tiquete_color', codigo_ruta = '$codigo_ruta', codigo_jornada = '$codigo_jornada'
-									WHERE id_ = '$codigo_produccion'";
-							// Ejecutamos el query
-								$resultadoQuery = $dblink -> query($query_update_p);              	             
-						}
+				//**** */
 				# RECORRER LA TABLA PRODUCCION ASIGNADO TEMP.
+				//****** */
 					$query_temp = "SELECT tiquete_desde, tiquete_hasta, total, cantidad, codigo_inventario_tiquete, codigo_personal 
 						FROM produccion_asignado_temp WHERE codigo_produccion = '$codigo_produccion' and codigo_personal = '$codigo_personal' ORDER BY id_";
 				// Ejecutamos el query
 					$resultadoQuery_temp = $dblink -> query($query_temp);
 					while($listado_temp = $resultadoQuery_temp -> fetch(PDO::FETCH_BOTH))
+					{
+						$desde_asignado = $listado_temp['tiquete_desde'];
+						$hasta_asignado = $listado_temp['tiquete_hasta'];
+						$total = $listado_temp['total'];
+						$cantidad = $listado_temp['cantidad'];
+						$codigo_inventario_tiquete = $listado_temp['codigo_inventario_tiquete'];
+						$codigo_personal = $listado_temp['codigo_personal'];
+
+							# VERIFICAR ANTES DE GUARDAR EN PRODUCCION ASIGNADO.
+							$query_ = "SELECT * FROM produccion_asignado
+								WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado'
+									and codigo_inventario_tiquete = '$codigo_inventario_tiquete' ORDER BY fecha ASC";
+					// Ejecutamos el query
+						$consulta_ = $dblink -> query($query_);								
+					// Validar si hay registros.
+						if($consulta_ -> rowCount() != 0){        
+							# verificar si pueder ser ingresado de nuevo para un nuevo control.
+							# si está procesado y 03 - > Entregado ól. 04 -> Devolución.
+							/*$query_prueba = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+							and codigo_estatus >= '03' and codigo_estatus <= '04' and procesado = 'true' ORDER BY fecha DESC LIMIT 1";*/
+							$query_prueba = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' 
+									and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+										and codigo_estatus = '03' and procesado = 'false' ORDER BY fecha DESC LIMIT 1";
+							// Ejecutamos el query
+							$consulta_pa1 = $dblink -> query($query_prueba);
+							// Da resultado cuanod ya existe el talonario con estatus '03.
+							if($consulta_pa1 -> rowCount() != 0){        
+								# NO GUARDAR
+								$NoGuardado++;
+								$QueryLista .= $query_prueba;
+
+								while($listado_pa1 = $consulta_pa1 -> fetch(PDO::FETCH_BOTH))
+								{
+									$fecha = $listado_pa1['fecha'];
+									$codigo_produccion_no_guardado = $listado_pa1['codigo_produccion'];
+									$tiquete_desde = $listado_pa1['tiquete_desde'];
+									$tiquete_hasta = $listado_pa1['tiquete_hasta'];
+									$codigo_estatus = $listado_pa1['codigo_estatus'];
+
+									$contenidoOKNoGuardados .= "<tr>
+									<td>$fecha
+									<td>$codigo_produccion_no_guardado
+									<td>$tiquete_desde
+									<td>$tiquete_hasta
+									<td>$codigo_estatus"
+									;
+								}
+							}else{
+								# otra pregunta....
+									$query_prueba2 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+										and codigo_estatus = '04' and procesado = 'true' ORDER BY fecha DESC LIMIT 1";
+								// Ejecutamos el query
+									$consulta_pa2 = $dblink -> query($query_prueba2);    
+								//
+									if($consulta_pa2 -> rowCount() != 0){        
+										# GUARDAR EN TABLA PRODUCCION ASIGNADO.
+											$query_pa = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
+												VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
+										// Ejecutamos el query
+											$resultadoQuery = $dblink -> query($query_pa);    
+									}else{
+										## EVALUAR SI HAY COLA.
+										##
+											# otra pregunta.... CUANDO EL CODIGO ES IGUAL A VENDIDO PERO TIENE COLA
+											$query_prueba3 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+												and codigo_estatus = '05' and procesado = 'true' and tiquete_cola <> 0 ORDER BY fecha DESC LIMIT 1";
+											// Ejecutamos el query
+												$consulta_pa3 = $dblink -> query($query_prueba3);    
+												if($consulta_pa3 -> rowCount() != 0){        
+													while($listado_3 = $consulta_pa3 -> fetch(PDO::FETCH_BOTH))
+													{
+														$tiquete_cola = $listado_3['tiquete_cola'];
+														# Analizar si la cola es igual a Tiquete ASignado.
+															if($desde_asignado == $tiquete_cola){
+																// query.
+																$query_pa = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
+																	VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
+																// Ejecutamos el query
+																	$resultadoQuery = $dblink -> query($query_pa);    	
+															}
+													}
+												}
+									}
+							}
+
+						}else{
+						# GUARDAR EN TABLA PRODUCCION ASIGNADO.
+						# CUANDO NO EXISTE EL TALONARIO.
+							// query.
+							$query_pa = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
+								VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
+						// Ejecutamos el query
+								$resultadoQuery = $dblink -> query($query_pa);    	
+						}
+					}     
+				break;
+			case 'ActualizarControlIngreso':
+					# VARIABLES.
+						$fecha_produccion = trim($_POST['FechaProduccion']);
+						$codigo_produccion = trim($_POST['NumeroCorrelativo']);
+						$codigo_ruta = trim($_POST['codigo_ruta']);
+						$codigo_jornada = trim($_POST['codigo_jornada']);
+						$codigo_inventario_tiquete = trim($_POST['codigo_serie']);
+						$codigo_tiquete_color = trim($_POST['codigo_tiquete_color']);
+						$codigo_personal = trim($_POST['codigo_personal']);
+					// ACTULIZAR CIERTOS CAMPOS DE LA PRODUCCIÓN.
+						$query_update_p = "UPDATE produccion SET codigo_inventario_tiquete = '$codigo_inventario_tiquete', codigo_tiquete_color = '$codigo_tiquete_color', codigo_ruta = '$codigo_ruta', codigo_jornada = '$codigo_jornada'
+							WHERE id_ = '$codigo_produccion'";
+					// Ejecutamos el query
+						$resultadoQuery = $dblink -> query($query_update_p);              	             
+					//**** */
+					# RECORRER LA TABLA PRODUCCION ASIGNADO TEMP.
+					//****** */
+						$query_temp = "SELECT * FROM produccion_asignado_temp WHERE codigo_produccion = '$codigo_produccion' and codigo_personal = '$codigo_personal' ORDER BY id_";
+					// Ejecutamos el query
+						$resultadoQuery_temp = $dblink -> query($query_temp);
+						while($listado_temp = $resultadoQuery_temp -> fetch(PDO::FETCH_BOTH))
 						{
 							$desde_asignado = $listado_temp['tiquete_desde'];
 							$hasta_asignado = $listado_temp['tiquete_hasta'];
 							$total = $listado_temp['total'];
 							$cantidad = $listado_temp['cantidad'];
-							$codigo_inventario_tiquete = $listado_temp['codigo_inventario_tiquete'];
-							$codigo_personal = $listado_temp['codigo_personal'];
 							$codigo_produccion_asignado = $listado_temp['codigo_produccion_asignado'];
-							// guardar solo cuando sea GUARDARCONTROLINGRESO.
-								if($AccionBuscar == "GuardarControlIngreso"){
-									// Armar query QueryGuardarProduccionAsignado
-										$queryGuardarProduccionAsignado = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
-											VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
+							$codigo_inventario_tiquete = $listado_temp['codigo_inventario_tiquete'];
+	
+							# VERIFICAR ANTES DE GUARDAR EN PRODUCCION ASIGNADO.
+								/*$query_ = "SELECT * FROM produccion_asignado
+									WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado'
+									and codigo_inventario_tiquete = '$codigo_inventario_tiquete' ORDER BY fecha ASC
+								";*/
+								$query_ = "SELECT * FROM produccion_asignado
+									WHERE  id_ = '$codigo_produccion_asignado'
+									and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+								";
+							// Ejecutamos el query
+								$consulta_ = $dblink -> query($query_);								
+							// Validar si hay registros.
+								if($consulta_ -> rowCount() != 0){        
+									# verificar si pueder ser ingresado de nuevo para un nuevo control.
+									# si está procesado y 03 - > Entregado ól. 04 -> Devolución.
+									/*$query_prueba = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+									and codigo_estatus >= '03' and codigo_estatus <= '04' and procesado = 'true' ORDER BY fecha DESC LIMIT 1";*/
+									/*$query_prueba = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+										and codigo_estatus = '03' and procesado = 'false' ORDER BY fecha DESC LIMIT 1";*/
+										$query_prueba = "SELECT * from produccion_asignado WHERE id_ = '$codigo_produccion_asignado'
+										and codigo_estatus = '03' and procesado = 'false'";
 									// Ejecutamos el query
-										$resultadoQuery = $dblink -> query($queryGuardarProduccionAsignado);    			
+									$consulta_pa1 = $dblink -> query($query_prueba);
+									// Da resultado cuanod ya existe el talonario con estatus '03.
+									if($consulta_pa1 -> rowCount() != 0){        
+										# ACTUALIZAR EL REGISTRO ESTE O NO ESTE ODIFICADO.
+											$update_query = "UPDATE produccion_asignado SET tiquete_desde = '$desde_asignado', total = '$total', cantidad = '$cantidad'
+												 WHERE id_ = '$codigo_produccion_asignado'
+												";
+										// Ejecutamos el query
+											$QueryUpdate = $dblink -> query($update_query);
+									}else{
+										# otra pregunta....
+											$query_prueba2 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+												and codigo_estatus = '04' and procesado = 'true' ORDER BY fecha DESC LIMIT 1";
+										// Ejecutamos el query
+											$consulta_pa2 = $dblink -> query($query_prueba2);    
+										//
+											if($consulta_pa2 -> rowCount() != 0){      
+												# PERO SI EL NUMERO DE CONTROL ES DIFERENTE
+												# LO DUPLICA PORQUE    
+												# GUARDAR EN TABLA PRODUCCION ASIGNADO.
+													$query_pa = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
+														VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
+												// Ejecutamos el query
+													$resultadoQuery = $dblink -> query($query_pa);    
+											}else{
+												## EVALUAR SI HAY COLA.
+												##
+													# otra pregunta....
+													$query_prueba3 = "SELECT * from produccion_asignado WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'
+														and codigo_estatus = '05' and procesado = 'true' and tiquete_cola <> 0 ORDER BY fecha DESC LIMIT 1";
+													// Ejecutamos el query
+														$consulta_pa3 = $dblink -> query($query_prueba3);    
+														if($consulta_pa3 -> rowCount() != 0){        
+															while($listado_3 = $consulta_pa3 -> fetch(PDO::FETCH_BOTH))
+															{
+																$tiquete_cola = $listado_3['tiquete_cola'];
+																# Analizar si la cola es igual a Tiquete ASignado.
+																	if($desde_asignado == $tiquete_cola){
+																		// query.
+																		$query_pa = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
+																			VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
+																		// Ejecutamos el query
+																			$resultadoQuery = $dblink -> query($query_pa);    	
+																	}
+															}
+														}
+											}
+									}
+
+								}else{
+								# GUARDAR EN TABLA PRODUCCION ASIGNADO.
+								# CUANDO NO EXISTE EL TALONARIO.
+									// query.
+									$query_pa = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
+										VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
+								// Ejecutamos el query
+										$resultadoQuery = $dblink -> query($query_pa);    	
 								}
-							// Evaluar Actualizar control ingreso.
-								if($AccionBuscar == "ActualizarControlIngreso"){
-									$consultaBuscarProduccionAsignado = 0;
-									// Armar query.
-										$queryBuscarProduccionAsignado = "SELECT * FROM produccion_asignado	WHERE  id_ = '$codigo_produccion_asignado' and codigo_inventario_tiquete = '$codigo_inventario_tiquete'";
-									// Ejecutamos el query
-										$consultaBuscarProduccionAsignado = $dblink -> query($queryBuscarProduccionAsignado);								
-									// Validar si hay registros.
-										if($consultaBuscarProduccionAsignado -> rowCount() == 0){        
-										}
-											// Armar query QueryGuardarProduccionAsignado
-												$queryGuardarProduccionAsignado = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
-													VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
-											// Ejecutamos el query
-												$resultadoQuery = $dblink -> query($queryGuardarProduccionAsignado);    			
-										}
-							}	// while asignacion temp.
-				break;
+						}     
+					break;
+			case 'ActualizarTemp':
+				// TABS-1 - tabla produccion.
+				$fecha_produccion = trim($_POST['FechaProduccion']);
+				$NumeroCorrelativo = trim($_POST['NumeroCorrelativo']);
+				$codigo_produccion = trim($_POST['NumeroCorrelativo']);
+				$IdProduccionOK = trim($_POST['NumeroCorrelativo']);
+				$codigo_personal = trim($_POST['cp']);
+				// 	validar la fecha de la producción.
+				$fechas = explode("-",$fecha_produccion);
+				$dia = $fechas[2];
+				$mes = $fechas[1];
+				$ann = $fechas[0];
+
+				if(checkdate($mes, $dia, $ann)){
+				//echo "fecha valida";
+				}else{
+				//echo "fecha no válida";
+					$mensajeError = "Fecha No Válida $dia . $mes . $ann";
+						break;
+				}
+				//$codigo_personal = trim($_POST['lstPersonal']);
+				$codigo_jornada = trim($_POST['lstJornada']);
+				//$codigo_transporte_colectivo = trim($_POST['lstUnidadTransporte']);
+				$codigo_ruta = trim($_POST['lstRuta']);
+				// SERIE DE DATOS
+				$codigo_inventario_tiquete = trim($_POST['lstSerie']);
+				$codigo_tiquete_color = trim($_POST['CodigoTiqueteColor']);
+				//$existencia = trim($_POST['Existencia']);
+				$existencia = intval(str_replace(",","",$_POST['Existencia']));
+				// TABS-1 - tabla produccion-asignado.
+				// fecha.
+				$fecha_produccion_asignado = $fecha_produccion;
+				$desde_asignado = intval(str_replace(",","",$_POST['DesdeAsignado']));
+				$hasta_asignado = intval(str_replace(",","",$_POST['HastaAsignado']));
+
+				//$desde_asignado = trim($_POST['DesdeAsignado']);
+				//$hasta_asignado = trim($_POST['HastaAsignado']);
+				$costo = trim($_POST['CantidadTiqueteAsignado']);
+				$cantidad_asignado = preg_replace("/[$,]/","",trim($_POST['CantidadTiqueteAsignado']));
+				$total = preg_replace("/[$,]/","",trim($_POST['TotalAsignado']));
+				$total = trim($_POST['TotalAsignado']);
+				///////////////////////////////////////////////////////////////////////////////////////
+				// validar dese y hasta en asignado. a < 0.
+					if($desde_asignado < 0 or $hasta_asignado < 0){
+						$mensajeError = "Desde o Hasta | Tiquete No pueden ser Menor a 0.";
+						break;
+					}
+				// validar dese y hasta en asignado. a < 0.
+				if($desde_asignado > $hasta_asignado){
+					$mensajeError = "Desde '$desde_asignado' no puede ser mayor a Hasta '$hasta_asignado' | Tiquete.";
+					break;
+				}
+				// validar desde en asignado. a < 0.
+				if($desde_asignado > $existencia){
+					$mensajeError = "Desde no puede ser mayor que la Existencia  | Tiquete.";
+					//break;
+				}
+				// validar hasta en asignado. a < 0.
+				if($hasta_asignado > $existencia){
+					$mensajeError = "Desde no puede ser mayor que la Existencia  | Tiquete.";
+					//break;
+				}	
+					///////////////////////////////////////////////////////////////////////////////////////
+					// TABLA PRODUCCION ASIGNADO.
+					// CONSULTAR ANTES SI EXISTE EL CORRELATIVO.
+					$query_ = "SELECT * FROM produccion_asignado_temp
+					WHERE codigo_produccion = '$codigo_produccion' and tiquete_desde >= '$desde_asignado' and tiquete_hasta <= '$hasta_asignado'
+					and codigo_inventario_tiquete = '$codigo_inventario_tiquete' and codigo_personal = '$codigo_personal'
+						";
+					// Ejecutamos el query
+						$consulta = $dblink -> query($query_);
+					// Validar si hay registros.
+						if($consulta -> rowCount() != 0){
+							$mensajeError = "La Producción | Correlativo Ya fueron Asignados.";
+							$contenidoOK = '';
+							ListadoAsignadoTemp();
+								break;
+						}else{
+							// query.
+								$query_pa = "INSERT INTO produccion_asignado_temp (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete, codigo_personal)
+									VALUES ('$fecha_produccion_asignado','$desde_asignado','$hasta_asignado','$cantidad_asignado','$total','$codigo_produccion','$codigo_inventario_tiquete','$codigo_personal')";
+							// Ejecutamos el query
+									$resultadoQuery = $dblink -> query($query_pa);              
+						}	
+					// MOSTRAR MENSAJE A LA HORA QUE GUARDO EL DATO.
+					if($consulta == true){
+						$respuestaOK = true;
+						$mensajeError = "Se ha agregado el registro correctamente";
+						$contenidoOK = '';		
+						ListadoAsignadoTemp();
+					}
+			break;
 			case 'BuscarControlIngreso':
 				$codigo_produccion = trim($_POST['NumeroCorrelativo']);
 				$codigo_personal = trim($_POST['codigo_personal']);
@@ -569,12 +823,10 @@ if($errorDbConexion == false){
 								$mensajeError = 'Talonario Actualizado.';
 						// Ver nuevamente el listado
 					}
-					// Ver nuevamente el listado.
+
 					ListadoAsignadoTemp();
 			break;
 			case 'EliminarUltimoRegistroProduccion':
-				//  variables para el count.
-					$count_pa = 0; $count_pc = 0;
 				// ELIMINAR CODIGO PRODUCCION.
 				$codigo_produccion = $_POST['codigo_produccion'];
 				//
@@ -591,29 +843,15 @@ if($errorDbConexion == false){
 							$codigo_produccion_asignado = trim($listado['codigo_produccion_asignado']);
 						// ELIMINAR CODIGO PRODUCCION ASIGNADO.
 						}
-						// armar queri produccion asignado temp.
 						$query_pa = "DELETE FROM produccion_asignado_temp WHERE codigo_produccion = '$codigo_produccion' and id_ = '$codigo_id'";
 							$count_pa = $dblink -> exec($query_pa);
 						//;
-						// condiconar que se ejecute cuando codigo_produccion_asignado sea diferente de 0.
-						if($codigo_produccion_asignado != 0)
-						{
-							// Armamos el query para eliminar de produccion asignado.
-							$query_pc = "DELETE FROM produccion_asignado WHERE id_ = $codigo_produccion_asignado";
-							// Ejecutamos el query
-							$count_pc = $dblink -> exec($query_pc);
-						}
+						$respuestaOK = true;
+						$mensajeError = 'Se ha Eliminado Registro(s).';
+					}else{
+						$mensajeError = 'No se ha eliminado el registro';
 					}
-					// Validamos que se haya actualizado el registro
-						if($count_pa != 0 or $count_pc != 0){
-							//$count_eliminados = $count_pc + $count_pa;
-							$count_eliminados = $count_pa + $count_pc;
-							$respuestaOK = true;
-							$mensajeError = 'Se ha Eliminado '.$count_eliminados.' Registro(s).';
-						}else{
-							$mensajeError = 'No se ha eliminado el registro';
-						}
-					// Ver nuevament el listado.
+					//
 					ListadoAsignadoTemp();
 					break; 	
             default:
@@ -627,9 +865,9 @@ if($errorDbConexion == false){
 else{
 	$mensajeError = 'No se puede establecer conexión con la base de datos';}
 // Salida de la Array con JSON.
-	if($AccionBuscar === "" or $AccionBuscar === "BuscarTodosCodigo"){
+	if($_POST["accion"] === "" or $_POST["accion"] === "BuscarTodosCodigo"){
 		echo json_encode($arreglo);	
-	}elseif($AccionBuscar === "BuscarTipoTransporte" or $AccionBuscar === "1UltimoRegistro" or $AccionBuscar === "BuscarPorId"){
+	}elseif($_POST["accion"] === "BuscarTipoTransporte" or $_POST["accion"] === "1UltimoRegistro" or $_POST["accion"] === "BuscarPorId"){
 		echo json_encode($datos);
 		}
 	else{
@@ -769,7 +1007,8 @@ function buscarProduccionAsignadoVendido(){
 	}	
 	// validar la cola sea diferente de 0.
 	if($colaVendido != 0){
-		if($colaVendido + 1 === intval($desde_asignado)){
+		$colaVendido . " " . $desde_asignado;
+		if($colaVendido > intval($desde_asignado)){
 			$vendido = true;
 			$mensajeError = "La Producción | Cola " . $colaVendido . " < que DESDE";
 			$contenidoOK = '';
