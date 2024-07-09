@@ -45,7 +45,7 @@ if($errorDbConexion == false){
                             (SELECT SUM(fianza)-SUM(devolucion) as saldo_fianza from fianzas where codigo = p.codigo),
                             (SELECT SUM(prestamos)-SUM(descuentos) as saldo_prestamo from prestamos where codigo = p.codigo)
                                 FROM personal p
-                                    WHERE p.codigo <> '' and p.codigo_estatus = '01'
+                                    WHERE p.codigo <> ''
                                         ORDER BY nombre_empleado
 						";
 				// Ejecutamos el Query.
