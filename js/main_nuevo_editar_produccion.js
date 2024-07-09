@@ -52,7 +52,7 @@ $(function(){ // INICIO DEL FUNCTION.
 			accion = "BuscarControlIngreso";
             codigo_personal = $("#cp").val();
 			// cambiar texto de label y enlace.
-			$("label[for='txtEdicionNuevo']").text("Producción | Devolución ");
+			$("label[for='txtEdicionNuevo']").text("Producción | Edición ");
             $("label[for='iEdicionNuevo']").text("Edición");
             // Llamar a la función listar.
             // desactivar fieldset ingreso o devolucion.

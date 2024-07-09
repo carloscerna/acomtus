@@ -201,15 +201,15 @@ document.querySelectorAll('select').forEach((input) => {
      <form action="" method="post" id="formUsers" name="formUsers" role="form" enctype="multipart/form-data">
         <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
         <input type="hidden" id="id_user" name="id_user" value = "{{ id }}">            
-        <input type="text" id="accion" name="accion" value = "{{ accion }}">            
+        <input type="hidden" id="accion" name="accion" value = "{{ accion }}">            
         <!-- INPUT HIDE CONTROLA EL GUARDO DEL REGISTRO..            -->
         <input type="hidden" id="cp" name="cp" value = "{{ codigo_personal }}">            
         <!-- VARIABLES PARA LA MATRICULA CUANDO SEA NUEVO -->
           <div class="card">
             <div class="card-header bg-gradient-navy">
               <div class="row">
-                <div class="col-md-8 col-lg-8 col-xl-8">
-                  <h3 class="card-title"><i class="fas fa-layer-group nav-icon"></i> <label for="txtEdicionNuevo">Texto.</label></h3>
+                <div class="col-md-8 col-lg-8 col-xl-8 p-1">
+                  <h3 class="card-title"><i class="fas fa-layer-group nav-icon"></i> <label class="text-white" for="txtEdicionNuevo">Texto.</label></h3>
                 </div>
 
                 
@@ -235,13 +235,13 @@ document.querySelectorAll('select').forEach((input) => {
                           <div class="col col-md-12 col-lg-6 col-xl-6">
                             <div class="input-group">
                                 <span class="input-group-text text-bold">N.º Control</span>
-                                <input type="text" id="NumeroCorrelativo" name="NumeroCorrelativo" class="form-control input-lg font-weight-bold text-green text-right" readonly value="0" style="font-size: xx-large;" tabindex="-1">
+                                <input type="text" title="N.º Correlativo" id="NumeroCorrelativo" name="NumeroCorrelativo" class="form-control input-lg font-weight-bold text-green text-right" readonly value="0" style="font-size: xx-large;" tabindex="-1">
                             </div>
                           </div>
                             <div class="col col-md-12 col-lg-6 col-xl-6">
                                 <div class="input-group">
                                     <span class="input-group-text">Fecha</span>
-                                    <input type="date" id="FechaProduccion" name="FechaProduccion" class="form-control" required autofocus>
+                                    <input type="date" title="Fecha Producción." id="FechaProduccion" name="FechaProduccion" class="form-control" required autofocus>
                                 </div>
                             </div>
                         </div>
@@ -256,14 +256,14 @@ document.querySelectorAll('select').forEach((input) => {
                           <div class="col col-md-12 col-lg-6 col-xl-6">
                               <div class="input-group">
                                   <span class="input-group-text">Ruta</span>
-                                  <select class="custom-select" name="lstRuta" id="lstRuta"></select>
+                                  <select class="custom-select" name="lstRuta" id="lstRuta" title="Ruta"></select>
                               </div>
                           </div>
                           <!-- JORNADA -->
                           <div class="col col-md-12 col-lg-6 col-xl-6">
                             <div class="input-group">
                                 <span class="input-group-text">Jornada</span>
-                                <select class="custom-select" name="lstJornada" id="lstJornada"></select>                                      
+                                <select class="custom-select" name="lstJornada" id="lstJornada" title="Jornada"></select>                                      
                             </div>
                           </div>
                         </div>
@@ -279,7 +279,7 @@ document.querySelectorAll('select').forEach((input) => {
                                 <div class="form-group row">
                                     <label class="col-lg-3 col-form-label form-control-label">Serie</label>
                                     <div class="col-lg-9">
-                                    <select class="custom-select" name="lstSerie" id="lstSerie" autofocus></select>
+                                    <select class="custom-select" name="lstSerie" id="lstSerie" autofocus title="Serie"></select>
                                     </div>
                                 </div>
                             </div>
@@ -287,7 +287,7 @@ document.querySelectorAll('select').forEach((input) => {
                                 <div class="form-group row">
                                     <label class="col-lg-6 col-form-label form-control-label">Precio Público</label>
                                     <div class="col-lg-6">
-                                        <input type="text" class="form-control font-weight-bold input-lg" name="PrecioPublico" id="PrecioPublico" readonly data-inputmask="'alias': 'currency'" style="font-size: x-large;" tabindex="-1">
+                                        <input type="text" title="Precio Publico" class="form-control font-weight-bold input-lg" name="PrecioPublico" id="PrecioPublico" readonly data-inputmask="'alias': 'currency'" style="font-size: x-large;" tabindex="-1">
                                     </div>
                                 </div>
                             </div>
@@ -295,7 +295,7 @@ document.querySelectorAll('select').forEach((input) => {
                                 <div class="form-group row">
                                     <label class="col-lg-6 col-form-label form-control-label">Existencia</label>
                                     <div class="col-lg-6">
-                                        <input type="text" class="form-control" name="Existencia" id="Existencia" readonly data-inputmask="'alias': 'numeric'" tabindex="-1" />
+                                        <input type="text" title="Existencia." class="form-control" name="Existencia" id="Existencia" readonly data-inputmask="'alias': 'numeric'" tabindex="-1" />
                                         <input type="hidden" class="form-control" name="CodigoTiqueteColor" id="CodigoTiqueteColor">
                                     </div>
                                 </div>
@@ -312,7 +312,7 @@ document.querySelectorAll('select').forEach((input) => {
                       <div class="col col-md-12 col-lg-6 col-xl-6">
                           <div class="input-group">
                               <span class="input-group-text">De: </span>
-                              <input type="text" class="form-control font-weight-bold input-lg" name="DesdeAsignado" id="DesdeAsignado" value="" data-inputmask="'alias': 'numeric'" style="font-size: x-large;" autocomplete="off" required maxlength="13">
+                              <input type="text" title="Desde" class="form-control font-weight-bold input-lg" name="DesdeAsignado" id="DesdeAsignado" value="" data-inputmask="'alias': 'numeric'" style="font-size: x-large;" autocomplete="off" required maxlength="13">
                               <!-- <input type="text" class="form-control font-weight-bold input-lg" name="DesdeAsignado" id="DesdeAsignado" value="" data-inputmask="'alias': 'numeric'" onblur="CalcularIncremento(this.value)" style="font-size: x-large;">-->
                           </div>
                           <div id="TextoAgregarTalonario" style="display: block;" class="p-0">
@@ -407,8 +407,8 @@ document.querySelectorAll('select').forEach((input) => {
 
     <section>
       <!-- CONTENDRÁ LA TABLA-->
-      <div class="col col-md-12 col-lg-6 col-xl-6"> <!-- COL SECUNDARIO -->
-        <fieldset id="FieldsetTabla">
+      <div class="col col-md-12"> <!-- COL SECUNDARIO -->
+        <fieldset id="FieldsetTablaNoGuardado">
           <legend>Tabla | Talonarios No Guardados</legend>
             <table id="listadoNoGuardados" class="table display responsive nowrap" style="width: 100%;">
               <thead>
@@ -433,6 +433,7 @@ document.querySelectorAll('select').forEach((input) => {
                 </tfoot>
             </table>
           </fieldset>
+      </div>
     </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->
 

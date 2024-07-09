@@ -135,31 +135,13 @@ var customInputmask = (function() {
 {% block contenidos %}
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-1">
-          <div class="col-sm-6">
-            <h4></h4>
-          </div>
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="index.php">Home</a></li>
-              <li class="breadcrumb-item active">Busqueda</li>
-            </ol>
-          </div>
-        </div>
-      </div><!-- /.container-fluid -->
-    </section>
-
-
   <!-- Small boxes (Stat box) -->
 <section class="content">
-    <div class="card card-secondary">
-      <div class="card-header">
+    <div class="card">
+      <div class="card-header bg-gradient-navy">
         <!-- /.card-tools -->
         <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+          <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Buscar"><i class="fas fa-minus"></i>
           </button>
         </div>
         
@@ -170,8 +152,8 @@ var customInputmask = (function() {
 
           <div class="col-md-6 col-lg-6 col-xl-6  d-flex justify-content-end">
             <!-- Botón Buscar por Tiquete.-->
-            <button class='btn btn-info' id="goBuscarPorTiquete" data-toggle="tooltip" data-placement="left" title="Buscar por Tiquete"> 
-              <div style='text-align:center;'><i class="fal fa-ticket"></i></div>  
+            <button class="btn btn-info btn-md" id="goBuscarPorTiquete" data-toggle="tooltip" data-placement="left" title="Buscar por Tiquete"> 
+              <div><i class="fal fa-ticket"></i></div>  
             </button>                    
             <!-- Botón Buscar control de tiquetes procesados.-->
             <button class="btn btn-info btn-md" data-toggle="tooltip" data-placement="top" title="Ver Controles Procesados" id = "goImprimir">
@@ -192,17 +174,17 @@ var customInputmask = (function() {
                 <div class="col-md-5 col-lg-5 col-xl-5">
                   <div class="input-group">
                     <span class="input-group-text">Fecha</span>
-                    <input type="date" id="FechaBuscarProduccion" name="FechaBuscarProduccion" class="form-control"  required autofocus>  
+                    <input type="date" id="FechaBuscarProduccion" name="FechaBuscarProduccion" title="Fecha Producción." class="form-control"  required autofocus>  
                   </div>
                 </div>
 
                 <div class="col-md-7 col-lg-7 col-xl-7">
                   <div class="input-group">
                     <span class="input-group-text">N.º Control</span>
-                      <input type="text" name="IdProduccion" id="IdProduccion" value="" class="form-control input-lg font-weight-bold text-green text-right" style="font-size: xx-large;" autocomplete="off">
+                      <input type="text" name="IdProduccion" id="IdProduccion" value="" title="Id_" class="form-control input-lg font-weight-bold text-green text-right" style="font-size: xx-large;" autocomplete="off">
                       
-                      <button class='btn btn-secondary' id="goBuscarProduccion"> 
-                        <div style='text-align:center;'><i class="fa fa-search"></i></div>  
+                      <button class="btn btn-secondary" id="goBuscarProduccion" title="Buscar Producción."> 
+                        <div><i class="fa fa-search"></i></div>  
                       </button>
                   </div>
                 </div>
@@ -221,31 +203,30 @@ var customInputmask = (function() {
               <legend>Información General</legend>
               <div class="form-group row">
                 <!--   RUTA  -->
-                <div class="col col-md-4 col-lg-4 col-xl-4">
-                  <h5> Ruta: <span class="badge badge-warning" id="Ruta">Ruta</span></h5>
+                <div class="col col-md-12">
+                  <label> Ruta: <span class="badge badge-warning" id="Ruta">Ruta</span></label>
                 </div>
                 <!-- JORNADA -->
-                  <div class="col col-md-4 col-lg-4 col-xl-4">
-                    <h5> Jornada: <span class="badge badge-warning" id="Jornada">a.m.</span></h5>
+                  <div class="col col-md-6">
+                    <label> Jornada: <span class="badge badge-warning" id="Jornada">a.m.</span></label>
                   </div>                
                 <!-- PRECIO PUBLICO -->
-                <div class="col col-md-4 col-lg-4 col-xl-4">
-                  <h5> Precio Público: <span class="badge badge-warning" id="PrecioPublico">$</span></h5>
+                <div class="col col-md-6">
+                  <label> Precio Público: <span class="badge badge-warning" id="PrecioPublico">$</span></label>
                 </div>                
-                                          <!--   RUTA  -->
-                                          <div class="col col-md-12 col-lg-6 col-xl-6">
-                                            <div class="input-group">
-                                                <span class="input-group-text">Ruta</span>
-                                                <select class="custom-select" name="lstRuta" id="lstRuta"></select>
-                                            </div>
-                                        </div>
+                <!--   RUTA  -->
+                <div class="col col-md-12">
+                  <div class="input-group">
+                      <span class="input-group-text bg-black">Ruta</span>
+                      <select class="custom-select" name="lstRuta" id="lstRuta"></select>
+                  </div>
+              </div>
               </div>
               <!-- codigo NOmbre Personal . -->
               <div class="form-group row">
                 <label class="col-lg-3 col-form-label form-control-label">Nombre (motorista)</label>
                 <div class="col-lg-9">
                      <select class="" name="lstPersonal" id="lstPersonal"></select> 
-                    </select>
                 </div>
               </div>
                 <div class="form-group row">
@@ -365,39 +346,6 @@ var customInputmask = (function() {
   
 </section>
 </div> <!-- /.content-Wrapper, Contains page content. -->
-        <!--
-          <table id="listado" class="table display responsive nowrap" style="width: 100%;">
-            <thead>
-                <tr>
-                  <th>Acción</th>
-                  <th>Id</th>
-                  <th>Fecha</th>
-                  <th>Hora</th>
-                  <th>Código</th>
-                  <th>Personal (Motorista)</th>
-                  <th>Jornada</th>
-                  <th>Ruta</th>
-                  <th>Unidad</th>
-                </tr>                
-            </thead>
-              <tbody id="listadoOk">
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Acción</th>
-                  <th>Id</th>
-                  <th>Fecha</th>
-                  <th>Hora</th>
-                  <th>Código</th>
-                  <th>Personal (Motorista)</th>
-                  <th>Jornada</th>
-                  <th>Ruta</th>
-                  <th>Unidad</th>
-                </tr>
-              </tfoot>
-          </table>
-          -->
-
 <!-- plantilla que contiene el . -->
 {% include 'VentanaBuscarPorTiquete.html' %}
 

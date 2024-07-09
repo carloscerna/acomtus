@@ -35,6 +35,7 @@ $NoGuardado = 0;
 $QueryLista = "";
 $vendido = false;
 $CreadoTemp = false;
+$Entregado = false;
 $AccionBuscar = "";
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);
@@ -178,6 +179,14 @@ if($errorDbConexion == false){
 					$mensajeError = "Desde no puede ser mayor que la Existencia  | Tiquete.";
 					//break;
 				}	
+					///////////////////////////////////////////////////////////////////////////////////////
+					// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (ENTREGADO).
+					buscarProduccionEntregado();
+					// validar $vendido
+						if($Entregado == true){
+							ListadoAsignadoTemp();
+							break;
+						}
 					///////////////////////////////////////////////////////////////////////////////////////
 					// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (VENDIDO).
 						buscarProduccionAsignadoVendido();
@@ -436,7 +445,9 @@ if($errorDbConexion == false){
 										$queryGuardarProduccionAsignado = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
 											VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
 									// Ejecutamos el query
-										$resultadoQuery = $dblink -> query($queryGuardarProduccionAsignado);    			
+										$queryAgregado = $dblink -> query($queryGuardarProduccionAsignado);    			
+									// $agregados.
+										$CountAgregados = $CountAgregados + $queryAgregado -> rowCount();
 								}
 							// Evaluar Actualizar control ingreso.
 								if($AccionBuscar == "ActualizarControlIngreso"){
@@ -746,7 +757,53 @@ function ListadoAsignado(){
 			;
 		}		
 }
-
+function buscarProduccionEntregado(){
+	// Variables globales del sistema.
+		global $desde_asignado, $hasta_asignado, $codigo_inventario_tiquete, $dblink, $mensajeError, $contenidoOK, $Entregado;
+	// validar desde_asignado cuando no sea 01 al terminar.
+		$colaEntregado = 0; $desde_asignadoNuevo = 0;
+		$valor01 = ($hasta_asignado - $desde_asignado);
+			if($valor01 != 99){
+				$quitoDesde = 99 - $valor01;
+				$desde_asignadoNuevo = $desde_asignado - $quitoDesde;
+			}
+	// armar query
+			if($valor01 != 99){
+				$query_buscarAsignado = "SELECT * from produccion_asignado 
+				WHERE tiquete_desde >= '$desde_asignadoNuevo' and tiquete_hasta <=  '$hasta_asignado' and 
+					codigo_inventario_tiquete = '$codigo_inventario_tiquete' and codigo_estatus = '03' and procesado = 'false'
+						ORDER BY fecha DESC LIMIT 1";
+			}else{
+				$query_buscarAsignado = "SELECT * from produccion_asignado 
+					WHERE tiquete_desde >= '$desde_asignado' and tiquete_hasta <=  '$hasta_asignado' and 
+						codigo_inventario_tiquete = '$codigo_inventario_tiquete' and codigo_estatus = '03' and procesado = 'false'
+							ORDER BY fecha DESC LIMIT 1";
+			}
+	// Ejecutamos el query
+		$consultaBuscarAsignado = $dblink -> query($query_buscarAsignado);	
+	// buscar si tiene cola el talonario vendido.
+		while($listado = $consultaBuscarAsignado -> fetch(PDO::FETCH_BOTH))
+		{
+			$colaEntregado = $listado['tiquete_cola'];
+	
+		}	
+		// validar la cola sea diferente de 0.
+		if($colaEntregado != 0){
+			if($colaEntregado + 1 === intval($desde_asignado)){
+				$Entregado = true;
+				$mensajeError = "La Producción | " . $colaEntregado . " < que DESDE";
+				$contenidoOK = '';
+			}
+		}else{
+			// Validar si hay registros.
+			if($consultaBuscarAsignado -> rowCount() != 0){
+				$mensajeError = "La Producción | Talonario Ya está en Producción.";
+				$contenidoOK = '';
+				$Entregado = true;
+			}
+		}
+				return $Entregado;
+	}
 function buscarProduccionAsignadoVendido(){
 // Variables globales del sistema.
 	global $desde_asignado, $hasta_asignado, $codigo_inventario_tiquete, $dblink, $mensajeError, $contenidoOK, $vendido;
