@@ -349,7 +349,6 @@ if($errorDbConexion == false){
 										$codigo_produccion_asignado = $listado['lastval'];
 									}
 						}
-
 					///////////////////////////////////////////////////////////////////////////////////////
 					// TABLA PRODUCCION CORRELACTIVO.
 					// VERIFICAR SI YA EXISTE.
@@ -471,7 +470,7 @@ if($errorDbConexion == false){
 							// Validamos que se haya actualizado el registro
 						if($CountAgregados != 0){
 							$respuestaOK = true;
-							$mensajeError = 'Se ha Agregado '.$CountAgregados.' Talonario(s).';
+							$mensajeError = "Se ha Agregado ".$CountAgregados." Talonario(s).";
 						}else{
 							$mensajeError = 'El Control no ha sido Modificado.';
 						}

@@ -23,15 +23,14 @@ if(empty($_SESSION['userNombre']))
 		$dia = strftime("%d");		// El Día.
         $mes = date('m');     // El Mes.
 		$año = strftime("%Y");		// El Año.
-        
+        // fecha
         $fecha = $año ."-".$mes."-".$dia;
     }
-    
 // Es utilizando en templateEngine.inc.php
 $root = '';
     include('includes/templateEngine.inc.php');
 
-    $twig->display('layout-produccion.html',array(
+    $twig->display('/Produccion/BuscarProduccion.html',array(
         "userName" => $_SESSION['userNombre'],
         "userID" => $_SESSION['userID'],
         "codigo_perfil" => $_SESSION['codigo_perfil'],
@@ -44,4 +43,3 @@ $root = '';
         "fecha" => $fecha
     ));
 }
-?>

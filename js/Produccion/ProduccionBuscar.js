@@ -55,7 +55,7 @@ $(function(){ // iNICIO DEL fUNCTION.
 			$('#lstSerieAgregarTiquete').on('change', function () {
 				var id_ = $("#lstSerieAgregarTiquete").val();
 				
-				$.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarSerieId', id_: id_},
+				$.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarSerieId', id_: id_},
 					function(data) {
 						$('#AgregarPrecioSerie').val(data[0].precio_publico);
 						$("#lstSerieAgregarTiquete").focus();
@@ -120,7 +120,7 @@ if(reload == true){
 				"processing": true,
 				"ajax":{
 					method:"POST",
-					url:"php_libs/soporte/ProduccionBuscar.php",
+					url:"php_libs/soporte/Produccion/ProduccionBuscar.php",
 					data: {"accion_buscar": buscartodos, "year": fecha_year, "month": fecha_month}
 				},
 				"columns":[
@@ -249,7 +249,7 @@ var obtener_data_editar = function(tbody, tabla){
 							cache: false,                     
 							type: "POST",                     
 							dataType: "json",                     
-							url:"php_libs/soporte/ProduccionBuscar.php",                     
+							url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 							data: {                     
 									accion_buscar: 'VerEliminarProduccion', codigo_produccion: id_, fecha: fecha,
 									},                     
@@ -317,7 +317,7 @@ var obtener_data_editar = function(tbody, tabla){
 				cache: false,
 				type: "POST",
 				dataType: "json",
-				url:"php_libs/soporte/.php",
+				url:"php_libs/soporte/Produccion/.php",
 				data: "id_user=" + id_ + "&accion=" + accion,
 				success: function(response){
 					// Validar mensaje de error proporcionado por el response. contenido.
@@ -369,7 +369,7 @@ $('#goBuscarProduccionDevolucion').on( 'click', function () {
 	cache: false,                     
 	type: "POST",                     
 	dataType: "json",                     
-	url:"php_libs/soporte/ProduccionBuscar.php",                     
+	url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 	data: {                     
 			accion_buscar: 'BuscarProduccionDevolucion', fecha: fecha,
 			},                     
@@ -439,7 +439,7 @@ $('#goVerProduccion').on('click', function(){
 	cache: false,                     
 	type: "POST",                     
 	dataType: "json",                     
-	url:"php_libs/soporte/ProduccionBuscar.php",                     
+	url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 	data: {                     
 			accion_buscar: 'VerUltimasProducciones', fecha: fecha,
 			},                     
@@ -501,7 +501,7 @@ $('#BusquedaNumerotiquete').on('keyup', function(e){
 			cache: false,                     
 			type: "POST",                     
 			dataType: "json",                     
-			url:"php_libs/soporte/ProduccionBuscar.php",                     
+			url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 			data: {                     
 					accion_buscar: 'BuscarPorTiqueteEnControl', numero_tiquete: numero_tiquete, serie: serie,
 					},                     
@@ -534,7 +534,7 @@ $('body').on('click','#listadoTiqueteEnControl a',function (e){
 				cache: false,                     
 				type: "POST",                     
 				dataType: "json",                     
-				url:"php_libs/soporte/ProduccionBuscar.php",                     
+				url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 				data: {                     
 						accion_buscar: accionAsignacion, NumeroControl: numero_control, numero_tiquete: numero_tiquete, serie: serie,
 						},                     
@@ -628,7 +628,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 						cache: false,                     
 						type: "POST",                     
 						dataType: "json",                     
-						url:"php_libs/soporte/ProduccionBuscar.php",                     
+						url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 						data: {                     
 								accion_buscar: 'VerEliminarProduccion', codigo_produccion: id_, fecha: fecha,
 								},                     
@@ -741,7 +741,7 @@ $('#goGuardarDevolucion').on( 'click', function () {
 			   cache: false,                     
 			   type: "POST",                     
 			   dataType: "json",                     
-			   url:"php_libs/soporte/ProduccionBuscar.php",                     
+			   url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 			   data: {                     
 					accion_buscar: accionAsignacion,
 					fila: fila, calcular_val: calcular_val_, calcular_chk: calcular_chk_, str: str
@@ -810,7 +810,7 @@ $('#goGuardar').on( 'click', function () {
 			   cache: false,                     
 			   type: "POST",                     
 			   dataType: "json",                     
-			   url:"php_libs/soporte/ProduccionBuscar.php",                     
+			   url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 			   data: str + "&accion_buscar=" + accionAsignacion + "&id=" + Math.random(),                     
 			   success: function(response) {                     
 					if (response.respuesta === true) {                     
@@ -891,7 +891,7 @@ function CambiarFechaProduccion() {
            cache: false,                     
            type: "POST",                     
            dataType: "json",                     
-           url:"php_libs/soporte/ProduccionBuscar.php",                     
+           url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
            data: {                     
 				accion_buscar: accionAsignacion, FechaProduccionCreacion: fecha_produccion, FechaProduccionDevolucion: fecha_nueva,
 				fila: fila, calcular_val: calcular_val_, calcular_chk: calcular_chk_, cambioFechaRuta: cambioFechaRuta, lstRuta:codigo_ruta,
@@ -913,7 +913,7 @@ function listar_serie(){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
         function(data) {
             miselect.empty();
             miselect.append('<option value="">Seleccionar...</option>');
@@ -932,7 +932,7 @@ function listar_serie_agregar_talonario(){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
         function(data) {
             miselect.empty();
             miselect.append('<option value="">Seleccionar...</option>');
@@ -1013,7 +1013,7 @@ function listar_ruta(codigo_ruta){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarRuta'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarRuta'},
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {

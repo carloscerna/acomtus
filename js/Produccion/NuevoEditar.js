@@ -38,7 +38,7 @@ $(function(){ // INICIO DEL FUNCTION.
 	$('#lstSerie').on('change', function () {
         var id_ = $("#lstSerie").val();
         
-        $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarSerieId', id_: id_},
+        $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarSerieId', id_: id_},
             function(data) {
                 $('#PrecioPublico').val(data[0].precio_publico);
                 $('#Existencia').val(data[0].existencia);
@@ -62,7 +62,7 @@ $(function(){ // INICIO DEL FUNCTION.
 			// Inicio del Ajax. BUSCAR VALORES PARA FECHA, RUTA, ID, JORNADA Y RUTA..
             ///////////////////////////////////////////////////////////////
             // DETARMINAR QUE SE VA EJECUTAR.	
-            $.post("php_libs/soporte/NuevoEditarProduccion.php",  { id_x: id_, accion: 'BuscarPorId', codigo_personal: codigo_personal },
+            $.post("php_libs/soporte/Produccion/NuevoEditarProduccion.php",  { id_x: id_, accion: 'BuscarPorId', codigo_personal: codigo_personal },
             function(data){
             // Cargar valores a los objetos Llenar el formulario con los datos del registro seleccionado.
             // datos para el card TITLE - INFORMACIÓN GENERAL
@@ -84,7 +84,7 @@ $(function(){ // INICIO DEL FUNCTION.
                 cache: false,
                 type: "POST",
                 dataType: "json",
-                url:"php_libs/soporte/NuevoEditarProduccion.php",
+                url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",
                 data: "accion=" + accion + "&NumeroCorrelativo=" + id_ + "&codigo_personal=" + codigo_personal + "&id__=" +  Math.random(),
                 success: function(response){
                     // Validar mensaje de error
@@ -159,7 +159,7 @@ var NuevoRegistro = function(){
     cache: false,                     
     type: "POST",                     
     dataType: "json",                     
-    url:"php_libs/soporte/NuevoEditarProduccion.php",                     
+    url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",                     
     data: {                     
             accion_buscar: 'UltimoRegistro', codigo_personal: codigo_personal,
             },                     
@@ -217,7 +217,7 @@ $("#DesdeAsignadoPartial01").on('keyup', function (e) {
                             cache: false,
                             type: "POST",
                             dataType: "json",
-                            url:"php_libs/soporte/NuevoEditarProduccion.php",
+                            url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",
                             data: "TotalAsignado=" + TotalAsignado + "&CantidadTiqueteAsignado=" + CantidadTiqueteAsignado + "&TiqueteHasta=" + TiqueteHasta + "&IdEditarTiqueteDesde=" + IdEditarTiqueteDesde + "&accion_buscar=" + 'ActualizarTalonario' + "&TiqueteDesde=" + TiqueteDesde + "&iid="  + Math.random() + "&codigo_produccion=" + codigo_produccion + "&IdProduccionAsignado=" + TiqueteDesdeInicial,
                             success: function(response){
                                 // Validar mensaje de error
@@ -280,7 +280,7 @@ $("#DesdeAsignado").on('keyup', function (e) {
                     cache: false,                     
                     type: "POST",                     
                     dataType: "json",                     
-                    url:"php_libs/soporte/NuevoEditarProduccion.php",                     
+                    url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",                     
                     data: {                     
                             accion_buscar: 'EliminarUltimoRegistroProduccion', codigo_produccion: codigo_produccion,
                             },                     
@@ -328,6 +328,7 @@ $("#DesdeAsignado").on('keyup', function (e) {
             }
     }
       // LIMPIAR ACCION Y CORRELATIVO PARA UNO NUEVO. flecha hacia arriba.
+      // CONSULTAR PARA GUARDAR EL CONTROL.
       if (keycode === 38){
         var r = confirm("¿Guardar Control de Ingresos?");
         if (r == true) {
@@ -342,13 +343,11 @@ $("#DesdeAsignado").on('keyup', function (e) {
              codigo_personal = $("#cp").val();
             //
             $("#DesdeAsignado").val("0");
-
              if($("#accion").val() == "AgregarNuevoTemp"){
                 accion = "GuardarControlIngreso";
              }else{
                 accion = "ActualizarControlIngreso";    
              }
-             
              if(codigo_produccion != 0){
                 ///////////////////////////////////////////////////////////////			
                 // Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
@@ -360,7 +359,7 @@ $("#DesdeAsignado").on('keyup', function (e) {
                     cache: false,
                     type: "POST",
                     dataType: "json",
-                    url:"php_libs/soporte/NuevoEditarProduccion.php",
+                    url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",
                     data: "NumeroCorrelativo=" + codigo_produccion + "&accion=" + accion + "&codigo_tiquete_color=" + codigo_tiquete_color + "&codigo_ruta="+ codigo_ruta + "&codigo_jornada="+ codigo_jornada + "&codigo_serie="+ codigo_serie +  "&FechaProduccion=" + fecha + "&codigo_personal=" + codigo_personal + "&id=" + Math.random(),
                     success: function(response){
                         // validar NoGuarado
@@ -373,49 +372,50 @@ $("#DesdeAsignado").on('keyup', function (e) {
                         // Validar mensaje de error
                         if(response.respuesta == true){
                             toastr["info"](response.mensaje, "Sistema");
+                                //
+                                    NuevoRegistro();
+                                    // Limpiar datos
+                                    $('#listadoAsignacionOk').empty();
+                                    //$("#DesdeAsignado").val("");
+                                    $("#DesdeAsignado").focus().select();
+                                    $("#HastaAsignado").val("");
+                                // activar readonly fecha y select.
+                                $("#FechaProduccion").prop("disabled", false);
+                                    $("#FechaProduccion").prop("readonly", false);
+                                    $("#lstRuta").prop("readonly", false);
+                                    $("#lstJornada").prop("readonly", false);
+                                    $("#lstSerie").prop("readonly", false);
+                                    GlobalDesde = 0; 
+                                    GlobalHasta = 0;
+                    
+                                    accion = "AgregarNuevoTemp";	// variable global
+                                    id_ = 0;
+                                    //$("#NumeroCorrelativo").val(id_);
+                                    $("#accion").val(accion);
+                                    $("#id_user").val(id_);
+                
+                                    // cambiar el valor del ingreso.
+                                    $("label[for='LblIngreso']").text('Total Entregado $ ');
+                                    $("label[for='LblCantidad']").text('Total Tiquete: ' );
+                                    $("label[for='LblCantidadTalonarios']").text('Total Talonarios: ');
+                                    //
+                                // pasar foco.
+                                $("#DesdeAsignado").focus().select();
+                                $("#HastaAsignado").val("");
                         }
                         if(response.respuesta == false){
                             toastr["info"](response.mensaje, "Sistema");
                          }
                     },
                 });
-                //
-                    NuevoRegistro();
-                 // Limpiar datos
-                 $('#listadoAsignacionOk').empty();
-                 //$("#DesdeAsignado").val("");
-                 $("#DesdeAsignado").focus().select();
-                 $("#HastaAsignado").val("");
-             // activar readonly fecha y select.
-                $("#FechaProduccion").prop("disabled", false);
-                 $("#FechaProduccion").prop("readonly", false);
-                 $("#lstRuta").prop("readonly", false);
-                 $("#lstJornada").prop("readonly", false);
-                 $("#lstSerie").prop("readonly", false);
-                 GlobalDesde = 0; 
-                 GlobalHasta = 0;
- 
-                 accion = "AgregarNuevoTemp";	// variable global
-                 id_ = 0;
-                 //$("#NumeroCorrelativo").val(id_);
-                 $("#accion").val(accion);
-                 $("#id_user").val(id_);
-
-                 // cambiar el valor del ingreso.
-                 $("label[for='LblIngreso']").text('Total Entregado $ ');
-                 $("label[for='LblCantidad']").text('Total Tiquete: ' );
-                 $("label[for='LblCantidadTalonarios']").text('Total Talonarios: ');
-                 //
-                // pasar foco.
-                $("#DesdeAsignado").focus().select();
-                $("#HastaAsignado").val("");
-             }
-        } else {
+               
+             } // CONDICIÓN PRODUCCIÓN DIFERENTE DE 0.
+        }else{
           txt = "You pressed Cancel!";
         }
-      }
+      } // CONDICION DE LA TECLA HACIA ARRIBA.
 });
-  
+// FINALIZAR CONTROL  
 $('#goFinaliar').on('click', function(){
     // activar readonly fecha y select.
         $("#FechaProduccion").prop("readonly", false);
@@ -439,7 +439,7 @@ $('#goFinaliar').on('click', function(){
             cache: false,                     
             type: "POST",                     
             dataType: "json",                     
-            url:"php_libs/soporte/NuevoEditarProduccion.php",                     
+            url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",                     
             data: {                     
                     accion_buscar: 'UltimoRegistro',
                     },                     
@@ -456,6 +456,7 @@ $('#goFinaliar').on('click', function(){
         $("#DesdeAsignado").focus().select();
         $("#HastaAsignado").val("");
 });
+// IMPRIMIR CONTROL.
 $('#goImprimir').on('click', function(){
     // Limpiar datos
         codigo_produccion = $('#NumeroCorrelativo').val();
@@ -483,7 +484,7 @@ $('#goUltimoControles').on('click', function(){
         cache: false,                     
         type: "POST",                     
         dataType: "json",                     
-        url:"php_libs/soporte/ProduccionBuscar.php",                     
+        url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
         data: {                     
                 accion_buscar: 'VerUltimasProducciones', fecha: fecha,
                 },                     
@@ -541,7 +542,7 @@ $('#formUsers').validate({
 		            cache: false,
 		            type: "POST",
 		            dataType: "json",
-		            url:"php_libs/soporte/NuevoEditarProduccion.php",
+		            url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",
 		            data:str + "&id=" + Math.random(),
 		            success: function(response){
 		            	// Validar mensaje de error
@@ -599,7 +600,7 @@ $('body').on('click','#listadoVerControles a',function (e){
     // Inicio del Ajax. BUSCAR VALORES PARA FECHA, RUTA, ID, JORNADA Y RUTA..
     ///////////////////////////////////////////////////////////////
     // DETARMINAR QUE SE VA EJECUTAR.	
-    $.post("php_libs/soporte/NuevoEditarProduccion.php",  { id_x: id_, accion: 'BuscarPorId' },
+    $.post("php_libs/soporte/Produccion/NuevoEditarProduccion.php",  { id_x: id_, accion: 'BuscarPorId' },
     function(data){
     // Cargar valores a los objetos Llenar el formulario con los datos del registro seleccionado.
     // datos para el card TITLE - INFORMACIÓN GENERAL
@@ -621,7 +622,7 @@ $('body').on('click','#listadoVerControles a',function (e){
         cache: false,
         type: "POST",
         dataType: "json",
-        url:"php_libs/soporte/NuevoEditarProduccion.php",
+        url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",
         data: "accion=" + accion + "&NumeroCorrelativo=" + id_ + "&id__=" +  Math.random() + "&codigo_personal=" + codigo_personal,
         success: function(response){
             // Validar mensaje de error
@@ -694,7 +695,7 @@ $('body').on('click','#listadoVerControles a',function (e){
                     cache: false,                     
                     type: "POST",                     
                     dataType: "json",                     
-                    url:"php_libs/soporte/ProduccionBuscar.php",                     
+                    url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
                     data: {                     
                             accion_buscar: 'VerEliminarProduccion', codigo_produccion: id_, fecha: fecha,
                             },                     
@@ -804,7 +805,7 @@ $('body').on('click','#listadoAsignacion a',function (e){
 				cache: false,
 				type: "POST",
 				dataType: "json",
-				url:"php_libs/soporte/NuevoEditarProduccion.php",
+				url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",
 				data: "id_=" + Id_Editar_Eliminar + "&accion_buscar=" + accionAsignacion,
 				success: function(response){
 					// Validar mensaje de error proporcionado por el response. contenido.
@@ -894,7 +895,7 @@ $('#BusquedaNumerotiquete').on('keyup', function(e){
 			cache: false,                     
 			type: "POST",                     
 			dataType: "json",                     
-			url:"php_libs/soporte/ProduccionBuscar.php",                     
+			url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 			data: {                     
 					accion_buscar: 'BuscarPorTiqueteEnControl', numero_tiquete: numero_tiquete, serie: serie,
 					},                     
@@ -927,7 +928,7 @@ $('body').on('click','#listadoTiqueteEnControl a',function (e){
 				cache: false,                     
 				type: "POST",                     
 				dataType: "json",                     
-				url:"php_libs/soporte/ProduccionBuscar.php",                     
+				url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 				data: {                     
 						accion_buscar: accionAsignacion, NumeroControl: numero_control, numero_tiquete: numero_tiquete, serie: serie,
 						},                     
@@ -1089,7 +1090,7 @@ function listar_jornada(codigo_jornada){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
@@ -1109,7 +1110,7 @@ function listar_ruta(codigo_ruta){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarRuta'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarRuta'},
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
@@ -1129,7 +1130,7 @@ function listar_serie(codigo_inventario_tiquete){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
         function(data) {
             miselect.empty();
             miselect.append('<option value="">0-Seleccionar...</option>');
@@ -1160,7 +1161,7 @@ function VerAsignacion() {
             cache: false,
             type: "POST",
             dataType: "json",
-            url:"php_libs/soporte/NuevoEditarProduccion.php",
+            url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",
             data:"accion_buscar=" + accionAsignacion,
             success: function(response){
                 // Validar mensaje de error PORTAFOLIO.
@@ -1184,7 +1185,7 @@ function listar_serie_tiquete(){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
         function(data) {
             miselect.empty();
             miselect.append('<option value="">0-Seleccionar...</option>');
