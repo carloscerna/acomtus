@@ -11,6 +11,7 @@ var codigo_produccion = 0;
 var IdEditarTiqueteDesde = 0;
 var TiqueteHasta = 0;
 var TiqueteDesde = 0;
+var continuarGuardarControl = 0;
 $(function(){ // INICIO DEL FUNCTION.
 // Escribir la hora actual.
     var hora = new Date();
@@ -27,7 +28,7 @@ $(function(){ // INICIO DEL FUNCTION.
     var month = ("0" + (now.getMonth() + 1)).slice(-2);
     var year = now.getFullYear();
 
-    var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+    var today = now.getFullYear()+"-"+(month)+"-"+(day);
 // ASIGNAR FECHA ACTUAL A LOS DATE CORRESPONDIENTES.
     $('#FechaProduccion').val(today);
 ///////////////////////////////////////////////////////////////////////////////
@@ -331,88 +332,116 @@ $("#DesdeAsignado").on('keyup', function (e) {
       // CONSULTAR PARA GUARDAR EL CONTROL.
       if (keycode === 38){
         var r = confirm("¿Guardar Control de Ingresos?");
-        if (r == true) {
-         // NUEVA PRODUCCIÓN.
-			 // Limpiar datos
-             codigo_produccion = $('#NumeroCorrelativo').val();
-             codigo_ruta = $("#lstRuta").val();
-             codigo_jornada = $("#lstJornada").val();
-             codigo_serie = $("#lstSerie").val();
-             codigo_tiquete_color = $("#CodigoTiqueteColor").val();
-             fecha = $("#FechaProduccion").val();
-             codigo_personal = $("#cp").val();
-            //
-            $("#DesdeAsignado").val("0");
-             if($("#accion").val() == "AgregarNuevoTemp"){
-                accion = "GuardarControlIngreso";
-             }else{
-                accion = "ActualizarControlIngreso";    
-             }
-             if(codigo_produccion != 0){
-                ///////////////////////////////////////////////////////////////			
-                // Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
-                ///////////////////////////////////////////////////////////////
+        if (r == true)
+        {
+            // NUEVA PRODUCCIÓN.
+            // Extraer 
+            codigo_produccion = $('#NumeroCorrelativo').val();
+            // ejecutar Ajax.. ACTUALIZAR ULITMO REGISTROS
                 $.ajax({
-                    beforeSend: function(){
-                        $('#listadoNoGuardadosOk').empty();
-                    },
-                    cache: false,
-                    type: "POST",
-                    dataType: "json",
-                    url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",
-                    data: "NumeroCorrelativo=" + codigo_produccion + "&accion=" + accion + "&codigo_tiquete_color=" + codigo_tiquete_color + "&codigo_ruta="+ codigo_ruta + "&codigo_jornada="+ codigo_jornada + "&codigo_serie="+ codigo_serie +  "&FechaProduccion=" + fecha + "&codigo_personal=" + codigo_personal + "&id=" + Math.random(),
-                    success: function(response){
-                        // validar NoGuarado
-                            if(response.NoGuardado > 0){
-                                $('#listadoNoGuardadosOk').append(response.contenidoNoGuardado);
-                                toastr["warning"]("Talonarios No se Guardaron!!!", "Sistema");
-
+                beforeSend: function(){
+                  //  $('#listadoAsignacionOk').empty();
+                },
+                cache: false,                     
+                type: "POST",                     
+                dataType: "json",                     
+                url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",                     
+                data: {                     
+                        accion_buscar: 'RegistrosTemp', codigo_produccion: codigo_produccion,
+                        },                     
+                success: function(response) {                     
+                        if (response.respuesta === true) {                     
+                            toastr["info"](response.mensaje, "Sistema");
+                            // Limpiar datos
+                            codigo_produccion = $('#NumeroCorrelativo').val();
+                            codigo_ruta = $("#lstRuta").val();
+                            codigo_jornada = $("#lstJornada").val();
+                            codigo_serie = $("#lstSerie").val();
+                            codigo_tiquete_color = $("#CodigoTiqueteColor").val();
+                            fecha = $("#FechaProduccion").val();
+                            codigo_personal = $("#cp").val();
+                            //
+                            $("#DesdeAsignado").val("0");
+                            if($("#accion").val() == "AgregarNuevoTemp"){
+                                accion = "GuardarControlIngreso";
                             }else{
+                                accion = "ActualizarControlIngreso";    
                             }
-                        // Validar mensaje de error
-                        if(response.respuesta == true){
-                            toastr["info"](response.mensaje, "Sistema");
-                                //
-                                    NuevoRegistro();
-                                    // Limpiar datos
-                                    $('#listadoAsignacionOk').empty();
-                                    //$("#DesdeAsignado").val("");
-                                    $("#DesdeAsignado").focus().select();
-                                    $("#HastaAsignado").val("");
-                                // activar readonly fecha y select.
-                                $("#FechaProduccion").prop("disabled", false);
-                                    $("#FechaProduccion").prop("readonly", false);
-                                    $("#lstRuta").prop("readonly", false);
-                                    $("#lstJornada").prop("readonly", false);
-                                    $("#lstSerie").prop("readonly", false);
-                                    GlobalDesde = 0; 
-                                    GlobalHasta = 0;
-                    
-                                    accion = "AgregarNuevoTemp";	// variable global
-                                    id_ = 0;
-                                    //$("#NumeroCorrelativo").val(id_);
-                                    $("#accion").val(accion);
-                                    $("#id_user").val(id_);
-                
-                                    // cambiar el valor del ingreso.
-                                    $("label[for='LblIngreso']").text('Total Entregado $ ');
-                                    $("label[for='LblCantidad']").text('Total Tiquete: ' );
-                                    $("label[for='LblCantidadTalonarios']").text('Total Talonarios: ');
-                                    //
-                                // pasar foco.
-                                $("#DesdeAsignado").focus().select();
-                                $("#HastaAsignado").val("");
-                        }
-                        if(response.respuesta == false){
-                            toastr["info"](response.mensaje, "Sistema");
-                         }
-                    },
+                            if(codigo_produccion != 0){
+                                ///////////////////////////////////////////////////////////////			
+                                // Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
+                                ///////////////////////////////////////////////////////////////
+                                $.ajax({
+                                    beforeSend: function(){
+                                        $('#listadoNoGuardadosOk').empty();
+                                    },
+                                    cache: false,
+                                    type: "POST",
+                                    dataType: "json",
+                                    url:"php_libs/soporte/Produccion/NuevoEditarProduccion.php",
+                                    data: "NumeroCorrelativo=" + codigo_produccion + "&accion=" + accion + "&codigo_tiquete_color=" + codigo_tiquete_color + "&codigo_ruta="+ codigo_ruta + "&codigo_jornada="+ codigo_jornada + "&codigo_serie="+ codigo_serie +  "&FechaProduccion=" + fecha + "&codigo_personal=" + codigo_personal + "&id=" + Math.random(),
+                                    success: function(response){
+                                        // validar NoGuarado
+                                            if(response.NoGuardado > 0){
+                                                $('#listadoNoGuardadosOk').append(response.contenidoNoGuardado);
+                                                toastr["warning"]("Talonarios No se Guardaron!!!", "Sistema");
+            
+                                            }else{
+                                            }
+                                        // Validar mensaje de error
+                                        if(response.respuesta == true){
+                                            toastr["info"](response.mensaje, "Sistema");
+                                                //
+                                                    NuevoRegistro();
+                                                    // Limpiar datos
+                                                    $('#listadoAsignacionOk').empty();
+                                                    //$("#DesdeAsignado").val("");
+                                                    $("#DesdeAsignado").focus().select();
+                                                    $("#HastaAsignado").val("");
+                                                // activar readonly fecha y select.
+                                                $("#FechaProduccion").prop("disabled", false);
+                                                    $("#FechaProduccion").prop("readonly", false);
+                                                    $("#lstRuta").prop("readonly", false);
+                                                    $("#lstJornada").prop("readonly", false);
+                                                    $("#lstSerie").prop("readonly", false);
+                                                    GlobalDesde = 0; 
+                                                    GlobalHasta = 0;
+                                    
+                                                    accion = "AgregarNuevoTemp";	// variable global
+                                                    id_ = 0;
+                                                    //$("#NumeroCorrelativo").val(id_);
+                                                    $("#accion").val(accion);
+                                                    $("#id_user").val(id_);
+                                
+                                                    // cambiar el valor del ingreso.
+                                                    $("label[for='LblIngreso']").text('Total Entregado $ ');
+                                                    $("label[for='LblCantidad']").text('Total Tiquete: ' );
+                                                    $("label[for='LblCantidadTalonarios']").text('Total Talonarios: ');
+                                                    //
+                                                // pasar foco.
+                                                $("#DesdeAsignado").focus().select();
+                                                $("#HastaAsignado").val("");
+                                        }
+                                        if(response.respuesta == false){
+                                            toastr["info"](response.mensaje, "Sistema");
+                                        }
+                                    },
+                                });
+                            } // si continuarGuardarControl.
+                        }                
+                        if (response.respuesta === false) {                     
+                            toastr["danger"](response.mensaje, "Sistema");
+                        }                
+                }                     
                 });
+            // AJAX CONTINUAR GUARDAR REGISTROS.
+            if(continuarGuardarControl == 1)
+            {
                
-             } // CONDICIÓN PRODUCCIÓN DIFERENTE DE 0.
+            } // CONDICIÓN si ENTER A PREGUNTA GUARDAR CONTROL.
         }else{
           txt = "You pressed Cancel!";
-        }
+        }   // condición de respuesta es igual a si.
       } // CONDICION DE LA TECLA HACIA ARRIBA.
 });
 // FINALIZAR CONTROL  

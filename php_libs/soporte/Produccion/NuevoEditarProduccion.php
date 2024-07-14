@@ -178,7 +178,8 @@ if($errorDbConexion == false){
 				if($hasta_asignado > $existencia){
 					$mensajeError = "Desde no puede ser mayor que la Existencia  | Tiquete.";
 					//break;
-				}	
+				}
+				/*	
 					///////////////////////////////////////////////////////////////////////////////////////
 					// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (ENTREGADO).
 					buscarProduccionEntregado();
@@ -195,6 +196,7 @@ if($errorDbConexion == false){
 							ListadoAsignadoTemp();
 							break;
 						}
+						*/
 					///////////////////////////////////////////////////////////////////////////////////////
 					// CONSULTAR ANTES SI EXISTE TALONARIO EN TEMP.
 					///////////////////////////////////////////////////////////////////////////////////////
@@ -393,6 +395,7 @@ if($errorDbConexion == false){
 					$codigo_inventario_tiquete = trim($_POST['codigo_serie']);
 					$codigo_tiquete_color = trim($_POST['codigo_tiquete_color']);
 					$codigo_personal = trim($_POST['codigo_personal']);
+					//
 					// Evaluar si es GUARDAR o ACTUALIZAR.
 						if($AccionBuscar == "GuardarControlIngreso"){
 							# GUARAR DATOS EN LA TABLA PRODUCCIÓN.
@@ -440,13 +443,24 @@ if($errorDbConexion == false){
 							$codigo_produccion_asignado = $listado_temp['codigo_produccion_asignado'];
 							// guardar solo cuando sea GUARDARCONTROLINGRESO.
 								if($AccionBuscar == "GuardarControlIngreso"){
-									// Armar query QueryGuardarProduccionAsignado
-										$queryGuardarProduccionAsignado = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
-											VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
-									// Ejecutamos el query
-										$queryAgregado = $dblink -> query($queryGuardarProduccionAsignado);    			
-									// $agregados.
-										$CountAgregados = $CountAgregados + $queryAgregado -> rowCount();
+									///////////////////////////////////////////////////////////////////////////////////////
+									// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (ENTREGADO).
+										buscarProduccionEntregado();
+									///////////////////////////////////////////////////////////////////////////////////////
+									// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (VENDIDO).
+										buscarProduccionAsignadoVendido();
+									// validar $vendido
+										if($Entregado == true || $vendido == true){
+											
+										}else{
+											// Armar query QueryGuardarProduccionAsignado
+												$queryGuardarProduccionAsignado = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
+													VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
+											// Ejecutamos el query
+												$queryAgregado = $dblink -> query($queryGuardarProduccionAsignado);    			
+											// $agregados.
+												$CountAgregados = $CountAgregados + $queryAgregado -> rowCount();
+										}
 								}
 							// Evaluar Actualizar control ingreso.
 								if($AccionBuscar == "ActualizarControlIngreso"){
@@ -636,6 +650,24 @@ if($errorDbConexion == false){
 					// Ver nuevament el listado.
 					ListadoAsignadoTemp();
 					break; 	
+				case "RegistrosTemp":
+					//  variables para el count.
+					$count_temp = 0;
+					// ELIMINAR CODIGO PRODUCCION.
+					$codigo_produccion = $_POST['codigo_produccion'];
+					//
+					$query_s = "SELECT * FROM produccion_asignado_temp WHERE codigo_produccion = '$codigo_produccion' ORDER BY id_ DESC";
+						// Ejecutamos el query
+						$consulta = $dblink -> query($query_s);
+					//
+						if($consulta -> rowCount() != 0){
+							$respuestaOK = true;
+							$mensajeError = 'Control se puede Guardar '. strval($codigo_produccion);
+						}else{
+							$respuestaOK = false;
+							$mensajeError = 'El control no se puede guardar '. strval($codigo_produccion);
+						}
+				break;
             default:
 				$mensajeError = 'Esta acción no se encuentra disponible';
 			break;
