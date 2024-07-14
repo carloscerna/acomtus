@@ -274,7 +274,7 @@ $('#BusquedaNumerotiquete').on('keyup', function(e){
 			cache: false,                     
 			type: "POST",                     
 			dataType: "json",                     
-			url:"php_libs/soporte/ProduccionBuscar.php",                     
+			url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 			data: {                     
 					accion_buscar: 'BuscarPorTiqueteEnControl', numero_tiquete: numero_tiquete, serie: serie,
 					},                     
@@ -307,7 +307,7 @@ $('body').on('click','#listadoTiqueteEnControl a',function (e){
 				cache: false,                     
 				type: "POST",                     
 				dataType: "json",                     
-				url:"php_libs/soporte/ProduccionBuscar.php",                     
+				url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 				data: {                     
 						accion_buscar: accionAsignacion, NumeroControl: numero_control, numero_tiquete: numero_tiquete, serie: serie,
 						},                     
@@ -401,7 +401,7 @@ $('body').on('click','#listadoVerControles a',function (e){
 						cache: false,                     
 						type: "POST",                     
 						dataType: "json",                     
-						url:"php_libs/soporte/ProduccionBuscar.php",                     
+						url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
 						data: {                     
 								accion_buscar: 'VerEliminarProduccion', codigo_produccion: id_, fecha: fecha,
 								},                     
@@ -1552,7 +1552,7 @@ function listar_serie(){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
         function(data) {
             miselect.empty();
             miselect.append('<option value="">Seleccionar...</option>');

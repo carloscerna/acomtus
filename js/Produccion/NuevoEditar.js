@@ -340,7 +340,7 @@ $("#DesdeAsignado").on('keyup', function (e) {
             // ejecutar Ajax.. ACTUALIZAR ULITMO REGISTROS
                 $.ajax({
                 beforeSend: function(){
-                  //  $('#listadoAsignacionOk').empty();
+                    $('#listadoAsignacionOk').empty();
                 },
                 cache: false,                     
                 type: "POST",                     
@@ -391,46 +391,46 @@ $("#DesdeAsignado").on('keyup', function (e) {
                                         // Validar mensaje de error
                                         if(response.respuesta == true){
                                             toastr["info"](response.mensaje, "Sistema");
-                                                //
-                                                    NuevoRegistro();
-                                                    // Limpiar datos
-                                                    $('#listadoAsignacionOk').empty();
-                                                    //$("#DesdeAsignado").val("");
-                                                    $("#DesdeAsignado").focus().select();
-                                                    $("#HastaAsignado").val("");
-                                                // activar readonly fecha y select.
-                                                $("#FechaProduccion").prop("disabled", false);
-                                                    $("#FechaProduccion").prop("readonly", false);
-                                                    $("#lstRuta").prop("readonly", false);
-                                                    $("#lstJornada").prop("readonly", false);
-                                                    $("#lstSerie").prop("readonly", false);
-                                                    GlobalDesde = 0; 
-                                                    GlobalHasta = 0;
-                                    
-                                                    accion = "AgregarNuevoTemp";	// variable global
-                                                    id_ = 0;
-                                                    //$("#NumeroCorrelativo").val(id_);
-                                                    $("#accion").val(accion);
-                                                    $("#id_user").val(id_);
-                                
-                                                    // cambiar el valor del ingreso.
-                                                    $("label[for='LblIngreso']").text('Total Entregado $ ');
-                                                    $("label[for='LblCantidad']").text('Total Tiquete: ' );
-                                                    $("label[for='LblCantidadTalonarios']").text('Total Talonarios: ');
-                                                    //
-                                                // pasar foco.
-                                                $("#DesdeAsignado").focus().select();
-                                                $("#HastaAsignado").val("");
                                         }
                                         if(response.respuesta == false){
                                             toastr["info"](response.mensaje, "Sistema");
                                         }
+                                            //
+                                            NuevoRegistro();
+                                            // Limpiar datos
+                                            $('#listadoAsignacionOk').empty();
+                                            //$("#DesdeAsignado").val("");
+                                            $("#DesdeAsignado").focus().select();
+                                            $("#HastaAsignado").val("");
+                                        // activar readonly fecha y select.
+                                            $("#FechaProduccion").prop("disabled", false);
+                                            $("#FechaProduccion").prop("readonly", false);
+                                            $("#lstRuta").prop("readonly", false);
+                                            $("#lstJornada").prop("readonly", false);
+                                            $("#lstSerie").prop("readonly", false);
+                                            GlobalDesde = 0; 
+                                            GlobalHasta = 0;
+                            
+                                            accion = "AgregarNuevoTemp";	// variable global
+                                            id_ = 0;
+                                            //$("#NumeroCorrelativo").val(id_);
+                                            $("#accion").val(accion);
+                                            $("#id_user").val(id_);
+                        
+                                            // cambiar el valor del ingreso.
+                                            $("label[for='LblIngreso']").text('Total Entregado $ ');
+                                            $("label[for='LblCantidad']").text('Total Tiquete: ' );
+                                            $("label[for='LblCantidadTalonarios']").text('Total Talonarios: ');
+                                            //
+                                        // pasar foco.
+                                            $("#DesdeAsignado").focus().select();
+                                            $("#HastaAsignado").val("");
                                     },
                                 });
                             } // si continuarGuardarControl.
                         }                
                         if (response.respuesta === false) {                     
-                            toastr["danger"](response.mensaje, "Sistema");
+                            toastr["error"](response.mensaje, "Sistema");
                         }                
                 }                     
                 });

@@ -37,6 +37,9 @@ $vendido = false;
 $CreadoTemp = false;
 $Entregado = false;
 $AccionBuscar = "";
+$desde_asignado = 0;
+$hasta_asignado = 0;
+$codigo_inventario_tiquete = 0;
 // ruta de los archivos con su carpeta
     $path_root=trim($_SERVER['DOCUMENT_ROOT']);
 // Incluimos el archivo de funciones y conexi�n a la base de datos
@@ -398,26 +401,37 @@ if($errorDbConexion == false){
 					//
 					// Evaluar si es GUARDAR o ACTUALIZAR.
 						if($AccionBuscar == "GuardarControlIngreso"){
-							# GUARAR DATOS EN LA TABLA PRODUCCIÓN.
-								$query = "INSERT INTO produccion (fecha, codigo_jornada, codigo_ruta, codigo_inventario_tiquete, hora, codigo_tiquete_color)
-									VALUES ('$fecha_produccion','$codigo_jornada','$codigo_ruta','$codigo_inventario_tiquete', '$hora_actual', '$codigo_tiquete_color')";
-							// Ejecutamos el query
-								$resultadoQuery = $dblink -> query($query);              
-							// obtener el último dato en este caso el Id_
-								$query = "SELECT lastval()";
-								$consulta = $dblink -> query($query);              
-								while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-								{
-									$codigo_produccion_last = $listado['lastval'];
-								}
-								## evaluar si son iguales.
-									if($codigo_produccion != $codigo_produccion_last){
-										$query_actualizar_codigo_temp = "UPDATE produccion_asignado_temp SET codigo_produccion = '$codigo_produccion_last'
-												WHERE codigo_produccion = '$codigo_produccion'";
-													$consulta_actualizar_codigo_temp = $dblink -> query($query_actualizar_codigo_temp);              
-										## Cambiar el valor de <codigo_produccion class="
-											$codigo_produccion = $codigo_produccion_last;
-									}
+							///////////////////////////////////////////////////////////////////////////////////////
+							// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (ENTREGADO).
+								buscarProduccionEntregado();
+							///////////////////////////////////////////////////////////////////////////////////////
+							// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (VENDIDO).
+								buscarProduccionAsignadoVendido();
+							// validar $vendido
+								if($Entregado == true || $vendido == true){
+									
+								}else{
+									# GUARAR DATOS EN LA TABLA PRODUCCIÓN.
+										$query = "INSERT INTO produccion (fecha, codigo_jornada, codigo_ruta, codigo_inventario_tiquete, hora, codigo_tiquete_color)
+											VALUES ('$fecha_produccion','$codigo_jornada','$codigo_ruta','$codigo_inventario_tiquete', '$hora_actual', '$codigo_tiquete_color')";
+									// Ejecutamos el query
+										$resultadoQuery = $dblink -> query($query);              
+									// obtener el último dato en este caso el Id_
+										$query = "SELECT lastval()";
+										$consulta = $dblink -> query($query);              
+										while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+										{
+											$codigo_produccion_last = $listado['lastval'];
+										}
+										## evaluar si son iguales.
+											if($codigo_produccion != $codigo_produccion_last){
+												$query_actualizar_codigo_temp = "UPDATE produccion_asignado_temp SET codigo_produccion = '$codigo_produccion_last'
+														WHERE codigo_produccion = '$codigo_produccion'";
+															$consulta_actualizar_codigo_temp = $dblink -> query($query_actualizar_codigo_temp);              
+												## Cambiar el valor de <codigo_produccion class="
+													$codigo_produccion = $codigo_produccion_last;
+											}// if si son iguales
+								} // IF SI SON ENTREGADOS O VENDIDOS.
 						}
 					// Evaluar Actualizar control ingreso.
 						if($AccionBuscar == "ActualizarControlIngreso"){
@@ -471,13 +485,24 @@ if($errorDbConexion == false){
 										$ValorBusqueda = $consultaBuscarProduccionAsignado -> rowCount();
 									// Validar si hay registros.
 										if($ValorBusqueda == 0){        
-											// Armar query QueryGuardarProduccionAsignado
-													$queryGuardarProduccionAsignado = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
-													VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
-											// Ejecutamos el query
-												$queryAgregado = $dblink -> query($queryGuardarProduccionAsignado);    			
-											// $agregados.
-											$CountAgregados = $CountAgregados + $queryAgregado -> rowCount();
+											///////////////////////////////////////////////////////////////////////////////////////
+											// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (ENTREGADO).
+													buscarProduccionEntregado();
+											///////////////////////////////////////////////////////////////////////////////////////
+											// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (VENDIDO).
+												buscarProduccionAsignadoVendido();
+											// validar $vendido
+												if($Entregado == true || $vendido == true){
+													
+												}else{
+													// Armar query QueryGuardarProduccionAsignado
+															$queryGuardarProduccionAsignado = "INSERT INTO produccion_asignado (fecha, tiquete_desde, tiquete_hasta, cantidad, total, codigo_produccion, codigo_inventario_tiquete)
+															VALUES ('$fecha_produccion','$desde_asignado','$hasta_asignado','$cantidad','$total','$codigo_produccion','$codigo_inventario_tiquete')";
+													// Ejecutamos el query
+														$queryAgregado = $dblink -> query($queryGuardarProduccionAsignado);    			
+													// $agregados.
+													$CountAgregados = $CountAgregados + $queryAgregado -> rowCount();
+												}
 										}
 								}	// if acceionBsucar
 							}	// while asignacion temp.
