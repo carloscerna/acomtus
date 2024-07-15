@@ -403,10 +403,10 @@ if($errorDbConexion == false){
 						if($AccionBuscar == "GuardarControlIngreso"){
 							///////////////////////////////////////////////////////////////////////////////////////
 							// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (ENTREGADO).
-								buscarProduccionEntregado();
+								//buscarProduccionEntregado();
 							///////////////////////////////////////////////////////////////////////////////////////
 							// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (VENDIDO).
-								buscarProduccionAsignadoVendido();
+								//buscarProduccionAsignadoVendido();
 							// validar $vendido
 								if($Entregado == true || $vendido == true){
 									
@@ -459,10 +459,10 @@ if($errorDbConexion == false){
 								if($AccionBuscar == "GuardarControlIngreso"){
 									///////////////////////////////////////////////////////////////////////////////////////
 									// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (ENTREGADO).
-										buscarProduccionEntregado();
+									//	buscarProduccionEntregado();
 									///////////////////////////////////////////////////////////////////////////////////////
 									// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (VENDIDO).
-										buscarProduccionAsignadoVendido();
+									//	buscarProduccionAsignadoVendido();
 									// validar $vendido
 										if($Entregado == true || $vendido == true){
 											
@@ -487,10 +487,10 @@ if($errorDbConexion == false){
 										if($ValorBusqueda == 0){        
 											///////////////////////////////////////////////////////////////////////////////////////
 											// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (ENTREGADO).
-													buscarProduccionEntregado();
+												//	buscarProduccionEntregado();
 											///////////////////////////////////////////////////////////////////////////////////////
 											// TABLA PRODUCCION ASIGNADO. BUSCAR SI YA FUE PROCESADO (VENDIDO).
-												buscarProduccionAsignadoVendido();
+											//	buscarProduccionAsignadoVendido();
 											// validar $vendido
 												if($Entregado == true || $vendido == true){
 													
