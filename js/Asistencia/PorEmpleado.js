@@ -421,7 +421,7 @@ function listar_jornada(codigo_jornada){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
@@ -449,7 +449,7 @@ function listar_jornada_cuatro_horas(codigo_jornada){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
@@ -479,7 +479,7 @@ function listar_jornada_descanso(codigo_jornada){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
@@ -505,7 +505,7 @@ function listar_jornada_vacacion(codigo_jornada){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
@@ -533,7 +533,7 @@ function listar_jornada_asueto(codigo_jornada){
     /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
     miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
     
-    $.post("php_libs/soporte/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
+    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
         function(data) {
             miselect.empty();
             for (var i=0; i<data.length; i++) {
