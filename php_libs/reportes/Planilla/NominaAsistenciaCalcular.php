@@ -454,6 +454,7 @@ exit;
                     $pago_mensual = ($row['salario']);
                     $pago_diario = round($row['salario'] / 30,10);      // CONVIERTE A PAGO DIARIO
                     $pago_diario_hora = round($pago_diario / 8,10);     // CONVIERTE A PAGO DIARIO POR HORA
+                    $pago4Horas = round($pago_diario_hora * 4,10);     // CONVIERTE A PAGO DIARIO POR HORA 1T
                     $pago_diario_extra_4H = round($pago_diario_hora * 4,10);     // CONVIERTE A PAGO DIARIO POR HORA 1T
                     $pago_diario_extra_1T = round($pago_diario_hora * 8,10);     // CONVIERTE A PAGO DIARIO POR HORA 1T
                     $pago_diario_extra_1_5T = round($pago_diario_hora * 12,10);     // CONVIERTE A PAGO DIARIO POR HORA 1.5T
@@ -461,6 +462,7 @@ exit;
                     $salario["Mensual"] = $pago_mensual;
                     $salario["PorDia"] = $pago_diario;
                     $salario["PorHora"] = $pago_diario_hora;
+                    $salario["Por4Horas"] = $pago4Horas;
                     $salario["Extra4H"] = $pago_diario_extra_4H;
                     $salario["Extra1T"] = $pago_diario_extra_1T;
                     $salario["Extra15T"] = $pago_diario_extra_1_5T;
@@ -472,6 +474,9 @@ exit;
                     $salario["Descuento4HFC"] = 0;
                     $salario["Descuento4H"] = 0;
                     $salario["DescuentoFaltas"] = 0;
+                    $salario["DescuentoCastigo"] = 0;
+                    $salario["DescuentoISSS"] = 0;
+                    $salario["DescuentoPP"] = 0;
                     $salario["TotalDiasQuincena"] = $total_dias_quincena;
                 // DATOS AL INFORME
                     $pdf->SetFillColor(234, 236, 238);   // CORAL CLARO// rgb(234, 236, 238); SIN PUNTEO
@@ -479,8 +484,8 @@ exit;
                     $pdf->Cell($w[0],6,$i,1,0,'C',$fillaFila);        // núermo correlativo
                     $pdf->Cell($w[1],6,$codigo,1,0,'L',$fillaFila);   // codigo empleado
                     $pdf->SetFont('Arial','',8);
-                        $pdf->Cell($w[2],6,$nombre_completo,1,0,'L',$fillaFila); // Nombre, Salario Nominal y días.
-                        //$pdf->Cell($w[2],6,$nombre_completo ." - ".$pago_mensual,1,0,'L',$fillaFila); // Nombre, Salario Nominal y días.
+                        //$pdf->Cell($w[2],6,$nombre_completo,1,0,'L',$fillaFila); // Nombre, Salario Nominal y días.
+                        $pdf->Cell($w[2],6,$nombre_completo ." - ".$pago_mensual,1,0,'L',$fillaFila); // Nombre, Salario Nominal y días.
                     $pdf->SetFont('Arial','',9);
                     // ACUMULAR EL VALOR DE $I y establece el fondo de la caja de texto Cell();
                     $fillaFila=!$fillaFila;
@@ -504,23 +509,22 @@ exit;
 /////////////////////////////////////////////////////////////////////////////////////
 //************* */ FUNCIONES.*******************************************************
 /////////////////////////////////////////////////////////////////////////////////////
-function rellenar_i($i)
-    {
-        global $pdf, $fill, $w, $w1, $header, $i, $total_dias_quincena, $total_lineas;
-        // SALTO DE PAGINA QUE DEPENDE DEL NUMERO DE LINEAS.
-        if($i==25 || $i == 51 || $i == 65){
-            $pdf->Cell($w[0],6,'','T',0,'C',$fill);    // núermo correlativo
-            $pdf->Cell($w[1],6,'','T',0,'L',$fill);    // codigo empleado
-            $pdf->Cell($w[2],6,'','T',0,'L',$fill);    // Nombre + apellido_materno + apellido_paterno
-            $pdf->Cell($w1[0]*$total_dias_quincena,6,'','T',0,'L',$fill);    // Total de dias
-            if($total_lineas > 25){
-                $pdf->AddPage();
-                // Posición en donde va iniciar el texto.
-                $pdf->SetY(30);
-                $pdf->FancyTable($header);
-            }
-        }    
-    }
+function rellenar_i($i){
+    global $pdf, $fill, $w, $w1, $header, $i, $total_dias_quincena, $total_lineas;
+    // SALTO DE PAGINA QUE DEPENDE DEL NUMERO DE LINEAS.
+    if($i==25 || $i == 51 || $i == 65){
+        $pdf->Cell($w[0],6,'','T',0,'C',$fill);    // núermo correlativo
+        $pdf->Cell($w[1],6,'','T',0,'L',$fill);    // codigo empleado
+        $pdf->Cell($w[2],6,'','T',0,'L',$fill);    // Nombre + apellido_materno + apellido_paterno
+        $pdf->Cell($w1[0]*$total_dias_quincena,6,'','T',0,'L',$fill);    // Total de dias
+        if($total_lineas > 25){
+            $pdf->AddPage();
+            // Posición en donde va iniciar el texto.
+            $pdf->SetY(30);
+            $pdf->FancyTable($header);
+        }
+    }    
+}
 // POR EL MOMENTO NO EJECUTA NADA.
 function rellenar_datos($linea){
     global $i, $pdf, $w, $w1, $total_dias_quincena, $fill;
@@ -837,7 +841,7 @@ function rellenar($total_dias_quincena){
                     // CON EL DESCUENTO
                         $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - $salario["Descuento4HFC"];
                     // CON MAS DE 4H.
-                        $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - (($salario["Descuento4H"] - 2) * $salario["Extra4H"]);
+                       // $salario["SalarioQuincena"] = $salario["SalarioQuincena"] - (($salario["Descuento4H"] - 2) * $salario["Extra4H"]);
                     // SALARIO EN PANTALLA
                         $salario_pantalla = number_format($salario["SalarioQuincena"],2,'.',',');
                         $pdf->SetTextColor(72,61,139);   // COLOR AZUL OSCURO rgb(72,61,139)
@@ -897,7 +901,7 @@ function CambiarJornadaColor($JornadaLicenciaPermiso, $Fecha, $codigo_personal){
         $pdf->SetFont('Arial','B',8); // I : Italica; U: Normal;
         if($JornadaLicenciaPermiso == "PP" || $JornadaLicenciaPermiso == "ISSS" || $JornadaLicenciaPermiso == "SP"){
             $pdf->SetTextColor(0,0,255); // COLOR azul rgb(0,0,255)
-                   $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + $salario["PorDia"];
+                   //$salario["Descuento4HFC"] = $salario["Descuento4HFC"] + $salario["PorDia"];
             if($JornadaLicenciaPermiso == "SP"){
                 $pdf->SetFillColor(235,235,164);   // CORAL CLARO// rgb(235,235,164); SIN PUNTEO
                 $pdf->SetTextColor(0,0,0);   // COLOR VERDE rgb(0,0,0)
@@ -1051,15 +1055,15 @@ function VerificarControl($fecha, $codigo_personal){
 }
 function VerificarFechaDescuento($codigo_personal){
     global $FechaDDT, $dblink, $salario, $fecha_periodo_inicio, $fecha_periodo_fin;
-    $CodigoNombreJornadaDDT = array(); $CantidadC = 0; $CantidadF = 0; $CantidadH = 0; $CantidadPP = 0; $CantidadISSS = 0;
+    $CodigoNombreJornadaDDT = []; $CantidadC = []; $CantidadF = []; $Cantidad4H = []; $CantidadPP = []; $CantidadISSS = [];
     $CodigoNombreJornadaDDT['DescripcionJornada'][] = "";
     $CodigoNombreJornadaDDT['DescripcionLicencia'][] = "";
    //print $codigo_personal . "<br>"; var_dump($FechaDDT);
     //
     // si es motorista catalogo_departamento-empresa 02
-        $primerDias = array(); $ultimoDias = array(); $BuscarFechaInicio = array(); $BuscarFechaFin = array(); $ll = 0;
+        $primerDias = []; $ultimoDias = []; $BuscarFechaInicio = []; $BuscarFechaFin = []; $ll = 0;
         foreach ($FechaDDT as $fecha_dd) {
-            $fecha_actual =$fecha_dd;
+            $fecha_actual = $fecha_dd;
             if($ll == 0){
                 //sumo 7 día
                 $primerDia = date("d-m-Y",strtotime($fecha_actual."- 6 days")); 
@@ -1088,82 +1092,233 @@ function VerificarFechaDescuento($codigo_personal){
             C - CASTIGO Ö
             4H - MAS...
         */
-    for ($bb=0; $bb < count($BuscarFechaInicio) ; $bb++) { 
+    for ($bloqueSemana=0; $bloqueSemana < count($BuscarFechaInicio) ; $bloqueSemana++) { 
         //print "Fecha Inicio: ". $BuscarFechaInicio[$bb] . " Fecha fin: " . $BuscarFechaFin[$bb];
         // armanr query para buscar si existe la fecha en el perido seleccionar en la tabla personal asisitencia.
-            $query_asistencia_buscar_db = "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
+            $queryAsistenciaPorSemana= "SELECT pa.fecha, pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones,
                     pa.codigo_jornada_descanso,
                     cat_j.descripcion as descripcion_jornada, cat_j.horas,
                     cat_lp.descripcion as descripcion_licencia, cat_lp.horas as horas_licencia
                         FROM personal_asistencia pa 
                         INNER JOIN catalogo_jornada cat_j ON cat_j.id_ = pa.codigo_jornada
                         INNER JOIN catalogo_tipo_licencia_o_permiso cat_lp ON cat_lp.id_ = pa.codigo_tipo_licencia
-                            WHERE pa.codigo_personal = '$codigo_personal' and pa.fecha >= '$BuscarFechaInicio[$bb]' and pa.fecha <= '$BuscarFechaFin[$bb]' order by pa.fecha";
-            $consulta_asistencia_buscar_db = $dblink -> query($query_asistencia_buscar_db);
+                            WHERE pa.codigo_personal = '$codigo_personal' and pa.fecha >= '$BuscarFechaInicio[$bloqueSemana]' and pa.fecha <= '$BuscarFechaFin[$bloqueSemana]' order by pa.fecha";
+            $consultaAsistenciaPorSemana = $dblink -> query($queryAsistenciaPorSemana);
             // validar si existen archivos en la consulta segun la fecha.
-            $cantidad_registros = $consulta_asistencia_buscar_db -> rowCount();
+            $cantidadDiasPorSemana = $consultaAsistenciaPorSemana -> rowCount();
             // regrear la variable conteo a 0
-                $conteo_4h = 0; $descuento = 0; $CantidadF = 0; $CantidadPP = 0; $CantidadH = 0; $Descuento4H = 0;
+                $CantidadC = []; $CantidadF = []; $Cantidad4H = []; $CantidadPP = []; $CantidadISSS = [];
+                //$conteo_4h = 0; $descuento = 0; $CantidadF = 0; $CantidadPP = 0; $CantidadH = 0; $Descuento4H = 0;
             // Verificar si existen registros.
-                if($consulta_asistencia_buscar_db -> rowCount() != 0){
-                    while($rows = $consulta_asistencia_buscar_db -> fetch(PDO::FETCH_BOTH))
+                if($consultaAsistenciaPorSemana -> rowCount() != 0){
+                    while($DiasJornadaLicencias = $consultaAsistenciaPorSemana -> fetch(PDO::FETCH_BOTH))
                     {
-                        $descripcion_jornada = trim($rows['descripcion_jornada']);
-                        $descripcion_licencia = trim($rows['descripcion_licencia']);
-                        $fecha = trim($rows['fecha']);
+                        $Jornada = trim($DiasJornadaLicencias['descripcion_jornada']);
+                        $Licencia = trim($DiasJornadaLicencias['descripcion_licencia']);
+                        $Fecha = trim($DiasJornadaLicencias['fecha']);
                         //
-                        if($fecha >= $fecha_periodo_inicio && $fecha <= $fecha_periodo_fin){
-                            $CodigoNombreJornadaDDT['DescripcionJornada'][] = $descripcion_jornada;
-                            $CodigoNombreJornadaDDT['DescripcionLicencia'][] = $descripcion_licencia;
+                        //if($Fecha >= $fecha_periodo_inicio && $Fecha <= $fecha_periodo_fin){
+                            $CodigoNombreJornadaDDT['DescripcionJornada'][] = $Jornada;
+                            $CodigoNombreJornadaDDT['DescripcionLicencia'][] = $Licencia;
+                       // }
+                    }   // LAZO WHILE DE LA CONSULTA POR SEMANA.
+
+                    // matriz - valores de la Jornada y Licencia.
+                    // CALCULO PARA EL DESCUENTO, CUANDO SOLO HA TRABAJADO 4HORAS
+                    switch ($bloqueSemana) {
+                    case '0':
+                        if(!empty($CodigoNombreJornadaDDT["DescripcionJornada"])){
+                            // CALCULO PARA LAS 4H + DE 1.
+                            $Cantidad4H[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionJornada"], "4H"));
+                            $cantidad4Horas = $Cantidad4H[$bloqueSemana];
+                            $diasDelaSemana = count($CodigoNombreJornadaDDT["DescripcionJornada"]);
+                            if($cantidad4Horas > 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["Descuento4H"] += ($cantidad4Horas - 1) * $salario["Por4Horas"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
                         }
-
-                    }   // LAZO WHILE
-                    //
-                    if(!empty($CodigoNombreJornadaDDT["DescripcionJornada"])){
-                        $CantidadH = count(array_keys($CodigoNombreJornadaDDT["DescripcionJornada"], "4H"));
-                        $salario["Descuento4H"] = $salario["Descuento4H"] + $CantidadH;
-                    }
-                    if(!empty($CodigoNombreJornadaDDT["DescripcionLicencia"])){
-                        $CantidadF = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "F"));
-                        $CantidadC = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "C"));
-                        $CantidadPP = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "PP"));
-                        $CantidadISSS = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "ISSS"));
-                    }
+                        if(!empty($CodigoNombreJornadaDDT["DescripcionLicencia"])){
+                            // CALCULO PARA LAS FALTAS, CASTIGO, ISSS Y PP.
+                            $CantidadF[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "F"));
+                            $CantidadC[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "C"));
+                            $CantidadISSS[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "ISSS"));
+                            $CantidadPP[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "PP"));
+                            //
+                            $cantidadFaltas = $CantidadF[$bloqueSemana];
+                            $diasDelaSemana = count($CodigoNombreJornadaDDT["DescripcionLicencia"]);
+                            // CALCULOS POR LAS FALTAS.
+                            if($cantidadFaltas == 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                }   // condición para días de la semana.
+                            }elseif($cantidadFaltas > 2){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * ($cantidadFaltas - 1); // pierde un día +.
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
+                            // CACULO PARALOS CASTIGOS.
+                            $cantidadCastigo = $CantidadC[$bloqueSemana];
+                            if($cantidadCastigo >= 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoCastigo"] += $cantidadCastigo * $salario["PorDia"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de UN CASTIGO en la semana y así poder aplicar un descuento.
+                            // CACULO PARA LOS ISSS.
+                            $cantidadISSS = $CantidadISSS[$bloqueSemana];
+                            if($cantidadISSS >= 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoISSS"] += $cantidadISSS * $salario["PorDia"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
+                            // CACULO PARA LOS PP.
+                            $cantidadPP = $CantidadPP[$bloqueSemana];
+                            if($cantidadPP >= 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoPP"] += $cantidadPP * $salario["PorDia"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
+                        }   // cuando descripcion liencia tenga información.
+                    break;
+                    case "1":
+                        if(!empty($CodigoNombreJornadaDDT["DescripcionJornada"])){
+                            // CALCULO PARA LAS 4H + DE 1.
+                            $Cantidad4H[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionJornada"], "4H"));
+                            $cantidad4Horas = $Cantidad4H[$bloqueSemana];
+                            $diasDelaSemana = count($CodigoNombreJornadaDDT["DescripcionJornada"]);
+                            if($cantidad4Horas > 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["Descuento4H"] += ($cantidad4Horas - 1) * $salario["Por4Horas"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
+                        }
+                        if(!empty($CodigoNombreJornadaDDT["DescripcionLicencia"])){
+                            // CALCULO PARA LAS FALTAS, CASTIGO, ISSS Y PP.
+                            $CantidadF[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "F"));
+                            $CantidadC[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "C"));
+                            $CantidadISSS[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "ISSS"));
+                            $CantidadPP[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "PP"));
+                            //
+                            $cantidadFaltas = $CantidadF[$bloqueSemana];
+                            $diasDelaSemana = count($CodigoNombreJornadaDDT["DescripcionLicencia"]);
+                            // CALCULOS POR LAS FALTAS.
+                            if($cantidadFaltas == 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                }   // condición para días de la semana.
+                            }elseif($cantidadFaltas > 2){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * ($cantidadFaltas - 1); // pierde un día +.
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
+                            // CACULO PARALOS CASTIGOS.
+                            $cantidadCastigo = $CantidadC[$bloqueSemana];
+                            if($cantidadCastigo >= 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoCastigo"] += $cantidadCastigo * $salario["PorDia"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de UN CASTIGO en la semana y así poder aplicar un descuento.
+                            // CACULO PARA LOS ISSS.
+                            $cantidadISSS = $CantidadISSS[$bloqueSemana];
+                            if($cantidadISSS >= 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoISSS"] += $cantidadISSS * $salario["PorDia"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
+                            // CACULO PARA LOS PP.
+                            $cantidadPP = $CantidadPP[$bloqueSemana];
+                            if($cantidadPP >= 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoPP"] += $cantidadPP * $salario["PorDia"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
+                        }   // cuando descripcion liencia tenga información.
+                    break;
+                    case "2":
+                        if(!empty($CodigoNombreJornadaDDT["DescripcionJornada"])){
+                            // CALCULO PARA LAS 4H + DE 1.
+                            $Cantidad4H[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionJornada"], "4H"));
+                            $cantidad4Horas = $Cantidad4H[$bloqueSemana];
+                            $diasDelaSemana = count($CodigoNombreJornadaDDT["DescripcionJornada"]);
+                            if($cantidad4Horas > 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["Descuento4H"] += ($cantidad4Horas - 1) * $salario["Por4Horas"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
+                        }
+                        if(!empty($CodigoNombreJornadaDDT["DescripcionLicencia"])){
+                            // CALCULO PARA LAS FALTAS, CASTIGO, ISSS Y PP.
+                            $CantidadF[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "F"));
+                            $CantidadC[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "C"));
+                            $CantidadISSS[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "ISSS"));
+                            $CantidadPP[$bloqueSemana] = count(array_keys($CodigoNombreJornadaDDT["DescripcionLicencia"], "PP"));
+                            //
+                            $cantidadFaltas = $CantidadF[$bloqueSemana];
+                            $diasDelaSemana = count($CodigoNombreJornadaDDT["DescripcionLicencia"]);
+                            // CALCULOS POR LAS FALTAS.
+                            if($cantidadFaltas == 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                }   // condición para días de la semana.
+                            }elseif($cantidadFaltas > 2){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * ($cantidadFaltas - 1); // pierde un día +.
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
+                            // CACULO PARALOS CASTIGOS.
+                            $cantidadCastigo = $CantidadC[$bloqueSemana];
+                            if($cantidadCastigo >= 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoCastigo"] += $cantidadCastigo * $salario["PorDia"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de UN CASTIGO en la semana y así poder aplicar un descuento.
+                            // CACULO PARA LOS ISSS.
+                            $cantidadISSS = $CantidadISSS[$bloqueSemana];
+                            if($cantidadISSS >= 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoISSS"] += $cantidadISSS * $salario["PorDia"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
+                            // CACULO PARA LOS PP.
+                            $cantidadPP = $CantidadPP[$bloqueSemana];
+                            if($cantidadPP >= 1){
+                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
+                                    $salario["DescuentoPP"] += $cantidadPP * $salario["PorDia"]; 
+                                }   // condición para días de la semana.
+                            }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
+                        }   // cuando descripcion liencia tenga información.
+                    break;
+                    } // VARIABLES $BLOQUESEMANA.
                 }   // LAZO IF....
-                // PASAR A MATRIZ F - FALTA Y C - CASTIGO Y 4H MAS DE 4H'S.
-                    // CALCULOS...
-                    // HORAS EXTRAS 4H
-                    if($CantidadH > 2){
-
-                      //  $Descuento4H = $Descuento4H + $CantidadH;
-                        //$salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["Extra4H"] * $Descuento4H);
+                    if($codigo_personal == '211791'){
+                        var_dump($CodigoNombreJornadaDDT);
+                        print "Valores de las matrices de descuento: <br>";
+                        var_dump($Cantidad4H);
+                        print "Valores de las matrices de descuento Faltas: <br>";
+                        var_dump($CantidadF);
+                        print "Valores de las matrices de descuento cASTIGO: <br>";
+                        var_dump($CantidadC);
+                        print "Valores de las matrices de descuento ISSS: <br>";
+                        var_dump($CantidadISSS);
+                        print "Valores de las matrices de descuento PP permiso: <br>";
+                        var_dump($CantidadPP);
                     }
-                    // FALTAS
-                    if($CantidadF !=0){
-
-                      $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * (2 * $CantidadF));   // pierde el dìa actual y el septimo.
-                      //$salario["DescuentoFaltas"] = $salario["DescuentoFaltas"] + $CantidadF;
-                    }
-                    // castigo
-                    if($CantidadC !=0){
-                       $salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * $CantidadC);
-                    }
-                    // isss.
-                    if($CantidadISSS !=0){
-                        //$salario["Descuento4HFC"] = $salario["Descuento4HFC"] + ($salario["PorDia"] * $CantidadISSS);
-                    }
-                    //var_dump($salario["Descuento4HFC"]);
-                    unset($CodigoNombreJornadaDDT);
-                    $CodigoNombreJornadaDDT = array();
-                    $CantidadC = 0; $CantidadF = 0; $CantidadPP = 0; $CantidadISSS = 0;
+                    unset($CodigoNombreJornadaDDT); $CodigoNombreJornadaDDT = [];
+                    $CantidadC = []; $CantidadF = []; $Cantidad4H = []; $CantidadPP = []; $CantidadISSS = [];
     } // LAZO FOR. para buscar datos de descuento o faltas.
-    
-    if($codigo_personal == '0217'){
+    /// PASAR EL DATO DE DESCUENTOS A SLARIO["$DESCUENTO4HFC"].
+        $salario["Descuento4HFC"] += $salario["Descuento4H"] + $salario["DescuentoFaltas"] + $salario["DescuentoCastigo"] + $salario["DescuentoISSS"] + $salario["DescuentoPP"];
+
+    if($codigo_personal == '211791'){
         var_dump($salario);
-       print $query_asistencia_buscar_db;
-       var_dump($BuscarFechaInicio);
-       var_dump($BuscarFechaFin);
-        exit;  
+        //print $query_asistencia_buscar_db;
+        var_dump($BuscarFechaInicio);
+        var_dump($BuscarFechaFin);
+        var_dump($CodigoNombreJornadaDDT);
+            exit;  
     }
 }
 function RellenarSinCalculos(){
