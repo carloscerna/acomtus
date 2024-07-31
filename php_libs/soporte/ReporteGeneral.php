@@ -63,216 +63,231 @@ if($errorDbConexion == false){
                 // CANTIDAD DE CONTROLES VENDIDOS.
                    $query_v = "SELECT count(*) as total_vendidos FROM produccion where codigo_estatus = '02' and fecha = '$fecha'";
                         $consulta_v = $dblink -> query($query_v);
-                // crear matriz
+                // Validar si hay registros.
+                if($consulta_v -> rowCount() != 0)
+                {
+                    // crear matriz
                     while($listado_v = $consulta_v -> fetch(PDO::FETCH_BOTH))
                     {
                         $cantidadVendidosProduccion = $listado_v['total_vendidos'];
                     }
-                // armando el Query. PARA LA TABLA CATALOGO RUTA.
-                    $query = "SELECT id_ruta, codigo, descripcion FROM catalogo_ruta ORDER BY codigo";
-                // Ejecutamos el Query.
-                    $codigo_ruta = array();
-                    $consulta = $dblink -> query($query);
-                // crear matriz
-                    while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-                    {
-                        $codigo_ruta[] = $listado['id_ruta'];
-                        $descripcion_ruta[] = $listado['descripcion'];
-                    }
-                     // armando el Query. PARA LA TABLA INVENTARIO TIQUETE..
-                        $query = "SELECT DISTINCT cat_tc.id_ as id_tiquete_color, cat_tc.descripcion as tiquete_color, it.precio_publico
-                        FROM catalogo_tiquete_color cat_tc
-                            INNER JOIN inventario_tiquete it ON cat_tc.id_ = it.codigo_tiquete_color
-                                ORDER BY it.precio_publico";
-                        // Ejecutamos el Query.
-                            $id_tiquete_color = array(); $precio_publico_ = array(); $nombre_serie = array(); $tiquete_color = array();
+                    if($cantidadVendidosProduccion != 0){
+                            // armando el Query. PARA LA TABLA CATALOGO RUTA.
+                            $query = "SELECT id_ruta, codigo, descripcion FROM catalogo_ruta ORDER BY codigo";
+                            // Ejecutamos el Query.
+                            $codigo_ruta = array();
                             $consulta = $dblink -> query($query);
-                        // crear matriz
-                        while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-                        {
-                            $id_tiquete_color[] = $listado['id_tiquete_color'];
-                            $precio_publico[] = $listado['precio_publico'];
-                            //$nombre_serie[] = $listado['nombre_serie'];
-                            $tiquete_color[] = $listado['tiquete_color'];
-                        }
-                        // CREAR MATRIZ UNIENDO LA RUTA CON EL PRECIO PUBLICO DE CADA TIQUETE.
-                        $codigo_ruta_precio = array(); $descripcion_ruta_ = array(); $precio_publico_ = array(); $nombre_serie_ = array(); $tiquete_color_ = array();
-                        for ($Hj=0; $Hj < count($codigo_ruta); $Hj++) { // tabla CATALOGO RUTA.
-                            for ($jj=0; $jj < count($precio_publico); $jj++) {   // TABLA CATALOGO INVENTARIO TIQUETE.
-                                // Verificar que sólo se genere ruta y único precio público.
-                                //$codigo_ruta_precio[] = $codigo_ruta[$Hj] . $id_it[$jj];
-                                $codigo_ruta_precio[] = $codigo_ruta[$Hj] . $id_tiquete_color[$jj];
-                                $descripcion_ruta_[] = $descripcion_ruta[$Hj];
-                                $precio_publico_[] = $precio_publico[$jj];
-                                //$nombre_serie_[] = $nombre_serie[$jj];
-                                $tiquete_color_[] = $tiquete_color[$jj];
+                            // crear matriz
+                            while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+                            {
+                                $codigo_ruta[] = $listado['id_ruta'];
+                                $descripcion_ruta[] = $listado['descripcion'];
                             }
-                        }
-                        // print_r($codigo_ruta_precio);
-                        // CONSULTA FOR INVENTARIO TIQUETE.
-                        for ($Hj=0; $Hj < count($codigo_ruta_precio); $Hj++)
-                        { // MATRIZ CATALOGO RUTA Y INVENTARIO TIQUETE..
-                            $query = "SELECT pro.id_, pro.total_ingreso, pro.codigo_ruta
-                                FROM produccion pro WHERE fecha = '$fecha' and concat(codigo_ruta,codigo_tiquete_color) = '$codigo_ruta_precio[$Hj]'
-                                    ORDER BY pro.codigo_ruta, pro.id_ ASC";
-                                $consulta = $dblink -> query($query);
-                            // Variable ProduccionIngreso Ok a cero.
-                                $ProduccionIngresoOk = 0; $cantidadTiquete = 0;
-                            // Validar si hay registros.
-                                if($consulta -> rowCount() != 0)
+                            // armando el Query. PARA LA TABLA INVENTARIO TIQUETE..
+                                $query = "SELECT DISTINCT cat_tc.id_ as id_tiquete_color, cat_tc.descripcion as tiquete_color, it.precio_publico
+                                FROM catalogo_tiquete_color cat_tc
+                                    INNER JOIN inventario_tiquete it ON cat_tc.id_ = it.codigo_tiquete_color
+                                        ORDER BY it.precio_publico";
+                                // Ejecutamos el Query.
+                                    $id_tiquete_color = array(); $precio_publico_ = array(); $nombre_serie = array(); $tiquete_color = array();
+                                    $consulta = $dblink -> query($query);
+                                // crear matriz
+                                while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
                                 {
-                                    // Crear matriz para poder tomar dos valores
-                                        $ProduccionDesdeHasta = array(); $ProduccionDesde = 0; $ProduccionHasta = 0;
-                                        // Recorriendo la Tabla con PDO::
-                                        while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-                                        {
-                                            $ProduccionDesdeHasta[] = $listado["id_"];
-                                            $ProduccionIngresoOk = $ProduccionIngresoOk + $listado["total_ingreso"];
-                                        }   // WHILE DE LA CONSULTA PRODUCCIÓN.
-                                        // CATNIDAD DE TIQUETES.
-                                            $cantidadTiquete = round($ProduccionIngresoOk / $precio_publico_[$Hj],2);
-                                            $cantidadTiquetePantalla = $cantidadTiquetePantalla + $cantidadTiquete;
-                                        // PASAR VALOR PRIMERO Y ÚLTIMO DE LA MATRIZ A LAS VARIALBES.
-                                            //$ProduccionDesde = reset($ProduccionDesdeHasta);
-                                            //$ProduccionHasta = end($ProduccionDesdeHasta);
-                                            $ProduccionCantidad = count($ProduccionDesdeHasta);
-                                        //
-                                            $totalProduccionOK = $totalProduccionOK + $ProduccionCantidad;
-                                        if(is_numeric($ProduccionIngresoOk)){
-                                            $ProduccionTotalIngresoOk = round($ProduccionTotalIngresoOk + $ProduccionIngresoOk,2);
-                                        }
-                                        //
-                                        $ProduccionIngresoOkPantalla = number_format($ProduccionIngresoOk,2);
-                                        $ProduccionTotalIngresoOkPantalla = number_format($ProduccionTotalIngresoOk,2);
-                                        //
-                                    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                    //////// CALCULAR LA CANTIDAD DE TIQUETES DEVUELTOS/////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                        // Variable cantidad tiquete devuelto.
-                                        $cantidadTiqueteDevolucion = 0; $cantidadTiqueteEntregados = 0; $TiqueteCola = 0;
-                                            for ($ab=0; $ab < count($ProduccionDesdeHasta); $ab++)
-                                            {   // MATRIZ CATALOGO RUTA Y INVENTARIO TIQUETE..
-                                                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
-                                                // VENDIDO DE TIQUETE CODIGO 05 - VENDIDOS CON COLA
-                                                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
-                                                $query_t_d = "SELECT * FROM produccion_asignado 
-                                                    WHERE codigo_estatus = '05' and fecha = '$fecha' and tiquete_cola > 0 and codigo_produccion = '$ProduccionDesdeHasta[$ab]'
-                                                    ORDER by id_";
-                                                $consultas = $dblink -> query($query_t_d);
-
-                                                // Validar si hay registros.
-                                                    if($consultas -> rowCount() != 0)
-                                                    {
-                                                        // Recorriendo la Tabla con PDO::
-                                                        while($listados = $consultas -> fetch(PDO::FETCH_BOTH))
-                                                        {
-                                                            $ctd = ($listados["tiquete_hasta"] - $listados["tiquete_cola"]) + 1;
-                                                            $TiqueteCola = $ctd;
-                                                            $cantidadTiqueteDevolucion = $cantidadTiqueteDevolucion + $ctd;
-                                                        }
-                                                    }   // if del query d t
-                                                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
-                                                // DEVOLUCION DE TIQUETE CODIGO 03 ENTREGADO (FUERON DEVUELTOS O NO LLEGO EL MOTORISTA)
-                                                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
-                                                $query_t_d_ = "SELECT sum(cantidad) as cantidad FROM produccion_asignado 
-                                                    WHERE codigo_estatus = '03' and fecha = '$fecha' and codigo_produccion = '$ProduccionDesdeHasta[$ab]'
-                                                    ORDER by cantidad";
-                                                $consultas_ = $dblink -> query($query_t_d_);
-                                                // Validar si hay registros.
-                                                    if($consultas_ -> rowCount() != 0){
-                                                    // Recorriendo la Tabla con PDO::
-                                                        while($listados_ = $consultas_ -> fetch(PDO::FETCH_BOTH))
-                                                        {
-                                                            $ctd = $listados_["cantidad"];
-                                                            $cantidadTiqueteDevolucion = $cantidadTiqueteDevolucion + $ctd;
-                                                        }
-                                                    }   // if del query d t
-                                                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
-                                                // DEVOLUCION DE TIQUETE CODIGO 04 DEVOLUCION
-                                                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
-                                                $query_t_d_ = "SELECT sum(cantidad) as cantidad FROM produccion_asignado 
-                                                    WHERE codigo_estatus = '04' and fecha = '$fecha' and codigo_produccion = '$ProduccionDesdeHasta[$ab]'
-                                                    ORDER by cantidad";
-                                                $consultas_ = $dblink -> query($query_t_d_);
-                                                // Validar si hay registros.
-                                                    if($consultas_ -> rowCount() != 0){
-                                                    // Recorriendo la Tabla con PDO::
-                                                        while($listados_ = $consultas_ -> fetch(PDO::FETCH_BOTH))
-                                                        {
-                                                            $ctd = $listados_["cantidad"];
-                                                            $cantidadTiqueteDevolucion = $cantidadTiqueteDevolucion + $ctd;
-                                                        }
-                                                    }   // if del query d t
-                                                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
-                                                // TIQUETES ENTREGADOS.
-                                                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
-                                                $query_t_d_c = "SELECT tiquete_desde, tiquete_hasta, cantidad, (tiquete_hasta-tiquete_desde)+1 as entregados
-                                                                FROM produccion_asignado 
-                                                                    WHERE fecha = '$fecha' and codigo_produccion = '$ProduccionDesdeHasta[$ab]' ORDER by cantidad";
-                                                    $consultas_c = $dblink -> query($query_t_d_c);
-                                                        // Validar si hay registros.
-                                                        if($consultas_c -> rowCount() != 0){
-                                                        // Recorriendo la Tabla con PDO::
-                                                            while($listados_c = $consultas_c -> fetch(PDO::FETCH_BOTH))
-                                                            {
-                                                                $ctd = $listados_c["entregados"];
-                                                                $cantidadTiqueteEntregados = $cantidadTiqueteEntregados + $ctd;
-                                                            }
-                                                        }   // if del query d t
-                                            }   // FINALIZA EL CALCULO DE TIQUETES DEVUELTOS VENDIDOS, ENTREGADOS.
-                                    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                }   // IF DE LA CONSULTA PRODUCCION POR RUTA..
-                                //  TOTAL DE TIQUETES ENTRGADOS.
-                                // DAR VALORES A VARIABLES.
-                                    // ESTILO
-                                    $estilo_l = 'style="padding: 0px; font-size: medium; text-align: left;"';
-                                    $estilo_c = 'style="padding: 0px; font-size: medium; text-align: center;"';
-                                    $estilo_r = 'style="padding: 0px; font-size: medium; text-align: right;"';
-                                    $estilo_r_green = 'style="padding: 0px; font-size: medium; color:green; text-align: right;"';
-                                    // CUANDO YA SE HA CALCULADO LA PRODUCCIÓN ASIGNADA.
-                                    // Validar si hay registros.
-                                    if($consulta -> rowCount() != 0){
-                                        // convertir la matriz $ProduccionDesdeHasta
-                                            $separado_por_comas = implode(",", $ProduccionDesdeHasta);
-                                        $contenidoOK .= "<tr>
-                                        <td $estilo_c><a data-accion=ProduccionImprimir data-toggle=tooltip data-placement=left title=Imprimir href=$separado_por_comas><i class='fad fa-search fa-lg'></i></a>
-                                        <td $estilo_l>
-                                        <td $estilo_l>$descripcion_ruta_[$Hj]
-                                        <td $estilo_r><input type=button class='btn btn-info btn-md' value='#' data-toggle=tooltip data-placement=left title='$separado_por_comas'>
-                                        <td $estilo_c>$ProduccionCantidad
-                                        <td $estilo_c>$cantidadTiqueteEntregados
-                                        <td $estilo_c>$cantidadTiqueteDevolucion
-                                        <td $estilo_c>$cantidadTiquete
-                                        <td $estilo_c>$ $precio_publico_[$Hj]
-                                        <td $estilo_r_green>$ $ProduccionIngresoOkPantalla
-                                        <td>
-                                        ";
-                                        $cantidadTiqueteEntregadosPantalla = $cantidadTiqueteEntregadosPantalla + $cantidadTiqueteEntregados;
-                                    }
-                                //
-                                
-                        }   // FOR DE LA TABLA INVENTARIO TIQUETE..
-                        // GUARDAR EN LA TABLA PRODUCCION_DIARIO
-                        // id_, fecha, total_dolares, total_colones
-                            $query_p_s = "SELECT * FROM produccion_diaria WHERE fecha = '$fecha'";
-                                    // Ejecutamos el query
-                                $consulta_p_s = $dblink -> query($query_p_s);              
-                                // obtener el último dato en este caso el Id_
-                                    // Validar si hay registros.
-                                if($consulta_p_s -> rowCount() != 0){  
-                                // ACTUALIZAR VALOREStotal_colones
-                                $total_colones = round($ProduccionTotalIngresoOk * 8.75,2);
-                                $query_p_d = "UPDATE produccion_diaria SET total_dolares = '$ProduccionTotalIngresoOk', total_colones = '$total_colones' WHERE fecha = '$fecha'";
-                                $consultas_p_d = $dblink -> query($query_p_d);
-                                }else{
-                                    // GUARDAR
-                                    $total_colones = round($ProduccionTotalIngresoOk * 8.75,2);
-                                    $query_p_d = "INSERT INTO produccion_diaria (fecha, total_dolares, total_colones) VALUES ('$fecha','$ProduccionTotalIngresoOk','$total_colones')";
-                                    $consultas_p_d = $dblink -> query($query_p_d);
+                                    $id_tiquete_color[] = $listado['id_tiquete_color'];
+                                    $precio_publico[] = $listado['precio_publico'];
+                                    //$nombre_serie[] = $listado['nombre_serie'];
+                                    $tiquete_color[] = $listado['tiquete_color'];
                                 }
-                                // 
-                                $respuestaOK = true;
-                                $mensajeError = "Producción Encontrada.";
+                                // CREAR MATRIZ UNIENDO LA RUTA CON EL PRECIO PUBLICO DE CADA TIQUETE.
+                                $codigo_ruta_precio = array(); $descripcion_ruta_ = array(); $precio_publico_ = array(); $nombre_serie_ = array(); $tiquete_color_ = array();
+                                for ($Hj=0; $Hj < count($codigo_ruta); $Hj++) { // tabla CATALOGO RUTA.
+                                    for ($jj=0; $jj < count($precio_publico); $jj++) {   // TABLA CATALOGO INVENTARIO TIQUETE.
+                                        // Verificar que sólo se genere ruta y único precio público.
+                                        //$codigo_ruta_precio[] = $codigo_ruta[$Hj] . $id_it[$jj];
+                                        $codigo_ruta_precio[] = $codigo_ruta[$Hj] . $id_tiquete_color[$jj];
+                                        $descripcion_ruta_[] = $descripcion_ruta[$Hj];
+                                        $precio_publico_[] = $precio_publico[$jj];
+                                        //$nombre_serie_[] = $nombre_serie[$jj];
+                                        $tiquete_color_[] = $tiquete_color[$jj];
+                                    }
+                                }
+                                // print_r($codigo_ruta_precio);
+                                // CONSULTA FOR INVENTARIO TIQUETE.
+                                for ($Hj=0; $Hj < count($codigo_ruta_precio); $Hj++)
+                                { // MATRIZ CATALOGO RUTA Y INVENTARIO TIQUETE..
+                                    $query = "SELECT pro.id_, pro.total_ingreso, pro.codigo_ruta
+                                        FROM produccion pro WHERE fecha = '$fecha' and concat(codigo_ruta,codigo_tiquete_color) = '$codigo_ruta_precio[$Hj]'
+                                            ORDER BY pro.codigo_ruta, pro.id_ ASC";
+                                        $consulta = $dblink -> query($query);
+                                    // Variable ProduccionIngreso Ok a cero.
+                                        $ProduccionIngresoOk = 0; $cantidadTiquete = 0;
+                                    // Validar si hay registros.
+                                        if($consulta -> rowCount() != 0)
+                                        {
+                                            // Crear matriz para poder tomar dos valores
+                                                $ProduccionDesdeHasta = array(); $ProduccionDesde = 0; $ProduccionHasta = 0;
+                                                // Recorriendo la Tabla con PDO::
+                                                while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
+                                                {
+                                                    $ProduccionDesdeHasta[] = $listado["id_"];
+                                                    $ProduccionIngresoOk = $ProduccionIngresoOk + $listado["total_ingreso"];
+                                                }   // WHILE DE LA CONSULTA PRODUCCIÓN.
+                                                // CATNIDAD DE TIQUETES.
+                                                    $cantidadTiquete = round($ProduccionIngresoOk / $precio_publico_[$Hj],2);
+                                                    $cantidadTiquetePantalla = $cantidadTiquetePantalla + $cantidadTiquete;
+                                                // PASAR VALOR PRIMERO Y ÚLTIMO DE LA MATRIZ A LAS VARIALBES.
+                                                    //$ProduccionDesde = reset($ProduccionDesdeHasta);
+                                                    //$ProduccionHasta = end($ProduccionDesdeHasta);
+                                                    $ProduccionCantidad = count($ProduccionDesdeHasta);
+                                                //
+                                                    $totalProduccionOK = $totalProduccionOK + $ProduccionCantidad;
+                                                if(is_numeric($ProduccionIngresoOk)){
+                                                    $ProduccionTotalIngresoOk = round($ProduccionTotalIngresoOk + $ProduccionIngresoOk,2);
+                                                }
+                                                //
+                                                $ProduccionIngresoOkPantalla = number_format($ProduccionIngresoOk,2);
+                                                $ProduccionTotalIngresoOkPantalla = number_format($ProduccionTotalIngresoOk,2);
+                                                //
+                                            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            //////// CALCULAR LA CANTIDAD DE TIQUETES DEVUELTOS/////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                // Variable cantidad tiquete devuelto.
+                                                $cantidadTiqueteDevolucion = 0; $cantidadTiqueteEntregados = 0; $TiqueteCola = 0;
+                                                    for ($ab=0; $ab < count($ProduccionDesdeHasta); $ab++)
+                                                    {   // MATRIZ CATALOGO RUTA Y INVENTARIO TIQUETE..
+                                                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
+                                                        // VENDIDO DE TIQUETE CODIGO 05 - VENDIDOS CON COLA
+                                                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
+                                                        $query_t_d = "SELECT * FROM produccion_asignado 
+                                                            WHERE codigo_estatus = '05' and fecha = '$fecha' and tiquete_cola > 0 and codigo_produccion = '$ProduccionDesdeHasta[$ab]'
+                                                            ORDER by id_";
+                                                        $consultas = $dblink -> query($query_t_d);
+
+                                                        // Validar si hay registros.
+                                                            if($consultas -> rowCount() != 0)
+                                                            {
+                                                                // Recorriendo la Tabla con PDO::
+                                                                while($listados = $consultas -> fetch(PDO::FETCH_BOTH))
+                                                                {
+                                                                    $ctd = ($listados["tiquete_hasta"] - $listados["tiquete_cola"]) + 1;
+                                                                    $TiqueteCola = $ctd;
+                                                                    $cantidadTiqueteDevolucion = $cantidadTiqueteDevolucion + $ctd;
+                                                                }
+                                                            }   // if del query d t
+                                                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
+                                                        // DEVOLUCION DE TIQUETE CODIGO 03 ENTREGADO (FUERON DEVUELTOS O NO LLEGO EL MOTORISTA)
+                                                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
+                                                        $query_t_d_ = "SELECT sum(cantidad) as cantidad FROM produccion_asignado 
+                                                            WHERE codigo_estatus = '03' and fecha = '$fecha' and codigo_produccion = '$ProduccionDesdeHasta[$ab]'
+                                                            ORDER by cantidad";
+                                                        $consultas_ = $dblink -> query($query_t_d_);
+                                                        // Validar si hay registros.
+                                                            if($consultas_ -> rowCount() != 0){
+                                                            // Recorriendo la Tabla con PDO::
+                                                                while($listados_ = $consultas_ -> fetch(PDO::FETCH_BOTH))
+                                                                {
+                                                                    $ctd = $listados_["cantidad"];
+                                                                    $cantidadTiqueteDevolucion = $cantidadTiqueteDevolucion + $ctd;
+                                                                }
+                                                            }   // if del query d t
+                                                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
+                                                        // DEVOLUCION DE TIQUETE CODIGO 04 DEVOLUCION
+                                                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                    
+                                                        $query_t_d_ = "SELECT sum(cantidad) as cantidad FROM produccion_asignado 
+                                                            WHERE codigo_estatus = '04' and fecha = '$fecha' and codigo_produccion = '$ProduccionDesdeHasta[$ab]'
+                                                            ORDER by cantidad";
+                                                        $consultas_ = $dblink -> query($query_t_d_);
+                                                        // Validar si hay registros.
+                                                            if($consultas_ -> rowCount() != 0){
+                                                            // Recorriendo la Tabla con PDO::
+                                                                while($listados_ = $consultas_ -> fetch(PDO::FETCH_BOTH))
+                                                                {
+                                                                    $ctd = $listados_["cantidad"];
+                                                                    $cantidadTiqueteDevolucion = $cantidadTiqueteDevolucion + $ctd;
+                                                                }
+                                                            }   // if del query d t
+                                                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+                                                        // TIQUETES ENTREGADOS.
+                                                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+                                                        $query_t_d_c = "SELECT tiquete_desde, tiquete_hasta, cantidad, (tiquete_hasta-tiquete_desde)+1 as entregados
+                                                                        FROM produccion_asignado 
+                                                                            WHERE fecha = '$fecha' and codigo_produccion = '$ProduccionDesdeHasta[$ab]' ORDER by cantidad";
+                                                            $consultas_c = $dblink -> query($query_t_d_c);
+                                                                // Validar si hay registros.
+                                                                if($consultas_c -> rowCount() != 0){
+                                                                // Recorriendo la Tabla con PDO::
+                                                                    while($listados_c = $consultas_c -> fetch(PDO::FETCH_BOTH))
+                                                                    {
+                                                                        $ctd = $listados_c["entregados"];
+                                                                        $cantidadTiqueteEntregados = $cantidadTiqueteEntregados + $ctd;
+                                                                    }
+                                                                }   // if del query d t
+                                                    }   // FINALIZA EL CALCULO DE TIQUETES DEVUELTOS VENDIDOS, ENTREGADOS.
+                                            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                        }   // IF DE LA CONSULTA PRODUCCION POR RUTA..
+                                        //  TOTAL DE TIQUETES ENTRGADOS.
+                                        // DAR VALORES A VARIABLES.
+                                            // ESTILO
+                                            $estilo_l = 'style="padding: 0px; font-size: medium; text-align: left;"';
+                                            $estilo_c = 'style="padding: 0px; font-size: medium; text-align: center;"';
+                                            $estilo_r = 'style="padding: 0px; font-size: medium; text-align: right;"';
+                                            $estilo_r_green = 'style="padding: 0px; font-size: medium; color:green; text-align: right;"';
+                                            // CUANDO YA SE HA CALCULADO LA PRODUCCIÓN ASIGNADA.
+                                            // Validar si hay registros.
+                                            if($consulta -> rowCount() != 0){
+                                                // convertir la matriz $ProduccionDesdeHasta
+                                                    $separado_por_comas = implode(",", $ProduccionDesdeHasta);
+                                                $contenidoOK .= "<tr>
+                                                <td $estilo_c><a data-accion=ProduccionImprimir data-toggle=tooltip data-placement=left title=Imprimir href=$separado_por_comas><i class='fad fa-search fa-lg'></i></a>
+                                                <td $estilo_l>
+                                                <td $estilo_l>$descripcion_ruta_[$Hj]
+                                                <td $estilo_r><input type=button class='btn btn-info btn-md' value='#' data-toggle=tooltip data-placement=left title='$separado_por_comas'>
+                                                <td $estilo_c>$ProduccionCantidad
+                                                <td $estilo_c>$cantidadTiqueteEntregados
+                                                <td $estilo_c>$cantidadTiqueteDevolucion
+                                                <td $estilo_c>$cantidadTiquete
+                                                <td $estilo_c>$ $precio_publico_[$Hj]
+                                                <td $estilo_r_green>$ $ProduccionIngresoOkPantalla
+                                                <td>
+                                                ";
+                                                $cantidadTiqueteEntregadosPantalla = $cantidadTiqueteEntregadosPantalla + $cantidadTiqueteEntregados;
+                                            }
+                                        //
+                                        
+                                }   // FOR DE LA TABLA INVENTARIO TIQUETE..
+                                // GUARDAR EN LA TABLA PRODUCCION_DIARIO
+                                // id_, fecha, total_dolares, total_colones
+                                    $query_p_s = "SELECT * FROM produccion_diaria WHERE fecha = '$fecha'";
+                                            // Ejecutamos el query
+                                        $consulta_p_s = $dblink -> query($query_p_s);              
+                                        // obtener el último dato en este caso el Id_
+                                            // Validar si hay registros.
+                                        if($consulta_p_s -> rowCount() != 0){  
+                                        // ACTUALIZAR VALOREStotal_colones
+                                        $total_colones = round($ProduccionTotalIngresoOk * 8.75,2);
+                                        $query_p_d = "UPDATE produccion_diaria SET total_dolares = '$ProduccionTotalIngresoOk', total_colones = '$total_colones' WHERE fecha = '$fecha'";
+                                        $consultas_p_d = $dblink -> query($query_p_d);
+                                        }else{
+                                            // GUARDAR
+                                            $total_colones = round($ProduccionTotalIngresoOk * 8.75,2);
+                                            $query_p_d = "INSERT INTO produccion_diaria (fecha, total_dolares, total_colones) VALUES ('$fecha','$ProduccionTotalIngresoOk','$total_colones')";
+                                            $consultas_p_d = $dblink -> query($query_p_d);
+                                        }
+                                        // 
+                                        $respuestaOK = true;
+                                        $mensajeError = "Producción Encontrada.";
+                    }else{
+                        // 
+                        $respuestaOK = false;
+                        $mensajeError = "Producción Vendida no Encontrada.";
+                    }
+                }else{
+                    // 
+                    $respuestaOK = false;
+                    $mensajeError = "Producción Vendida no Encontrada.";
+                }
+                
                 break;   
             case "BuscarTodosUnidadPlaca":
                 $codigo_up = trim($_REQUEST['codigo_up']);

@@ -1425,6 +1425,10 @@ function BuscarProduccionPorFecha() {
 						$("label[for='LblProduccionesTotalIngreso']").text('Ingreso ¢ ' + total_colones);
 						
 				}
+				if(response.respuesta == false){
+					// vAR DATA
+					toastr["info"](response.mensaje, "Sistema Acomtus");
+				}
 			},	// DATA.
 		});
 	}	// function BuscarProduccionPorFecha()
