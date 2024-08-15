@@ -256,16 +256,47 @@ $("#JornadaExtraSi, #JornadaExtraNo").change(function () {
 	if ($("#JornadaExtraSi").is(":checked")) {
         //  MOSTRAR RADIO BUTTONS.
             $('#JornadaExtra4Horas').show();
-            $('#CJE4H').val(2);  // CODIGO JORNADA
+            $('#CJE4H').val(2);  // CODIGO JORNADA MEDIA TANDA.
+        //  OCULTAR RADIO BUTTON 
+            $('#Jornada4HLicenciaPermiso').hide();
+        //  LISTAR CATALOGO.
     		    listar_jornada_cuatro_horas(2);
-        // ELIMINAR UN ITEM DE LSTJORNADA
-    		 //   $("#lstJornadaExtraCuatroHoras").find('option')[3].remove();
 	}
 	else if ($("#JornadaExtraNo").is(":checked")) {
         //  VALORES POR DEFECTO DE LA 
-            $('#CJE4H').val(4);  // CODIGO JORNADA
+            $('#CJE4H').val(4);  // CODIGO JORNADA MEDIA 
         //  OCULTAR RADIO BUTTONS.
-		$('#JornadaExtra4Horas').hide();
+    		$('#JornadaExtra4Horas').hide();
+        //  OCULTAR RADIO BUTTON 
+            $('#Jornada4HLicenciaPermiso').show();
+	}
+});
+///////////////////////////////////////////////////////////////////////////////	  
+// SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL JORNAA 4 HORAS.
+///////////////////////////////////////////////////////////////////////////////	  
+$("#Jornada4HLicenciaPermisoSI, #Jornada4HLicenciaPermisoNO").change(function () {
+	if ($("#Jornada4HLicenciaPermisoSI").is(":checked")) {
+        //  MOSTRAR RADIO BUTTONS.
+            $('#DivJornada4HLicenciaPermiso').show();
+            $('#CJE4H').val(4);  // CODIGO JORNADA 4H
+            $('#CTL').val(2);  // CODIGO TIPO LICENCIA
+        //  OCULTAR RADIO BUTTONS.
+    		$('#JornadaExtra4Horas').hide();
+        //
+            $('#JornadaExtra').hide();
+        //
+    		    listar_tipo_licencia_4HLicenciaPermiso(2);
+	}
+	else if ($("#Jornada4HLicenciaPermisoNO").is(":checked")) {
+        //  VALORES POR DEFECTO DE LA 
+            $('#CJE4H').val(4);  // CODIGO JORNADA 4H
+            $('#CTL').val(1);  // CODIGO TIPO LICENCIA
+        //  OCULTAR RADIO BUTTONS. 4H LICENCIAS PERMISO
+		    $('#DivJornada4HLicenciaPermiso').hide();
+            $('#Jornada4HLicenciaPermiso').show();
+        // MOSTRAR 
+            $('#JornadaExtra4Horas').hide();
+            $('#JornadaExtra').show();
 	}
 });
 ///////////////////////////////////////////////////////////////////////////////	  
@@ -284,7 +315,9 @@ $("#lstJornada").change(function () {
 			if(ValorJornada == '1'){
 				// VOLVER A COLOCAR EN VALOR "si"
                     $("#CTL").val(1)    // CODIGO JORANDA TIPO LICENCIA.
+                    $('#CJE4H').val(4);  // CODIGO JORNADA MEDIA TANDA.
 	    			$("#JornadaExtra").show();
+                    $("#Jornada4HLicenciaPermiso").show();
     				//listar_jornada_cuatro_horas(4);
 			}else if(ValorJornada == "4")
             {
@@ -298,13 +331,18 @@ $("#lstJornada").change(function () {
                 $("#CJN").val(4);   // CODIGO JORNADA NOCTURNIDAD
             }else{
                 //  VALORES POR DEFECTO DE LA 
-                    $('#CJE4H').val(4);  // CODIGO JORNADA
+                    $('#CJE4H').val(4);  // CODIGO JORNADA MEDIA TANDA.
                 //
 				    $("#JornadaExtra").hide();
 				    $("#JornadaExtra4Horas").hide();
+                    $("#Jornada4HLicenciaPermiso").hide();
+                    $("#DivJornada4HLicenciaPermiso").hide();
 				// Activar y bloquear Permiso y seleccionar un item.
     				$("#JornadaExtraSi").prop("checked", false);
 	    			$("#JornadaExtraNo").prop("checked", true);
+                // Activar y bloquear Permiso y seleccionar un item.
+    				$("#Jornada4HLicenciaPermisoSI").prop("checked", false);
+	    			$("#Jornada4HLicenciaPermisoNO").prop("checked", true);
 			}
 		});
 });
@@ -428,6 +466,16 @@ $("#lstJornadaExtraCuatroHoras").change(function () {
                 $('#CJE4H').val(ValorJornada);  // CODIGO JORNADA
 		});
 });
+// BUSCA PARA COLOCAR VISIBLE 4H licencias y permisos.
+$("#lstJornada4HLicenciaPermiso").change(function () {
+	var miselect=$("#lstJornada4HLicenciaPermiso");
+	$("#lstJornada4HLicenciaPermiso option:selected").each(function () {
+			// ELEJIR EL VALOR DEL SELECT
+			    ValorJornada=$(this).val();
+            // cabmiar el valor del text o hidden.
+                $('#CTL').val(ValorJornada);  // CODIGO JORNADA
+		});
+});
 // BUSCA PARA COLOCAR VISIBLE EL EXTRA EN TRABAJO EN VACACIÓN.
 $("#lstJornadaTV").change(function () {
 	$("#lstJornadaTV option:selected").each(function () {
@@ -522,10 +570,14 @@ $("#goGuardarPunteo").on('click', function(){
                             $("#JornadaExtra").hide();
                             $("#JornadaExtra4Horas").hide();
                             $("#JornadaAsueto").hide();
+                            $("#DivJornada4HLicenciaPermiso").hide();
 						// Activar y bloquear Permiso y seleccionar un item.
                             $("#JornadaExtraSi").prop("checked", false);
                             $("#JornadaExtraNo").prop("checked", true);
                             $("#chkNocturnidad").prop("checked", false);
+                        // Activar y bloquear Permiso y seleccionar un item.
+                            $("#Jornada4HLicenciaPermisoSI").prop("checked", false);
+                            $("#Jornada4HLicenciaPermisoNO").prop("checked", true);
 						// focus
     					    $("#CodigoPersonal").focus();
                         //
@@ -547,6 +599,8 @@ $("#goGuardarPunteo").on('click', function(){
                         // ocultar
                             $('#JornadaExtra').hide();
                             $('#JornadaExtra4Horas').hide();
+                            $('#Jornada4HLicenciaPermiso').hide();
+                            $("#DivJornada4HLicenciaPermiso").hide();
                         ///
                             buscar_personal(codigo_personal);
 					}      
@@ -703,7 +757,7 @@ function listar_jornada_cuatro_horas(codigo_jornada){
             }
     }, "json");    
 }
-// FUNCION LISTAR TABLA catalogo_jornada
+// FUNCION LISTAR TABLA catalogo_tipo_licencia.
 ////////////////////////////////////////////////////////////
 function listar_tipo_licencia(codigo_tipo_licencia){
     var miselect=$("#lstTipoLicencia");
@@ -721,6 +775,28 @@ function listar_tipo_licencia(codigo_tipo_licencia){
                     {
 
                     }else{
+                        miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
+                    }
+                }
+            }
+    }, "json");    
+}
+// FUNCION LISTAR TABLA catalogo_tipo_licencia 4h
+////////////////////////////////////////////////////////////
+function listar_tipo_licencia_4HLicenciaPermiso(codigo_tipo_licencia){
+    var miselect=$("#lstJornada4HLicenciaPermiso");
+    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    
+    $.post("php_libs/soporte/Asistencia/PorNomina.php", {accion_buscar: 'BuscarTipoLicencia'},
+        function(data) {
+            miselect.empty();
+            for (var i=0; i<data.length; i++) {
+                if(codigo_tipo_licencia == data[i].codigo){
+                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
+                }else{
+                    if(data[i].codigo == 2 || data[i].codigo == 3 || data[i].codigo == 4 || data[i].codigo == 10)
+                    {
                         miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
                     }
                 }

@@ -1134,7 +1134,7 @@ function VerificarFechaDescuento($codigo_personal){
                             $diasDelaSemana = count($CodigoNombreJornadaDDT["DescripcionJornada"]);
                             if($cantidad4Horas > 1){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["Descuento4H"] += ($cantidad4Horas - 1) * $salario["Por4Horas"]; 
+                                    $salario["Descuento4H"] = ($cantidad4Horas - 1) * $salario["Por4Horas"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
                         }
@@ -1150,33 +1150,33 @@ function VerificarFechaDescuento($codigo_personal){
                             // CALCULOS POR LAS FALTAS.
                             if($cantidadFaltas == 1){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                    $salario["DescuentoFaltas"] = $salario["PorDia"] * 2; // pierde un día + el 7.º.
                                 }   // condición para días de la semana.
                             }elseif($cantidadFaltas > 2){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
-                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * ($cantidadFaltas - 1); // pierde un día +.
+                                    $salario["DescuentoFaltas"] = $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                    $salario["DescuentoFaltas"] = $salario["PorDia"] * ($cantidadFaltas - 1); // pierde un día +.
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
                             // CACULO PARALOS CASTIGOS.
                             $cantidadCastigo = $CantidadC[$bloqueSemana];
                             if($cantidadCastigo >= 1){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoCastigo"] += $cantidadCastigo * $salario["PorDia"]; 
+                                    $salario["DescuentoCastigo"] = $cantidadCastigo * $salario["PorDia"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de UN CASTIGO en la semana y así poder aplicar un descuento.
                             // CACULO PARA LOS ISSS.
                             $cantidadISSS = $CantidadISSS[$bloqueSemana];
                             if($cantidadISSS >= 1){
-                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoISSS"] += $cantidadISSS * $salario["PorDia"]; 
+                                if($Fecha >= $fecha_periodo_inicio && $Fecha <= $fecha_periodo_fin){
+                                    $salario["DescuentoISSS"] = $cantidadISSS * $salario["PorDia"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
                             // CACULO PARA LOS PP.
                             $cantidadPP = $CantidadPP[$bloqueSemana];
                             if($cantidadPP >= 1){
-                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoPP"] += $cantidadPP * $salario["PorDia"]; 
+                                if($Fecha >= $fecha_periodo_inicio && $Fecha <= $fecha_periodo_fin){
+                                    $salario["DescuentoPP"] = $cantidadPP * $salario["PorDia"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
                         }   // cuando descripcion liencia tenga información.
@@ -1189,7 +1189,7 @@ function VerificarFechaDescuento($codigo_personal){
                             $diasDelaSemana = count($CodigoNombreJornadaDDT["DescripcionJornada"]);
                             if($cantidad4Horas > 1){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["Descuento4H"] += ($cantidad4Horas - 1) * $salario["Por4Horas"]; 
+                                    $salario["Descuento4H"] = ($cantidad4Horas - 1) * $salario["Por4Horas"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
                         }
@@ -1205,33 +1205,33 @@ function VerificarFechaDescuento($codigo_personal){
                             // CALCULOS POR LAS FALTAS.
                             if($cantidadFaltas == 1){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                    $salario["DescuentoFaltas"] = $salario["PorDia"] * 2; // pierde un día + el 7.º.
                                 }   // condición para días de la semana.
                             }elseif($cantidadFaltas > 2){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
-                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * ($cantidadFaltas - 1); // pierde un día +.
+                                    $salario["DescuentoFaltas"] = $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                    $salario["DescuentoFaltas"] = $salario["PorDia"] * ($cantidadFaltas - 1); // pierde un día +.
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
                             // CACULO PARALOS CASTIGOS.
                             $cantidadCastigo = $CantidadC[$bloqueSemana];
                             if($cantidadCastigo >= 1){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoCastigo"] += $cantidadCastigo * $salario["PorDia"]; 
+                                    $salario["DescuentoCastigo"] = $cantidadCastigo * $salario["PorDia"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de UN CASTIGO en la semana y así poder aplicar un descuento.
                             // CACULO PARA LOS ISSS.
                             $cantidadISSS = $CantidadISSS[$bloqueSemana];
                             if($cantidadISSS >= 1){
-                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoISSS"] += $cantidadISSS * $salario["PorDia"]; 
+                                if($Fecha >= $fecha_periodo_inicio && $Fecha <= $fecha_periodo_fin){
+                                    $salario["DescuentoISSS"] = $cantidadISSS * $salario["PorDia"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
                             // CACULO PARA LOS PP.
                             $cantidadPP = $CantidadPP[$bloqueSemana];
                             if($cantidadPP >= 1){
-                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoPP"] += $cantidadPP * $salario["PorDia"]; 
+                                if($Fecha >= $fecha_periodo_inicio && $Fecha <= $fecha_periodo_fin){
+                                    $salario["DescuentoPP"] = $cantidadPP * $salario["PorDia"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
                         }   // cuando descripcion liencia tenga información.
@@ -1244,7 +1244,7 @@ function VerificarFechaDescuento($codigo_personal){
                             $diasDelaSemana = count($CodigoNombreJornadaDDT["DescripcionJornada"]);
                             if($cantidad4Horas > 1){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["Descuento4H"] += ($cantidad4Horas - 1) * $salario["Por4Horas"]; 
+                                    $salario["Descuento4H"] = ($cantidad4Horas - 1) * $salario["Por4Horas"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
                         }
@@ -1260,40 +1260,40 @@ function VerificarFechaDescuento($codigo_personal){
                             // CALCULOS POR LAS FALTAS.
                             if($cantidadFaltas == 1){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                    $salario["DescuentoFaltas"] = $salario["PorDia"] * 2; // pierde un día + el 7.º.
                                 }   // condición para días de la semana.
                             }elseif($cantidadFaltas > 2){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * 2; // pierde un día + el 7.º.
-                                    $salario["DescuentoFaltas"] += $salario["PorDia"] * ($cantidadFaltas - 1); // pierde un día +.
+                                    $salario["DescuentoFaltas"] = $salario["PorDia"] * 2; // pierde un día + el 7.º.
+                                    $salario["DescuentoFaltas"] = $salario["PorDia"] * ($cantidadFaltas - 1); // pierde un día +.
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de 4h en la semana y así poder aplicar un descuento.
                             // CACULO PARALOS CASTIGOS.
                             $cantidadCastigo = $CantidadC[$bloqueSemana];
                             if($cantidadCastigo >= 1){
                                 if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoCastigo"] += $cantidadCastigo * $salario["PorDia"]; 
+                                    $salario["DescuentoCastigo"] = $cantidadCastigo * $salario["PorDia"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de UN CASTIGO en la semana y así poder aplicar un descuento.
                             // CACULO PARA LOS ISSS.
                             $cantidadISSS = $CantidadISSS[$bloqueSemana];
                             if($cantidadISSS >= 1){
-                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoISSS"] += $cantidadISSS * $salario["PorDia"]; 
+                                if($Fecha >= $fecha_periodo_inicio && $Fecha <= $fecha_periodo_fin){
+                                    $salario["DescuentoISSS"] = $cantidadISSS * $salario["PorDia"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
                             // CACULO PARA LOS PP.
                             $cantidadPP = $CantidadPP[$bloqueSemana];
                             if($cantidadPP >= 1){
-                                if($diasDelaSemana == 7 || $diasDelaSemana == 8){
-                                    $salario["DescuentoPP"] += $cantidadPP * $salario["PorDia"]; 
+                                if($Fecha >= $fecha_periodo_inicio && $Fecha <= $fecha_periodo_fin){
+                                    $salario["DescuentoPP"] = $cantidadPP * $salario["PorDia"]; 
                                 }   // condición para días de la semana.
                             }   // condición para saber si hay mas de ISSS en la semana y así poder aplicar un descuento.
                         }   // cuando descripcion liencia tenga información.
                     break;
                     } // VARIABLES $BLOQUESEMANA.
                 }   // LAZO IF....
-                    if($codigo_personal == '211791'){
+                    if($codigo_personal == '009231'){
                         var_dump($CodigoNombreJornadaDDT);
                         print "Valores de las matrices de descuento: <br>";
                         var_dump($Cantidad4H);
@@ -1310,14 +1310,14 @@ function VerificarFechaDescuento($codigo_personal){
                     $CantidadC = []; $CantidadF = []; $Cantidad4H = []; $CantidadPP = []; $CantidadISSS = [];
     } // LAZO FOR. para buscar datos de descuento o faltas.
     /// PASAR EL DATO DE DESCUENTOS A SLARIO["$DESCUENTO4HFC"].
-        $salario["Descuento4HFC"] += $salario["Descuento4H"] + $salario["DescuentoFaltas"] + $salario["DescuentoCastigo"] + $salario["DescuentoISSS"] + $salario["DescuentoPP"];
+        $salario["Descuento4HFC"] = $salario["Descuento4H"] + $salario["DescuentoFaltas"] + $salario["DescuentoCastigo"] + $salario["DescuentoISSS"] + $salario["DescuentoPP"];
 
-    if($codigo_personal == '211791'){
+    if($codigo_personal == '009231'){
         var_dump($salario);
-        //print $query_asistencia_buscar_db;
         var_dump($BuscarFechaInicio);
         var_dump($BuscarFechaFin);
         var_dump($CodigoNombreJornadaDDT);
+        print "código: $codigo_personal  Fecha Inicio: $fecha_periodo_inicio - Fecha Fin: $fecha_periodo_fin";
             exit;  
     }
 }
