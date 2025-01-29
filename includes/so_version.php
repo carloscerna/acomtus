@@ -27,6 +27,7 @@ echo "Nombre del Host: " . $nombreHost . "<br>";
  */
 function detect()
 {
+	$version_ = [];
 	$respuestaOK = false;
 $mensajeError = "No se puede ejecutar la aplicaci�n";
 $contenidoOK = "";
