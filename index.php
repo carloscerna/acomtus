@@ -32,6 +32,10 @@ $root = '';
     break;
     }
 //
+include('includes/so_version.php');
+if($version_1 == "Windows 10)"){
+    print "Hola...";
+}else{
 if(!empty($_SESSION) && $_SESSION['userLogin'] == true){
     include('includes/templateEngine.inc.php');
 
@@ -51,4 +55,4 @@ if(!empty($_SESSION) && $_SESSION['userLogin'] == true){
 }else{
     header("Location:login.php");
 }
-?>
+}
