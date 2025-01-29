@@ -172,13 +172,12 @@
       dataType: "json",
       url:"includes/so_version.php",
       success: function(response){
-        if(response.contenido == "Windows 10)"){
+        if(response.contenido == "Windows 7)"){
           window.location.href = 'includes/so.html';
-        }else{
         }
-       
        }
     });
+
 		function MostrarMensaje(){
 		     $.ajax({
 			    type: "POST",
@@ -249,7 +248,7 @@
       }
     }
 
-    toggleSwitch.addEventListener('change', switchTheme, false);
+   // toggleSwitch.addEventListener('change', switchTheme, false);
   });
     </script>
 <!-- CONFIGURACI`´ON DE ESTILOS PARA TODO EL SISTEMA EN FORMULARIOS, INPUT, SELECT, ETC.-->
