@@ -165,6 +165,19 @@
    {
         field.value = field.value.toUpperCase();
    }
+
+    $.ajax({
+      cache: false,
+      type: "POST",
+      dataType: "json",
+      url:"includes/so_version.php",
+      success: function(response){
+        if(response.contenido == "Windows 7)"){
+          window.location.href = 'includes/so.html';
+        }
+       }
+    });
+
 		function MostrarMensaje(){
 		     $.ajax({
 			    type: "POST",

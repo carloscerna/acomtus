@@ -51,4 +51,3 @@ if(!empty($_SESSION) && $_SESSION['userLogin'] == true){
 }else{
     header("Location:login.php");
 }
-?>
