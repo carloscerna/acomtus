@@ -149,14 +149,28 @@ if($errorDbConexion == false){
 								$CodigoJornadaDescanso = trim($listado_b['codigo_jornada_descanso']);
 								$CodigoJornadaE4H = trim($listado_b['codigo_jornada_e_4h']);
 								$CodigoJornadaNocturna = trim($listado_b['codigo_jornada_nocturna']);
-							//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-								$CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.
-													$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.
-													$CodigoJornadaNocturna;
-							//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-								$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
-															".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
-															".".$CodigoJornadaNocturna;
+								$HoraExtra = trim($listado_b['hora_extra']);
+
+								if($HoraExtra != 0){
+									//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
+									$CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.
+									$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.
+									$CodigoJornadaNocturna.$HoraExtra;
+									//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
+									$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
+										".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
+										".".$CodigoJornadaNocturna.".".$HoraExtra;
+								}
+								else{
+									//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
+										$CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.
+										$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.
+										$CodigoJornadaNocturna;
+									//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
+									$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
+																".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
+																".".$CodigoJornadaNocturna;
+								}
 							// Condiciones para la Imagen.
 								$buscar = array_search($CodigoJornadaTodas, $CodigoJornadaImagen['codigo']);
 								if(!empty($buscar)){
@@ -169,6 +183,7 @@ if($errorDbConexion == false){
 						// PASAR EL IMGJORNADA.
 							$fila_array++;
 							$datos[$fila_array]["imgJornada"] = $imgJornada;
+							$datos[$fila_array]["HoraExtra"] = $HoraExtra;
 					}	// FIN DEL IF ROWCOUNT():
 			break;
 			case "BuscarPersonalRutaCodigo":
@@ -237,6 +252,7 @@ if($errorDbConexion == false){
 				$boolean_descanso = trim($_POST['BooleanDescanso']) ;
 				$codigo_perfil = trim($_POST['codigo_perfil']);
 				$boolean_RadiosE = trim($_POST['RadiosE']);
+				$HoraExtra = trim($_POST['lstHoraExtra']);
 
 				// CALULAR CUANDO SEA EXTRA EL 4 HORAS.
 				if($boolean_RadiosE == "si"){
@@ -321,7 +337,8 @@ if($errorDbConexion == false){
 												codigo_jornada_vacaciones = '$codigo_jornada_vacaciones',
 												codigo_jornada_descanso = '$codigo_jornada_descanso',
 												codigo_jornada_e_4h = '$codigo_jornada_4_extra',
-												codigo_jornada_nocturna = '$codigo_jornada_nocturnidad'
+												codigo_jornada_nocturna = '$codigo_jornada_nocturnidad',
+												hora_extra = '$HoraExtra'
 													WHERE id_ = '$id_'
 										";
 							// Ejecutamos el Query.
@@ -346,8 +363,8 @@ if($errorDbConexion == false){
 												break;
 										}
 								// GUARDAR DATOS SIN VALIDAR
-									$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso, codigo_jornada_e_4h, codigo_jornada_nocturna) 
-													VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario', '$codigo_jornada_vacaciones', '$codigo_jornada_descanso','$codigo_jornada_4_extra', '$codigo_jornada_nocturnidad')";
+									$query = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, codigo_personal_encargado, codigo_jornada_vacaciones, codigo_jornada_descanso, codigo_jornada_e_4h, codigo_jornada_nocturna, hora_extra) 
+													VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_jornada','$codigo_tipo_licencia','$codigo_jornada_asueto','$codigo_personal_usuario', '$codigo_jornada_vacaciones', '$codigo_jornada_descanso','$codigo_jornada_4_extra', '$codigo_jornada_nocturnidad','$HoraExtra')";
 								// Ejecutamos el Query.
 									$consulta = $dblink -> query($query);
 								// Linea de mensajes.
