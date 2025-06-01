@@ -49,6 +49,8 @@ $(document).ready(function(){
 			$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
 			// focus
 			$("#CodigoPersonal").focus();
+			// Rellenar Hora Extra.
+			HoraExtra();
 		});
 });
 $(document).ready(function(){
@@ -124,6 +126,8 @@ $("#Jornada, #Permiso").change(function () {
 		$("#JornadaTV").hide();
 		$("#JornadaDescanso").hide();
 		$("#JornadaAsueto").hide();
+        // div de la Hora Extra.
+        $("#HoraExtra").show();
 		// VOLVER A COLOCAR EN VALOR "no" AMBAS BOOLEAN
 		$("#BooleanTV").val('no');
 		$("#BooleanDescanso").val('no');
@@ -141,6 +145,8 @@ $("#Jornada, #Permiso").change(function () {
 		$("#JornadaTV").hide();
 		$("#JornadaDescanso").hide();
 		$("#JornadaAsueto").hide();
+		// div de la Hora Extra.
+		$("#HoraExtra").hide();
 		// Listar tipo licencia.
 			listar_tipo_licencia();
 	}
@@ -174,9 +180,18 @@ $("#lstJornada").change(function () {
 				$("#JornadaExtra").show();
 
 				listar_jornada_cuatro_horas(2);
-			}else{
+				// div de la Hora Extra.
+				$("#HoraExtra").hide();                
+			}else if(elegido == "2")
+            {
+                    // div de la Hora Extra.
+                    $("#HoraExtra").show();                
+            }
+			else{
 				$("#JornadaExtra").hide();
 				$("#JornadaExtra4Horas").hide();
+				// div de la Hora Extra.
+				$("#HoraExtra").hide();                
 				// Activar y bloquear Permiso y seleccionar un item.
 				$("#JornadaExtraSi").prop("checked", false);
 				$("#JornadaExtraNo").prop("checked", true);
@@ -323,6 +338,8 @@ $("#goEnviar").on('click', function(){
 						$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
 						// focus
 						$("#CodigoPersonal").focus();
+						// div de la Hora Extra.
+						$("#HoraExtra").hide();                
 					}      
 				},
 			});
@@ -366,6 +383,12 @@ function buscar_personal(codigo_personal){
 					}
 				//	IMAGEN JORNADA
 					$("#ImagenAsistencia").attr("src", ".." + data[1].imgJornada);
+					let valor = data[1].HoraExtra;
+					console.log("valor: "  + valor);
+					if (valor === undefined || valor === null) {
+						valor = 0;
+					}     
+					$("#lstHoraExtra").val(valor);     
 				// presar CHECK BOX NOCTURNIDAD.
 				if(data[0].codigo_departamento_empresa == "08" || data[0].codigo_departamento_empresa == "09"){
 					$("#NocturnidadSiNo").show();
@@ -406,6 +429,8 @@ function buscar_personal(codigo_personal){
 					}
 				//	MENSAJE DEL SISEMA
 				toastr["success"](data[0].mensajeError, "Sistema");
+				// div de la Hora Extra.
+				$("#HoraExtra").hide();                
 			}else{
 				// IMAGEN PREDETERMINADA
 				$(".card-img-top").attr("src", "../acomtus/img/NoDisponible.jpg");
@@ -640,3 +665,28 @@ function configureLoadingScreen(screen){
 		});
 	}
 function delimitNumbers(str) { return (str + "").replace(/\b(\d+)((\.\d+)*)\b/g, function(a, b, c) { return (b.charAt(0) > 0 && !(c || ".").lastIndexOf(".") ? b.replace(/(\d)(?=(\d{3})+$)/g, "$1,") : b) + c; }); } 
+
+function HoraExtra() {
+    // Obtener el elemento select
+    let select = document.getElementById("lstHoraExtra");
+
+    // Limpiar el select antes de llenarlo
+    select.innerHTML = "";
+
+    // Definir las opciones
+    let opciones = [
+        { value: 0, text: "Seleccionar..." },
+        { value: 1, text: "1 Hora" },
+        { value: 2, text: "2 Horas" },
+        { value: 3, text: "3 Horas" },
+        { value: 4, text: "4 Horas" }
+    ];
+
+    // Agregar las opciones al select
+    opciones.forEach(opcion => {
+        let option = document.createElement("option");
+        option.value = opcion.value;
+        option.textContent = opcion.text;
+        select.appendChild(option);
+    });
+}

@@ -31,6 +31,8 @@ $(function(){ // iNICIO DEL fUNCTION.
         //
             buscar_personal(codigo_personal);
             CodigoRuta = $("#CodigoRuta").val();
+        // Rellenar Hora Extra.
+            HoraExtra();
 	});		
 // cuando la fecha cambie.
     $("#FechaListadoEmpleados").change(function(){
@@ -77,6 +79,15 @@ $(function(){ // iNICIO DEL fUNCTION.
                                         $('#CJD').val(CJTodosSeparador[4]); // CODIGO JORNADA DESCANSO
                                         $('#CJE4H').val(CJTodosSeparador[5]);   //  CODIGO JORNADA EXTRA 4 HORAS
                                         $('#CJN').val(CJTodosSeparador[6]); //  CODIGO JORNADA NOCTURNA+
+
+                                        let valor = CJTodosSeparador[7];
+                                        console.log("valor: "  + valor);
+                                        if (valor === undefined || valor === null) {
+                                            valor = 0;
+                                        }     
+                                        $("#lstHoraExtra").val(valor);                                   
+                                            // Ejemplo de uso: seleccionar la opción con value=2
+                                            //seleccionarHoraExtra(valor);
                                     //  ACTIVAR O DESACTIVAR ELEMENTOS.
                                         // presar CHECK BOX NOCTURNIDAD. MANTENIMIENTO Y VIGILANCIA
                                         if(codigo_departamento_empresa == "08" || codigo_departamento_empresa == "09"){
@@ -102,6 +113,8 @@ $(function(){ // iNICIO DEL fUNCTION.
                                             $('#JornadaExtra4Horas').hide();
                                             $("#DivPermisos").hide();
                                             $("#JornadaAsueto").hide();
+                                            // div de la Hora Extra.
+                                            $("#HoraExtra").hide();
                                         }
                                     // reestablecer el accion a=ActualizarJOrnada
                                         accion = "ActualizarJornada";
@@ -223,6 +236,8 @@ $("#BotonJornada, #BotonLicencia, #BotonCerrar").on('click',function () {
         // Valor por defecto.
         $('#CJ').val(2);  // CODIGO JORNADA
         $('#CTL').val(1);  // CODIGO JORNADA
+        // div de la Hora Extra.
+        $("#HoraExtra").show();
     		listar_jornada();
 	}
 	else if (this.value == "Licencia") {
@@ -232,6 +247,8 @@ $("#BotonJornada, #BotonLicencia, #BotonCerrar").on('click',function () {
 		//
 		$("#JornadaTV").hide();
 		$("#JornadaDescanso").hide();
+        // div de la Hora Extra.
+        $("#HoraExtra").hide();
 		// Listar tipo licencia.
 			listar_tipo_licencia();
         // Valor por defecto.
@@ -243,6 +260,8 @@ $("#BotonJornada, #BotonLicencia, #BotonCerrar").on('click',function () {
 		//
 		$("#JornadaTV").hide();
 		$("#JornadaDescanso").hide();
+                // div de la Hora Extra.
+                $("#HoraExtra").hide();
         // Activar y bloquear Permiso y seleccionar un item.
         $("#JornadaExtraSi").prop("checked", false);
         $("#JornadaExtraNo").prop("checked", true);
@@ -318,8 +337,15 @@ $("#lstJornada").change(function () {
                     $('#CJE4H').val(4);  // CODIGO JORNADA MEDIA TANDA.
 	    			$("#JornadaExtra").show();
                     $("#Jornada4HLicenciaPermiso").show();
+                    // div de la Hora Extra.
+                        $("#HoraExtra").hide();
     				//listar_jornada_cuatro_horas(4);
-			}else if(ValorJornada == "4")
+			}else if(ValorJornada == "2")
+            {
+                    // div de la Hora Extra.
+                    $("#HoraExtra").show();                
+            }
+            else if(ValorJornada == "4")
             {
                 // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
                 $("#CJ").val(4);    // VALOR PREDETERMINADO.
@@ -329,6 +355,8 @@ $("#lstJornada").change(function () {
                 $("#CJA").val(4);    // valor actual de lstJornadaAsueto
                 $('#CJE4H').val(4);  // CODIGO JORNADA 4 HORAS EXTRAS
                 $("#CJN").val(4);   // CODIGO JORNADA NOCTURNIDAD
+                    // div de la Hora Extra.
+                    $("#HoraExtra").hide();
             }else{
                 //  VALORES POR DEFECTO DE LA 
                     $('#CJE4H').val(4);  // CODIGO JORNADA MEDIA TANDA.
@@ -337,6 +365,8 @@ $("#lstJornada").change(function () {
 				    $("#JornadaExtra4Horas").hide();
                     $("#Jornada4HLicenciaPermiso").hide();
                     $("#DivJornada4HLicenciaPermiso").hide();
+                    // div de la Hora Extra.
+                    $("#HoraExtra").hide();
 				// Activar y bloquear Permiso y seleccionar un item.
     				$("#JornadaExtraSi").prop("checked", false);
 	    			$("#JornadaExtraNo").prop("checked", true);
@@ -872,4 +902,39 @@ function listar_jornada_asueto(codigo_jornada){
                 }
             }
     }, "json");    
+}
+
+function HoraExtra() {
+    // Obtener el elemento select
+    let select = document.getElementById("lstHoraExtra");
+
+    // Limpiar el select antes de llenarlo
+    select.innerHTML = "";
+
+    // Definir las opciones
+    let opciones = [
+        { value: 0, text: "Seleccionar..." },
+        { value: 1, text: "1 Hora" },
+        { value: 2, text: "2 Horas" },
+        { value: 3, text: "3 Horas" },
+        { value: 4, text: "4 Horas" }
+    ];
+
+    // Agregar las opciones al select
+    opciones.forEach(opcion => {
+        let option = document.createElement("option");
+        option.value = opcion.value;
+        option.textContent = opcion.text;
+        select.appendChild(option);
+    });
+}
+function seleccionarHoraExtra(valor) {
+    let select = document.getElementById("lstHoraExtra");
+
+    // Asegurar que el valor está dentro de los permitidos
+    if ([0, 1, 2, 3, 4].includes(valor)) {
+        select.value = valor;
+    } else {
+        console.warn("Valor no válido");
+    }
 }
