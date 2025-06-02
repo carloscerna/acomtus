@@ -6,6 +6,7 @@ var miselect = "";
 var fecha = "";
 var codigo_personal = "";
 var codigo_departamento_empresa = "";
+var valor = 0;
 $(function(){ // iNICIO DEL fUNCTION.
 	///////////////////////////////////////////////////////////////////////////////
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
@@ -134,6 +135,12 @@ $("#Jornada, #Permiso").change(function () {
 		listar_jornada();
 		// ELIMINAR UN ITEM DE LSTJORNADA
 		$("#lstJornada option[value='0H']").remove();
+		//
+		HoraExtra();
+		if(valor != 0){
+			$("#lstHoraExtra").val(valor); // Asignar el valor seleccionado a lstHoraExtra
+			alert("Valor: " + valor);
+		}
 	}
 	else if ($("#Permiso").is(":checked")) {
 		$('#DivPermisos').show();
@@ -186,6 +193,12 @@ $("#lstJornada").change(function () {
             {
                     // div de la Hora Extra.
                     $("#HoraExtra").show();                
+					$("#JornadaExtra").hide();
+					$("#JornadaExtra4Horas").hide();
+					// Activar y bloquear Permiso y seleccionar un item.
+					$("#JornadaExtraSi").prop("checked", false);
+					$("#JornadaExtraNo").prop("checked", true);
+					HoraExtra();
             }
 			else{
 				$("#JornadaExtra").hide();
@@ -388,6 +401,7 @@ function buscar_personal(codigo_personal){
 					if (valor === undefined || valor === null) {
 						valor = 0;
 					}     
+					HoraExtra();
 					$("#lstHoraExtra").val(valor);     
 				// presar CHECK BOX NOCTURNIDAD.
 				if(data[0].codigo_departamento_empresa == "08" || data[0].codigo_departamento_empresa == "09"){
