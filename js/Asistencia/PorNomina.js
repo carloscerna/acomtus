@@ -280,6 +280,10 @@ $("#JornadaExtraSi, #JornadaExtraNo").change(function () {
             $('#Jornada4HLicenciaPermiso').hide();
         //  LISTAR CATALOGO.
     		    listar_jornada_cuatro_horas(2);
+                                    // div de la Hora Extra.
+                                    $("#HoraExtra").show();
+                                    // ubicarme en el valor 0
+                $("#lstHoraExtra").val(4);
 	}
 	else if ($("#JornadaExtraNo").is(":checked")) {
         //  VALORES POR DEFECTO DE LA 
@@ -288,6 +292,10 @@ $("#JornadaExtraSi, #JornadaExtraNo").change(function () {
     		$('#JornadaExtra4Horas').hide();
         //  OCULTAR RADIO BUTTON 
             $('#Jornada4HLicenciaPermiso').show();
+                                // div de la Hora Extra.
+                                $("#HoraExtra").hide();
+                                // ubicarme en el valor 0
+            $("#lstHoraExtra").val(0);
 	}
 });
 ///////////////////////////////////////////////////////////////////////////////	  
@@ -339,11 +347,15 @@ $("#lstJornada").change(function () {
                     $("#Jornada4HLicenciaPermiso").show();
                     // div de la Hora Extra.
                         $("#HoraExtra").hide();
+                                        // ubicarme en el valor 0
+                    $("#lstHoraExtra").val(0);
     				//listar_jornada_cuatro_horas(4);
 			}else if(ValorJornada == "2")
             {
                     // div de la Hora Extra.
-                    $("#HoraExtra").show();                
+                    $("#HoraExtra").show();   
+                                    // ubicarme en el valor 0
+                                    $("#lstHoraExtra").val(0);             
             }
             else if(ValorJornada == "4")
             {
@@ -357,6 +369,8 @@ $("#lstJornada").change(function () {
                 $("#CJN").val(4);   // CODIGO JORNADA NOCTURNIDAD
                     // div de la Hora Extra.
                     $("#HoraExtra").hide();
+                                    // ubicarme en el valor 0
+                                    $("#lstHoraExtra").val(0);
             }else{
                 //  VALORES POR DEFECTO DE LA 
                     $('#CJE4H').val(4);  // CODIGO JORNADA MEDIA TANDA.
@@ -373,6 +387,8 @@ $("#lstJornada").change(function () {
                 // Activar y bloquear Permiso y seleccionar un item.
     				$("#Jornada4HLicenciaPermisoSI").prop("checked", false);
 	    			$("#Jornada4HLicenciaPermisoNO").prop("checked", true);
+                // ubicarme en el valor 0
+                    $("#lstHoraExtra").val(0);
 			}
 		});
 });
@@ -382,6 +398,8 @@ $("#lstTipoLicencia").change(function () {
     $("#CJ").val(4);    // VALOR PREDETERMINADO.
     $("#CTL").val(2);    // VALOR PREDETERMINADO.
     $("#CJA").val(4);    // VALOR PREDETERMINADO.
+                // ubicarme en el valor 0
+                $("#lstHoraExtra").val(0);
     
 	$("#lstTipoLicencia option:selected").each(function () {
 			// ELEJIR EL VALOR DEL SELECT

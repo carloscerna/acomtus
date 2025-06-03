@@ -57,6 +57,7 @@ $hora_actual = date("h:i:s a");
     $NocturnaValorUnitario = 0.57;
     $NocturnaCantidad = 0;
     $NocturnaValor = 0;
+    $HoraExtra = 0;
 // Establecer formato para la fecha.
     date_default_timezone_set('America/El_Salvador');
 	setlocale(LC_TIME,'es_SV');
@@ -542,7 +543,7 @@ function rellenar($total_dias_quincena){
     // VARIABLES GLOBALES
         global $dblink, $pdf, $salario, $w, $fill, $fecha_periodo_inicio, $fecha_periodo_fin, $codigo, $CalcularDatos,
             $DepartamentoEmpresa, $NombresCodigoDE, $fillFecha, $codigo_produccion, $link, $NocturnaValorUnitario, $JornadaLicenciaPermiso, $FechaDDT,
-            $CodigoNombreJornadaDDT, $FechaDescripcionAsueto, $fecha_periodo, $fillaFila, $codigo_cargo, $hora_actual;
+            $CodigoNombreJornadaDDT, $FechaDescripcionAsueto, $fecha_periodo, $fillaFila, $codigo_cargo, $hora_actual, $HoraExtra;
     // VARIABLES LOCALES
         $CodigoNombreJornada = array(); $ValoresCount = array();
      // DECLARACI{ON DE AMTRICES}
@@ -555,7 +556,7 @@ function rellenar($total_dias_quincena){
                 pa.codigo_jornada_vacaciones,  cat_jv.descripcion as descripcion_vacacion,
                 pa.codigo_jornada_nocturna, cat_jn.descripcion as descripcion_nocturna,
                 pa.codigo_jornada_e_4h, cat_j4.descripcion as descripcion_e_4h,
-                pa.codigo_personal_encargado,
+                pa.codigo_personal_encargado, pa.hora_extra,
                 cat_lp.horas as horas_licencia, cat_j.horas,
                 pa.codigo_jornada_asueto, 
                 cat_jn.descripcion as descripcion_jornada_nocturna,
@@ -590,6 +591,7 @@ function rellenar($total_dias_quincena){
                         $descripcion_asueto = trim($listado['descripcion_asueto']);
                         $descripcion_4h = trim($listado['descripcion_e_4h']);
                         $fecha_asistencia = trim($listado['fecha']);
+                        $HoraExtra = trim($listado['hora_extra']);
                         //
                             $CodigoNombreJornada['DescripcionJornada'][] = $descripcion_jornada;
                             $CodigoNombreJornada['DescripcionLicencia'][] = $descripcion_licencia;
@@ -598,13 +600,15 @@ function rellenar($total_dias_quincena){
                             $CodigoNombreJornada['DescripcionNocturna'][] = $descripcion_nocturna;
                             $CodigoNombreJornada['DescripcionExtra4H'][] = $descripcion_4h;
                             $CodigoNombreJornada['DescripcionAsueto'][] = $descripcion_asueto;
-                            $CodigoNombreJornada['FechaAsistencia'][] = $fecha_asistencia;                        
+                            $CodigoNombreJornada['FechaAsistencia'][] = $fecha_asistencia;   
+                            $CodigoNombreJornada['HoraExtra'][] = $HoraExtra;                        
                 }   // WHILEE QUE RECORRER LA CONSULTA, CUANDO HAY REGISTROS.
                     /////////////////////////////////////////////////////////////////////////////////////////////////
                     // IMPRIMIR VALORES EN PANTALLA
                     /////////////////////////////////////////////////////////////////////////////////////////////////
                     //var_dump($CodigoNombreJornada['DescripcionJornada']);
                     //var_dump($CodigoNombreJornada['FechaAsistencia']);
+                    //var_dump($CodigoNombreJornada['HoraExtra']);
                     //exit;
                     $fila_array = 0;
                     foreach ($CodigoNombreJornada['DescripcionJornada'] as $valor => $Jornada)
@@ -631,7 +635,9 @@ function rellenar($total_dias_quincena){
                         // VALIDAR LA JORNADAA
                         switch ($Jornada) {
                             case "1T":  // CAMBIAR EL 1T POR (.)
+                                $HoraExtra = $CodigoNombreJornada["HoraExtra"][$fila_array];
                                     Punto1T();  // CUANDO LA JORNADA ES NORMAL 1T.
+
                                 break;
                             case "0H":  // CUANDO TIENE DESCANSO, PP, F, ISSS, C, V, TV, P, TD.
                                 $JornadaLicenciaPermiso = $CodigoNombreJornada["DescripcionLicencia"][$fila_array]; // VARIABLES CUANDO ES DIFERENTE DE 1T. (1 TANDA)
@@ -918,7 +924,7 @@ function CuadrosFaltantes($columnas){
         
 }
 function Punto1T(){
-    global $pdf, $fillFecha, $w, $codigo_produccion, $DepartamentoEmpresa, $Jornada, $NombresCodigoDE,$link;
+    global $pdf, $fillFecha, $w, $codigo_produccion, $DepartamentoEmpresa, $Jornada, $NombresCodigoDE,$link, $HoraExtra;
     if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"]){
         $link = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=" . $codigo_produccion;
     // Establce un punto en media (.) si se establece el valor como una 1T (1 Tanda).
@@ -928,6 +934,11 @@ function Punto1T(){
         $pdf->Rect($x,$y,7,6,"DF");
         $pdf->Cell($w[3],3.5,'.','LTR',0,'C',$fillFecha, $link);        
         $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
+    // COLOCAR DESCRIPCION HORA EXTRA 1,2,3,4 EJEMPLO 1HE, 2HE, 3HE, 4HE
+        $x = $pdf->GetX() -3.5 ; $y = $pdf->GetY() + 2;
+        $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
+            $pdf->RotatedText($x,$y,$HoraExtra.'HE',0);
+        $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;                                    
     }else{
         // Establce un punto en media (.) si se establece el valor como una 1T (1 Tanda).
         $pdf->SetFont('Arial','B',20); // I : Italica; U: Normal;

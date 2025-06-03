@@ -456,7 +456,7 @@ if($errorDbConexion == false){
 					$codigo_jornada_descanso = trim($_POST["CJD"]);
 					$codigo_jornada_4_extra = trim($_POST["CJE4H"]);
 					$codigo_jornada_nocturnidad = trim($_POST["CJN"]);
-					$HoraExtra = trim($_POST["lstHoraExtra"]);
+					$HoraExtra = isset($_POST["lstHoraExtra"]) && trim($_POST["lstHoraExtra"]) !== '' ? trim($_POST["lstHoraExtra"]) : 0;
 				//
 					$codigo_perfil = trim($_POST["CodigoPerfil"]);
 					$codigo_personal_usuario = trim($_POST["CodigoPersonal"]);
