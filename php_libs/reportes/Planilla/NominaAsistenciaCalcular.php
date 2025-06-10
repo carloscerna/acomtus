@@ -459,6 +459,7 @@ exit;
                     $pago_diario_extra_4H = round($pago_diario_hora * 4,10);     // CONVIERTE A PAGO DIARIO POR HORA 1T
                     $pago_diario_extra_1T = round($pago_diario_hora * 8,10);     // CONVIERTE A PAGO DIARIO POR HORA 1T
                     $pago_diario_extra_1_5T = round($pago_diario_hora * 12,10);     // CONVIERTE A PAGO DIARIO POR HORA 1.5T
+                    $pagoHoraExtraDiurna = round($pago_diario_hora * 2,10);
                 // CREAR ARRAY ASOCIATIVA. SALARIO.Ç
                     $salario["Mensual"] = $pago_mensual;
                     $salario["PorDia"] = $pago_diario;
@@ -468,6 +469,7 @@ exit;
                     $salario["Extra1T"] = $pago_diario_extra_1T;
                     $salario["Extra15T"] = $pago_diario_extra_1_5T;
                     $salario["Nominal"] = 0;
+                    $salario["HoraExtraDiurna"] = 0;
                     $salario["Extra"] = 0;
                     $salario["TotalExtra"] = 0;
                     $salario["Total"] = 0;
@@ -543,7 +545,7 @@ function rellenar($total_dias_quincena){
     // VARIABLES GLOBALES
         global $dblink, $pdf, $salario, $w, $fill, $fecha_periodo_inicio, $fecha_periodo_fin, $codigo, $CalcularDatos,
             $DepartamentoEmpresa, $NombresCodigoDE, $fillFecha, $codigo_produccion, $link, $NocturnaValorUnitario, $JornadaLicenciaPermiso, $FechaDDT,
-            $CodigoNombreJornadaDDT, $FechaDescripcionAsueto, $fecha_periodo, $fillaFila, $codigo_cargo, $hora_actual, $HoraExtra;
+            $CodigoNombreJornadaDDT, $FechaDescripcionAsueto, $fecha_periodo, $fillaFila, $codigo_cargo, $hora_actual, $HoraExtra, $pagoHoraExtraDiurna;
     // VARIABLES LOCALES
         $CodigoNombreJornada = array(); $ValoresCount = array();
      // DECLARACI{ON DE AMTRICES}
@@ -601,7 +603,7 @@ function rellenar($total_dias_quincena){
                             $CodigoNombreJornada['DescripcionExtra4H'][] = $descripcion_4h;
                             $CodigoNombreJornada['DescripcionAsueto'][] = $descripcion_asueto;
                             $CodigoNombreJornada['FechaAsistencia'][] = $fecha_asistencia;   
-                            $CodigoNombreJornada['HoraExtra'][] = $HoraExtra;                        
+                            $CodigoNombreJornada['CantidadHoraExtra'][] = $HoraExtra;                        
                 }   // WHILEE QUE RECORRER LA CONSULTA, CUANDO HAY REGISTROS.
                     /////////////////////////////////////////////////////////////////////////////////////////////////
                     // IMPRIMIR VALORES EN PANTALLA
@@ -635,9 +637,9 @@ function rellenar($total_dias_quincena){
                         // VALIDAR LA JORNADAA
                         switch ($Jornada) {
                             case "1T":  // CAMBIAR EL 1T POR (.)
-                                $HoraExtra = $CodigoNombreJornada["HoraExtra"][$fila_array];
+                                $CantidadHoraExtraDiurna = $CodigoNombreJornada["CantidadHoraExtra"][$fila_array];
                                     Punto1T();  // CUANDO LA JORNADA ES NORMAL 1T.
-
+                                $salario["HoraExtraDiurna"] = $salario["HoraExtraDiurna"] + ($CantidadHoraExtraDiurna * $pagoHoraExtraDiurna);
                                 break;
                             case "0H":  // CUANDO TIENE DESCANSO, PP, F, ISSS, C, V, TV, P, TD.
                                 $JornadaLicenciaPermiso = $CodigoNombreJornada["DescripcionLicencia"][$fila_array]; // VARIABLES CUANDO ES DIFERENTE DE 1T. (1 TANDA)
@@ -834,9 +836,16 @@ function rellenar($total_dias_quincena){
                             $salario["Extra"] = $salario["Extra"] + $NocturnaValor; // Incrementar el valor de Total Extra.
                         }
                     # PRESENTAR SALARIO TOTAL EXTRA
-                        $salario["TotalExtra"] = $salario["Extra"];
-                        $salario_total_extra_pantalla = number_format($salario["TotalExtra"],2,'.',',');
-                        $pdf->Cell($w[1],6,'$' . $salario_total_extra_pantalla,1,0,'C',$fillaFila);
+                    # POR DEPARTAMENTO
+                        if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"] || $DepartamentoEmpresa  == $NombresCodigoDE["Revisador"]){
+                            $salario["TotalExtra"] = $salario["HoraExtraDiurna"];
+                            $salario_total_extra_pantalla = number_format($salario["TotalExtra"],2,'.',',');
+                            $pdf->Cell($w[1],6,'$' . $salario_total_extra_pantalla,1,0,'C',$fillaFila);
+                        }else{
+                            $salario["TotalExtra"] = $salario["Extra"];
+                            $salario_total_extra_pantalla = number_format($salario["TotalExtra"],2,'.',',');
+                            $pdf->Cell($w[1],6,'$' . $salario_total_extra_pantalla,1,0,'C',$fillaFila);
+                        }
                     # PRESENTAR SALARIO TOTAL
                         $pdf->SetFont('Arial','B',8); // I : Italica; U: Normal;
                         $pdf->SetTextColor(72,61,139);   // COLOR AZUL OSCURO rgb(72,61,139)
@@ -1153,7 +1162,7 @@ function VerificarFechaDescuento($codigo_personal){
                     break;
                     }
                 }   // LAZO IF....
-                    if($codigo_personal == '017122'){
+                    if($codigo_personal == '0040115'){
                         var_dump($CodigoNombreJornadaDDT);
                         print "Valores de las matrices de descuento: <br>";
                         var_dump($Cantidad4H);
@@ -1178,7 +1187,7 @@ function VerificarFechaDescuento($codigo_personal){
     /// PASAR EL DATO DE DESCUENTOS A SLARIO["$DESCUENTO4HFC"].
         $salario["Descuento4HFC"] = $salario["Descuento4H"] + $salario["DescuentoFaltas"] + $salario["DescuentoCastigo"] + $salario["DescuentoISSS"] + $salario["DescuentoPP"] + $salario["SinPunteo"];
 
-    if($codigo_personal == '011722'){
+    if($codigo_personal == '004401'){
         var_dump($salario);
         var_dump($BuscarFechaInicio);
         var_dump($BuscarFechaFin);
