@@ -50,6 +50,7 @@ $hora_actual = date("h:i:s a");
     $fecha_inicio_adb = array();
     $DescripcionJornada = array();
     $codigo_produccion = 0;
+    $CantidadHoraExtraDiurna = 0;
     $pase = 0;
     $link = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=" . $codigo_produccion;
     $codigo_cargo = "";
@@ -459,7 +460,7 @@ exit;
                     $pago_diario_extra_4H = round($pago_diario_hora * 4,10);     // CONVIERTE A PAGO DIARIO POR HORA 1T
                     $pago_diario_extra_1T = round($pago_diario_hora * 8,10);     // CONVIERTE A PAGO DIARIO POR HORA 1T
                     $pago_diario_extra_1_5T = round($pago_diario_hora * 12,10);     // CONVIERTE A PAGO DIARIO POR HORA 1.5T
-                    $pagoHoraExtraDiurna = round($pago_diario_hora * 2,10);
+                    $pagoHoraExtraDiurna = round($pago_diario_hora * 2,2);
                 // CREAR ARRAY ASOCIATIVA. SALARIO.Ç
                     $salario["Mensual"] = $pago_mensual;
                     $salario["PorDia"] = $pago_diario;
@@ -543,7 +544,7 @@ function rellenar_datos($linea){
 }
 function rellenar($total_dias_quincena){
     // VARIABLES GLOBALES
-        global $dblink, $pdf, $salario, $w, $fill, $fecha_periodo_inicio, $fecha_periodo_fin, $codigo, $CalcularDatos,
+        global $dblink, $pdf, $salario, $w, $fill, $fecha_periodo_inicio, $fecha_periodo_fin, $codigo, $CalcularDatos, $CantidadHoraExtraDiurna,
             $DepartamentoEmpresa, $NombresCodigoDE, $fillFecha, $codigo_produccion, $link, $NocturnaValorUnitario, $JornadaLicenciaPermiso, $FechaDDT,
             $CodigoNombreJornadaDDT, $FechaDescripcionAsueto, $fecha_periodo, $fillaFila, $codigo_cargo, $hora_actual, $HoraExtra, $pagoHoraExtraDiurna;
     // VARIABLES LOCALES
@@ -746,14 +747,26 @@ function rellenar($total_dias_quincena){
                         //exit;
                     // BUSCAR LA CANTIDAD DE 1.5T PARA OBTENER EL EXTRA. DE UNA JORNADA NORMAL.
                         foreach ($ValoresCount['CantidadDescripcion4H'] as $Jornada => $cantidad) {
-                            if($Jornada == "4H"){
-                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra4H"] * $cantidad);
-                            }
-                            if($Jornada == "1T"){
-                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra1T"] * $cantidad);
-                            }
-                            if($Jornada == "1.5T"){
-                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra15T"] * $cantidad);
+                            if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"] || $DepartamentoEmpresa  == $NombresCodigoDE["Revisador"]){
+                                if($Jornada == "4H"){
+                                    $salario["HoraExtraDiurna"] = $salario["HoraExtraDiurna"] + ($pagoHoraExtraDiurna * 4);
+                                }
+                                if($Jornada == "1T"){
+                                    $salario["HoraExtraDiurna"] = $salario["HoraExtraDiurna"] + ($pagoHoraExtraDiurna * 8);
+                                }
+                                if($Jornada == "1.5T"){
+                                    $salario["HoraExtraDiurna"] = $salario["HoraExtraDiurna"] + ($pagoHoraExtraDiurna * 12);
+                                }
+                            }else{
+                                if($Jornada == "4H"){
+                                    $salario["Extra"] = $salario["Extra"] + ($salario["Extra4H"] * $cantidad);
+                                }
+                                if($Jornada == "1T"){
+                                    $salario["Extra"] = $salario["Extra"] + ($salario["Extra1T"] * $cantidad);
+                                }
+                                if($Jornada == "1.5T"){
+                                    $salario["Extra"] = $salario["Extra"] + ($salario["Extra15T"] * $cantidad);
+                                }
                             }
                         }
                     // BUSCAR LA CANTIDAD DE 1T Ó 1.5T PARA OBTENER EL EXTRA. DE UNA JORNADA DE DESCANSO.
@@ -764,15 +777,28 @@ function rellenar($total_dias_quincena){
                         }
                     // BUSCAR LA CANTIDAD DE 1T Ó 1.5T PARA OBTENER EL EXTRA. DE UNA JORNADA DE DESCANSO.
                         foreach ($ValoresCount['CantidadDescripcionDescanso'] as $Jornada => $cantidad) {
-                            if($Jornada == "4H"){
-                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra4H"] * $cantidad);
+                            if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"] || $DepartamentoEmpresa  == $NombresCodigoDE["Revisador"]){
+                                if($Jornada == "4H"){
+                                    $salario["HoraExtraDiurna"] = $salario["HoraExtraDiurna"] + ($pagoHoraExtraDiurna * 4);
+                                }
+                                if($Jornada == "1T"){
+                                    $salario["HoraExtraDiurna"] = $salario["HoraExtraDiurna"] + ($pagoHoraExtraDiurna * 8);
+                                }
+                                if($Jornada == "1.5T"){
+                                    $salario["HoraExtraDiurna"] = $salario["HoraExtraDiurna"] + ($pagoHoraExtraDiurna * 12);
+                                }
+                            }else{
+                                if($Jornada == "4H"){
+                                    $salario["Extra"] = $salario["Extra"] + ($salario["Extra4H"] * $cantidad);
+                                }
+                                if($Jornada == "1T"){
+                                    $salario["Extra"] = $salario["Extra"] + ($salario["Extra1T"] * $cantidad);
+                                }
+                                if($Jornada == "1.5T"){
+                                    $salario["Extra"] = $salario["Extra"] + ($salario["Extra15T"] * $cantidad);
+                                }
                             }
-                            if($Jornada == "1T"){
-                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra1T"] * $cantidad);
-                            }
-                            if($Jornada == "1.5T"){
-                                $salario["Extra"] = $salario["Extra"] + ($salario["Extra15T"] * $cantidad);
-                            }
+
                         }
                     // BUSCAR LA CANTIDAD DE 1T Ó 1.5T PARA OBTENER EL EXTRA. DE UNA JORNADA DE DESCANSO.
                         foreach ($ValoresCount['CantidadDescripcionAsueto'] as $Jornada => $cantidad) {
@@ -824,8 +850,14 @@ function rellenar($total_dias_quincena){
                         $asueto_pantalla = "";
                         $pdf->Cell($w[1],6,$asueto_pantalla,1,0,'C',$fillaFila);
                     # PRESENTAR SALARIO EXTRA
+                    if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"] || $DepartamentoEmpresa  == $NombresCodigoDE["Revisador"]){
+                        $salario_extra_pantalla = number_format($salario["HoraExtraDiurna"],2,'.',',');
+                        $pdf->Cell($w[1],6,'$' . $salario_extra_pantalla,1,0,'C',$fillaFila);
+                    }else{
                         $salario_extra_pantalla = number_format($salario["Extra"],2,'.',',');
                         $pdf->Cell($w[1],6,'$' . $salario_extra_pantalla,1,0,'C',$fillaFila);
+                    }
+
                     # CALCULO DE NOCTURNA EN EL CASO DE VIGILANCIA, MANTENIMIENTO Y Taller.
                         if($DepartamentoEmpresa == $NombresCodigoDE["Mantenimiento"] || $DepartamentoEmpresa  == $NombresCodigoDE["Vigilancia"] || $DepartamentoEmpresa  == $NombresCodigoDE["Taller"]){
                             $CantidadNocturnidad = count(array_keys($CodigoNombreJornada["DescripcionNocturna"], "N"));
@@ -933,7 +965,7 @@ function CuadrosFaltantes($columnas){
         
 }
 function Punto1T(){
-    global $pdf, $fillFecha, $w, $codigo_produccion, $DepartamentoEmpresa, $Jornada, $NombresCodigoDE,$link, $HoraExtra;
+    global $pdf, $fillFecha, $w, $codigo_produccion, $DepartamentoEmpresa, $Jornada, $NombresCodigoDE,$link, $CantidadHoraExtraDiurna;
     if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"]){
         $link = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=" . $codigo_produccion;
     // Establce un punto en media (.) si se establece el valor como una 1T (1 Tanda).
@@ -946,7 +978,12 @@ function Punto1T(){
     // COLOCAR DESCRIPCION HORA EXTRA 1,2,3,4 EJEMPLO 1HE, 2HE, 3HE, 4HE
         $x = $pdf->GetX() -3.5 ; $y = $pdf->GetY() + 2;
         $pdf->SetFont('Arial','',5); // I : Italica; U: Normal;
-            $pdf->RotatedText($x,$y,$HoraExtra.'HE',0);
+            if($CantidadHoraExtraDiurna != 0){
+                $pdf->RotatedText($x,$y,$CantidadHoraExtraDiurna.'HE',0);
+            }else{
+                $pdf->RotatedText($x,$y,'',0);
+            }
+            
         $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;                                    
     }else{
         // Establce un punto en media (.) si se establece el valor como una 1T (1 Tanda).
