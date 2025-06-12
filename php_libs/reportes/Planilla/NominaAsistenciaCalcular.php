@@ -49,6 +49,7 @@ $hora_actual = date("h:i:s a");
     $contar_4H = 1;
     $fecha_inicio_adb = array();
     $DescripcionJornada = array();
+    $ValoresCount = array();
     $codigo_produccion = 0;
     $CantidadHoraExtraDiurna = 0;
     $pase = 0;
@@ -469,6 +470,7 @@ exit;
                     $salario["Extra4H"] = $pago_diario_extra_4H;
                     $salario["Extra1T"] = $pago_diario_extra_1T;
                     $salario["Extra15T"] = $pago_diario_extra_1_5T;
+                    $salario["HoraExtra"] = $pagoHoraExtraDiurna;
                     $salario["Nominal"] = 0;
                     $salario["HoraExtraDiurna"] = 0;
                     $salario["Extra"] = 0;
@@ -546,9 +548,9 @@ function rellenar($total_dias_quincena){
     // VARIABLES GLOBALES
         global $dblink, $pdf, $salario, $w, $fill, $fecha_periodo_inicio, $fecha_periodo_fin, $codigo, $CalcularDatos, $CantidadHoraExtraDiurna,
             $DepartamentoEmpresa, $NombresCodigoDE, $fillFecha, $codigo_produccion, $link, $NocturnaValorUnitario, $JornadaLicenciaPermiso, $FechaDDT,
-            $CodigoNombreJornadaDDT, $FechaDescripcionAsueto, $fecha_periodo, $fillaFila, $codigo_cargo, $hora_actual, $HoraExtra, $pagoHoraExtraDiurna;
+            $CodigoNombreJornadaDDT, $FechaDescripcionAsueto, $fecha_periodo, $fillaFila, $codigo_cargo, $hora_actual, $HoraExtra, $pagoHoraExtraDiurna, $ValoresCount;
     // VARIABLES LOCALES
-        $CodigoNombreJornada = array(); $ValoresCount = array();
+        $CodigoNombreJornada = array(); //$ValoresCount = array();
      // DECLARACI{ON DE AMTRICES}
         $FechaDDT = array(); //$descripcion_jornada_a_P2 = array(); $fecha_inicio_adb = array();
             $pdf->SetFont('Arial','',8); // I : Italica; U: Normal;
@@ -638,9 +640,14 @@ function rellenar($total_dias_quincena){
                         // VALIDAR LA JORNADAA
                         switch ($Jornada) {
                             case "1T":  // CAMBIAR EL 1T POR (.)
-                                $CantidadHoraExtraDiurna = $CodigoNombreJornada["CantidadHoraExtra"][$fila_array];
                                     Punto1T();  // CUANDO LA JORNADA ES NORMAL 1T.
-                                $salario["HoraExtraDiurna"] = $salario["HoraExtraDiurna"] + ($CantidadHoraExtraDiurna * $pagoHoraExtraDiurna);
+                                $CantidadHoraExtraDiurna = $CodigoNombreJornada["CantidadHoraExtra"][$fila_array];
+                                if($CantidadHoraExtraDiurna !=0){
+                                    $salario["HoraExtraDiurna"] = $salario["HoraExtraDiurna"] + ($CantidadHoraExtraDiurna * $pagoHoraExtraDiurna);
+                                }else{
+                                    $CantidadHoraExtraDiurna = 0;
+                                }
+                                
                                 break;
                             case "0H":  // CUANDO TIENE DESCANSO, PP, F, ISSS, C, V, TV, P, TD.
                                 $JornadaLicenciaPermiso = $CodigoNombreJornada["DescripcionLicencia"][$fila_array]; // VARIABLES CUANDO ES DIFERENTE DE 1T. (1 TANDA)
@@ -894,7 +901,7 @@ function rellenar($total_dias_quincena){
                     RellenarSinCalculos();
                 }
             // VACIAR LA VARIABLE DE LA FECHA PARA EL DESCUENTO
-                unset($FechaDDT); unset($CodigoNombreJornadaDDT); unset($salario);
+                unset($FechaDDT); unset($CodigoNombreJornadaDDT); unset($salario); unset($ValoresCount);
         } // FIN DEL IF QUE DETERMINA SI HAY REGISTROS.
         else{
             /// RELLENAR CON VALRIOS IS HACEN FALTA
@@ -1078,7 +1085,7 @@ function VerificarControl($fecha, $codigo_personal){
         }
 }
 function VerificarFechaDescuento($codigo_personal){
-    global $FechaDDT, $dblink, $salario, $fecha_periodo_inicio, $fecha_periodo_fin;
+    global $FechaDDT, $dblink, $salario, $fecha_periodo_inicio, $fecha_periodo_fin, $ValoresCount, $CodigoNombreJornada;
     $CodigoNombreJornadaDDT = []; $CantidadC = []; $CantidadF = []; $Cantidad4H = []; $CantidadPP = []; $CantidadISSS = [];
     $CodigoNombreJornadaDDT['DescripcionJornada'][] = "";
     $CodigoNombreJornadaDDT['DescripcionLicencia'][] = "";
@@ -1199,7 +1206,7 @@ function VerificarFechaDescuento($codigo_personal){
                     break;
                     }
                 }   // LAZO IF....
-                    if($codigo_personal == '011898'){
+                    if($codigo_personal == '100225'){
                         var_dump($CodigoNombreJornadaDDT);
                         print "Valores de las matrices de descuento: <br>";
                         var_dump($Cantidad4H);
@@ -1224,11 +1231,13 @@ function VerificarFechaDescuento($codigo_personal){
     /// PASAR EL DATO DE DESCUENTOS A SLARIO["$DESCUENTO4HFC"].
         $salario["Descuento4HFC"] = $salario["Descuento4H"] + $salario["DescuentoFaltas"] + $salario["DescuentoCastigo"] + $salario["DescuentoISSS"] + $salario["DescuentoPP"] + $salario["SinPunteo"];
 
-    if($codigo_personal == '101898'){
+    if($codigo_personal == '010225'){
         var_dump($salario);
         var_dump($BuscarFechaInicio);
         var_dump($BuscarFechaFin);
         var_dump($CodigoNombreJornadaDDT);
+        var_dump($CodigoNombreJornada);
+        var_dump($ValoresCount);
         print "código: $codigo_personal  Fecha Inicio: $fecha_periodo_inicio - Fecha Fin: $fecha_periodo_fin";
             exit;  
     }
