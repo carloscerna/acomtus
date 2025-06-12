@@ -301,8 +301,12 @@ $('#ActivarEditarCodigo').click(function () {
         
         $("#Salario").on('keyup', function (e) {
             var keycode = e.keyCode || e.which;
-                var calcular_pago_diario = parseInt(this.value) / 30;
-                $("#PagoDiario").val(calcular_pago_diario.toFixed(2));
+                //var calcular_pago_diario = parseInt(this.value) / 30;
+                //$("#PagoDiario").val(calcular_pago_diario.toFixed(2));
+                let resultado = this.value / 30;
+                let redondeado = Number(resultado.toPrecision(4)); // 13.63
+                console.log(redondeado);
+                $("#PagoDiario").val(redondeado);
         });
 }); // fin de la funcion principal ************************************/
 		

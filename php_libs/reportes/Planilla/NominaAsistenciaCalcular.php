@@ -460,7 +460,7 @@ exit;
                     $pago_diario_extra_4H = round($pago_diario_hora * 4,10);     // CONVIERTE A PAGO DIARIO POR HORA 1T
                     $pago_diario_extra_1T = round($pago_diario_hora * 8,10);     // CONVIERTE A PAGO DIARIO POR HORA 1T
                     $pago_diario_extra_1_5T = round($pago_diario_hora * 12,10);     // CONVIERTE A PAGO DIARIO POR HORA 1.5T
-                    $pagoHoraExtraDiurna = round($pago_diario_hora * 2,2);
+                    $pagoHoraExtraDiurna = round($pago_diario_hora * 2,10);
                 // CREAR ARRAY ASOCIATIVA. SALARIO.Ç
                     $salario["Mensual"] = $pago_mensual;
                     $salario["PorDia"] = $pago_diario;
