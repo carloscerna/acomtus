@@ -640,10 +640,12 @@ function rellenar($total_dias_quincena){
                         // VALIDAR LA JORNADAA
                         switch ($Jornada) {
                             case "1T":  // CAMBIAR EL 1T POR (.)
-                                    Punto1T();  // CUANDO LA JORNADA ES NORMAL 1T.
                                 $CantidadHoraExtraDiurna = $CodigoNombreJornada["CantidadHoraExtra"][$fila_array];
+                                    Punto1T();  // CUANDO LA JORNADA ES NORMAL 1T.
+
                                 if($CantidadHoraExtraDiurna !=0){
                                     $salario["HoraExtraDiurna"] = $salario["HoraExtraDiurna"] + ($CantidadHoraExtraDiurna * $pagoHoraExtraDiurna);
+                                    
                                 }else{
                                     $CantidadHoraExtraDiurna = 0;
                                 }
