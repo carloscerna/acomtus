@@ -1199,7 +1199,7 @@ function VerificarFechaDescuento($codigo_personal){
                     break;
                     }
                 }   // LAZO IF....
-                    if($codigo_personal == '0040115'){
+                    if($codigo_personal == '011898'){
                         var_dump($CodigoNombreJornadaDDT);
                         print "Valores de las matrices de descuento: <br>";
                         var_dump($Cantidad4H);
@@ -1224,7 +1224,7 @@ function VerificarFechaDescuento($codigo_personal){
     /// PASAR EL DATO DE DESCUENTOS A SLARIO["$DESCUENTO4HFC"].
         $salario["Descuento4HFC"] = $salario["Descuento4H"] + $salario["DescuentoFaltas"] + $salario["DescuentoCastigo"] + $salario["DescuentoISSS"] + $salario["DescuentoPP"] + $salario["SinPunteo"];
 
-    if($codigo_personal == '004401'){
+    if($codigo_personal == '101898'){
         var_dump($salario);
         var_dump($BuscarFechaInicio);
         var_dump($BuscarFechaFin);
