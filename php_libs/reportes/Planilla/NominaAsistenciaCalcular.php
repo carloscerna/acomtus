@@ -38,10 +38,15 @@ $mes = $hoy["mon"];     // mes
     $calcular = $_REQUEST["chkCalcular"]; // Valor para si se realiza el cálculo (enviado desde JS)
     $DepartamentoEmpresa = $_REQUEST["DepartamentoEmpresa"]; // Valor para el departamento/empresa
     $departamentoEmpresaTexto = $_REQUEST["DepartamentoText"]; // Texto para el departamento/empresa
+    $persona_responsable = $_REQUEST["persona_responsable"] ?? 'No Definido'; // Asegurarse de que esta variable llegue
 
-// Validar que las variables de fecha y quincena estén presentes
-if (!isset($fecha_mes) || !isset($fecha_ann) || !isset($quincena)) {
+// Validar que las variables de fecha o quincena estén presentes
+if (!isset($fecha_mes) || !isset($quincena)) {
     die("Faltan parámetros de fecha o quincena.");
+}
+if (!isset($fecha_ann) || !is_numeric($fecha_ann)) {
+    // Si $fecha_ann no está definido o no es numérico, usa el año actual
+    $fecha_ann = date('Y');
 }
 
 // Determinar el rango de fechas para la quincena
@@ -71,32 +76,33 @@ foreach ($period as $date) {
     $rango_fechas[] = $date->format('Y-m-d');
 }
 
+// Define la ruta base para las imágenes de jornada
+$image_base_path = $_SERVER['DOCUMENT_ROOT'] . "/acomtus/img/Catalogo Jornada/"; // Usa $_SERVER['DOCUMENT_ROOT'] para ruta absoluta
+
 // ARRAY PARA ALMACENAR LOS DATOS DE ASISTENCIA PRE-CARGADOS
 $asistencia_por_empleado_y_fecha = [];
 
 // Query principal para obtener los empleados y sus datos relevantes (incluyendo cargo y ruta)
 $query = "SELECT p.codigo, p.nombres, p.apellidos, p.salario, p.codigo_ruta, p.codigo_departamento_empresa, cc.descripcion as cargo_descripcion ";
 $query .= "FROM personal p ";
-$query .= "LEFT JOIN catalogo_cargo cc ON cc.codigo = p.codigo_cargo "; // ASUMIMOS catalogo_cargos Y p.codigo_cargo
-$query .= "WHERE 1=1";
+$query .= "LEFT JOIN catalogo_cargo cc ON cc.codigo = p.codigo_cargo "; // CORRECCIÓN: catalogo_cargo
+$query .= "WHERE 1=1 AND p.codigo_estatus = '01'"; // AÑADIDA: Condición para codigo_estatus
 if ($NombreRuta != '00') {
     $query .= " AND p.codigo_ruta = '$NombreRuta'";
 }
 if ($DepartamentoEmpresa != '00') {
     $query .= " AND p.codigo_departamento_empresa = '$DepartamentoEmpresa'";
 }
-$query .= " ORDER BY p.codigo_departamento_empresa, p.apellidos, p.nombres";
+$query .= " ORDER BY p.codigo_departamento_empresa, p.apellidos, p.nombres, p.codigo"; // AÑADIDA: p.codigo al ORDER BY
 
 try {
     $stmt_codigos_personal = $dblink->query($query);
 } catch (PDOException $e) {
-    error_log("ERROR PDOException al consultar códigos de personal: " . $e->getMessage());
     die("Error interno del servidor al obtener datos de personal. Revise los logs del servidor.");
 }
 
 if ($stmt_codigos_personal === false) {
     $error_info = $dblink->errorInfo();
-    error_log("ERROR: La consulta SQL para códigos de personal falló y regresó FALSE. SQLSTATE: " . $error_info[0] . ", Código: " . $error_info[1] . ", Mensaje: " . $error_info[2]);
     die("Error crítico al obtener la lista de personal. Contacte a soporte.");
 }
 
@@ -117,7 +123,7 @@ $codigos_personal_str = "'" . implode("','", $codigos_personal_a_consultar) . "'
 // 2. Consulta única para obtener TODOS los datos de asistencia relevantes
 try {
         $stmt_all_asistencia = $dblink->prepare("
-        SELECT pa.codigo_personal, pa.fecha, pa.hora_extra, pa.observacion,
+        SELECT pa.codigo_personal, pa.fecha, pa.hora_extra,
                 pa.codigo_jornada, cat_j.descripcion as descripcion_jornada, cat_j.horas as horas_jornada_regular,
                 pa.codigo_tipo_licencia, cat_lp.descripcion as descripcion_licencia, cat_lp.horas as horas_licencia,
                 pa.codigo_jornada_descanso, cat_jd.descripcion as descripcion_descanso,
@@ -148,7 +154,6 @@ try {
             $asistencia_por_empleado_y_fecha[$codigo_p][$fecha_a] = $row_asistencia;
         }
     } catch (PDOException $e) {
-        error_log("Error al pre-cargar datos de asistencia detallados: " . $e->getMessage());
         die("Error al obtener datos de asistencia detallados. Por favor, intente más tarde.");
     }
 
@@ -171,163 +176,280 @@ while ($row = $consultaAsueto->fetch(PDO::FETCH_ASSOC)) {
     $FechaDescripcionAsueto[$row['fecha']] = $row['descripcion'];
 }
 
+// NUEVA CONSULTA: Cargar el mapeo de códigos a nombres de archivo de imagen
+$jornada_imagenes_map = [];
+try {
+    $consulta_imagenes = $dblink->query("SELECT codigo, descripcion FROM catalogo_jornada_imagenes");
+    while ($row_img = $consulta_imagenes->fetch(PDO::FETCH_ASSOC)) {
+        $jornada_imagenes_map[trim($row_img['codigo'])] = trim($row_img['descripcion']);
+    }
+} catch (PDOException $e) {
+    die("Error al obtener datos de imágenes de jornada. Por favor, intente más tarde.");
+}
+
 // --- NUEVA FUNCIÓN PARA PROCESAR DATOS DE ASISTENCIA Y CALCULAR TOTALES ---
 // Esta función NO imprime, solo calcula y retorna.
-function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario_mensual, $jornada_base_default, $asistencia_data_precargada, $NombresCodigoLicenciaPermiso) {
-    $total_salario_devengado_empleado = 0;
+function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario_mensual, $jornada_base_default, $asistencia_data_precargada, $NombresCodigoLicenciaPermiso, $jornada_imagenes_map, $FechaDescripcionAsueto) {
+    $total_salario_devengado_empleado = 0; // Para jornadas normales, descanso, vacaciones, licencias
+    $total_salario_asuetos = 0; // Salario específico de asuetos (solo el adicional por trabajar asueto)
     $total_monto_horas_extra_empleado = 0;
-    $total_descuentos_empleado = 0;
+    $total_descuentos_empleado = 0; // Descuentos por faltas, etc.
     $total_otras_deducciones_empleado = 0; // Para futuras deducciones no calculadas aquí
-    $total_dias_asuetos_empleado = 0;
-    $total_dias_licencias_empleado = 0; // Contar días de licencia
-    $total_horas_trabajadas_regulares_empleado = 0;
+    $total_horas_extra_cantidad = 0; // Cantidad total de horas extra
+    $total_deduccion_7mo = 0; // Inicializar deducción del 7mo día
     
+    // Contadores de días por tipo de asistencia (estos ya no se usarán para imprimir en columnas, pero sí para los cálculos de devengado)
+    $total_dias_jornada_empleado = 0;
+    $total_dias_descanso_empleado = 0;
+    $total_dias_vacaciones_empleado = 0;
+    $total_dias_nocturna_empleado = 0;
+    $total_dias_e4h_empleado = 0;
+    $total_dias_asuetos_empleado_count = 0; 
+    $total_dias_licencias_empleado = 0;
+
+    $daily_attendance_details = []; // Almacenará los códigos e imágenes para cada día
+
     $salario_diario = $salario_mensual / 30; // Salario diario basado en 30 días
 
-    $daily_rows_formatted = []; // Para almacenar las filas diarias ya formateadas
+    // Códigos que no deben sumar al salario (solo visualización)
+    $non_contributory_codes_display_only = ['4144444', '4344444', '4244444']; 
+    // Códigos que implican doble descuento y pueden activar 7mo día
+    $double_deduction_codes = ['41044444', '4444444']; // 'C' (Castigo), 'F' (Falta)
+
+    // Códigos de asueto que implican pago adicional por trabajar
+    $asueto_worked_codes = [
+        '41614444' => $salario_diario / 2, // 4 horas adicionales
+        '41624444' => $salario_diario,     // 8 horas adicionales (día completo)
+        '41634444' => $salario_diario + ($salario_diario / 2) // 12 horas adicionales
+    ];
+
+    // Weekly tracking for 7mo day deduction
+    $weekly_tracking = []; // Key: week_start_date (Monday), Value: ['has_deductible_event' => bool, 'has_descanso' => bool, 'descanso_date' => date_string]
 
     foreach ($rango_fechas as $fecha_actual) {
         $row_asistencia = $asistencia_data_precargada[$codigo_personal][$fecha_actual] ?? null;
 
         $horas_extra_registradas = 0;
-        $observacion = '';
-        $salario_dia_actual = 0;
+        $salario_dia_actual = 0; // Salario para este día (jornada, descanso, vacación, licencia)
         $monto_horas_extra_dia_actual = 0;
-        $descuento_dia_actual = 0;
+        $descuento_dia_actual = 0; // Descuento por este día (si es falta o castigo)
         $horas_jornada_para_este_dia = $jornada_base_default; // Horas por defecto
         
-        // Inicializar display values para asegurar exclusividad
-        $jornada_display_value = '';
-        $descanso_display_value = '';
-        $vacaciones_display_value = '';
-        $nocturna_display_value = '';
-        $e_4h_display_value = '';
-        $asueto_display_value = '';
-        $licencia_display_value = '';
-
-        $es_dia_pagado = false; // Flag para determinar si el día se paga para cálculos de salario y HE
+        $es_dia_pagado_para_hora_extra = false; // Flag para determinar si el día se paga para cálculos de HE
+        $is_activity_recorded = false; // Flag: Indica si hay un registro de actividad (pagada o no)
         
+        // Inicializar códigos para la concatenación
+        $CodigoJornada = '';
+        $CodigoLicencia = '';
+        $CodigoJornadaAsueto = '';
+        $CodigoJornadaVacaciones = '';
+        $CodigoJornadaDescanso = '';
+        $CodigoJornadaE4H = '';
+        $CodigoJornadaNocturna = '';
+        $CodigoJornadaTodas = ''; // Initialize for each day
+
+        // Determine the start of the week for this date (Monday)
+        $date_obj = new DateTime($fecha_actual);
+        $day_of_week_num = (int)$date_obj->format('N'); // 1 (Mon) through 7 (Sun)
+        $week_start_date_obj = clone $date_obj;
+        // Move to Monday of the current week (N=1 for Monday)
+        if ($day_of_week_num != 1) { // If not Monday, go back to previous Monday
+            $week_start_date_obj->modify('last monday');
+        }
+        $week_start_date = $week_start_date_obj->format('Y-m-d');
+
+
+        // Initialize weekly tracking for this week if not already
+        if (!isset($weekly_tracking[$week_start_date])) {
+            $weekly_tracking[$week_start_date] = [
+                'has_deductible_event' => false, // F or C
+                'has_descanso' => false,        // Descanso day (41344444)
+                'descanso_date' => null,        // Date of Descanso
+                'deducted_7mo' => false         // Flag to prevent multiple 7mo deductions for same week
+            ];
+        }
+
         if ($row_asistencia) {
+            $is_activity_recorded = true;
             $horas_extra_registradas = (float)($row_asistencia['hora_extra'] ?? 0);
-            $observacion = utf8_decode($row_asistencia['observacion'] ?? '');
 
-            // Lógica para el pago del día y determinar el tipo de asistencia principal (mutuamente excluyente)
-            // Prioridad: Asueto > Licencia (código jornada 4) > Jornada Regular > Descanso > Vacaciones > Nocturna > E_4H > Otras Licencias
+            // Extraer códigos para la concatenación, asegurando que sean cadenas vacías si son nulos
+            $CodigoJornada = trim($row_asistencia['codigo_jornada'] ?? '');
+            $CodigoLicencia = trim($row_asistencia['codigo_tipo_licencia'] ?? '');
+            $CodigoJornadaAsueto = trim($row_asistencia['codigo_jornada_asueto'] ?? '');
+            $CodigoJornadaVacaciones = trim($row_asistencia['codigo_jornada_vacaciones'] ?? '');
+            $CodigoJornadaDescanso = trim($row_asistencia['codigo_jornada_descanso'] ?? '');
+            $CodigoJornadaE4H = trim($row_asistencia['codigo_jornada_e_4h'] ?? '');
+            $CodigoJornadaNocturna = trim($row_asistencia['codigo_jornada_nocturna'] ?? '');
 
-            // 1. Asueto
-            if (isset($row_asistencia['codigo_jornada_asueto']) && !empty($row_asistencia['codigo_jornada_asueto'])) {
-                $asueto_display_value = 'A'; // Carácter para Asueto
-                $es_dia_pagado = true;
-                $total_dias_asuetos_empleado++;
-                $salario_dia_actual = $salario_diario;
-                $horas_jornada_para_este_dia = (float)($row_asistencia['horas_jornada_regular'] ?? $jornada_base_default);
+            // Formar el CodigoJornadaTodas temporal para la primera validación
+            $CodigoJornadaTodas_temp = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.$CodigoJornadaNocturna;
+            $CodigoJornadaTodas = $CodigoJornadaTodas_temp; // Asignar al final, podría ser sobreescrito por FALTA/AS
+
+
+            // --- Lógica para códigos que NO SUMAN AL SALARIO (solo visualización) ---
+            if (in_array(trim($CodigoJornadaTodas_temp), $non_contributory_codes_display_only)) {
+                $salario_dia_actual = 0; // NO se suma al salario
+                $monto_horas_extra_dia_actual = 0; // No hay pago de HE
+                $descuento_dia_actual = 0; // No es una "falta" deducible
+                $es_dia_pagado_para_hora_extra = false;
             } 
-            // 2. Licencia (con codigo_jornada = 4 y tipo_licencia = 13 para el punto '.')
-            else if (isset($row_asistencia['codigo_jornada']) && $row_asistencia['codigo_jornada'] == '4') {
-                $jornada_display_value = '.'; // Carácter de punto para este tipo de licencia
-                $es_dia_pagado = true;
-                $total_dias_licencias_empleado++; // Se cuenta como día de licencia
-                $licencia_info = $NombresCodigoLicenciaPermiso[$row_asistencia['codigo_tipo_licencia']] ?? ['horas' => 0, 'descripcion' => 'N/A'];
-                $horas_licencia_dia = (float)($licencia_info['horas'] ?? 0);
+            // --- Lógica para DÍAS DE CASTIGO 'C' o FALTA 'F' (doble descuento) ---
+            else if (in_array(trim($CodigoJornadaTodas_temp), $double_deduction_codes)) {
+                $salario_dia_actual = $salario_diario; // <<--- CAMBIO CLAVE: El día SÍ se paga para el cálculo del bruto.
+                $monto_horas_extra_dia_actual = 0; // No hay pago de HE
+                $descuento_dia_actual = $salario_diario * 2; // Doble descuento
+                $es_dia_pagado_para_hora_extra = false;
                 
-                $valor_hora_normal = ($jornada_base_default > 0) ? ($salario_diario / $jornada_base_default) : 0;
-                $salario_dia_actual = $valor_hora_normal * $horas_licencia_dia;
-                $horas_jornada_para_este_dia = $horas_licencia_dia;
+                // Marcar que hubo un evento deducible en esta semana para el 7mo día
+                $weekly_tracking[$week_start_date]['has_deductible_event'] = true;
             }
-            // 3. Jornada Regular (si no es el código 4 de licencia)
-            else if (isset($row_asistencia['codigo_jornada']) && !empty($row_asistencia['codigo_jornada'])) {
-                $jornada_display_value = str_replace(' ', '.', trim($row_asistencia['descripcion_jornada'] ?? ''));
-                $es_dia_pagado = true;
-                $salario_dia_actual = $salario_diario;
-                $horas_jornada_para_este_dia = (float)($row_asistencia['horas_jornada_regular'] ?? $jornada_base_default);
-            }
-            // 4. Descanso
-            else if (isset($row_asistencia['codigo_jornada_descanso']) && !empty($row_asistencia['codigo_jornada_descanso'])) {
-                $descanso_display_value = 'Ds'; // Carácter para Descanso
-                $es_dia_pagado = true;
-                $salario_dia_actual = $salario_diario;
-            }
-            // 5. Vacaciones
-            else if (isset($row_asistencia['codigo_jornada_vacaciones']) && !empty($row_asistencia['codigo_jornada_vacaciones'])) {
-                $vacaciones_display_value = 'V'; // Carácter para Vacaciones
-                $es_dia_pagado = true;
-                $salario_dia_actual = $salario_diario;
-            }
-            // 6. Nocturna
-            else if (isset($row_asistencia['codigo_jornada_nocturna']) && !empty($row_asistencia['codigo_jornada_nocturna'])) {
-                $nocturna_display_value = 'N'; // Carácter para Nocturna
-                $es_dia_pagado = true;
-                $salario_dia_actual = $salario_diario;
-            }
-            // 7. E_4H
-            else if (isset($row_asistencia['codigo_jornada_e_4h']) && !empty($row_asistencia['codigo_jornada_e_4h'])) {
-                $e_4h_display_value = '4H'; // Carácter para E_4H
-                $es_dia_pagado = true;
-                $salario_dia_actual = $salario_diario;
-            }
-            // 8. Otras Licencias (si no fue manejada por codigo_jornada=4)
-            else if (isset($row_asistencia['codigo_tipo_licencia']) && !empty($row_asistencia['codigo_tipo_licencia'])) {
-                $licencia_info = $NombresCodigoLicenciaPermiso[$row_asistencia['codigo_tipo_licencia']] ?? ['horas' => 0, 'descripcion' => 'N/A'];
-                $horas_licencia_dia = (float)($licencia_info['horas'] ?? 0);
-                
-                if ($horas_licencia_dia > 0) {
-                    $es_dia_pagado = true;
+            // --- Lógica NORMAL para días que SÍ PUEDEN SUMAR AL SALARIO ---
+            else { 
+                $es_dia_pagado_para_hora_extra = true; // Potencialmente contribuye al salario
+
+                // Priority: Asueto (específico) > Jornada > Descanso > Vacaciones > Nocturna > E_4H > Licencias (otras)
+                // --- Lógica para Asuetos con pago adicional por trabajar (41614444, 41624444, 41634444) ---
+                if (isset($asueto_worked_codes[trim($CodigoJornadaTodas_temp)])) {
+                    $total_dias_asuetos_empleado_count++; // Contar como día de asueto
+                    $total_salario_asuetos += $asueto_worked_codes[trim($CodigoJornadaTodas_temp)]; // Suma el valor ADICIONAL
+                    $salario_dia_actual = $salario_diario; // El día base del asueto se paga aquí
+                    $es_dia_pagado_para_hora_extra = true;
+                    $horas_jornada_para_este_dia = (float)($row_asistencia['horas_jornada_regular'] ?? $jornada_base_default); // Usa jornada_regular si aplica
+                }
+                // --- Asueto normal (2144444) ---
+                else if (!empty($CodigoJornadaAsueto) && $CodigoJornadaAsueto == '2144444') { 
+                    $total_dias_asuetos_empleado_count++;
+                    // No se suma a total_salario_asuetos aquí, porque este es el asueto "normal" no trabajado extra
+                    $salario_dia_actual = $salario_diario; // Se paga el día normal de asueto
+                    $es_dia_pagado_para_hora_extra = true; 
+                    $horas_jornada_para_este_dia = (float)($row_asistencia['horas_jornada_regular'] ?? $jornada_base_default); 
+                } 
+                else if (!empty($CodigoJornada) && $CodigoJornada == '4') { // Jornada tipo 4 es una licencia
                     $total_dias_licencias_empleado++;
+                    $es_dia_pagado_para_hora_extra = true;
+                    $licencia_info = $NombresCodigoLicenciaPermiso[$row_asistencia['codigo_tipo_licencia']] ?? ['horas' => 0, 'descripcion' => 'N/A'];
+                    $horas_licencia_dia = (float)($licencia_info['horas'] ?? 0);
+                    
                     $valor_hora_normal = ($jornada_base_default > 0) ? ($salario_diario / $jornada_base_default) : 0;
                     $salario_dia_actual = $valor_hora_normal * $horas_licencia_dia;
                     $horas_jornada_para_este_dia = $horas_licencia_dia;
                 }
-                $licencia_display_value = 'L'; // Carácter para otras licencias
-            }
+                else if (!empty($CodigoJornada)) {
+                    $total_dias_jornada_empleado++;
+                    $es_dia_pagado_para_hora_extra = true;
+                    $salario_dia_actual = $salario_diario;
+                    $horas_jornada_para_este_dia = (float)($row_asistencia['horas_jornada_regular'] ?? $jornada_base_default);
+                }
+                else if (!empty($CodigoJornadaDescanso)) {
+                    $total_dias_descanso_empleado++;
+                    $es_dia_pagado_para_hora_extra = true;
+                    $salario_dia_actual = $salario_diario;
+                    // Marcar que hubo un descanso en esta semana para el 7mo día
+                    $weekly_tracking[$week_start_date]['has_descanso'] = true;
+                    $weekly_tracking[$week_start_date]['descanso_date'] = $fecha_actual;
+                }
+                else if (!empty($CodigoJornadaVacaciones)) {
+                    $total_dias_vacaciones_empleado++;
+                    $es_dia_pagado_para_hora_extra = true;
+                    $salario_dia_actual = $salario_diario;
+                }
+                else if (!empty($CodigoJornadaNocturna)) {
+                    $total_dias_nocturna_empleado++;
+                    $es_dia_pagado_para_hora_extra = true;
+                    $salario_dia_actual = $salario_diario;
+                }
+                else if (!empty($CodigoJornadaE4H)) {
+                    $total_dias_e4h_empleado++;
+                    $es_dia_pagado_para_hora_extra = true;
+                    $salario_dia_actual = $salario_diario;
+                }
+                else if (!empty($CodigoLicencia)) { 
+                    $total_dias_licencias_empleado++;
+                    $es_dia_pagado_para_hora_extra = true;
+                    $licencia_info = $NombresCodigoLicenciaPermiso[$row_asistencia['codigo_tipo_licencia']] ?? ['horas' => 0, 'descripcion' => 'N/A'];
+                    $horas_licencia_dia = (float)($licencia_info['horas'] ?? 0);
+                    $valor_hora_normal = ($jornada_base_default > 0) ? ($salario_diario / $jornada_base_default) : 0;
+                    $salario_dia_actual = $valor_hora_normal * $horas_licencia_dia;
+                    $horas_jornada_para_este_dia = $horas_licencia_dia;
+                }
 
-            // Calcular monto de horas extras (solo si el día se considera pagado)
-            if ($es_dia_pagado) {
-                $valor_hora_normal_base = ($jornada_base_default > 0) ? ($salario_diario / $jornada_base_default) : 0;
-                $monto_horas_extra_dia_actual = $horas_extra_registradas * ($valor_hora_normal_base * 2); // Ejemplo: Doble pago
-            }
+                // Calcular monto de horas extras (solo si el día se considera pagado)
+                if ($es_dia_pagado_para_hora_extra) {
+                    $valor_hora_normal_base = ($jornada_base_default > 0) ? ($salario_diario / $jornada_base_default) : 0;
+                    $monto_horas_extra_dia_actual = $horas_extra_registradas * ($valor_hora_normal_base * 2); 
+                    $total_horas_extra_cantidad += $horas_extra_registradas; 
+                }
+            } // Cierre ELSE de la lógica de códigos no contributivos y doble descuento
         } // Cierre if ($row_asistencia)
         
-        // Acumulación de totales de salario devengado, horas extra, y descuentos
-        $total_salario_devengado_empleado += $salario_dia_actual;
-        $total_monto_horas_extra_empleado += $monto_horas_extra_dia_actual;
-        $total_descuentos_empleado += $descuento_dia_actual; // (Si tienes lógica para descuento_dia_actual)
-
-        // Acumular horas regulares, excluyendo días de asueto y licencia completa
-        if ($es_dia_pagado && empty($asueto_display_value) && empty($licencia_display_value) && ($jornada_display_value != '.')) {
-             $total_horas_trabajadas_regulares_empleado += $horas_jornada_para_este_dia;
+        // --- Lógica para cuando NO HAY REGISTRO DE ASISTENCIA (posible FALTA genérica o Asueto de calendario sin registro) ---
+        else { 
+            $es_asueto_calendario = isset($FechaDescripcionAsueto[$fecha_actual]);
+            if (!$es_asueto_calendario) { // Es una FALTA genérica (no es asueto de calendario)
+                $descuento_dia_actual = $salario_diario; // Se deduce el día completo
+                $CodigoJornadaTodas = 'FALTA_GENERICA'; // Código para imagen de FALTA GENÉRICA
+                // Marcar como evento deducible en esta semana para el 7mo día si aplica (asumiendo que faltas genéricas también lo activan)
+                $weekly_tracking[$week_start_date]['has_deductible_event'] = true;
+            } else { // Es un ASUETo del calendario (pero no hay registro específico de asistencia)
+                $CodigoJornadaTodas = 'AS'; // Código para imagen de Asueto de calendario
+                $salario_dia_actual = $salario_diario; // Se paga el día de asueto
+                $total_salario_asuetos += $salario_diario; // Se suma al total de asuetos
+            }
         }
 
-        // Preparar la fila diaria formateada con los valores de display específicos
-        $daily_rows_formatted[] = [
-            'fecha' => date('d/m/Y', strtotime($fecha_actual)),
-            'jornada' => $jornada_display_value,
-            'descanso' => $descanso_display_value,
-            'vacaciones' => $vacaciones_display_value,
-            'nocturna' => $nocturna_display_value,
-            'e_4h' => $e_4h_display_value,
-            'asueto' => $asueto_display_value,
-            'licencia' => $licencia_display_value,
-            'horas_extra' => number_format($horas_extra_registradas, 2),
-            'salario_dia' => number_format($salario_dia_actual, 2),
-            'descuento_dia' => number_format($descuento_dia_actual, 2),
-            'observacion' => $observacion,
+        // Acumulación de totales
+        $total_salario_devengado_empleado += $salario_dia_actual;
+        $total_monto_horas_extra_empleado += $monto_horas_extra_dia_actual;
+        $total_descuentos_empleado += $descuento_dia_actual; 
+        
+        // FINALIZAR FORMACIÓN DEL CODIGO ALL PARA LA IMAGEN (añadir _HE si aplica)
+        if ($horas_extra_registradas > 0 && strpos($CodigoJornadaTodas, '_HE') === false) { 
+            $CodigoJornadaTodas .= str_replace('.', '', (string)$horas_extra_registradas); 
+        }
+        
+        // Buscar el nombre del archivo de imagen en el mapa
+        $image_filename = $jornada_imagenes_map[trim($CodigoJornadaTodas)] ?? '';
+
+        $daily_attendance_details[$fecha_actual] = [
+            'code_all' => $CodigoJornadaTodas,
+            'image_filename' => $image_filename,
+            'horas_extra_dia' => $horas_extra_registradas, // Store daily extra hours for potential sub-rows
         ];
+
     } // Cierre del foreach ($rango_fechas as $fecha_actual)
 
-    // Cálculo del salario líquido
-    $salario_liquido_empleado = $total_salario_devengado_empleado + $total_monto_horas_extra_empleado - $total_descuentos_empleado - $total_otras_deducciones_empleado;
+    // --- CÁLCULO DE DEDUCCIONES DEL 7mo DÍA (DESPUÉS DE PROCESAR TODOS LOS DÍAS) ---
+    foreach ($weekly_tracking as $week_start => $week_data) {
+        if ($week_data['has_deductible_event'] && $week_data['has_descanso'] && !$week_data['deducted_7mo']) {
+            // Deduce el salario diario del día de descanso
+            $total_deduccion_7mo += $salario_diario; // El valor del 7mo es el salario de un día normal
+            $weekly_tracking[$week_start]['deducted_7mo'] = true; // Marca como deducido
+        }
+    }
+    // Sumar la deducción del 7mo día al total de descuentos
+    $total_descuentos_empleado += $total_deduccion_7mo;
+
+
+    // El "Total Extra" es la suma del valor monetario de Asuetos (adicionales) y Horas Extra
+    $total_extra_empleado = $total_salario_asuetos + $total_monto_horas_extra_empleado;
+
+    // Cálculo del Total Salario (Gross): Salario Devengado (normal + asueto base) + Valor Horas Extra + Valor Asuetos Adicionales
+    $total_salario_gross_empleado = $total_salario_devengado_empleado + $total_monto_horas_extra_empleado + $total_salario_asuetos;
+
+    // Cálculo del Salario Líquido Final: Total Salario (Gross) - Total Descuentos
+    $salario_liquido_final_empleado = $total_salario_gross_empleado - $total_descuentos_empleado - $total_otras_deducciones_empleado;
 
     return [
-        'totals' => [
-            'total_salario_devengado' => $total_salario_devengado_empleado,
-            'total_dias_asuetos' => $total_dias_asuetos_empleado,
-            'total_dias_licencias' => $total_dias_licencias_empleado,
-            'total_monto_horas_extra' => $total_monto_horas_extra_empleado,
-            'total_descuentos' => $total_descuentos_empleado,
-            'salario_liquido' => $salario_liquido_empleado,
-            'total_horas_regulares' => $total_horas_trabajadas_regulares_empleado,
-        ],
-        'daily_rows' => $daily_rows_formatted,
+        'total_salario_devengado' => $total_salario_devengado_empleado, 
+        'total_salario_asuetos' => $total_salario_asuetos, // Este es el valor monetario ADICIONAL de asuetos
+        'total_monto_horas_extra' => $total_monto_horas_extra_empleado, 
+        'total_descuentos' => $total_descuentos_empleado, 
+        'salario_liquido_final' => $salario_liquido_final_empleado, 
+        'total_extra_general' => $total_extra_empleado, 
+        'total_horas_extra_cantidad' => $total_horas_extra_cantidad, 
+        'total_salario_gross' => $total_salario_gross_empleado, 
+        'daily_details' => $daily_attendance_details, 
     ];
 }
 
@@ -337,14 +459,132 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
 // INICIO DE LA CLASE PDF (deberías tener una estructura similar)
 class PDF extends FPDF
 {
-    // ... tu código de la clase PDF (Header, Footer, etc.) ...
+    // Mapeo manual de días de la semana (para asegurar el español)
+    private $day_names_spanish = [
+        'Sun' => 'Dom',
+        'Mon' => 'Lun',
+        'Tue' => 'Mar',
+        'Wed' => 'Mié',
+        'Thu' => 'Jue',
+        'Fri' => 'Vie',
+        'Sat' => 'Sáb'
+    ];
+
     function Header() {
-        global $fecha_periodo_inicio, $fecha_periodo_fin, $departamentoEmpresaTexto, $RutaText, $quincena;
-        $this->SetFont('Arial', 'B', 10);
-        $this->Cell(0, 5, utf8_decode('Reporte de Planilla - '. $departamentoEmpresaTexto . ' (' . $RutaText . ') - Quincena: ' . $quincena), 0, 1, 'C');
-        $this->Cell(0, 5, utf8_decode('Período: ' . date('d/m/Y', strtotime($fecha_periodo_inicio)) . ' al ' . date('d/m/Y', strtotime($fecha_periodo_fin))), 0, 1, 'C');
-        $this->Ln(5);
+        global $fecha_periodo_inicio, $fecha_periodo_fin, $departamentoEmpresaTexto, $RutaText, $quincena, $rango_fechas;
+        // Variables adicionales para el Header (asegurarse de que estén definidas en el ámbito global del script principal)
+        global $_SESSION, $persona_responsable; 
+
+        // --- INICIO CÓDIGO DEL USUARIO PARA EL HEADER ---
+        // Logo
+        $img = $_SERVER['DOCUMENT_ROOT'].'/acomtus/img/'.$_SESSION['logo_uno'];
+        // Asegurarse de que el archivo de imagen del logo existe
+        if (file_exists($img)) {
+            $this->Image($img,5,4,24,24);
+        } else {
+            // Si el logo no existe, puedes imprimir un texto o dejar un espacio en blanco
+            $this->SetXY(5,4);
+            $this->Cell(24,24,'[LOGO]',1,0,'C');
+        }
+        
+        // Arial bold 14
+        $this->SetFont('Arial','B',14);
+        // Título de la Institución
+        $this->SetXY(30,5);
+        $this->Cell(100,7,mb_convert_encoding($_SESSION["nombre_institucion"],"ISO-8859-1"),0,1,"L",false);
+        
+        // Contenido para Reporte de Trabajo y Reporte de Ruta
+        $reporte_trabajo_display = utf8_decode('Reporte de trabajo correspondiente a la quincena del ');
+        $reporte_trabajo_display .= date('d', strtotime($fecha_periodo_inicio)) . ' al ' . date('d', strtotime($fecha_periodo_fin)) . ' de ' . utf8_decode(strftime('%B', strtotime($fecha_periodo_inicio))) . ' de ' . date('Y', strtotime($fecha_periodo_inicio));
+        
+        $reporte_ruta_display = utf8_decode($departamentoEmpresaTexto);
+        if (!empty($RutaText) && $RutaText != '00' && $RutaText != 'Seleccionar...') { // Si se seleccionó una ruta específica
+            $reporte_ruta_display .= utf8_decode(' (Ruta: ') . utf8_decode($RutaText) . utf8_decode(')');
+        }
+
+        // Arial bold 11
+        $this->SetFont('Arial','B',11);
+        $this->SetX(30);
+        $this->Cell(100,6, $reporte_trabajo_display,0,1,"L",false);
+        $this->SetX(30);
+        $this->Cell(100,6, $reporte_ruta_display,0,1,"L",false);
+        
+        // Persona Responsable del Punteo.
+        $this->SetFont('Arial','B',9);
+        $this->SetX(30);
+        $this->Cell(130,6,mb_convert_encoding("Responsable del Punteo: " . ($persona_responsable ?? 'N/A'),"ISO-8859-1"),0,0,"L",false);
+        $this->Cell(4,6,"",0,0,"L",false); 
+        $this->Ln(5); // Espacio después de la información de la empresa/responsable
+        // --- FIN CÓDIGO DEL USUARIO PARA EL HEADER ---
+
+        // Encabezados de la tabla principal
+        $this->SetFont('Arial', 'B', 7);
+        $this->SetFillColor(200, 220, 255);
+        $this->SetDrawColor(0,0,0); // Set border color to black
+
+        // Anchos para las COLUMNAS FIJAS INICIALES: No., CODIGO, NOMBRE
+        $w_initial_fixed = [7, 15, 50]; // Total 72mm
+        // Ancho para cada columna de día
+        $daily_col_width = 7.5; // Aproximadamente 16 días * 7.5mm = 120mm
+
+        // Anchos para las COLUMNAS FINANCIERAS PRINCIPALES: Salarios, Asuetos, Hora Extra, Total Extra, Salario Líquido
+        $w_financial_fixed = [12, 9, 17, 14, 15]; // Ajustados a 67mm
+
+        $header_height = 12; // Altura total para el encabezado de dos filas
+        $half_header_height = $header_height / 2; // 6mm para cada sub-fila de encabezado
+
+        $x_start = 10;
+        $y_start_table_headers = $this->GetY(); // Obtener la Y actual después del bloque de información de la empresa
+
+        // 1. Imprimir encabezados de la primera fila
+        $this->SetY($y_start_table_headers);
+        $this->SetX($x_start);
+
+        $this->Cell($w_initial_fixed[0], $header_height, 'No.', 1, 0, 'C', true); // No.
+        $this->Cell($w_initial_fixed[1], $header_height, 'CODIGO', 1, 0, 'C', true); // CODIGO
+        $this->Cell($w_initial_fixed[2], $header_height, 'NOMBRE', 1, 0, 'C', true); // NOMBRE
+        
+        // Mover X a donde comienzan los encabezados de días
+        $x_after_initial_fixed = $x_start + array_sum($w_initial_fixed);
+        $this->SetX($x_after_initial_fixed);
+
+        // Encabezados superiores de días (Nombre del día)
+        foreach ($rango_fechas as $fecha_actual) {
+            $english_day_name = date('D', strtotime($fecha_actual)); 
+            $spanish_day_name = $this->day_names_spanish[$english_day_name] ?? $english_day_name; 
+            $this->Cell($daily_col_width, $half_header_height, utf8_decode(strtoupper($spanish_day_name)), 1, 0, 'C', true);
+        }
+
+        // Encabezados financieros de la primera fila (padres o que abarcan dos filas)
+        $this->Cell($w_financial_fixed[0], $header_height, 'Salarios', 1, 0, 'C', true);
+        $this->Cell($w_financial_fixed[1], $header_height, 'Asuetos', 1, 0, 'C', true);
+        $this->Cell($w_financial_fixed[2], $half_header_height, utf8_decode('Hora Extra'), 1, 0, 'C', true); // Encabezado padre de Hora Extra
+        $this->Cell($w_financial_fixed[3], $half_header_height, 'Total', 1, 0, 'C', true); // Encabezado padre de Total Extra
+        $this->Cell($w_financial_fixed[4], $half_header_height, 'Salario', 1, 0, 'C', true); // Encabezado padre de Salario Liquido
+
+        $this->Ln(); // Nueva línea para la segunda fila de encabezados
+
+        // Segunda fila de encabezados (Números de día y sub-encabezados C, V, Extra, Liquido)
+        $this->SetY($y_start_table_headers + $half_header_height); // Mover Y hacia abajo a la mitad del encabezado
+        $this->SetX($x_after_initial_fixed); // Resetear X al inicio de las columnas diarias
+
+        // Números de día
+        foreach ($rango_fechas as $fecha_actual) {
+            $day_number = date('d', strtotime($fecha_actual)); 
+            $this->Cell($daily_col_width, $half_header_height, $day_number, 1, 0, 'C', true);
+        }
+
+        // Sub-encabezados para columnas financieras
+        $this->Cell($w_financial_fixed[0], $half_header_height, '', 0, 0, 'C', false); // Celda vacía bajo Salarios
+        $this->Cell($w_financial_fixed[1], $half_header_height, '', 0, 0, 'C', false); // Celda vacía bajo Asuetos
+        $this->Cell($w_financial_fixed[2]/2, $half_header_height, 'C', 1, 0, 'C', true); // Sub-encabezado C de Hora Extra
+        $this->Cell($w_financial_fixed[2]/2, $half_header_height, 'V', 1, 0, 'C', true); // Sub-encabezado V de Hora Extra
+        $this->Cell($w_financial_fixed[3], $half_header_height, 'Extra', 1, 0, 'C', true); // Sub-encabezado Extra de Total Extra
+        $this->Cell($w_financial_fixed[4], $half_header_height, 'Liquido', 1, 0, 'C', true); // Sub-encabezado Liquido de Salario Liquido
+
+        $this->Ln(); // Mover a la siguiente línea después de completar todos los encabezados.
     }
+
     function Footer() {
         $this->SetY(-15);
         $this->SetFont('Arial', 'I', 8);
@@ -373,37 +613,12 @@ $datos_empleado_principal = $sorted_datos_empleado_principal; // Reemplazar con 
 $i=1; // Número correlativo de empleado
 $jornada_base_default = 8; // Define un valor de jornada por defecto (ej. 8 horas)
 
-// Anchos para la LÍNEA PRINCIPAL DEL EMPLEADO (incluyendo cálculos)
-$w_main_employee_row = [
-    7,  // No.
-    15, // CODIGO
-    50, // NOMBRE
-    30, // CARGO
-    20, // RUTA
-    22, // SALARIO
-    18, // TOTAL ASUETOS (días)
-    18, // TOTAL LICENCIAS (días)
-    22, // TOTAL HORAS EXTRAS (monto)
-    22, // TOTAL DESCUENTO (monto)
-    26  // SALARIO LIQUIDO
-];
-
-// Anchos para la TABLA DE DETALLES DIARIOS (12 columnas)
-$w_daily_details = [
-    18, // Fecha
-    20, // Jornada
-    18, // Descanso
-    18, // Vacaciones
-    18, // Nocturna
-    18, // E_4H
-    18, // Asueto
-    18, // Licencia
-    18, // Horas Extra (cantidad)
-    18, // Salario (del día)
-    18, // Descuento (del día)
-    35  // Observacion
-];
-
+// Anchos para las COLUMNAS FIJAS INICIALES: No., CODIGO, NOMBRE
+$w_initial_fixed = [7, 15, 50]; // Total 72mm
+// Ancho para cada columna de día
+$daily_col_width = 7.5;
+// Anchos para las COLUMNAS FINANCIERAS PRINCIPALES: Salarios, Asuetos, Hora Extra (padre), Total Extra, Salario Líquido
+$w_financial_fixed = [12, 9, 17, 14, 15]; // Ajustados a 67mm
 
 // --- INICIO DEL BUCLE PRINCIPAL QUE ITERA A TRAVÉS DE CADA EMPLEADO ---
 foreach ($datos_empleado_principal as $row_empleado) {
@@ -411,85 +626,81 @@ foreach ($datos_empleado_principal as $row_empleado) {
     $nombres_empleado = TRIM($row_empleado['nombres']);
     $apellidos_empleado = TRIM($row_empleado['apellidos']);
     $salario_mensual = (float)$row_empleado['salario'];
-    $cargo_empleado = utf8_decode($row_empleado['cargo_descripcion'] ?? 'N/A');
-    $ruta_empleado = utf8_decode($row_empleado['codigo_ruta'] ?? 'N/A');
-
+    $codigo_departamento_empleado = TRIM($row_empleado['codigo_departamento_empresa']);
+    
     $nombre_completo = trim(utf8_decode($nombres_empleado . ' ' . $apellidos_empleado));
 
-    // 1. PROCESAR DATOS Y OBTENER TOTALES PARA EL EMPLEADO ACTUAL
-    $employee_data = processEmployeeAttendanceData(
+    // 1. PROCESAR DATOS Y OBTENER TOTALES PARA EL EMPLEADO ACTUAL (incluyendo detalles diarios)
+    $results = processEmployeeAttendanceData(
         $rango_fechas,
         $codigo_personal,
         $salario_mensual,
         $jornada_base_default,
         $asistencia_por_empleado_y_fecha,
-        $NombresCodigoLicenciaPermiso
+        $NombresCodigoLicenciaPermiso,
+        $jornada_imagenes_map,
+        $FechaDescripcionAsueto // Pass Asueto dates here
     );
 
-    $totals = $employee_data['totals'];
-    $daily_rows_to_print = $employee_data['daily_rows'];
+    // Nuevas variables para los totales (usando el operador null coalescing para evitar "Undefined index" si la clave falta)
+    $total_salarios_a_mostrar = $results['total_salario_devengado'] ?? 0;
+    $total_salario_asuetos_a_mostrar = $results['total_salario_asuetos'] ?? 0;
+    $total_monto_horas_extra_a_mostrar = $results['total_monto_horas_extra'] ?? 0;
+    $total_extra_general_a_mostrar = $results['total_extra_general'] ?? 0; 
+    $total_salario_gross_a_mostrar = $results['total_salario_gross'] ?? 0;
+    $total_horas_extra_cantidad_a_mostrar = $results['total_horas_extra_cantidad'] ?? 0;
+    $salario_liquido_final_a_mostrar = $results['salario_liquido_final'] ?? 0;
+
+
+    $daily_attendance_details = $results['daily_details'] ?? []; // Asegurar que daily_details sea un array
 
     // 2. IMPRIMIR LA LÍNEA PRINCIPAL DEL EMPLEADO CON CÁLCULOS INTEGRADOS
-    $pdf->SetFont('Arial', 'B', 8); // Negrita para la línea principal
+    $pdf->SetFont('Arial', '', 7); // Fuente para la línea principal
     $pdf->SetFillColor(234, 236, 238); // Color de fondo claro para la línea principal
     $pdf->SetDrawColor(0,0,0); // Borde negro
 
     $pdf->SetX(10); // Reiniciar posición X
 
-    // COLUMNAS FIJAS INICIALES
-    $pdf->Cell($w_main_employee_row[0], 7, $i, 1, 0, 'C', true); // No.
-    $pdf->Cell($w_main_employee_row[1], 7, $codigo_personal, 1, 0, 'L', true); // CÓDIGO
-    $pdf->Cell($w_main_employee_row[2], 7, $nombre_completo, 1, 0, 'L', true); // NOMBRE
-    $pdf->Cell($w_main_employee_row[3], 7, $cargo_empleado, 1, 0, 'L', true); // CARGO
-    $pdf->Cell($w_main_employee_row[4], 7, $ruta_empleado, 1, 0, 'L', true); // RUTA
+    // COLUMNAS FIJAS INICIALES (No., CODIGO, NOMBRE)
+    $pdf->Cell($w_initial_fixed[0], 6, $i, 1, 0, 'C', true); // No.
+    $pdf->Cell($w_initial_fixed[1], 6, $codigo_personal, 1, 0, 'L', true); // CÓDIGO
+    $pdf->Cell($w_initial_fixed[2], 6, $nombre_completo, 1, 0, 'L', true); // NOMBRE
 
-    // COLUMNAS DE CÁLCULOS EN LA MISMA LÍNEA
-    $pdf->Cell($w_main_employee_row[5], 7, number_format($totals['total_salario_devengado'], 2, '.', ','), 1, 0, 'R', true); // SALARIO
-    $pdf->Cell($w_main_employee_row[6], 7, number_format($totals['total_dias_asuetos'], 0, '.', ','), 1, 0, 'C', true); // TOTAL ASUETOS (días)
-    $pdf->Cell($w_main_employee_row[7], 7, number_format($totals['total_dias_licencias'], 0, '.', ','), 1, 0, 'C', true); // TOTAL LICENCIAS (días)
-    $pdf->Cell($w_main_employee_row[8], 7, number_format($totals['total_monto_horas_extra'], 2, '.', ','), 1, 0, 'R', true); // TOTAL HORAS EXTRAS (monto)
-    $pdf->Cell($w_main_employee_row[9], 7, number_format($totals['total_descuentos'], 2, '.', ','), 1, 0, 'R', true); // TOTAL DESCUENTO (monto)
-    $pdf->Cell($w_main_employee_row[10], 7, number_format($totals['salario_liquido'], 2, '.', ','), 1, 1, 'R', true); // SALARIO LIQUIDO (1,1 para nueva línea)
+    // Imprimir las imágenes diarias
+    foreach ($rango_fechas as $fecha_actual) {
+        $daily_detail = $daily_attendance_details[$fecha_actual] ?? ['image_filename' => ''];
+        $image_filename = $daily_detail['image_filename'];
+        
+        $image_full_path = $image_base_path . $image_filename;
 
-    // 3. IMPRIMIR LOS ENCABEZADOS DE LA TABLA DE DETALLES DIARIOS
-    $pdf->SetFont('Arial', 'B', 7); // Fuente más pequeña para encabezados diarios
-    $pdf->SetFillColor(200, 220, 255); // Color de fondo para encabezados
-    $pdf->SetX(10); // Alinea con la primera columna de datos diarios
-    $pdf->Cell($w_daily_details[0], 6, 'Fecha', 1, 0, 'C', true);
-    // REMOVED: Entrada, Salida
-    $pdf->Cell($w_daily_details[1], 6, 'Jornada', 1, 0, 'C', true);
-    $pdf->Cell($w_daily_details[2], 6, 'Descanso', 1, 0, 'C', true);
-    $pdf->Cell($w_daily_details[3], 6, 'Vacaciones', 1, 0, 'C', true);
-    $pdf->Cell($w_daily_details[4], 6, 'Nocturna', 1, 0, 'C', true);
-    $pdf->Cell($w_daily_details[5], 6, 'E_4H', 1, 0, 'C', true);
-    $pdf->Cell($w_daily_details[6], 6, 'Asueto', 1, 0, 'C', true);
-    $pdf->Cell($w_daily_details[7], 6, 'Licencia', 1, 0, 'C', true);
-    $pdf->Cell($w_daily_details[8], 6, 'Hrs Extra', 1, 0, 'C', true);
-    $pdf->Cell($w_daily_details[9], 6, 'Salario Dia', 1, 0, 'C', true);
-    $pdf->Cell($w_daily_details[10], 6, 'Descuento', 1, 0, 'C', true);
-    $pdf->Cell($w_daily_details[11], 6, utf8_decode('Observación'), 1, 1, 'C', true);
-
-    // 4. IMPRIMIR LAS FILAS DE DETALLES DIARIOS
-    $pdf->SetFont('Arial', '', 7); // Fuente para los datos diarios
-    foreach ($daily_rows_to_print as $daily_row) {
-        $pdf->SetX(10);
-        $pdf->Cell($w_daily_details[0], 5, $daily_row['fecha'], 1, 0, 'C');
-        // REMOVED: Entrada, Salida
-        $pdf->Cell($w_daily_details[1], 5, $daily_row['jornada'], 1, 0, 'C');
-        $pdf->Cell($w_daily_details[2], 5, $daily_row['descanso'], 1, 0, 'C');
-        $pdf->Cell($w_daily_details[3], 5, $daily_row['vacaciones'], 1, 0, 'C');
-        $pdf->Cell($w_daily_details[4], 5, $daily_row['nocturna'], 1, 0, 'C');
-        $pdf->Cell($w_daily_details[5], 5, $daily_row['e_4h'], 1, 0, 'C');
-        $pdf->Cell($w_daily_details[6], 5, $daily_row['asueto'], 1, 0, 'C');
-        $pdf->Cell($w_daily_details[7], 5, $daily_row['licencia'], 1, 0, 'C');
-        $pdf->Cell($w_daily_details[8], 5, $daily_row['horas_extra'], 1, 0, 'C');
-        $pdf->Cell($w_daily_details[9], 5, $daily_row['salario_dia'], 1, 0, 'R');
-        $pdf->Cell($w_daily_details[10], 5, $daily_row['descuento_dia'], 1, 0, 'R');
-        $pdf->Cell($w_daily_details[11], 5, $daily_row['observacion'], 1, 1, 'L');
+        // Ensure image file exists before attempting to insert it
+        // And that the filename is not empty
+        if (!empty($image_filename) && file_exists($image_full_path)) {
+            $pdf->Cell($daily_col_width, 6, '', 1, 0, 'C', true); // Celda de fondo para la imagen
+            // Posicionar la imagen dentro de la celda. Ajustar +0.5 para un pequeño margen.
+            $pdf->Image($image_full_path, $pdf->GetX() - $daily_col_width + 0.5, $pdf->GetY() + 0.5, $daily_col_width - 1, 5); // Ancho y alto de la imagen
+        } else {
+            $pdf->Cell($daily_col_width, 6, '', 1, 0, 'C', true); // Celda vacía si no hay imagen o archivo
+        }
     }
 
-    // SALTO DE LÍNEA GRANDE ANTES DEL PRÓXIMO EMPLEADO
-    $pdf->Ln(10); // Ajusta este valor para la separación deseada
+    // IMPRIMIR COLUMNAS FIJAS FINALES (Salarios, Asuetos, Hora Extra C:V, Total Extra, Salario Líquido)
+    $pdf->Cell($w_financial_fixed[0], 6, number_format($total_salarios_a_mostrar, 2, '.', ','), 1, 0, 'R', true); // Salarios
+    $pdf->Cell($w_financial_fixed[1], 6, number_format($total_salario_asuetos_a_mostrar, 2, '.', ','), 1, 0, 'R', true); // Asuetos
+
+    // Columna de HORAS EXTRA (C:V)
+    $he_display_string_C = number_format($total_horas_extra_cantidad_a_mostrar, 0, '.', ','); // Cantidad entera
+    $he_display_string_V = number_format($total_monto_horas_extra_a_mostrar, 2, '.', ','); // Valor con 2 decimales
+
+    // Ahora se imprimen en dos celdas separadas (C y V)
+    $pdf->Cell($w_financial_fixed[2]/2, 6, $he_display_string_C, 1, 0, 'C', true); // Celda C
+    $pdf->Cell($w_financial_fixed[2]/2, 6, $he_display_string_V, 1, 0, 'C', true); // Celda V
+
+    $pdf->Cell($w_financial_fixed[3], 6, number_format($total_extra_general_a_mostrar, 2, '.', ','), 1, 0, 'R', true); // Total Extra (TE)
+    $pdf->Cell($w_financial_fixed[4], 6, number_format($salario_liquido_final_a_mostrar, 2, '.', ','), 1, 1, 'R', true); // Salario Liquido
+    
+    // SALTO DE LÍNEA PEQUEÑO ENTRE EMPLEADOS (opcional, ajusta si es necesario)
+    $pdf->Ln(2); 
 
     $i++; // Incrementar el contador de empleado
 }
@@ -501,3 +712,4 @@ $print_nombre = mb_convert_encoding("Planilla: $departamentoEmpresaTexto - $quin
 $pdf->Output($print_nombre,$modo);
 
 ?>
+#
