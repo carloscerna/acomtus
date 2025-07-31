@@ -224,7 +224,7 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
     $daily_attendance_details = []; // Almacenará los códigos e imágenes para cada día
 
     // MODIFICACIÓN: Redondear salario diario a dos decimales
-    $salario_diario = round($salario_mensual / 30, 2); // Salario diario basado en 30 días, redondeado a 2 decimales
+    $salario_diario = $salario_mensual / 30; // Salario diario basado en 30 días, redondeado a 2 decimales
 
     // Códigos que no deben sumar al salario (solo visualización)
     $non_contributory_codes_display_only = ['4144444', '4344444', '4244444']; 
@@ -262,7 +262,6 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
 
     // Nuevos códigos de Nocturnidad y sus valores de pago base (el 0.57 es la adición por nocturnidad)
     $nocturnidad_base_value = 0.57; // Valor fijo de nocturnidad
-
     $nocturnidad_codes_specific = [
         '2144445' => [
             'paga_salario_diario' => true,
@@ -865,7 +864,7 @@ foreach ($datos_empleado_principal as $row_empleado) {
     $total_salarios_a_mostrar = round($results['total_salario_devengado'] ?? 0, 2);
     $total_salario_asuetos_a_mostrar = round($results['total_salario_asuetos'] ?? 0, 2); 
     $total_monto_horas_extra_a_mostrar = round($results['total_monto_horas_extra'] ?? 0, 2); 
-    $total_extra_general_a_mostrar = round($results['total_extra_general'] ?? 0, 2); 
+    $total_extra_general_a_mostrar = $results['total_extra_general'] ?? 0; 
     $total_salario_gross_a_mostrar = round($results['total_salario_gross'] ?? 0, 2); 
     $total_horas_extra_cantidad_a_mostrar = $results['total_horas_extra_cantidad'] ?? 0; // Cantidad, no monetario
     $salario_liquido_final_a_mostrar = round($results['salario_liquido_final'] ?? 0, 2); 
