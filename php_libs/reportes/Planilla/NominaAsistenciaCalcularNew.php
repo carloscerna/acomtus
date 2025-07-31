@@ -223,8 +223,7 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
 
     $daily_attendance_details = []; // Almacenará los códigos e imágenes para cada día
 
-    // MODIFICACIÓN: Redondear salario diario a dos decimales
-    $salario_diario = $salario_mensual / 30; // Salario diario basado en 30 días, redondeado a 2 decimales
+    $salario_diario = $salario_mensual / 30; // Salario diario basado en 30 días
 
     // Códigos que no deben sumar al salario (solo visualización)
     $non_contributory_codes_display_only = ['4144444', '4344444', '4244444']; 
@@ -260,46 +259,13 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         '41534444' => $salario_diario + ($salario_diario / 2) // TDA 12 horas adicionales
     ];
 
-    // Nuevos códigos de Nocturnidad y sus valores de pago base (el 0.57 es la adición por nocturnidad)
-    $nocturnidad_base_value = 0.57; // Valor fijo de nocturnidad
-    $nocturnidad_codes_specific = [
-        '2144445' => [
-            'paga_salario_diario' => true,
-            'agrega_nocturnidad' => true,
-            'agrega_extra' => 0
-        ], // Jornada Normal + Nocturnidad
-        '1144445' => [
-            'paga_salario_diario' => true,
-            'agrega_nocturnidad' => true,
-            'agrega_extra' => 0
-        ], // Media Jornada + Nocturnidad
-        '1144425' => [
-            'paga_salario_diario' => true,
-            'agrega_nocturnidad' => true,
-            'agrega_extra' => $salario_diario
-        ], // Media Jornada + Nocturnidad + Extra
-        // Asueto + Nocturnidad
-        '11444450' => [ // Asumo este código para Asueto + Nocturnidad
-            'paga_salario_diario' => true,
-            'agrega_nocturnidad' => true,
-            'agrega_extra' => 0
-        ],
-        // Asueto + Nocturnidad + Extra
-        '2124445' => [
-            'paga_salario_diario' => true,
-            'agrega_nocturnidad' => true,
-            'agrega_extra' => $salario_diario
-        ]
+    // Nuevos códigos de Nocturnidad
+    $nocturnidad_codes = [
+        '2144445' => 0.57, // Nocturnidad base por día (0.57 ctvs)
+        '1144425' => 0.57, // 4h + 8h Extra + Nocturnidad (solo el valor de nocturnidad)
+        '1144424' => 0, // 4h + 8h Extra (no nocturnidad explícita, valor 0 para nocturnidad)
+        '2144445' => 0.57 // Jornada normal + Nocturnidad
     ];
-
-    // MODIFICACIÓN: Código con un monto EXTRA fijo, no relacionado con nocturnidad
-    $fixed_extra_codes = [
-        '1144424' => [ // Código para 4 horas que completan 44 horas semanales + un salario diario a Extra (Corregido de 11444240)
-            'paga_salario_diario' => true,
-            'agrega_extra' => $salario_diario // Este monto se sumará a total_trabajo_extra_empleado
-        ]
-    ];
-
 
     // Weekly tracking for 7mo day deduction
     $weekly_tracking = []; // Key: week_start_date (Monday), Value: ['has_deductible_event' => bool, 'has_descanso' => bool, 'descanso_date' => date_string]
@@ -313,8 +279,7 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         $descuento_dia_actual = 0; // Descuento por este día (si es falta o castigo)
         $horas_jornada_para_este_dia = $jornada_base_default; // Horas por defecto
         $monto_nocturnidad_dia_actual = 0; // Monto de nocturnidad para el día
-        $monto_extra_especifico = 0; // Para los casos como 1144425, 2124445 y 1144424
-
+        
         $es_dia_pagado_para_hora_extra = false; // Flag para determinar si el día se paga para cálculos de HE
         $is_activity_recorded = false; // Flag: Indica si hay un registro de actividad (pagada o no)
         
@@ -373,8 +338,6 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
                 $monto_horas_extra_dia_actual = 0; // No hay pago de HE
                 $descuento_dia_actual = 0; // No es una "falta" deducible
                 $es_dia_pagado_para_hora_extra = false;
-                $horas_extra_registradas = 0; // No contar horas extra si es solo visualización
-
             } 
             // --- Lógica para DÍAS DE CASTIGO 'C' o FALTA 'F' (doble descuento) ---
             else if (in_array(trim($CodigoJornadaTodas_temp), $double_deduction_codes)) {
@@ -382,52 +345,33 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
                 $monto_horas_extra_dia_actual = 0; // No hay pago de HE
                 $descuento_dia_actual = $salario_diario * 2; // Doble descuento
                 $es_dia_pagado_para_hora_extra = false;
-                $horas_extra_registradas = 0; // No contar horas extra si es castigo/falta
                 
                 // Marcar que hubo un evento deducible en esta semana para el 7mo día
                 $weekly_tracking[$week_start_date]['has_deductible_event'] = true;
             }
-            // --- Lógica para códigos de NOCTURNIDAD ESPECÍFICOS ---
-            else if (isset($nocturnidad_codes_specific[trim($CodigoJornadaTodas_temp)])) {
-                $noct_config = $nocturnidad_codes_specific[trim($CodigoJornadaTodas_temp)];
-                
-                if ($noct_config['paga_salario_diario']) {
-                    $salario_dia_actual = $salario_diario;
-                    $es_dia_pagado_para_hora_extra = true;
-                }
-
-                if ($noct_config['agrega_nocturnidad']) {
-                    // Solo si el departamento es 08 o 09, se suma el valor de nocturnidad
-                    if ($codigo_departamento_empleado == '08' || $codigo_departamento_empleado == '09') {
-                        $monto_nocturnidad_dia_actual = $nocturnidad_base_value; 
-                        $total_nocturnidad_cantidad_empleado += 1; // Asumimos 1 día de nocturnidad por el código
-                    }
-                }
-
-                if ($noct_config['agrega_extra'] > 0) {
-                    $monto_extra_especifico = $noct_config['agrega_extra'];
-                }
-
-                // Si CodigoJornadaNocturna es 5, no se toman en cuenta las horas extra registradas del campo hora_extra
-                if (trim($CodigoJornadaNocturna) == '5') {
-                    $horas_extra_registradas = 0; // Anular horas extra del campo hora_extra
-                }
-                // Si el código es 2124445, se paga salario_diario para "Asueto" pero no se suma a $total_salario_asuetos como adicional
-                // Se suma a $total_trabajo_extra_empleado.
-                if (trim($CodigoJornadaTodas_temp) == '2124445') {
-                    // Ya $salario_dia_actual = $salario_diario;
-                    // El valor adicional del asueto no se maneja aquí, solo se paga el día base.
-                    // El "Extra" va a $total_trabajo_extra_empleado
-                }
-            }
-            // --- Lógica NORMAL para días que SÍ PUEDEN SUMAR AL SALARIO (cuando no es un código de nocturnidad específico) ---
+            // --- Lógica NORMAL para días que SÍ PUEDEN SUMAR AL SALARIO ---
             else { 
                 $es_dia_pagado_para_hora_extra = true; // Potencialmente contribuye al salario
 
-                // Priority: Asueto (con pago adicional) > Asueto (normal) > Trabajo Descanso Asueto > Trabajo Vacación > Trabajo Descanso > Jornada > Descanso > Vacaciones > E_4H > Licencias (otras)
-                
+                // Priority: Nocturnidad > Asueto (con pago adicional) > Asueto (normal) > Trabajo Descanso Asueto > Trabajo Vacación > Trabajo Descanso > Jornada > Descanso > Vacaciones > E_4H > Licencias (otras)
+                // --- Lógica para Nocturnidad (2144445, 11444254, 11444244, 21444450) ---
+                if (isset($nocturnidad_codes[trim($CodigoJornadaTodas_temp)])) {
+                    // Solo si el departamento es 08 o 09, se suma el valor de nocturnidad
+                    if ($codigo_departamento_empleado == '08' || $codigo_departamento_empleado == '09') {
+                        $monto_nocturnidad_dia_actual = $nocturnidad_codes[trim($CodigoJornadaTodas_temp)]; 
+                        $total_nocturnidad_cantidad_empleado += 1; // Asumimos 1 día de nocturnidad por el código
+                    }
+                    $salario_dia_actual = $salario_diario; // El día base se paga
+                    $es_dia_pagado_para_hora_extra = true;
+                    $total_dias_nocturna_empleado++; // Contar día de nocturnidad
+                    // Lógica específica para 11444254 y 11444244 (implican horas extra)
+                    if (trim($CodigoJornadaTodas_temp) == '11444254' || trim($CodigoJornadaTodas_temp) == '11444244') {
+                         // Las horas extra ya vienen en $horas_extra_registradas y se calcularán abajo
+                         // El salario diario ya se sumó.
+                    }
+                }
                 // --- Lógica para Asuetos con pago adicional por trabajar (41614444, 41624444, 41634444) ---
-                if (isset($asueto_worked_codes[trim($CodigoJornadaTodas_temp)])) {
+                else if (isset($asueto_worked_codes[trim($CodigoJornadaTodas_temp)])) {
                     $total_dias_asuetos_empleado_count++; // Contar como día de asueto
                     $total_salario_asuetos += $asueto_worked_codes[trim($CodigoJornadaTodas_temp)]; // Suma el valor ADICIONAL
                     $salario_dia_actual = $salario_diario; // El día base del asueto se paga aquí
@@ -471,19 +415,6 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
                     $es_dia_pagado_para_hora_extra = true;
                     $horas_jornada_para_este_dia = (float)($row_asistencia['horas_jornada_regular'] ?? $jornada_base_default); // Usa jornada_regular si aplica
                 }
-                // Lógica para códigos con EXTRA FIJO (ej. 1144424)
-                else if (isset($fixed_extra_codes[trim($CodigoJornadaTodas_temp)])) {
-                    $fixed_extra_config = $fixed_extra_codes[trim($CodigoJornadaTodas_temp)];
-                    
-                    if ($fixed_extra_config['paga_salario_diario']) {
-                        $salario_dia_actual = $salario_diario;
-                        $es_dia_pagado_para_hora_extra = true;
-                    }
-                    if ($fixed_extra_config['agrega_extra'] > 0) {
-                        $monto_extra_especifico = $fixed_extra_config['agrega_extra'];
-                    }
-                    $horas_extra_registradas = 0; // Las horas extra del campo hora_extra no se toman en cuenta para este código, ya que el "extra" es fijo.
-                }
                 else if (!empty($CodigoJornada) && $CodigoJornada == '4') { // Jornada tipo 4 es una licencia
                     $total_dias_licencias_empleado++;
                     $es_dia_pagado_para_hora_extra = true;
@@ -513,18 +444,10 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
                     $es_dia_pagado_para_hora_extra = true;
                     $salario_dia_actual = $salario_diario;
                 }
-                else if (!empty($CodigoJornadaNocturna)) { // Este else if es para códigos de nocturnidad que no estén en la lista específica
+                else if (!empty($CodigoJornadaNocturna)) {
                     $total_dias_nocturna_empleado++;
                     $es_dia_pagado_para_hora_extra = true;
                     $salario_dia_actual = $salario_diario;
-                    // Solo si el departamento es 08 o 09, se suma el valor de nocturnidad
-                    if ($codigo_departamento_empleado == '08' || $codigo_departamento_empleado == '09') {
-                        $monto_nocturnidad_dia_actual = $nocturnidad_base_value;
-                        $total_nocturnidad_cantidad_empleado += 1;
-                    }
-                    if (trim($CodigoJornadaNocturna) == '5') {
-                        $horas_extra_registradas = 0; // Anular horas extra si CodigoJornadaNocturna es '5'
-                    }
                 }
                 else if (!empty($CodigoJornadaE4H)) {
                     $total_dias_e4h_empleado++;
@@ -541,20 +464,15 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
                     $horas_jornada_para_este_dia = $horas_licencia_dia;
                 }
 
-                // Calcular monto de horas extras (solo if the day is considered paid AND no es código de nocturnidad 5)
-                // Las horas extra se toman en cuenta si $CodigoJornadaNocturna NO es '5'
-                // O si es '5', pero no hay horas extra registradas, entonces se mantiene en 0.
-                if ($es_dia_pagado_para_hora_extra && (trim($CodigoJornadaNocturna) != '5' || $horas_extra_registradas > 0)) {
+                // Calcular monto de horas extras (solo if the day is considered paid)
+                if ($es_dia_pagado_para_hora_extra) {
                     // Factor de hora extra: 2 para departamentos 02 y 03, 1 para otros
                     $factor_hora_extra = ($codigo_departamento_empleado == '02' || $codigo_departamento_empleado == '03') ? 2 : 1;
                     $valor_hora_normal_base = ($jornada_base_default > 0) ? ($salario_diario / $jornada_base_default) : 0;
                     $monto_horas_extra_dia_actual = $horas_extra_registradas * ($valor_hora_normal_base * $factor_hora_extra); 
                     $total_horas_extra_cantidad += $horas_extra_registradas; 
-                } else if (trim($CodigoJornadaNocturna) == '5') {
-                     $horas_extra_registradas = 0; // Se fuerza a 0 si es CodigoJornadaNocturna = 5
-                     $monto_horas_extra_dia_actual = 0;
                 }
-            } // Cierre ELSE de la lógica de códigos no contributivos, doble descuento y códigos específicos de nocturnidad
+            } // Cierre ELSE de la lógica de códigos no contributivos y doble descuento
         } // Cierre if ($row_asistencia)
         
         // --- Lógica para cuando NO HAY REGISTRO DE ASISTENCIA (posible FALTA genérica o Asueto de calendario sin registro) ---
@@ -568,7 +486,7 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
             } else { // Es un ASUETo del calendario (pero no hay registro específico de asistencia)
                 $CodigoJornadaTodas = 'AS'; // Código para imagen de Asueto de calendario
                 $salario_dia_actual = $salario_diario; // Se paga el día de asueto
-                $total_salario_asuetos += $salario_diario; // Se suma al total de asuetos (aquí como parte del devengado)
+                $total_salario_asuetos += $salario_diario; // Se suma al total de asuetos
             }
         }
 
@@ -577,12 +495,9 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         $total_monto_horas_extra_empleado += $monto_horas_extra_dia_actual;
         $total_descuentos_empleado += $descuento_dia_actual; 
         $total_monto_nocturnidad_empleado += $monto_nocturnidad_dia_actual; // Sumar nocturnidad al total
-        $total_trabajo_extra_empleado += $monto_extra_especifico; // Sumar monto extra específico
-
-
+        
         // FINALIZAR FORMACIÓN DEL CODIGO ALL PARA LA IMAGEN (añadir _HE si aplica)
-        // Solo añadir las horas extra si no son 0 y si no es un código de nocturnidad 5
-        if ($horas_extra_registradas > 0 && trim($CodigoJornadaNocturna) != '5' && strpos($CodigoJornadaTodas, '_HE') === false) { 
+        if ($horas_extra_registradas > 0 && strpos($CodigoJornadaTodas, '_HE') === false) { 
             $CodigoJornadaTodas .= str_replace('.', '', (string)$horas_extra_registradas); 
         }
         
@@ -610,7 +525,6 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
 
 
     // El "Total Extra" es la suma del valor monetario de Asuetos (adicionales) y Horas Extra y Trabajo Descanso
-    // Y ahora también incluye los montos extra específicos y la nocturnidad.
     $total_extra_empleado = $total_salario_asuetos + $total_monto_horas_extra_empleado + $total_trabajo_extra_empleado + $total_monto_nocturnidad_empleado; 
 
     // Cálculo del Total Salario (Gross): Salario Devengado (normal + asueto base) + Valor Horas Extra + Valor Asuetos Adicionales + Valor Trabajo Descanso + Valor Nocturnidad
@@ -860,17 +774,16 @@ foreach ($datos_empleado_principal as $row_empleado) {
     );
 
     // Nuevas variables para los totales (usando el operador null coalescing para evitar "Undefined index" si la clave falta)
-    // MODIFICACIÓN: Todos los totales monetarios se mantienen con dos decimales.
-    $total_salarios_a_mostrar = round($results['total_salario_devengado'] ?? 0, 2);
-    $total_salario_asuetos_a_mostrar = round($results['total_salario_asuetos'] ?? 0, 2); 
-    $total_monto_horas_extra_a_mostrar = round($results['total_monto_horas_extra'] ?? 0, 2); 
+    $total_salarios_a_mostrar = $results['total_salario_devengado'] ?? 0;
+    $total_salario_asuetos_a_mostrar = $results['total_salario_asuetos'] ?? 0;
+    $total_monto_horas_extra_a_mostrar = $results['total_monto_horas_extra'] ?? 0;
     $total_extra_general_a_mostrar = $results['total_extra_general'] ?? 0; 
-    $total_salario_gross_a_mostrar = round($results['total_salario_gross'] ?? 0, 2); 
-    $total_horas_extra_cantidad_a_mostrar = $results['total_horas_extra_cantidad'] ?? 0; // Cantidad, no monetario
-    $salario_liquido_final_a_mostrar = round($results['salario_liquido_final'] ?? 0, 2); 
-    $total_trabajo_extra_empleado_a_mostrar = round($results['total_trabajo_extra_empleado'] ?? 0, 2); 
-    $total_monto_nocturnidad_a_mostrar = round($results['total_monto_nocturnidad'] ?? 0, 2); 
-    $total_nocturnidad_cantidad_a_mostrar = $results['total_nocturnidad_cantidad'] ?? 0; // Cantidad, no monetario
+    $total_salario_gross_a_mostrar = $results['total_salario_gross'] ?? 0;
+    $total_horas_extra_cantidad_a_mostrar = $results['total_horas_extra_cantidad'] ?? 0;
+    $salario_liquido_final_a_mostrar = $results['salario_liquido_final'] ?? 0;
+    $total_trabajo_extra_empleado_a_mostrar = $results['total_trabajo_extra_empleado'] ?? 0; // Nueva variable para mostrar
+    $total_monto_nocturnidad_a_mostrar = $results['total_monto_nocturnidad'] ?? 0; // Nuevo
+    $total_nocturnidad_cantidad_a_mostrar = $results['total_nocturnidad_cantidad'] ?? 0; // Nuevo
 
     $daily_attendance_details = $results['daily_details'] ?? []; // Asegurar que daily_details sea un array
 
@@ -913,19 +826,18 @@ foreach ($datos_empleado_principal as $row_empleado) {
     $pdf->SetFillColor($current_row_fill_color[0], $current_row_fill_color[1], $current_row_fill_color[2]); 
 
     // Helper para formatear números o dejar vacío si es cero
-    // MODIFICACIÓN: Se usa $decimals para controlar el redondeo en la presentación
     $format_num = function($value, $decimals = 2) {
         return ($value == 0) ? '' : number_format($value, $decimals, '.', ',');
     };
 
-    // Salarios (ahora con 2 decimales)
-    $pdf->Cell($w_financial_fixed[0], 6, $format_num($total_salarios_a_mostrar, 2), 1, 0, 'R', true); 
+    // Salarios
+    $pdf->Cell($w_financial_fixed[0], 6, $format_num($total_salarios_a_mostrar), 1, 0, 'R', true); 
     
-    // Asuetos (mantiene 2 decimales)
-    $pdf->Cell($w_financial_fixed[1], 6, $format_num($total_salario_asuetos_a_mostrar, 2), 1, 0, 'R', true); 
+    // Asuetos
+    $pdf->Cell($w_financial_fixed[1], 6, $format_num($total_salario_asuetos_a_mostrar), 1, 0, 'R', true); 
     
-    // EXTRA (Trabajo Descanso y Trabajo Vacación - mantiene 2 decimales)
-    $pdf->Cell($w_financial_fixed[2], 6, $format_num($total_trabajo_extra_empleado_a_mostrar, 2), 1, 0, 'R', true); 
+    // EXTRA (Trabajo Descanso y Trabajo Vacación)
+    $pdf->Cell($w_financial_fixed[2], 6, $format_num($total_trabajo_extra_empleado_a_mostrar), 1, 0, 'R', true); 
 
     // Columna de NOCTURNIDAD (C:V) - SOLO PARA DEPARTAMENTOS 08 Y 09
     if ($DepartamentoEmpresa == '08' || $DepartamentoEmpresa == '09') {
@@ -945,11 +857,11 @@ foreach ($datos_empleado_principal as $row_empleado) {
     $pdf->Cell($w_financial_fixed[4]/2, 6, $he_display_string_C, 1, 0, 'C', true); // Celda C de Hora Extra
     $pdf->Cell($w_financial_fixed[4]/2, 6, $he_display_string_V, 1, 0, 'C', true); 
 
-    // Total Extra (TE) (ahora con 2 decimales)
-    $pdf->Cell($w_financial_fixed[5], 6, $format_num($total_extra_general_a_mostrar, 2), 1, 0, 'R', true); 
+    // Total Extra (TE)
+    $pdf->Cell($w_financial_fixed[5], 6, $format_num($total_extra_general_a_mostrar), 1, 0, 'R', true); 
     
-    // Salario Liquido (ahora con 2 decimales)
-    $pdf->Cell($w_financial_fixed[6], 6, $format_num($salario_liquido_final_a_mostrar, 2), 1, 1, 'R', true); 
+    // Salario Liquido
+    $pdf->Cell($w_financial_fixed[6], 6, $format_num($salario_liquido_final_a_mostrar), 1, 1, 'R', true); 
     
     // Alternar el color de fondo para la próxima fila
     $row_fill_flag = !$row_fill_flag;

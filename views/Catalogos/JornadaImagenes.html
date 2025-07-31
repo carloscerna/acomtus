@@ -1,0 +1,135 @@
+{# Heredando la plantilla principal #}
+
+{% extends 'default_layout.html' %}
+
+{% block extraCSS %}
+{% endblock %}
+
+{% block javascripts %}
+    <script src="js/Catalogos/CatalogoCodigoImagenes.js"></script>
+{% endblock %}
+
+{% block contenidos %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Gestión de Imágenes de Jornada</h5>
+        </div>
+        <div class="card-body">
+            <button id="newRecordBtn" class="btn btn-success mb-3" data-toggle="modal" data-target="#jornadaImagenesModal">
+                <i class="fas fa-plus"></i> Nuevo Registro
+            </button>
+
+            <div class="table-responsive">
+                <table id="jornadaImagenesDataTable" class="table table-striped table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th>Imagen</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="jornadaImagenesModal" tabindex="-1" role="dialog" aria-labelledby="jornadaImagenesModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="jornadaImagenesModalLabel">Formulario de Imagen de Jornada</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="jornadaImagenesForm" enctype="multipart/form-data">
+                    <input type="hidden" id="jornada_imagen_id" name="id_">
+
+                    <div class="form-group" id="generate_code_section">
+                        <label for="codigo_jornada">Jornada:</label>
+                        <select class="form-control" id="codigo_jornada" name="codigo_jornada">
+                            <option value="">Seleccione una jornada</option>
+                            </select>
+                    </div>
+
+                    <div class="form-group" id="generate_code_section">
+                        <label for="codigo_licencia">Tipo Licencia/Permiso:</label>
+                        <select class="form-control" id="codigo_licencia" name="codigo_licencia">
+                            <option value="">Seleccione tipo de licencia</option>
+                            </select>
+                    </div>
+
+                    <div class="form-group" id="generate_code_section">
+                        <label for="codigo_asueto">Asueto:</label>
+                        <select class="form-control" id="codigo_asueto" name="codigo_asueto">
+                            <option value="">Seleccione opción</option>
+                            </select>
+                    </div>
+
+                    <div class="form-group" id="generate_code_section">
+                        <label for="codigo_vacaciones">Vacaciones:</label>
+                        <select class="form-control" id="codigo_vacaciones" name="codigo_vacaciones">
+                            <option value="">Seleccione opción</option>
+                            </select>
+                    </div>
+
+                    <div class="form-group" id="generate_code_section">
+                        <label for="codigo_descanso">Descanso:</label>
+                        <select class="form-control" id="codigo_descanso" name="codigo_descanso">
+                            <option value="">Seleccione opción</option>
+                            </select>
+                    </div>
+
+                    <div class="form-group" id="generate_code_section">
+                        <label for="codigo_extra4h">Extra 4 Horas:</label>
+                        <select class="form-control" id="codigo_extra4h" name="codigo_extra4h">
+                            <option value="">Seleccione opción</option>
+                            </select>
+                    </div>
+
+                    <div class="form-group" id="generate_code_section">
+                        <label for="codigo_nocturnidad">Nocturnidad:</label>
+                        <select class="form-control" id="codigo_nocturnidad" name="codigo_nocturnidad">
+                            <option value="">Seleccione opción</option>
+                            </select>
+                    </div>
+
+                    <div class="form-group" id="generate_code_section">
+                        <label for="cantidad_horas_extras">Cantidad Horas Extras (1-4):</label>
+                        <input type="number" class="form-control" id="cantidad_horas_extras" name="cantidad_horas_extras" min="1" max="4">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="codigo">Código Generado:</label>
+                        <input type="text" class="form-control" id="codigo" name="codigo" readonly required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imagen_file">Seleccionar Imagen:</label>
+                        <input type="file" class="form-control-file" id="imagen_file" name="imagen_file" accept="image/*">
+                        <small class="form-text text-muted">Formatos permitidos: JPG, PNG, GIF.</small>
+                    </div>
+                    <div class="form-group text-center">
+                        <img id="image_preview" src="#" alt="Previsualización de Imagen" style="max-width: 150px; height: auto; margin-top: 10px; display: none;">
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Nombre de la Imagen (se llenará automáticamente):</label>
+                        <input type="text" class="form-control" id="descripcion" name="descripcion" required readonly>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block loginUser %}
+{% endblock %}

@@ -162,6 +162,43 @@ $(document).ready(function(){
 				}
 			AbrirVentana(varenviar);   
 	});
+	$("#goCalcularPlanilla2").on('click', function (e) {
+		// Limpiar datos
+		fechaMes = $("#lstFechaMes").val();
+		fechaAnn = $("#lstFechaAño").val();
+		quincena = $("#lstQuincena").val();
+		if($('#chkCalcular').is(':checked') ) {
+			//alert('Seleccionado Dolares');
+			var calcular = "no";
+		}else{
+			var calcular = "si";
+		}
+		// LstDepartmaentoEmpresa
+		DepartamentoEmpresa = $("#lstDepartamentoEmpresa").val();
+		value_d = $("#lstDepartamentoEmpresa option:selected");
+		DepartamentoText = value_d.text();
+		persona_responsable = $("label[for=CodigoRutaResponsable]").html();
+		// lstruta
+		ruta = $("#lstRuta").val();
+		var value = $("#lstRuta option:selected");
+		var RutaText = value.text();
+		// validar lstRuta == 00
+		codigo_ruta = $("#lstRuta").val();
+		if(codigo_ruta == "00" && DepartamentoEmpresa == "02"){
+			toastr["error"]("Debe seleccionar una ruta.", "Sistema");
+			return
+		}
+			//Validar que información llevara el informe 
+			// Cìdog 02 corresponde a los motoristas
+			if(DepartamentoEmpresa == '02'){
+				// Ejecutar Informe
+					varenviar = "/acomtus/php_libs/reportes/Planilla/NominaAsistenciaCalcularRevisar.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&ruta="+ruta+"&RutaText="+RutaText+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&chkCalcular="+calcular+"&persona_responsable="+persona_responsable;
+				}else{
+				// Ejecutar Informe
+					varenviar = "/acomtus/php_libs/reportes/Planilla/NominaAsistenciaCalcularRevisar.php?fechaMes="+fechaMes+"&fechaAnn="+fechaAnn+"&quincena="+quincena+"&DepartamentoEmpresa="+DepartamentoEmpresa+"&DepartamentoText="+DepartamentoText+"&ruta="+ruta+"&RutaText="+RutaText+"&chkCalcular="+calcular+"&persona_responsable="+persona_responsable;
+				}
+			AbrirVentana(varenviar);   
+	});
 // CUANDO SE ENCUENTRA EL CAMBIO DEL DEPARTAMENTO EN LA EMPRESA
 	$("#lstDepartamentoEmpresa").change(function () {
 		var miselect=$("#lstDepartamentoEmpresa");
