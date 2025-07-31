@@ -32,14 +32,62 @@ if($errorDbConexion == false){
 		}
 		// Verificamos las variables de acci�n
 		switch ($_POST['accion']) {
-		case 'BuscarTodos':
-				// Armamos el query.
-				/*$query = "SELECT p.id_personal, p.codigo, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado, p.telefono_residencia, telefono_celular,
-                            to_char(p.fecha_nacimiento,'dd/mm/yyyy') as fecha_nacimiento, p.edad, p.codigo_estatus
-                                FROM personal p
-                                    WHERE p.codigo <> ''
-                                        ORDER BY p.id_personal DESC, p.codigo_estatus ASC
-						";*/
+			case 'BuscarTodos':
+				// Armamos el query optimizado.
+				$query = "SELECT 
+							p.id_personal, 
+							p.codigo, 
+							btrim(p.nombres || ' ' || p.apellidos) AS nombre_empleado, 
+							p.telefono_residencia, 
+							p.telefono_celular,
+							to_char(p.fecha_nacimiento,'dd/mm/yyyy') as fecha_nacimiento, 
+							p.edad, 
+							p.codigo_estatus,
+							COALESCE(sf.saldo_fianza, 0) AS saldo_fianza,
+							COALESCE(sp.saldo_prestamo, 0) AS saldo_prestamo
+						FROM 
+							personal p
+						LEFT JOIN 
+							(SELECT codigo, SUM(fianza) - SUM(devolucion) AS saldo_fianza 
+							 FROM fianzas 
+							 GROUP BY codigo) sf ON p.codigo = sf.codigo
+						LEFT JOIN 
+							(SELECT codigo, SUM(prestamos) - SUM(descuentos) AS saldo_prestamo 
+							 FROM prestamos 
+							 GROUP BY codigo) sp ON p.codigo = sp.codigo
+						WHERE 
+							p.codigo <> ''
+						ORDER BY 
+							nombre_empleado ASC"; // Se cambia a ASC para ordenar alfabéticamente por nombre
+				
+				// Ejecutamos el Query.
+				$consulta = $dblink->query($query);
+				
+				// Validar si hay registros.
+				if ($consulta->rowCount() != 0) {
+					$respuestaOK = true;
+					$num = 0; // Esta variable $num no se está utilizando.
+					
+					// Convertimos el objeto
+					while ($listado = $consulta->fetch(PDO::FETCH_ASSOC)) { // Usar PDO::FETCH_ASSOC es generalmente más eficiente y claro
+						$arreglo["data"][] = $listado;
+					}
+					$mensajeError = "Si Registro"; // Este mensaje indica éxito, quizás "Registros encontrados" sería más apropiado.
+				} else {
+					$respuestaOK = true; // Si no hay registros, la operación es exitosa en el sentido de que no hubo errores, pero no hay datos.
+					$contenidoOK = ''; // Esta variable $contenidoOK no se está utilizando.
+					$mensajeError = 'No Registro'; // "No se encontraron registros" sería más claro.
+					$arreglo["data"] = []; // Asegúrate de que "data" sea un array vacío, no una cadena JSON.
+					// Si estás enviando esto a una tabla de datos como DataTables, deberías devolver un objeto JSON con la estructura esperada:
+					$arreglo = [
+						"sEcho" => 1,
+						"iTotalRecords" => "0",
+						"iTotalDisplayRecords" => "0",
+						"aaData" => []
+					];
+				}
+				break;
+/*		case 'BuscarTodos':
                 $query = "SELECT p.id_personal, p.codigo, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado, p.telefono_residencia, telefono_celular,
                             to_char(p.fecha_nacimiento,'dd/mm/yyyy') as fecha_nacimiento, p.edad, p.codigo_estatus,
                             (SELECT SUM(fianza)-SUM(devolucion) as saldo_fianza from fianzas where codigo = p.codigo),
@@ -73,7 +121,7 @@ if($errorDbConexion == false){
 										}';						
 				}
 			break;
-
+*/
 			case 'eliminarA':
 				// Armamos el query
 				$query = "DELETE FROM alumno WHERE id_alumno = $_POST[id_user]";
