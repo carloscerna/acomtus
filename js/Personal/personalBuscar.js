@@ -89,7 +89,7 @@ var obtener_data_editar = function(tbody, tabla){
 		var data = tabla.row($(this).parents("tr")).data();
 		console.log(data); console.log(data[0]);
 		
-		id_ = data[0];
+		id_ = data.id_personal;
 		accion = "EditarRegistro";	// variable global
 			window.location.href = 'editar_Nuevo_Personal.php?id='+id_+"&accion="+accion;
 	});
@@ -101,7 +101,7 @@ $(tbody).on("click","a.FianzasPrestamos",function(){
 	var data = tabla.row($(this).parents("tr")).data();
 	console.log(data); console.log(data[0]);
 	
-	id_ = data[0];
+	id_ = data.id_personal;
 	accion = "BuscarFianzasPrestamos";	// variable global
 		window.location.href = 'editar_Fianzas_Prestamos.php?id_personal='+id_+"&accion="+accion;
 });
@@ -115,8 +115,8 @@ $(tbody).on("click","a.FianzasPrestamos",function(){
 		var data = tabla.row($(this).parents("tr")).data();
 		console.log(data); console.log(data[0]);
 		
-		id_ = data[0];
-		nombre = data[1];
+		id_ = data.id_personal;
+		nombre = data.nombre_empleado;
 		accion = "EliminarRegistro";	// variable global
 //	ENVIAR MENSAJE CON SWEETALERT 2, PARA CONFIRMAR SI ELIMINA EL REGISTRO.
 		const swalWithBootstrapButtons = Swal.mixin({
