@@ -297,6 +297,10 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         '1144424' => [ // Código para 4 horas que completan 44 horas semanales + un salario diario a Extra (Corregido de 11444240)
             'paga_salario_diario' => true,
             'agrega_extra' => $salario_diario // Este monto se sumará a total_trabajo_extra_empleado
+        ],
+        '3144444' => [ // Código para 4 horas que completan 44 horas semanales + un salario diario a Extra (Corregido de 11444240)
+            'paga_salario_diario' => true,
+            'agrega_extra' => $salario_diario / 2// Este monto se sumará a total_trabajo_extra_empleado
         ]
     ];
 
@@ -653,7 +657,7 @@ class PDF extends FPDF
     ];
 
     function Header() {
-        global $fecha_periodo_inicio, $fecha_periodo_fin, $departamentoEmpresaTexto, $RutaText, $quincena, $rango_fechas;
+        global $fecha_periodo_inicio, $fecha_periodo_fin, $departamentoEmpresaTexto, $RutaText, $quincena, $rango_fechas, $DepartamentoEmpresa;
         // Variables adicionales para el Header (asegurarse de que estén definidas en el ámbito global del script principal)
         global $_SESSION, $persona_responsable; 
 
@@ -752,7 +756,9 @@ class PDF extends FPDF
         $this->SetFillColor(180, 200, 230); // Color más oscuro para EXTRA
         $this->Cell($w_financial_fixed[2], $half_header_height, utf8_decode('EXTRA'), 1, 0, 'C', true); // Nueva columna EXTRA
         $this->SetFillColor(200, 220, 255); // Resetear color
+        if ($DepartamentoEmpresa == '08' || $DepartamentoEmpresa == '09') {
         $this->Cell($w_financial_fixed[3], $half_header_height, utf8_decode('Nocturnidad'), 1, 0, 'C', true); // Nueva columna Nocturnidad
+        }
         $this->SetFillColor(180, 200, 230); // Color más oscuro para Hora Extra
         $this->Cell($w_financial_fixed[4], $half_header_height, utf8_decode('Hora Extra'), 1, 0, 'C', true); // Encabezado padre de Hora Extra
         $this->SetFillColor(200, 220, 255); // Resetear color
@@ -784,8 +790,10 @@ class PDF extends FPDF
         $this->Cell($w_financial_fixed[0], $half_header_height, '', 0, 0, 'C', false); // Celda vacía bajo SA
         $this->Cell($w_financial_fixed[1], $half_header_height, '', 0, 0, 'C', false); // Celda vacía bajo AS
         $this->Cell($w_financial_fixed[2], $half_header_height, '', 0, 0, 'C', false); // Celda vacía bajo EXTRA
+        if ($DepartamentoEmpresa == '08' || $DepartamentoEmpresa == '09') {
         $this->Cell($w_financial_fixed[3]/2, $half_header_height, 'C', 1, 0, 'C', true); // Sub-encabezado C de Nocturnidad
         $this->Cell($w_financial_fixed[3]/2, $half_header_height, 'V', 1, 0, 'C', true); // Sub-encabezado V de Nocturnidad
+        }
         $this->Cell($w_financial_fixed[4]/2, $half_header_height, 'C', 1, 0, 'C', true); // Sub-encabezado C de Hora Extra
         $this->Cell($w_financial_fixed[4]/2, $half_header_height, 'V', 1, 0, 'C', true); // Sub-encabezado V de Hora Extra
         $this->SetFillColor(180, 200, 230); // Color más oscuro para Total Extra
@@ -935,8 +943,8 @@ foreach ($datos_empleado_principal as $row_empleado) {
         $pdf->Cell($w_financial_fixed[3]/2, 6, $noct_display_string_V, 1, 0, 'C', true); // Celda V de Nocturnidad
     } else {
         // Si no es departamento 08 o 09, estas celdas están vacías
-        $pdf->Cell($w_financial_fixed[3]/2, 6, '', 1, 0, 'C', true); // Celda C de Nocturnidad vacía
-        $pdf->Cell($w_financial_fixed[3]/2, 6, '', 1, 0, 'C', true); // Celda V de Nocturnidad vacía
+       // $pdf->Cell($w_financial_fixed[3]/2, 6, '', 1, 0, 'C', true); // Celda C de Nocturnidad vacía
+        //$pdf->Cell($w_financial_fixed[3]/2, 6, '', 1, 0, 'C', true); // Celda V de Nocturnidad vacía
     }
 
     // Columna de HORA EXTRA (C:V)
