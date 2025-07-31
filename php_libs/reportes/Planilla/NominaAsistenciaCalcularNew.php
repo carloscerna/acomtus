@@ -38,9 +38,7 @@ $mes = $hoy["mon"];     // mes
     $calcular = $_REQUEST["chkCalcular"]; // Valor para si se realiza el cálculo (enviado desde JS)
     $DepartamentoEmpresa = $_REQUEST["DepartamentoEmpresa"]; // Valor para el departamento/empresa
     $departamentoEmpresaTexto = $_REQUEST["DepartamentoText"]; // Texto para el departamento/empresa
-    if(isset($_REQUEST["persona_responsable"])){
-        $reporte_persona_responsable = $_REQUEST["persona_responsable"];
-    }
+    $persona_responsable = $_REQUEST["persona_responsable"] ?? 'No Definido'; // Asegurarse de que esta variable llegue
 
 // Validar que las variables de fecha o quincena estén presentes
 if (!isset($fecha_mes) || !isset($quincena)) {
@@ -78,8 +76,12 @@ foreach ($period as $date) {
     $rango_fechas[] = $date->format('Y-m-d');
 }
 
+// DEBUG: Imprimir el rango de fechas generado
+error_log("DEBUG: Rango de fechas generado: " . print_r($rango_fechas, true));
+
+
 // Define la ruta base para las imágenes de jornada
-$image_base_path = $path_root . "/acomtus/img/Catalogo Jornada/";
+$image_base_path = $_SERVER['DOCUMENT_ROOT'] . "/acomtus/img/Catalogo Jornada/"; // Usa $_SERVER['DOCUMENT_ROOT'] para ruta absoluta
 
 // ARRAY PARA ALMACENAR LOS DATOS DE ASISTENCIA PRE-CARGADOS
 $asistencia_por_empleado_y_fecha = [];
@@ -89,9 +91,12 @@ $query = "SELECT p.codigo, p.nombres, p.apellidos, p.salario, p.codigo_ruta, p.c
 $query .= "FROM personal p ";
 $query .= "LEFT JOIN catalogo_cargo cc ON cc.codigo = p.codigo_cargo "; // CORRECCIÓN: catalogo_cargo
 $query .= "WHERE 1=1 AND p.codigo_estatus = '01'"; // AÑADIDA: Condición para codigo_estatus
-if ($NombreRuta != '00') {
+
+// Condición para filtrar por ruta SOLO si el departamento es '02' (Motorista)
+if ($DepartamentoEmpresa == '02' && $NombreRuta != '00') {
     $query .= " AND p.codigo_ruta = '$NombreRuta'";
 }
+// Condición para filtrar por departamento (siempre aplica si no es '00')
 if ($DepartamentoEmpresa != '00') {
     $query .= " AND p.codigo_departamento_empresa = '$DepartamentoEmpresa'";
 }
@@ -158,7 +163,7 @@ try {
     } catch (PDOException $e) {
         die("Error al obtener datos de asistencia detallados. Por favor, intente más tarde.");
     }
-
+//var_dump($asistencia_por_empleado_y_fecha);
 // Preparar datos para las consultas iniciales (esto probablemente ya lo tenías)
 $NombresCodigoDE = [];
 $consultaDE = $dblink->query("SELECT codigo, descripcion FROM catalogo_departamento_empresa");
@@ -191,23 +196,29 @@ try {
 
 // --- NUEVA FUNCIÓN PARA PROCESAR DATOS DE ASISTENCIA Y CALCULAR TOTALES ---
 // Esta función NO imprime, solo calcula y retorna.
-function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario_mensual, $jornada_base_default, $asistencia_data_precargada, $NombresCodigoLicenciaPermiso, $jornada_imagenes_map, $FechaDescripcionAsueto) {
+function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario_mensual, $jornada_base_default, $asistencia_data_precargada, $NombresCodigoLicenciaPermiso, $jornada_imagenes_map, $FechaDescripcionAsueto, $codigo_departamento_empleado) { // Added $codigo_departamento_empleado
     $total_salario_devengado_empleado = 0; // Para jornadas normales, descanso, vacaciones, licencias
-    $total_salario_asuetos = 0; // Salario específico de asuetos
+    $total_salario_asuetos = 0; // Salario específico de asuetos (solo el adicional por trabajar asueto)
     $total_monto_horas_extra_empleado = 0;
     $total_descuentos_empleado = 0; // Descuentos por faltas, etc.
     $total_otras_deducciones_empleado = 0; // Para futuras deducciones no calculadas aquí
     $total_horas_extra_cantidad = 0; // Cantidad total de horas extra
     $total_deduccion_7mo = 0; // Inicializar deducción del 7mo día
     
+    // Nueva variable para acumular el valor de Trabajo Descanso
+    $total_trabajo_extra_empleado = 0; // Renombrado de total_trabajo_descanso_extra_empleado
+    
+    // Nueva variable para Nocturnidad
+    $total_monto_nocturnidad_empleado = 0;
+    $total_nocturnidad_cantidad_empleado = 0;
+
     // Contadores de días por tipo de asistencia (estos ya no se usarán para imprimir en columnas, pero sí para los cálculos de devengado)
-    // Inicializar contadores de días
     $total_dias_jornada_empleado = 0;
     $total_dias_descanso_empleado = 0;
     $total_dias_vacaciones_empleado = 0;
     $total_dias_nocturna_empleado = 0;
     $total_dias_e4h_empleado = 0;
-    $total_dias_asuetos_empleado_count = 0; // Renombrado para evitar confusión con el monto
+    $total_dias_asuetos_empleado_count = 0; 
     $total_dias_licencias_empleado = 0;
 
     $daily_attendance_details = []; // Almacenará los códigos e imágenes para cada día
@@ -218,6 +229,43 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
     $non_contributory_codes_display_only = ['4144444', '4344444', '4244444']; 
     // Códigos que implican doble descuento y pueden activar 7mo día
     $double_deduction_codes = ['41044444', '4444444']; // 'C' (Castigo), 'F' (Falta)
+
+    // Códigos de asueto que implican pago adicional por trabajar
+    $asueto_worked_codes = [
+        '41614444' => $salario_diario / 2, // 4 horas adicionales (medio día de salario)
+        '41624444' => $salario_diario,     // 8 horas adicionales (día completo de salario)
+        '41634444' => $salario_diario + ($salario_diario / 2) // 12 horas adicionales (día y medio de salario)
+    ];
+
+    // Códigos de Trabajo Descanso (TD) que implican pago adicional
+    $trabajo_descanso_codes = [
+        '41444144' => $salario_diario / 2, // TD 4 horas adicionales
+        '41444244' => $salario_diario,     // TD 8 horas adicionales
+        '41444344' => $salario_diario + ($salario_diario / 2) // TD 12 horas adicionales
+    ];
+
+    // Nuevos códigos de Trabajo Vacación (TV)
+    $trabajo_vacacion_codes = [
+        '41241444' => $salario_diario / 2, // TV 4 horas adicionales
+        '41242444' => $salario_diario,     // TV 8 horas adicionales
+        '41243444' => $salario_diario + ($salario_diario / 2) // TV 12 horas adicionales
+    ];
+
+    // Nuevos códigos de Trabajo Descanso Asueto (TDA)
+    $trabajo_descanso_asueto_codes = [
+        '41744444' => $salario_diario, // DA - Descanso Asueto (se paga el día normal)
+        '41514444' => $salario_diario / 2, // TDA 4 horas adicionales
+        '41524444' => $salario_diario,     // TDA 8 horas adicionales
+        '41534444' => $salario_diario + ($salario_diario / 2) // TDA 12 horas adicionales
+    ];
+
+    // Nuevos códigos de Nocturnidad
+    $nocturnidad_codes = [
+        '2144445' => 0.57, // Nocturnidad base por día (0.57 ctvs)
+        '1144425' => 0.57, // 4h + 8h Extra + Nocturnidad (solo el valor de nocturnidad)
+        '1144424' => 0, // 4h + 8h Extra (no nocturnidad explícita, valor 0 para nocturnidad)
+        '2144445' => 0.57 // Jornada normal + Nocturnidad
+    ];
 
     // Weekly tracking for 7mo day deduction
     $weekly_tracking = []; // Key: week_start_date (Monday), Value: ['has_deductible_event' => bool, 'has_descanso' => bool, 'descanso_date' => date_string]
@@ -230,6 +278,7 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         $monto_horas_extra_dia_actual = 0;
         $descuento_dia_actual = 0; // Descuento por este día (si es falta o castigo)
         $horas_jornada_para_este_dia = $jornada_base_default; // Horas por defecto
+        $monto_nocturnidad_dia_actual = 0; // Monto de nocturnidad para el día
         
         $es_dia_pagado_para_hora_extra = false; // Flag para determinar si el día se paga para cálculos de HE
         $is_activity_recorded = false; // Flag: Indica si hay un registro de actividad (pagada o no)
@@ -304,13 +353,68 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
             else { 
                 $es_dia_pagado_para_hora_extra = true; // Potencialmente contribuye al salario
 
-                // Priority: Asueto (específico) > Jornada > Descanso > Vacaciones > Nocturna > E_4H > Licencias (otras)
-                if (!empty($CodigoJornadaAsueto) && $CodigoJornadaAsueto == '2144444') { // Check for specific Asueto code
-                    $total_dias_asuetos_empleado_count++;
-                    $total_salario_asuetos += $salario_diario; // Suma salario de asueto por separado
-                    $es_dia_pagado_para_hora_extra = true; // Asuetos pueden generar horas extra
+                // Priority: Nocturnidad > Asueto (con pago adicional) > Asueto (normal) > Trabajo Descanso Asueto > Trabajo Vacación > Trabajo Descanso > Jornada > Descanso > Vacaciones > E_4H > Licencias (otras)
+                // --- Lógica para Nocturnidad (2144445, 11444254, 11444244, 21444450) ---
+                if (isset($nocturnidad_codes[trim($CodigoJornadaTodas_temp)])) {
+                    // Solo si el departamento es 08 o 09, se suma el valor de nocturnidad
+                    if ($codigo_departamento_empleado == '08' || $codigo_departamento_empleado == '09') {
+                        $monto_nocturnidad_dia_actual = $nocturnidad_codes[trim($CodigoJornadaTodas_temp)]; 
+                        $total_nocturnidad_cantidad_empleado += 1; // Asumimos 1 día de nocturnidad por el código
+                    }
+                    $salario_dia_actual = $salario_diario; // El día base se paga
+                    $es_dia_pagado_para_hora_extra = true;
+                    $total_dias_nocturna_empleado++; // Contar día de nocturnidad
+                    // Lógica específica para 11444254 y 11444244 (implican horas extra)
+                    if (trim($CodigoJornadaTodas_temp) == '11444254' || trim($CodigoJornadaTodas_temp) == '11444244') {
+                         // Las horas extra ya vienen en $horas_extra_registradas y se calcularán abajo
+                         // El salario diario ya se sumó.
+                    }
+                }
+                // --- Lógica para Asuetos con pago adicional por trabajar (41614444, 41624444, 41634444) ---
+                else if (isset($asueto_worked_codes[trim($CodigoJornadaTodas_temp)])) {
+                    $total_dias_asuetos_empleado_count++; // Contar como día de asueto
+                    $total_salario_asuetos += $asueto_worked_codes[trim($CodigoJornadaTodas_temp)]; // Suma el valor ADICIONAL
+                    $salario_dia_actual = $salario_diario; // El día base del asueto se paga aquí
+                    $es_dia_pagado_para_hora_extra = true;
                     $horas_jornada_para_este_dia = (float)($row_asistencia['horas_jornada_regular'] ?? $jornada_base_default); // Usa jornada_regular si aplica
+                }
+                // --- Asueto normal (2144444) ---
+                else if (!empty($CodigoJornadaAsueto) && $CodigoJornadaAsueto == '2144444') { 
+                    $total_dias_asuetos_empleado_count++;
+                    $salario_dia_actual = $salario_diario; // Se paga el día normal de asueto
+                    $es_dia_pagado_para_hora_extra = true; 
+                    $horas_jornada_para_este_dia = (float)($row_asistencia['horas_jornada_regular'] ?? $jornada_base_default); 
                 } 
+                // --- Trabajo Descanso Asueto (TDA) con pago adicional (41514444, 41524444, 41534444, 41744444) ---
+                else if (isset($trabajo_descanso_asueto_codes[trim($CodigoJornadaTodas_temp)])) {
+                    // Si es 41744444 (DA), se paga el día normal, no hay adicional extra para asuetos
+                    if (trim($CodigoJornadaTodas_temp) == '41744444') {
+                        $salario_dia_actual = $salario_diario; // Se paga el día normal
+                        $total_dias_descanso_empleado++; // Cuenta como día de descanso
+                        $total_dias_asuetos_empleado_count++; // Cuenta como día de asueto
+                    } else {
+                        // Para 41514444, 41524444, 41534444 (TDA), se paga el día normal + adicional
+                        $total_salario_asuetos += $trabajo_descanso_asueto_codes[trim($CodigoJornadaTodas_temp)]; // Suma el valor ADICIONAL a asuetos
+                        $salario_dia_actual = $salario_diario; // El día base del descanso asueto se paga aquí
+                        $total_dias_asuetos_empleado_count++; // Cuenta como día de asueto
+                    }
+                    $es_dia_pagado_para_hora_extra = true;
+                    $horas_jornada_para_este_dia = (float)($row_asistencia['horas_jornada_regular'] ?? $jornada_base_default); // Usa jornada_regular si aplica
+                }
+                // --- Trabajo Vacación (TV) con pago adicional (41241444, 41242444, 41243444) ---
+                else if (isset($trabajo_vacacion_codes[trim($CodigoJornadaTodas_temp)])) {
+                    $total_trabajo_extra_empleado += $trabajo_vacacion_codes[trim($CodigoJornadaTodas_temp)]; // Suma el valor ADICIONAL a EXTRA
+                    $salario_dia_actual = $salario_diario; // El día base de la vacación trabajada se paga aquí
+                    $es_dia_pagado_para_hora_extra = true;
+                    $horas_jornada_para_este_dia = (float)($row_asistencia['horas_jornada_regular'] ?? $jornada_base_default); // Usa jornada_regular si aplica
+                }
+                // --- Trabajo Descanso (TD) con pago adicional (41444144, 41444244, 41444344) ---
+                else if (isset($trabajo_descanso_codes[trim($CodigoJornadaTodas_temp)])) {
+                    $total_trabajo_extra_empleado += $trabajo_descanso_codes[trim($CodigoJornadaTodas_temp)]; // Suma el valor ADICIONAL
+                    $salario_dia_actual = $salario_diario; // El día base del descanso trabajado se paga aquí
+                    $es_dia_pagado_para_hora_extra = true;
+                    $horas_jornada_para_este_dia = (float)($row_asistencia['horas_jornada_regular'] ?? $jornada_base_default); // Usa jornada_regular si aplica
+                }
                 else if (!empty($CodigoJornada) && $CodigoJornada == '4') { // Jornada tipo 4 es una licencia
                     $total_dias_licencias_empleado++;
                     $es_dia_pagado_para_hora_extra = true;
@@ -360,10 +464,12 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
                     $horas_jornada_para_este_dia = $horas_licencia_dia;
                 }
 
-                // Calcular monto de horas extras (solo si el día se considera pagado)
+                // Calcular monto de horas extras (solo if the day is considered paid)
                 if ($es_dia_pagado_para_hora_extra) {
+                    // Factor de hora extra: 2 para departamentos 02 y 03, 1 para otros
+                    $factor_hora_extra = ($codigo_departamento_empleado == '02' || $codigo_departamento_empleado == '03') ? 2 : 1;
                     $valor_hora_normal_base = ($jornada_base_default > 0) ? ($salario_diario / $jornada_base_default) : 0;
-                    $monto_horas_extra_dia_actual = $horas_extra_registradas * ($valor_hora_normal_base * 2); 
+                    $monto_horas_extra_dia_actual = $horas_extra_registradas * ($valor_hora_normal_base * $factor_hora_extra); 
                     $total_horas_extra_cantidad += $horas_extra_registradas; 
                 }
             } // Cierre ELSE de la lógica de códigos no contributivos y doble descuento
@@ -388,6 +494,7 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         $total_salario_devengado_empleado += $salario_dia_actual;
         $total_monto_horas_extra_empleado += $monto_horas_extra_dia_actual;
         $total_descuentos_empleado += $descuento_dia_actual; 
+        $total_monto_nocturnidad_empleado += $monto_nocturnidad_dia_actual; // Sumar nocturnidad al total
         
         // FINALIZAR FORMACIÓN DEL CODIGO ALL PARA LA IMAGEN (añadir _HE si aplica)
         if ($horas_extra_registradas > 0 && strpos($CodigoJornadaTodas, '_HE') === false) { 
@@ -417,18 +524,18 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
     $total_descuentos_empleado += $total_deduccion_7mo;
 
 
-    // El "Total Extra" es la suma del valor monetario de Asuetos y Horas Extra
-    $total_extra_empleado = $total_salario_asuetos + $total_monto_horas_extra_empleado;
+    // El "Total Extra" es la suma del valor monetario de Asuetos (adicionales) y Horas Extra y Trabajo Descanso
+    $total_extra_empleado = $total_salario_asuetos + $total_monto_horas_extra_empleado + $total_trabajo_extra_empleado + $total_monto_nocturnidad_empleado; 
 
-    // Cálculo del Total Salario (Gross): Salario Devengado (normal) + Valor Horas Extra
-    $total_salario_gross_empleado = $total_salario_devengado_empleado + $total_monto_horas_extra_empleado;
+    // Cálculo del Total Salario (Gross): Salario Devengado (normal + asueto base) + Valor Horas Extra + Valor Asuetos Adicionales + Valor Trabajo Descanso + Valor Nocturnidad
+    $total_salario_gross_empleado = $total_salario_devengado_empleado + $total_monto_horas_extra_empleado + $total_salario_asuetos + $total_trabajo_extra_empleado + $total_monto_nocturnidad_empleado; 
 
     // Cálculo del Salario Líquido Final: Total Salario (Gross) - Total Descuentos
     $salario_liquido_final_empleado = $total_salario_gross_empleado - $total_descuentos_empleado - $total_otras_deducciones_empleado;
 
     return [
         'total_salario_devengado' => $total_salario_devengado_empleado, 
-        'total_salario_asuetos' => $total_salario_asuetos, 
+        'total_salario_asuetos' => $total_salario_asuetos, // Este es el valor monetario ADICIONAL de asuetos
         'total_monto_horas_extra' => $total_monto_horas_extra_empleado, 
         'total_descuentos' => $total_descuentos_empleado, 
         'salario_liquido_final' => $salario_liquido_final_empleado, 
@@ -436,6 +543,9 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         'total_horas_extra_cantidad' => $total_horas_extra_cantidad, 
         'total_salario_gross' => $total_salario_gross_empleado, 
         'daily_details' => $daily_attendance_details, 
+        'total_trabajo_extra_empleado' => $total_trabajo_extra_empleado,
+        'total_monto_nocturnidad' => $total_monto_nocturnidad_empleado, // Nuevo retorno
+        'total_nocturnidad_cantidad' => $total_nocturnidad_cantidad_empleado // Nuevo retorno
     ];
 }
 
@@ -458,54 +568,50 @@ class PDF extends FPDF
 
     function Header() {
         global $fecha_periodo_inicio, $fecha_periodo_fin, $departamentoEmpresaTexto, $RutaText, $quincena, $rango_fechas;
-            // Variables adicionales para el Header (asegurarse de que estén definidas en el ámbito global del script principal)
-            global $_SESSION, $persona_responsable; 
-            $nombresMeses = array(1=>"Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
-            $fecha_objeto = DateTime::createFromFormat('Y-m-d', $fecha_periodo_inicio); // convierte la cadena en un objeto DateTime
-            $mes = (int)$fecha_objeto->format('m');     // mes
-            $nombreMes = $nombresMeses[$mes];
-            // --- INICIO CÓDIGO DEL USUARIO PARA EL HEADER ---
-            // Logo
-            $img = $_SERVER['DOCUMENT_ROOT'].'/acomtus/img/'.$_SESSION['logo_uno'];
-            // Asegurarse de que el archivo de imagen del logo existe
-            if (file_exists($img)) {
-                $this->Image($img,5,4,24,24);
-            } else {
-                // Si el logo no existe, puedes imprimir un texto o dejar un espacio en blanco
-                $this->SetXY(5,4);
-                $this->Cell(24,24,'[LOGO]',1,0,'C');
-            }
-            
-            // Arial bold 14
-            $this->SetFont('Arial','B',14);
-            // Título de la Institución
-            $this->SetXY(30,5);
-            $this->Cell(100,7,mb_convert_encoding($_SESSION["nombre_institucion"],"ISO-8859-1"),0,1,"L",false);
-            
-            // Contenido para Reporte de Trabajo y Reporte de Ruta
-            $reporte_trabajo_display = utf8_decode('Reporte de trabajo correspondiente a la quincena del ');
-            $reporte_trabajo_display .= date('d', strtotime($fecha_periodo_inicio)) . ' al ' . date('d', strtotime($fecha_periodo_fin)) . ' de ' . $nombreMes . ' de ' . date('Y', strtotime($fecha_periodo_inicio));
-            
-            $reporte_ruta_display = utf8_decode($departamentoEmpresaTexto);
-            if (!empty($RutaText) && $RutaText != '00' && $RutaText != 'Seleccionar...') { // Si se seleccionó una ruta específica
-                $reporte_ruta_display .= utf8_decode(' (Ruta: ') . utf8_decode($RutaText) . utf8_decode(')');
-            }
+        // Variables adicionales para el Header (asegurarse de que estén definidas en el ámbito global del script principal)
+        global $_SESSION, $persona_responsable; 
 
-            // Arial bold 11
-            $this->SetFont('Arial','B',11);
-            $this->SetX(30);
-            $this->Cell(100,6, $reporte_trabajo_display,0,1,"L",false);
-            $this->SetX(30);
-            $this->Cell(100,6, $reporte_ruta_display,0,1,"L",false);
-            
-            // Persona Responsable del Punteo.
-            $this->SetFont('Arial','B',9);
-            $this->SetX(30);
-            $this->Cell(130,6,mb_convert_encoding("Responsable del Punteo: " . ($persona_responsable ?? 'N/A'),"ISO-8859-1"),0,0,"L",false);
-            $this->Cell(4,6,"",0,0,"L",false); 
-            $this->Ln(5); // Espacio después de la información de la empresa/responsable
-            // --- FIN CÓDIGO DEL USUARIO PARA EL HEADER ---
-        $this->Ln(5);
+        // --- INICIO CÓDIGO DEL USUARIO PARA EL HEADER ---
+        // Logo
+        $img = $_SERVER['DOCUMENT_ROOT'].'/acomtus/img/'.$_SESSION['logo_uno'];
+        // Asegurarse de que el archivo de imagen del logo existe
+        if (file_exists($img)) {
+            $this->Image($img,5,4,24,24);
+        } else {
+            // Si el logo no existe, puedes imprimir un texto o dejar un espacio en blanco
+            $this->SetXY(5,4);
+            $this->Cell(24,24,'[LOGO]',1,0,'C');
+        }
+        
+        // Arial bold 14
+        $this->SetFont('Arial','B',14);
+        // Título de la Institución
+        $this->SetXY(30,5);
+        $this->Cell(100,7,mb_convert_encoding($_SESSION["nombre_institucion"],"ISO-8859-1"),0,1,"L",false);
+        
+        // Contenido para Reporte de Trabajo y Reporte de Ruta
+        $reporte_trabajo_display = utf8_decode('Reporte de trabajo correspondiente a la quincena del ');
+        $reporte_trabajo_display .= date('d', strtotime($fecha_periodo_inicio)) . ' al ' . date('d', strtotime($fecha_periodo_fin)) . ' de ' . utf8_decode(strftime('%B', strtotime($fecha_periodo_inicio))) . ' de ' . date('Y', strtotime($fecha_periodo_inicio));
+        
+        $reporte_ruta_display = utf8_decode($departamentoEmpresaTexto);
+        if (!empty($RutaText) && $RutaText != '00' && $RutaText != 'Seleccionar...') { // Si se seleccionó una ruta específica
+            $reporte_ruta_display .= utf8_decode(' (Ruta: ') . utf8_decode($RutaText) . utf8_decode(')');
+        }
+
+        // Arial bold 11
+        $this->SetFont('Arial','B',11);
+        $this->SetX(30);
+        $this->Cell(100,6, $reporte_trabajo_display,0,1,"L",false);
+        $this->SetX(30);
+        $this->Cell(100,6, $reporte_ruta_display,0,1,"L",false);
+        
+        // Persona Responsable del Punteo.
+        $this->SetFont('Arial','B',9);
+        $this->SetX(30);
+        $this->Cell(130,6,mb_convert_encoding("Responsable del Punteo: " . ($persona_responsable ?? 'N/A'),"ISO-8859-1"),0,0,"L",false);
+        $this->Cell(4,6,"",0,0,"L",false); 
+        $this->Ln(5); // Espacio después de la información de la empresa/responsable
+        // --- FIN CÓDIGO DEL USUARIO PARA EL HEADER ---
 
         // Encabezados de la tabla principal
         $this->SetFont('Arial', 'B', 7);
@@ -515,19 +621,19 @@ class PDF extends FPDF
         // Anchos para las COLUMNAS FIJAS INICIALES: No., CODIGO, NOMBRE
         $w_initial_fixed = [7, 15, 50]; // Total 72mm
         // Ancho para cada columna de día
-        $daily_col_width = 7.5; // Aproximadamente 16 días * 7.5mm = 120mm
+        $daily_col_width = 7.0; // Ajustado a 7.0mm
 
-        // Anchos para las COLUMNAS FINANCIERAS PRINCIPALES: Salarios, Asuetos, Hora Extra, Total Extra, Salario Líquido
-        $w_financial_fixed = [12, 9, 17, 14, 15]; // Suma a 67mm. Ajustados.
+        // Anchos para las COLUMNAS FINANCIERAS PRINCIPALES: Salarios, Asuetos, EXTRA, Nocturnidad, Hora Extra, Total Extra, Salario Líquido
+        $w_financial_fixed = [10, 8, 10, 10, 17, 14, 15]; // Suma a 84mm. Ajustados.
 
         $header_height = 12; // Altura total para el encabezado de dos filas
         $half_header_height = $header_height / 2; // 6mm para cada sub-fila de encabezado
 
         $x_start = 10;
-        $y_start = $this->GetY();
+        $y_start_table_headers = $this->GetY(); // Obtener la Y actual después del bloque de información de la empresa
 
-        // 1. Imprimir encabezados que abarcan dos filas o son padres (No, Codigo, Nombre, Salarios, Asuetos)
-        $this->SetY($y_start);
+        // 1. Imprimir encabezados de la primera fila
+        $this->SetY($y_start_table_headers);
         $this->SetX($x_start);
 
         $this->Cell($w_initial_fixed[0], $header_height, 'No.', 1, 0, 'C', true); // No.
@@ -542,35 +648,64 @@ class PDF extends FPDF
         foreach ($rango_fechas as $fecha_actual) {
             $english_day_name = date('D', strtotime($fecha_actual)); 
             $spanish_day_name = $this->day_names_spanish[$english_day_name] ?? $english_day_name; 
+            // Color de fondo para Sábados y Domingos
+            if ($english_day_name == 'Sat' || $english_day_name == 'Sun') {
+                $this->SetFillColor(180, 200, 230); // Color más oscuro
+            } else {
+                $this->SetFillColor(200, 220, 255); // Color normal
+            }
             $this->Cell($daily_col_width, $half_header_height, utf8_decode(strtoupper($spanish_day_name)), 1, 0, 'C', true);
         }
 
         // Encabezados financieros de la primera fila (padres o que abarcan dos filas)
-        $this->Cell($w_financial_fixed[0], $header_height, 'Salarios', 1, 0, 'C', true);
-        $this->Cell($w_financial_fixed[1], $header_height, 'Asuetos', 1, 0, 'C', true);
-        $this->Cell($w_financial_fixed[2], $half_header_height, utf8_decode('Hora Extra'), 1, 0, 'C', true); // Encabezado padre de Hora Extra
-        $this->Cell($w_financial_fixed[3], $half_header_height, 'Total', 1, 0, 'C', true); // Encabezado padre de Total Extra
-        $this->Cell($w_financial_fixed[4], $half_header_height, 'Salario', 1, 0, 'C', true); // Encabezado padre de Salario Liquido
+        // Fondo más oscuro para SA y Total Extra
+        $this->SetFillColor(180, 200, 230); // Color más oscuro para SA
+        $this->Cell($w_financial_fixed[0], $header_height, 'SA', 1, 0, 'C', true); // Salarios -> SA
+        $this->SetFillColor(200, 220, 255); // Resetear color
+        $this->Cell($w_financial_fixed[1], $header_height, 'AS', 1, 0, 'C', true); // Asuetos -> AS
+        $this->SetFillColor(180, 200, 230); // Color más oscuro para EXTRA
+        $this->Cell($w_financial_fixed[2], $half_header_height, utf8_decode('EXTRA'), 1, 0, 'C', true); // Nueva columna EXTRA
+        $this->SetFillColor(200, 220, 255); // Resetear color
+        $this->Cell($w_financial_fixed[3], $half_header_height, utf8_decode('Nocturnidad'), 1, 0, 'C', true); // Nueva columna Nocturnidad
+        $this->SetFillColor(180, 200, 230); // Color más oscuro para Hora Extra
+        $this->Cell($w_financial_fixed[4], $half_header_height, utf8_decode('Hora Extra'), 1, 0, 'C', true); // Encabezado padre de Hora Extra
+        $this->SetFillColor(200, 220, 255); // Resetear color
+        $this->Cell($w_financial_fixed[5], $half_header_height, 'Total', 1, 0, 'C', true); // Encabezado padre de Total Extra
+        $this->SetFillColor(180, 200, 230); // Color más oscuro para Salario Liquido (para que se vea el fondo oscuro)
+        $this->Cell($w_financial_fixed[6], $half_header_height, 'Salario', 1, 0, 'C', true); // Encabezado padre de Salario Liquido
 
         $this->Ln(); // Nueva línea para la segunda fila de encabezados
 
         // Segunda fila de encabezados (Números de día y sub-encabezados C, V, Extra, Liquido)
-        $this->SetY($y_start + $half_header_height); // Mover Y hacia abajo a la mitad del encabezado
+        $this->SetY($y_start_table_headers + $half_header_height); // Mover Y hacia abajo a la mitad del encabezado
         $this->SetX($x_after_initial_fixed); // Resetear X al inicio de las columnas diarias
 
-        // Números de día
+        // Números de día (con fondo más oscuro para Sáb y Dom)
         foreach ($rango_fechas as $fecha_actual) {
+            $english_day_name = date('D', strtotime($fecha_actual)); 
             $day_number = date('d', strtotime($fecha_actual)); 
+            // Color de fondo para Sábados y Domingos
+            if ($english_day_name == 'Sat' || $english_day_name == 'Sun') {
+                $this->SetFillColor(180, 200, 230); // Color más oscuro
+            } else {
+                $this->SetFillColor(200, 220, 255); // Color normal
+            }
             $this->Cell($daily_col_width, $half_header_height, $day_number, 1, 0, 'C', true);
         }
 
         // Sub-encabezados para columnas financieras
-        $this->Cell($w_financial_fixed[0], $half_header_height, '', 0, 0, 'C', false); // Celda vacía bajo Salarios
-        $this->Cell($w_financial_fixed[1], $half_header_height, '', 0, 0, 'C', false); // Celda vacía bajo Asuetos
-        $this->Cell($w_financial_fixed[2]/2, $half_header_height, 'C', 1, 0, 'C', true); // Sub-encabezado C de Hora Extra
-        $this->Cell($w_financial_fixed[2]/2, $half_header_height, 'V', 1, 0, 'C', true); // Sub-encabezado V de Hora Extra
-        $this->Cell($w_financial_fixed[3], $half_header_height, 'Extra', 1, 0, 'C', true); // Sub-encabezado Extra de Total Extra
-        $this->Cell($w_financial_fixed[4], $half_header_height, 'Liquido', 1, 0, 'C', true); // Sub-encabezado Liquido de Salario Liquido
+        $this->SetFillColor(200, 220, 255); // Resetear color
+        $this->Cell($w_financial_fixed[0], $half_header_height, '', 0, 0, 'C', false); // Celda vacía bajo SA
+        $this->Cell($w_financial_fixed[1], $half_header_height, '', 0, 0, 'C', false); // Celda vacía bajo AS
+        $this->Cell($w_financial_fixed[2], $half_header_height, '', 0, 0, 'C', false); // Celda vacía bajo EXTRA
+        $this->Cell($w_financial_fixed[3]/2, $half_header_height, 'C', 1, 0, 'C', true); // Sub-encabezado C de Nocturnidad
+        $this->Cell($w_financial_fixed[3]/2, $half_header_height, 'V', 1, 0, 'C', true); // Sub-encabezado V de Nocturnidad
+        $this->Cell($w_financial_fixed[4]/2, $half_header_height, 'C', 1, 0, 'C', true); // Sub-encabezado C de Hora Extra
+        $this->Cell($w_financial_fixed[4]/2, $half_header_height, 'V', 1, 0, 'C', true); // Sub-encabezado V de Hora Extra
+        $this->SetFillColor(180, 200, 230); // Color más oscuro para Total Extra
+        $this->Cell($w_financial_fixed[5], $half_header_height, 'Extra', 1, 0, 'C', true); // Sub-encabezado Extra de Total Extra
+        $this->SetFillColor(200, 220, 255); // Resetear color
+        $this->Cell($w_financial_fixed[6], $half_header_height, 'Liquido', 1, 0, 'C', true); // Sub-encabezado Liquido de Salario Liquido
 
         $this->Ln(); // Mover a la siguiente línea después de completar todos los encabezados.
     }
@@ -598,6 +733,7 @@ foreach ($codigos_personal_a_consultar as $codigo) {
 }
 $datos_empleado_principal = $sorted_datos_empleado_principal; // Reemplazar con el array ordenado
 
+
 // Bucle principal para rellenar el PDF con los datos de cada empleado
 $i=1; // Número correlativo de empleado
 $jornada_base_default = 8; // Define un valor de jornada por defecto (ej. 8 horas)
@@ -605,11 +741,16 @@ $jornada_base_default = 8; // Define un valor de jornada por defecto (ej. 8 hora
 // Anchos para las COLUMNAS FIJAS INICIALES: No., CODIGO, NOMBRE
 $w_initial_fixed = [7, 15, 50]; // Total 72mm
 // Ancho para cada columna de día
-$daily_col_width = 7.5;
-// Anchos para las COLUMNAS FINANCIERAS PRINCIPALES: Salarios, Asuetos, Hora Extra (padre), Total Extra, Salario Líquido
-$w_financial_fixed = [12, 9, 17, 14, 15]; // Suma a 67mm. Ajustados
+$daily_col_width = 7.0; // Ajustado a 7.0mm
+// Anchos para las COLUMNAS FINANCIERAS PRINCIPALES: Salarios, Asuetos, EXTRA, Nocturnidad, Hora Extra, Total Extra, Salario Líquido
+$w_financial_fixed = [10, 8, 10, 10, 17, 14, 15]; // Suma a 84mm. Ajustados.
 
 // --- INICIO DEL BUCLE PRINCIPAL QUE ITERA A TRAVÉS DE CADA EMPLEADO ---
+// Definir colores de fila alternos para los datos de los empleados
+$row_color_even = [234, 236, 238]; // Color gris claro
+$row_color_odd = [255, 255, 255];  // Color blanco
+$row_fill_flag = false; // Bandera para alternar colores
+
 foreach ($datos_empleado_principal as $row_empleado) {
     $codigo_personal = TRIM($row_empleado['codigo']);
     $nombres_empleado = TRIM($row_empleado['nombres']);
@@ -628,7 +769,8 @@ foreach ($datos_empleado_principal as $row_empleado) {
         $asistencia_por_empleado_y_fecha,
         $NombresCodigoLicenciaPermiso,
         $jornada_imagenes_map,
-        $FechaDescripcionAsueto // Pass Asueto dates here
+        $FechaDescripcionAsueto, // Pass Asueto dates here
+        $codigo_departamento_empleado // Pass department code
     );
 
     // Nuevas variables para los totales (usando el operador null coalescing para evitar "Undefined index" si la clave falta)
@@ -639,13 +781,18 @@ foreach ($datos_empleado_principal as $row_empleado) {
     $total_salario_gross_a_mostrar = $results['total_salario_gross'] ?? 0;
     $total_horas_extra_cantidad_a_mostrar = $results['total_horas_extra_cantidad'] ?? 0;
     $salario_liquido_final_a_mostrar = $results['salario_liquido_final'] ?? 0;
-
+    $total_trabajo_extra_empleado_a_mostrar = $results['total_trabajo_extra_empleado'] ?? 0; // Nueva variable para mostrar
+    $total_monto_nocturnidad_a_mostrar = $results['total_monto_nocturnidad'] ?? 0; // Nuevo
+    $total_nocturnidad_cantidad_a_mostrar = $results['total_nocturnidad_cantidad'] ?? 0; // Nuevo
 
     $daily_attendance_details = $results['daily_details'] ?? []; // Asegurar que daily_details sea un array
 
+    // Determinar el color de fondo de la fila actual
+    $current_row_fill_color = $row_fill_flag ? $row_color_odd : $row_color_even;
+    $pdf->SetFillColor($current_row_fill_color[0], $current_row_fill_color[1], $current_row_fill_color[2]); 
+
     // 2. IMPRIMIR LA LÍNEA PRINCIPAL DEL EMPLEADO CON CÁLCULOS INTEGRADOS
     $pdf->SetFont('Arial', '', 7); // Fuente para la línea principal
-    $pdf->SetFillColor(234, 236, 238); // Color de fondo claro para la línea principal
     $pdf->SetDrawColor(0,0,0); // Borde negro
 
     $pdf->SetX(10); // Reiniciar posición X
@@ -673,19 +820,52 @@ foreach ($datos_empleado_principal as $row_empleado) {
         }
     }
 
-    // IMPRIMIR COLUMNAS FIJAS FINALES (Salarios, Asuetos, Hora Extra (C:V), Total Extra, Salario Líquido)
-    $pdf->Cell($w_financial_fixed[0], 6, number_format($total_salarios_a_mostrar, 2, '.', ','), 1, 0, 'R', true); // Salarios
-    $pdf->Cell($w_financial_fixed[1], 6, number_format($total_salario_asuetos_a_mostrar, 2, '.', ','), 1, 0, 'R', true); // Asuetos
+    // IMPRIMIR COLUMNAS FIJAS FINALES (Salarios, Asuetos, EXTRA, Nocturnidad C:V, Hora Extra C:V, Total Extra, Salario Líquido)
+    // Determinar el color de fondo para las celdas de datos financieros
+    // Usar los colores definidos previamente para las filas alternas
+    $pdf->SetFillColor($current_row_fill_color[0], $current_row_fill_color[1], $current_row_fill_color[2]); 
 
-    // Columna de HORAS EXTRA (C:V) - AHORA PARA TODOS LOS DEPARTAMENTOS
-    //$he_display_string = utf8_decode('C: ') . number_format($total_horas_extra_cantidad_a_mostrar, 0, '.', ',') .  // Cantidad entera
-    //                     utf8_decode(' V: ') . number_format($total_monto_horas_extra_a_mostrar, 2, '.', ','); // Valor con 2 decimales
-    $pdf->Cell($w_financial_fixed[2]/2, 6, number_format($total_horas_extra_cantidad_a_mostrar, 0, '.', ','), 1, 0, 'C', true); 
-    $pdf->Cell($w_financial_fixed[2]/2, 6, number_format($total_monto_horas_extra_a_mostrar, 2, '.', ','), 1, 0, 'C', true); 
+    // Helper para formatear números o dejar vacío si es cero
+    $format_num = function($value, $decimals = 2) {
+        return ($value == 0) ? '' : number_format($value, $decimals, '.', ',');
+    };
 
-    $pdf->Cell($w_financial_fixed[3], 6, number_format($total_extra_general_a_mostrar, 2, '.', ','), 1, 0, 'R', true); // Total Extra (TE)
-    $pdf->Cell($w_financial_fixed[4], 6, number_format($salario_liquido_final_a_mostrar, 2, '.', ','), 1, 1, 'R', true); // Salario Liquido
+    // Salarios
+    $pdf->Cell($w_financial_fixed[0], 6, $format_num($total_salarios_a_mostrar), 1, 0, 'R', true); 
     
+    // Asuetos
+    $pdf->Cell($w_financial_fixed[1], 6, $format_num($total_salario_asuetos_a_mostrar), 1, 0, 'R', true); 
+    
+    // EXTRA (Trabajo Descanso y Trabajo Vacación)
+    $pdf->Cell($w_financial_fixed[2], 6, $format_num($total_trabajo_extra_empleado_a_mostrar), 1, 0, 'R', true); 
+
+    // Columna de NOCTURNIDAD (C:V) - SOLO PARA DEPARTAMENTOS 08 Y 09
+    if ($DepartamentoEmpresa == '08' || $DepartamentoEmpresa == '09') {
+        $noct_display_string_C = $format_num($total_nocturnidad_cantidad_a_mostrar, 0); // Cantidad entera
+        $noct_display_string_V = $format_num($total_monto_nocturnidad_a_mostrar, 2); // Valor con 2 decimales
+        $pdf->Cell($w_financial_fixed[3]/2, 6, $noct_display_string_C, 1, 0, 'C', true); // Celda C de Nocturnidad
+        $pdf->Cell($w_financial_fixed[3]/2, 6, $noct_display_string_V, 1, 0, 'C', true); // Celda V de Nocturnidad
+    } else {
+        // Si no es departamento 08 o 09, estas celdas están vacías
+        $pdf->Cell($w_financial_fixed[3]/2, 6, '', 1, 0, 'C', true); // Celda C de Nocturnidad vacía
+        $pdf->Cell($w_financial_fixed[3]/2, 6, '', 1, 0, 'C', true); // Celda V de Nocturnidad vacía
+    }
+
+    // Columna de HORA EXTRA (C:V)
+    $he_display_string_C = $format_num($total_horas_extra_cantidad_a_mostrar, 0); // Cantidad entera
+    $he_display_string_V = $format_num($total_monto_horas_extra_a_mostrar, 2); // Valor con 2 decimales
+    $pdf->Cell($w_financial_fixed[4]/2, 6, $he_display_string_C, 1, 0, 'C', true); // Celda C de Hora Extra
+    $pdf->Cell($w_financial_fixed[4]/2, 6, $he_display_string_V, 1, 0, 'C', true); 
+
+    // Total Extra (TE)
+    $pdf->Cell($w_financial_fixed[5], 6, $format_num($total_extra_general_a_mostrar), 1, 0, 'R', true); 
+    
+    // Salario Liquido
+    $pdf->Cell($w_financial_fixed[6], 6, $format_num($salario_liquido_final_a_mostrar), 1, 1, 'R', true); 
+    
+    // Alternar el color de fondo para la próxima fila
+    $row_fill_flag = !$row_fill_flag;
+
     // SALTO DE LÍNEA PEQUEÑO ENTRE EMPLEADOS (opcional, ajusta si es necesario)
     $pdf->Ln(2); 
 
@@ -693,7 +873,7 @@ foreach ($datos_empleado_principal as $row_empleado) {
 }
 // --- FIN DEL BUCLE PRINCIPAL QUE CAMBIA DE EMPLEADO ---
 
-// Salida del pdf.
+// Output PDF.
 $modo = "I"; // Envia al navegador (I), Descarga el archivo (D), Guardar el fichero en un local(F).
 $print_nombre = mb_convert_encoding("Planilla: $departamentoEmpresaTexto - $quincena - $mes.pdf","ISO-8859-1");
 $pdf->Output($print_nombre,$modo);
