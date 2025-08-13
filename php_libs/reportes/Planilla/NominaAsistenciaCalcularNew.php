@@ -944,8 +944,8 @@ foreach ($datos_empleado_principal as $row_empleado) {
         $pdf->Cell($w_financial_fixed[3]/2, 6, $noct_display_string_V, 1, 0, 'C', true); // Celda V de Nocturnidad
     } else {
         // Si no es departamento 08 o 09, estas celdas están vacías
-        $pdf->Cell($w_financial_fixed[3]/2, 6, '', 1, 0, 'C', true); // Celda C de Nocturnidad vacía
-        $pdf->Cell($w_financial_fixed[3]/2, 6, '', 1, 0, 'C', true); // Celda V de Nocturnidad vacía
+      //  $pdf->Cell($w_financial_fixed[3]/2, 6, '', 1, 0, 'C', true); // Celda C de Nocturnidad vacía
+      //  $pdf->Cell($w_financial_fixed[3]/2, 6, '', 1, 0, 'C', true); // Celda V de Nocturnidad vacía
     }
 
     // Columna de HORA EXTRA (C:V)
@@ -970,12 +970,14 @@ foreach ($datos_empleado_principal as $row_empleado) {
 
     // LLAMADA A LA FUNCIÓN PARA GUARDAR/ACTUALIZAR EL SALARIO MENSUAL
     // Se llama aquí, dentro del bucle de empleados, después de que se ha calculado el salario_liquido_final_a_mostrar para el empleado actual.
+    // MODIFICACIÓN: Pasamos también el salario bruto de la quincena ($total_salario_gross_a_mostrar)
     saveOrUpdateMonthlySalary(
         $codigo_personal,
         $fecha_mes,
         $fecha_ann,
         $quincena,
-        $salario_liquido_final_a_mostrar, // Usamos el salario líquido de la quincena actual
+        $salario_liquido_final_a_mostrar, // Salario líquido de la quincena actual
+        $total_salario_gross_a_mostrar, // Salario bruto de la quincena actual
         $dblink
     );
 }
@@ -984,11 +986,11 @@ foreach ($datos_empleado_principal as $row_empleado) {
 // --- NUEVAS FUNCIONES PARA EL CÁLCULO Y ALMACENAMIENTO DE SALARIOS MENSUALES Y DEDUCCIONES ---
 
 /**
- * Calcula los descuentos de ley (ISSS, AFP, Renta) para El Salvador.
+ * Calcula los descuentos de ley del empleado (ISSS, AFP, Renta) para El Salvador.
  * @param float $salario_bruto_mensual El salario bruto mensual antes de descuentos de ley.
  * @return array Un array asociativo con los montos de los descuentos.
  */
-function calculateLegalDeductions($salario_bruto_mensual) {
+function calculateEmployeeDeductions($salario_bruto_mensual) {
     // Tasas y límites para El Salvador (ejemplos, pueden variar)
     $tasa_isss_empleado = 0.03; // 3%
     $limite_isss = 1000.00; // Salario máximo cotizable para ISSS
@@ -1037,15 +1039,47 @@ function calculateLegalDeductions($salario_bruto_mensual) {
 }
 
 /**
- * Guarda o actualiza el salario líquido del empleado para la quincena y calcula los totales mensuales.
+ * Calcula las contribuciones patronales (ISSS, AFP) para El Salvador.
+ * @param float $salario_bruto_mensual El salario bruto mensual sobre el cual se calculan las contribuciones.
+ * @return array Un array asociativo con los montos de las contribuciones patronales.
+ */
+function calculateEmployerContributions($salario_bruto_mensual) {
+    // Tasas y límites para El Salvador (ejemplos, pueden variar)
+    $tasa_isss_patronal = 0.075; // 7.5%
+    $limite_isss = 1000.00; // Salario máximo cotizable para ISSS (mismo que empleado)
+    
+    $tasa_afp_patronal = 0.0875; // 8.75%
+    $limite_afp = 7000.00; // Salario máximo cotizable para AFP (mismo que empleado)
+
+    $isss_patronal = 0;
+    $afp_patronal = 0;
+
+    // Cálculo de ISSS Patronal
+    $salario_isss_cotizable = min($salario_bruto_mensual, $limite_isss);
+    $isss_patronal = round($salario_isss_cotizable * $tasa_isss_patronal, 2);
+
+    // Cálculo de AFP Patronal
+    $salario_afp_cotizable = min($salario_bruto_mensual, $limite_afp);
+    $afp_patronal = round($salario_afp_cotizable * $tasa_afp_patronal, 2);
+
+    return [
+        'isss_patronal' => $isss_patronal,
+        'afp_patronal' => $afp_patronal
+    ];
+}
+
+/**
+ * Guarda o actualiza el salario líquido y bruto del empleado para la quincena,
+ * y calcula y almacena los totales mensuales y deducciones/contribuciones.
  * @param string $codigo_personal El código del empleado.
  * @param int $fecha_mes El mes (1-12).
  * @param int $fecha_ann El año.
  * @param string $quincena La quincena ('Q1' o 'Q2').
  * @param float $salario_liquido_quincena El salario líquido calculado para la quincena.
+ * @param float $salario_gross_quincena El salario bruto calculado para la quincena.
  * @param PDO $dblink La conexión a la base de datos.
  */
-function saveOrUpdateMonthlySalary($codigo_personal, $fecha_mes, $fecha_ann, $quincena, $salario_liquido_quincena, $dblink) {
+function saveOrUpdateMonthlySalary($codigo_personal, $fecha_mes, $fecha_ann, $quincena, $salario_liquido_quincena, $salario_gross_quincena, $dblink) {
     try {
         // 1. Intentar obtener el registro existente para el empleado y mes
         $stmt_check = $dblink->prepare("SELECT * FROM personal_salario_deducciones_mensual WHERE codigo_personal = :codigo_personal AND fecha_mes = :fecha_mes AND fecha_ann = :fecha_ann");
@@ -1055,73 +1089,155 @@ function saveOrUpdateMonthlySalary($codigo_personal, $fecha_mes, $fecha_ann, $qu
         $stmt_check->execute();
         $existing_record = $stmt_check->fetch(PDO::FETCH_ASSOC);
 
-        $quincena_field_name = ($quincena == 'Q1') ? 'quincena_1_salario_liquido' : 'quincena_2_salario_liquido';
+        $quincena_liquido_field_name = ($quincena == 'Q1') ? 'quincena_1_salario_liquido' : 'quincena_2_salario_liquido';
+        $quincena_gross_field_name = ($quincena == 'Q1') ? 'quincena_1_salario_gross' : 'quincena_2_salario_gross';
+
+        $q1_liquido = 0;
+        $q2_liquido = 0;
+        $q1_gross = 0;
+        $q2_gross = 0;
 
         if ($existing_record) {
-            // 2. Si el registro existe, actualizar la quincena correspondiente
-            $update_query = "UPDATE personal_salario_deducciones_mensual SET $quincena_field_name = :salario_liquido_quincena, fecha_actualizacion = NOW() WHERE id = :id";
-            $stmt_update = $dblink->prepare($update_query);
-            $stmt_update->bindParam(':salario_liquido_quincena', $salario_liquido_quincena);
-            $stmt_update->bindParam(':id', $existing_record['id']);
-            $stmt_update->execute();
+            // Si el registro existe, actualizar la quincena correspondiente
+            $update_quincena_query = "UPDATE personal_salario_deducciones_mensual SET 
+                                        $quincena_liquido_field_name = :salario_liquido_quincena,
+                                        $quincena_gross_field_name = :salario_gross_quincena,
+                                        fecha_actualizacion = NOW()
+                                      WHERE id = :id";
+            $stmt_update_quincena = $dblink->prepare($update_quincena_query);
+            $stmt_update_quincena->bindParam(':salario_liquido_quincena', $salario_liquido_quincena);
+            $stmt_update_quincena->bindParam(':salario_gross_quincena', $salario_gross_quincena);
+            $stmt_update_quincena->bindParam(':id', $existing_record['id']);
+            $stmt_update_quincena->execute();
 
             // Recargar el registro para obtener los valores actualizados de ambas quincenas
             $stmt_check->execute(); // Re-ejecutar para obtener el registro actualizado
             $updated_record = $stmt_check->fetch(PDO::FETCH_ASSOC);
 
-            $q1_val = (float)($updated_record['quincena_1_salario_liquido'] ?? 0);
-            $q2_val = (float)($updated_record['quincena_2_salario_liquido'] ?? 0);
-            $salario_bruto_mensual = round($q1_val + $q2_val, 2);
-
-            // Calcular deducciones de ley
-            $deducciones = calculateLegalDeductions($salario_bruto_mensual);
-            $salario_neto_mensual = round($salario_bruto_mensual - $deducciones['isss_descuento'] - $deducciones['afp_descuento'] - $deducciones['renta_descuento'], 2);
-
-            // Actualizar el registro con los totales mensuales y deducciones
-            $update_totals_query = "UPDATE personal_salario_deducciones_mensual SET 
-                                    salario_bruto_mensual = :salario_bruto_mensual,
-                                    isss_descuento = :isss_descuento,
-                                    afp_descuento = :afp_descuento,
-                                    renta_descuento = :renta_descuento,
-                                    salario_neto_mensual = :salario_neto_mensual,
-                                    fecha_actualizacion = NOW()
-                                    WHERE id = :id";
-            $stmt_update_totals = $dblink->prepare($update_totals_query);
-            $stmt_update_totals->bindParam(':salario_bruto_mensual', $salario_bruto_mensual);
-            $stmt_update_totals->bindParam(':isss_descuento', $deducciones['isss_descuento']);
-            $stmt_update_totals->bindParam(':afp_descuento', $deducciones['afp_descuento']);
-            $stmt_update_totals->bindParam(':renta_descuento', $deducciones['renta_descuento']);
-            $stmt_update_totals->bindParam(':salario_neto_mensual', $salario_neto_mensual);
-            $stmt_update_totals->bindParam(':id', $existing_record['id']);
-            $stmt_update_totals->execute();
-            error_log("DEBUG: Registro de salario mensual actualizado para empleado: $codigo_personal, mes: $fecha_mes, año: $fecha_ann, quincena: $quincena");
+            $q1_liquido = (float)($updated_record['quincena_1_salario_liquido'] ?? 0);
+            $q2_liquido = (float)($updated_record['quincena_2_salario_liquido'] ?? 0);
+            $q1_gross = (float)($updated_record['quincena_1_salario_gross'] ?? 0);
+            $q2_gross = (float)($updated_record['quincena_2_salario_gross'] ?? 0);
 
         } else {
-            // 3. Si no existe, insertar un nuevo registro
-            $insert_query = "INSERT INTO personal_salario_deducciones_mensual (codigo_personal, fecha_mes, fecha_ann, $quincena_field_name, salario_bruto_mensual, isss_descuento, afp_descuento, renta_descuento, salario_neto_mensual, fecha_creacion, fecha_actualizacion) VALUES (:codigo_personal, :fecha_mes, :fecha_ann, :salario_liquido_quincena, :salario_bruto_mensual, :isss_descuento, :afp_descuento, :renta_descuento, :salario_neto_mensual, NOW(), NOW())";
+            // Si no existe, insertar un nuevo registro
+            $insert_query = "INSERT INTO personal_salario_deducciones_mensual (
+                                codigo_personal, fecha_mes, fecha_ann, 
+                                $quincena_liquido_field_name, $quincena_gross_field_name,
+                                fecha_creacion, fecha_actualizacion
+                            ) VALUES (
+                                :codigo_personal, :fecha_mes, :fecha_ann, 
+                                :salario_liquido_quincena, :salario_gross_quincena,
+                                NOW(), NOW()
+                            )";
             $stmt_insert = $dblink->prepare($insert_query);
-
-            $salario_bruto_mensual_inicial = round($salario_liquido_quincena, 2); // Al inicio, el bruto mensual es solo la quincena
-            $deducciones_iniciales = calculateLegalDeductions($salario_bruto_mensual_inicial);
-            $salario_neto_mensual_inicial = round($salario_bruto_mensual_inicial - $deducciones_iniciales['isss_descuento'] - $deducciones_iniciales['afp_descuento'] - $deducciones_iniciales['renta_descuento'], 2);
-
             $stmt_insert->bindParam(':codigo_personal', $codigo_personal);
             $stmt_insert->bindParam(':fecha_mes', $fecha_mes);
             $stmt_insert->bindParam(':fecha_ann', $fecha_ann);
             $stmt_insert->bindParam(':salario_liquido_quincena', $salario_liquido_quincena);
-            $stmt_insert->bindParam(':salario_bruto_mensual', $salario_bruto_mensual_inicial);
-            $stmt_insert->bindParam(':isss_descuento', $deducciones_iniciales['isss_descuento']);
-            $stmt_insert->bindParam(':afp_descuento', $deducciones_iniciales['afp_descuento']);
-            $stmt_insert->bindParam(':renta_descuento', $deducciones_iniciales['renta_descuento']);
-            $stmt_insert->bindParam(':salario_neto_mensual', $salario_neto_mensual_inicial);
+            $stmt_insert->bindParam(':salario_gross_quincena', $salario_gross_quincena);
             $stmt_insert->execute();
-            error_log("DEBUG: Nuevo registro de salario mensual insertado para empleado: $codigo_personal, mes: $fecha_mes, año: $fecha_ann, quincena: $quincena");
+
+            // Para los cálculos mensuales, el registro actual es el que acabamos de insertar
+            if ($quincena == 'Q1') {
+                $q1_liquido = $salario_liquido_quincena;
+                $q1_gross = $salario_gross_quincena;
+            } else { // Q2
+                $q2_liquido = $salario_liquido_quincena;
+                $q2_gross = $salario_gross_quincena;
+            }
         }
+
+        // --- CALCULAR TOTALES MENSUALES Y DEDUCCIONES/CONTRIBUCIONES ---
+        $salario_bruto_mensual = round($q1_gross + $q2_gross, 2);
+
+        // Calcular deducciones de empleado mensuales
+        $employee_deductions_monthly = calculateEmployeeDeductions($salario_bruto_mensual);
+        
+        // Calcular contribuciones patronales mensuales
+        $employer_contributions_monthly = calculateEmployerContributions($salario_bruto_mensual);
+
+        // Calcular salario neto mensual (salario bruto mensual - deducciones de empleado mensuales)
+        $salario_neto_mensual = round(
+            $salario_bruto_mensual - 
+            $employee_deductions_monthly['isss_descuento'] - 
+            $employee_deductions_monthly['afp_descuento'] - 
+            $employee_deductions_monthly['renta_descuento'], 
+        2);
+
+        // --- PRORRATEAR DEDUCCIONES DE EMPLEADO PARA ALMACENAMIENTO QUINCENAL ---
+        $total_gross_for_prorating = $q1_gross + $q2_gross;
+        
+        $q1_isss_empleado = 0;
+        $q1_afp_empleado = 0;
+        $q1_renta_empleado = 0;
+        $q2_isss_empleado = 0;
+        $q2_afp_empleado = 0;
+        $q2_renta_empleado = 0;
+
+        if ($total_gross_for_prorating > 0) {
+            $q1_ratio = round($q1_gross / $total_gross_for_prorating, 4); // Ratio de la Q1 sobre el total bruto mensual
+            $q2_ratio = round($q2_gross / $total_gross_for_prorating, 4); // Ratio de la Q2 sobre el total bruto mensual
+
+            $q1_isss_empleado = round($employee_deductions_monthly['isss_descuento'] * $q1_ratio, 2);
+            $q1_afp_empleado = round($employee_deductions_monthly['afp_descuento'] * $q1_ratio, 2);
+            $q1_renta_empleado = round($employee_deductions_monthly['renta_descuento'] * $q1_ratio, 2);
+
+            $q2_isss_empleado = round($employee_deductions_monthly['isss_descuento'] * $q2_ratio, 2);
+            $q2_afp_empleado = round($employee_deductions_monthly['afp_descuento'] * $q2_ratio, 2);
+            $q2_renta_empleado = round($employee_deductions_monthly['renta_descuento'] * $q2_ratio, 2);
+        }
+
+        // --- ACTUALIZAR EL REGISTRO CON TODOS LOS TOTALES Y DEDUCCIONES/CONTRIBUCIONES ---
+        $update_totals_query = "UPDATE personal_salario_deducciones_mensual SET 
+                                quincena_1_salario_liquido = :q1_liquido,
+                                quincena_2_salario_liquido = :q2_liquido,
+                                quincena_1_salario_gross = :q1_gross,
+                                quincena_2_salario_gross = :q2_gross,
+                                quincena_1_isss_empleado = :q1_isss_empleado,
+                                quincena_1_afp_empleado = :q1_afp_empleado,
+                                quincena_1_renta_empleado = :q1_renta_empleado,
+                                quincena_2_isss_empleado = :q2_isss_empleado,
+                                quincena_2_afp_empleado = :q2_afp_empleado,
+                                quincena_2_renta_empleado = :q2_renta_empleado,
+                                salario_bruto_mensual = :salario_bruto_mensual,
+                                isss_empleado_mensual = :isss_empleado_mensual,
+                                afp_empleado_mensual = :afp_empleado_mensual,
+                                renta_empleado_mensual = :renta_empleado_mensual,
+                                isss_patronal_mensual = :isss_patronal_mensual,
+                                afp_patronal_mensual = :afp_patronal_mensual,
+                                salario_neto_mensual = :salario_neto_mensual,
+                                fecha_actualizacion = NOW()
+                                WHERE codigo_personal = :codigo_personal AND fecha_mes = :fecha_mes AND fecha_ann = :fecha_ann";
+        
+        $stmt_update_totals = $dblink->prepare($update_totals_query);
+        $stmt_update_totals->bindParam(':q1_liquido', $q1_liquido);
+        $stmt_update_totals->bindParam(':q2_liquido', $q2_liquido);
+        $stmt_update_totals->bindParam(':q1_gross', $q1_gross);
+        $stmt_update_totals->bindParam(':q2_gross', $q2_gross);
+        $stmt_update_totals->bindParam(':q1_isss_empleado', $q1_isss_empleado);
+        $stmt_update_totals->bindParam(':q1_afp_empleado', $q1_afp_empleado);
+        $stmt_update_totals->bindParam(':q1_renta_empleado', $q1_renta_empleado);
+        $stmt_update_totals->bindParam(':q2_isss_empleado', $q2_isss_empleado);
+        $stmt_update_totals->bindParam(':q2_afp_empleado', $q2_afp_empleado);
+        $stmt_update_totals->bindParam(':q2_renta_empleado', $q2_renta_empleado);
+        $stmt_update_totals->bindParam(':salario_bruto_mensual', $salario_bruto_mensual);
+        $stmt_update_totals->bindParam(':isss_empleado_mensual', $employee_deductions_monthly['isss_descuento']);
+        $stmt_update_totals->bindParam(':afp_empleado_mensual', $employee_deductions_monthly['afp_descuento']);
+        $stmt_update_totals->bindParam(':renta_empleado_mensual', $employee_deductions_monthly['renta_descuento']);
+        $stmt_update_totals->bindParam(':isss_patronal_mensual', $employer_contributions_monthly['isss_patronal']);
+        $stmt_update_totals->bindParam(':afp_patronal_mensual', $employer_contributions_monthly['afp_patronal']);
+        $stmt_update_totals->bindParam(':salario_neto_mensual', $salario_neto_mensual);
+        $stmt_update_totals->bindParam(':codigo_personal', $codigo_personal);
+        $stmt_update_totals->bindParam(':fecha_mes', $fecha_mes);
+        $stmt_update_totals->bindParam(':fecha_ann', $fecha_ann);
+        $stmt_update_totals->execute();
+
+        error_log("DEBUG: Registro de salario mensual actualizado/insertado y totales calculados para empleado: $codigo_personal, mes: $fecha_mes, año: $fecha_ann, quincena: $quincena");
+
     } catch (PDOException $e) {
         // Registra el error en el log del servidor
         error_log("ERROR en saveOrUpdateMonthlySalary para empleado $codigo_personal, mes $fecha_mes, año $fecha_ann, quincena $quincena: " . $e->getMessage());
-        // Opcional: Podrías lanzar una excepción o manejar el error de otra manera si es crítico
-        // throw $e;
     }
 }
 

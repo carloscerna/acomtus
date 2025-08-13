@@ -8,6 +8,8 @@ var value_d = "";
 var value = "";
 var RutaText = "";
 var DepartamentoText = "";
+var reporteMensualDataTable; // Variable global para la instancia de DataTables
+
 $(function(){ // iNICIO DEL fUNCTION.
 ///////////////////////////////////////////////////////////////////////////////
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
@@ -236,6 +238,203 @@ $(document).ready(function(){
 				}
 			AbrirVentana(varenviar);   
 	});
+
+    // NUEVO: Evento para el botón de Reporte Mensual
+    $("#goReporteMensual").on('click', function (e) {
+        e.preventDefault(); // Prevenir el comportamiento por defecto del botón
+
+        // Obtener valores de los selectores
+        var fechaMes = $("#lstFechaMes").val();
+        var fechaAnn = $("#lstFechaAño").val();
+        var DepartamentoEmpresa = $("#lstDepartamentoEmpresa").val();
+        var DepartamentoText = $("#lstDepartamentoEmpresa option:selected").text(); // Texto del departamento
+        var ruta = $("#lstRuta").val();
+        var RutaText = $("#lstRuta option:selected").text(); // Texto de la ruta
+
+        // Construir el título de la tarjeta
+        var cardTitle = 'Reporte Mensual de Planilla - ' + $('#lstFechaMes option:selected').text() + ' ' + fechaAnn;
+        if (DepartamentoEmpresa && DepartamentoEmpresa !== '00') {
+            cardTitle += ' | ' + DepartamentoText;
+            if (DepartamentoEmpresa === '02' && ruta && ruta !== '00' && ruta !== 'Seleccionar...') {
+                cardTitle += ' (' + RutaText + ')';
+            }
+        }
+        $('#reporteMensualCardTitle').text(cardTitle); // Establecer el título de la tarjeta
+
+        // Destruir la instancia existente de DataTables si la hay
+        if ($.fn.DataTable.isDataTable('#reporteMensualTable')) {
+            reporteMensualDataTable.destroy();
+            $('#reporteMensualTable tbody').empty(); // Limpiar el cuerpo de la tabla
+        }
+
+        // Realizar la llamada AJAX para obtener los datos mensuales
+        $.ajax({
+            url: "php_libs/reportes/Planilla/NominaMensualReporte.php", // Nuevo archivo PHP
+            type: "GET",
+            dataType: "json",
+            data: {
+                fechaMes: fechaMes,
+                fechaAnn: fechaAnn,
+                DepartamentoEmpresa: DepartamentoEmpresa,
+                ruta: ruta
+            },
+            beforeSend: function() {
+                toastr.info("Cargando reporte mensual...", "Sistema");
+                // Ocultar la sección principal y mostrar la tarjeta de reporte
+                $("#PantallaPrincipal").hide();
+                $("#reporteMensualCardContainer").show();
+            },
+            success: function(response) {
+                if (response.data && response.data.length > 0) {
+                    toastr.success("Reporte mensual cargado exitosamente.", "Sistema");
+                    
+                    // Inicializar DataTables con los datos recibidos
+                    reporteMensualDataTable = $('#reporteMensualTable').DataTable({
+                        data: response.data,
+                        columns: [
+                            { data: 'codigo_personal' },
+                            { data: 'nombre_completo' },
+                            { data: 'fecha_mes' },
+                            { data: 'fecha_ann' },
+                            { data: 'salario_bruto_mensual', render: $.fn.dataTable.render.number(',', '.', 2, '$') },
+                            { data: 'isss_empleado_mensual', render: $.fn.dataTable.render.number(',', '.', 2, '$') },
+                            { data: 'afp_empleado_mensual', render: $.fn.dataTable.render.number(',', '.', 2, '$') },
+                            { data: 'renta_empleado_mensual', render: $.fn.dataTable.render.number(',', '.', 2, '$') },
+                            { data: 'isss_patronal_mensual', render: $.fn.dataTable.render.number(',', '.', 2, '$') },
+                            { data: 'afp_patronal_mensual', render: $.fn.dataTable.render.number(',', '.', 2, '$') },
+                            { data: 'salario_neto_mensual', render: $.fn.dataTable.render.number(',', '.', 2, '$') }
+                        ],
+					// ... dentro de la inicialización de reporteMensualDataTable
+					dom: 'Bfrtip', // La 'B' es necesaria para los botones
+					buttons: [
+						'copy', 
+						'csv',
+						{
+							extend: 'excelHtml5', // Usamos la extensión de Excel
+							footer: true, // ¡IMPORTANTE! Esto incluye el <tfoot> en la exportación.
+							title: function() {
+								// Título dinámico para el archivo Excel.
+								var fechaAnn = $("#lstFechaAño").val();
+								var mesTexto = $('#lstFechaMes option:selected').text();
+								return 'Reporte Mensual Planilla - ' + mesTexto + ' ' + fechaAnn;
+							},
+							messageTop: function() {
+								// Mensaje dinámico que aparecerá como subtítulo en el Excel.
+								var departamento = $("#lstDepartamentoEmpresa option:selected").text();
+								var ruta = $("#lstRuta option:selected").text();
+								var codigoDepto = $("#lstDepartamentoEmpresa").val();
+
+								if (codigoDepto && codigoDepto !== '00') {
+									if (codigoDepto === '02' && $("#lstRuta").val() !== '00' && $("#lstRuta").val() !== 'Seleccionar...') {
+										return 'Departamento: ' + departamento + ' | Ruta: ' + ruta;
+									}
+									return 'Departamento: ' + departamento;
+								}
+								return 'Reporte General (Todos los departamentos)';
+							}
+						},
+						'pdf', 
+						'print'
+					],
+					// ... el resto de la configuración sigue igual
+                        "paging": true,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": false,
+                        "responsive": true, // Mantener responsive para ajuste automático
+                        "footerCallback": function ( row, data, start, end, display ) {
+                            var api = this.api();
+                
+                            // Función para sumar una columna
+                            var intVal = function ( i ) {
+                                return typeof i === 'string' ?
+                                    i.replace(/[\$,]/g, '')*1 :
+                                    typeof i === 'number' ?
+                                        i : 0;
+                            };
+                
+                            // Sumas para el pie de tabla
+                            var total_salario_bruto_mensual_table = api
+                                .column( 4, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+                
+                            var total_isss_empleado_table = api
+                                .column( 5, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+                            
+                            var total_afp_empleado_table = api
+                                .column( 6, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+
+                            var total_renta_empleado_table = api
+                                .column( 7, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+
+                            var total_isss_patronal_table = api
+                                .column( 8, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+
+                            var total_afp_patronal_table = api
+                                .column( 9, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+
+                            var total_salario_neto_mensual_table = api
+                                .column( 10, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+                
+                            // Actualizar el pie de página de la tabla
+                            $( api.column( 4 ).footer() ).html( '$' + total_salario_bruto_mensual_table.toFixed(2) );
+                            $( api.column( 5 ).footer() ).html( '$' + total_isss_empleado_table.toFixed(2) );
+                            $( api.column( 6 ).footer() ).html( '$' + total_afp_empleado_table.toFixed(2) );
+                            $( api.column( 7 ).footer() ).html( '$' + total_renta_empleado_table.toFixed(2) );
+                            $( api.column( 8 ).footer() ).html( '$' + total_isss_patronal_table.toFixed(2) );
+                            $( api.column( 9 ).footer() ).html( '$' + total_afp_patronal_table.toFixed(2) );
+                            $( api.column( 10 ).footer() ).html( '$' + total_salario_neto_mensual_table.toFixed(2) );
+
+                            // Actualizar el recuadro de totales
+                            $('#totalSalarioBrutoMensual').text('$' + total_salario_bruto_mensual_table.toFixed(2));
+                            $('#totalIsssEmpleado').text('$' + total_isss_empleado_table.toFixed(2));
+                            $('#totalAfpEmpleado').text('$' + total_afp_empleado_table.toFixed(2));
+                            $('#totalRentaEmpleado').text('$' + total_renta_empleado_table.toFixed(2));
+                            $('#totalIsssPatronal').text('$' + total_isss_patronal_table.toFixed(2));
+                            $('#totalAfpPatronal').text('$' + total_afp_patronal_table.toFixed(2));
+                            $('#totalSalarioNetoMensual').text('$' + total_salario_neto_mensual_table.toFixed(2));
+                        }
+                    });
+                    // Ajustar columnas y redibujar la tabla después de la carga inicial
+                    // Esto es importante para que DataTables se ajuste al ancho de la tarjeta.
+                    reporteMensualDataTable.columns.adjust().responsive.recalc();
+                } else {
+                    toastr.warning("No se encontraron datos para el mes y año seleccionados.", "Sistema");
+                    $("#reporteMensualCardContainer").hide(); // Ocultar si no hay datos
+                    $("#PantallaPrincipal").show(); // Volver a mostrar el formulario
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                toastr.error("Error al cargar el reporte mensual: " + textStatus + " - " + errorThrown, "Sistema");
+                console.error("AJAX Error: ", textStatus, errorThrown, jqXHR);
+                $("#reporteMensualCardContainer").hide(); // Ocultar si hay error
+                $("#PantallaPrincipal").show(); // Volver a mostrar el formulario
+            }
+        });
+    });
+
+    // Removido: El evento shown.bs.modal ya no es necesario ya que no usamos modal
+    // $('#reporteMensualModal').on('shown.bs.modal', function () {
+    //     if (reporteMensualDataTable) {
+    //         reporteMensualDataTable.columns.adjust().responsive.recalc();
+    //     }
+    // });
+
 // CUANDO SE ENCUENTRA EL CAMBIO DEL DEPARTAMENTO EN LA EMPRESA
 	$("#lstDepartamentoEmpresa").change(function () {
 		var miselect=$("#lstDepartamentoEmpresa");
