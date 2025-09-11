@@ -58,7 +58,7 @@ if($errorDbConexion == false){
 						WHERE 
 							p.codigo <> ''
 						ORDER BY 
-							nombre_empleado ASC"; // Se cambia a ASC para ordenar alfabéticamente por nombre
+							p.codigo DESC"; // Se cambia a ASC para ordenar alfabéticamente por nombre
 				
 				// Ejecutamos el Query.
 				$consulta = $dblink->query($query);
