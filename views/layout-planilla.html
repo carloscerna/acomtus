@@ -4,7 +4,7 @@
 
 {% block extraCSS %}
 <style>
-/* mensajes de error para el validate de los form de input*/
+  /* mensajes de error para el validate de los form de input*/
   input.error {
       border-color: #f00 !important;
   }
@@ -17,39 +17,72 @@
   }
   /* Estilos adicionales para los small-box si es necesario */
   .small-box h3 {
-    font-size: 2.2rem; /* Ajusta el tamaño de la fuente para los números */
+    font-size: 2.2rem;
     font-weight: bold;
     margin: 0 0 10px 0;
     white-space: nowrap;
     padding: 0;
   }
   .small-box p {
-    font-size: 1rem; /* Ajusta el tamaño de la fuente para el texto */
+    font-size: 1rem;
+  }
+
+  /* --- NUEVOS ESTILOS PARA EL PANEL LATERAL DE TOTALES --- */
+
+  /* Contenedor principal dentro del modal-body */
+  .report-wrapper {
+    position: relative;
+    overflow-x: hidden; /* Oculta el panel cuando está fuera de la pantalla */
+  }
+
+  /* El panel lateral donde irán los totales */
+  #totalsSidebar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 380px; /* Ancho del panel lateral */
+    height: 100%;
+    background-color: #f4f6f9; /* Un color de fondo ligeramente diferente */
+    border-left: 1px solid #dee2e6;
+    padding: 20px;
+    /* Inicia fuera de la pantalla (a la derecha) */
+    transform: translateX(100%); 
+    transition: transform 0.35s ease-in-out; /* Animación suave */
+    overflow-y: auto; /* Scroll si el contenido es muy largo */
+    z-index: 10; /* Se asegura que esté por encima de la tabla si es necesario */
+  }
+
+  /* Clase que se añadirá con JS para mostrar el panel */
+  #totalsSidebar.open {
+    transform: translateX(0); /* Mueve el panel a su posición visible */
+    box-shadow: -5px 0 15px rgba(0,0,0,0.1);
   }
 </style>
 {% endblock %}
 
 {% block javascripts %}
-    <!-- JS para esta página. -->
     <script type="text/JavaScript" src="js/main_planilla.js"></script>
-    <!-- Incluir DataTables y sus extensiones para botones de exportación -->
+    
     <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+    
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.colVis.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.bootstrap4.min.js"></script>
-    <!-- Estilos de DataTables y Buttons -->
+    
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap4.min.js"></script>
+    
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css"/>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.bootstrap4.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap4.min.css"/>
 {% endblock %}
 
 {% block contenidos %}
-<!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
     <section class="content-header p-0" style="background-color: rgb(234, 236, 238);">
       <div class="container-fluid">
         <div class="row">
@@ -63,9 +96,7 @@
             </ol>
           </div>
         </div>
-      </div><!-- /.container-fluid -->
-    </section>
-  <!-- Small boxes (Stat box) -->
+      </div></section>
   <section class="col col-sm-12 col-md-12 col-lg-8 col-xl-6 m-auto" id="PantallaPrincipal">
     <div class="card m-auto">
       <div class="card-header bg-gradient-navy">
@@ -79,16 +110,11 @@
                 Planilla | Reporte de Trabajo</h3>
           </div>
         </div>
-        <!-- /.card-tools -->
-      </div>
-    <!-- /.card-header -->
-      <div class="card-body">
-        <!-- /.PARA LA BUSQUEDA MODIFICANDO EL FILTER SEARCH -->
-        <!-- /.INPUT PARA EL MENU CONTEXTUAL -->
-          <input type="hidden" id="MenuTab" value="{{ codigo_perfil }}">         
+        </div>
+    <div class="card-body">
+        <input type="hidden" id="MenuTab" value="{{ codigo_perfil }}">         
                 <div class="row" id="DivSoloPlanilla">
                   <div class="col col-md-12 col-lg-12 col-xl-12">
-                    <!-- SELECT CATALOGO JORNADA -->
                     <div class="form-group">
                       <label for="Mes">Mes</label>
                       <select class="custom-select" name="lstFechaMes" id="lstFechaMes" aria-label="lstrFechaMes">
@@ -106,12 +132,10 @@
                         <option value="12">Diciembre</option>
                       </select>                                      
                     </div>
-                    <!-- AÑO ACTUAL-->
                     <div class="form-group">
                       <label class="año">Año</label>
                       <select class="custom-select" name="lstFechaAño" id="lstFechaAño" aria-label="lstFechaAño"></select>                                      
                     </div>
-                    <!-- QUINCENA-->
                     <div class="form-group">
                     <label for="Quincena">Quincena</label>
                         <select class="custom-select" name="lstQuincena" id="lstQuincena" aria-label="lstQuincena">
@@ -119,49 +143,38 @@
                         <option value="Q2">Segunda</option>
                       </select>    
                     </div>
-                    <!-- DEPARTAMENTO-->
                     <div class="form-group">
                       <label for="lstDepartamentoEmpresa">Departamento en la Empresa</label>
                       <select class="custom-select" name="lstDepartamentoEmpresa" id="lstDepartamentoEmpresa"></select>    
                     </div>
-                    <!-- RUTA - APARACERA CUANDO EN DEPARTAMENTO SE SELECCIONE MOTORISTAS-->
                     <div class="form-group"  id="DivRuta" style="display: none;">
                       <label for="Ruta">Ruta</label>
                       <select class="custom-select" name="lstRuta" id="lstRuta" title="LstRuta"></select>
-                      <!-- <label for="CodigoRutaResponsable" class="text-primary"></label>    -->
-                    </div>
+                      </div>
                     <div class="form-group">
                       <label for="CodigoRutaResponsable" class="text-primary"></label>    
                     </div>
               </div>
                 </div>
-      </div> <!-- CARDO BODY CIERRE-->
-      <!-- /.CARD  footer -->
-        <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
+      </div> <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
           <div class="d-flex justify-content-between">
-            <!-- Botón Crear Planilla -->
             <button class="btn btn-success btn-lg" id="goCrearPlanilla" data-toggle="tooltip" data-placement="left" title="Crear" type="button"> 
               <div style="text-align:center;"><i class="fad fa-clipboard-list"></i></div>  
             </button>
 
-            <!-- Botón Calcular Planilla (Quincenal) -->
             <button class="btn btn-primary btn-lg" id="goCalcularPlanilla" data-toggle="tooltip" data-placement="left" title="Calcular"> 
               <div style="text-align:center;"><i class="fal fa-clipboard-list-check"></i></div>  
             </button>
-            <!-- Botón Calcular Planilla 2 -->
             <button class="btn btn-default btn-lg" id="goCalcularPlanilla2" data-toggle="tooltip" data-placement="left" title="Calcular2"> 
               <div style="text-align:center;"><i class="fas fa-file-check"></i></div>  
             </button>
-            <!-- Botón Calcular Planilla 3 -->
-            <button class="btn btn-default btn-lg" id="goCalcularPlanilla3" data-toggle="tooltip" data-placement="left" title="Calcular3"> 
+            <button class="btn btn-default btn-lg" id="goCalcularPlanilla3" data-toggle="tooltip" data-placement="left" title="Calcular3" hidden> 
               <div style="text-align:center;"><i class="fad fa-calculator-alt"></i></div>
             </button>
-            <!-- NUEVO Botón para Reporte Mensual -->
-            <button class="btn btn-info btn-lg" id="goReporteMensual" data-toggle="tooltip" data-placement="left" title="Reporte Mensual">
+            <button class="btn btn-info btn-lg" id="goReporteMensual" data-toggle="tooltip" data-placement="left" title="Reporte Mensual" hidden>
               <div style="text-align:center;"><i class="fas fa-chart-line"></i></div>
             </button>
           </div>
-              <!-- SELECCIONAR con o sin calculos           -->
               <div class="form-group row p-2">
                 <label class="form-label"></label>
                 <div class="form-check-inline">
@@ -174,148 +187,136 @@
     </div>
   </section>
 
-  <!-- Sección para mostrar la tabla de reporte mensual y totales -->
-  <section class="col-sm-12 m-auto" id="reporteMensualCardContainer" style="display: none;">
-    <div class="card m-auto">
-      <div class="card-header bg-gradient-info">
-        <h3 class="card-title" id="reporteMensualCardTitle"><i class="fas fa-table"></i> Reporte Mensual de Planilla</h3>
-      </div>
-      <div class="card-body">
-        <table id="reporteMensualTable" class="table table-bordered table-striped">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Nombre</th>
-              <th>Mes</th>
-              <th>Año</th>
-              <th>Salario Bruto Mensual</th>
-              <th>ISSS (Empleado)</th>
-              <th>AFP (Empleado)</th>
-              <th>Renta (Empleado)</th>
-              <th>ISSS (Patronal)</th>
-              <th>AFP (Patronal)</th>
-              <th>Salario Neto Mensual</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Los datos se cargarán aquí con DataTables -->
-          </tbody>
-          <tfoot>
-            <tr>
-              <th colspan="4" style="text-align:right">Total:</th>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th></th>
-            </tr>
-          </tfoot>
-        </table>
-
-        <!-- Recuadro para Totales - Ahora con small-box -->
-        <h5 class="mt-4">Totales del Reporte:</h5>
-        <div class="row">
-          <!-- Salario Bruto Mensual Total -->
-          <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="small-box bg-info">
-              <div class="inner">
-                <h3 id="totalSalarioBrutoMensual"></h3>
-                <p>Salario Bruto Mensual Total</p>
-              </div>
-              <div class="icon">
-                <i class="fas fa-money-bill-wave"></i>
-              </div>
-              <a href="#" class="small-box-footer">Más info <i class="fas fa-arrow-circle-right"></i></a>
+  <div class="modal fade" id="reporteMensualModal" tabindex="-1" role="dialog" aria-labelledby="reporteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-gradient-info">
+          <h5 class="modal-title" id="reporteModalLabel"><i class="fas fa-table"></i> Reporte Mensual de Planilla</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="card m-auto" id="reporteMensualCardContainer">
+            <div class="card-header">
+                <h3 class="card-title" id="reporteMensualCardTitle"></h3>
+                <div class="card-tools">
+                    <button class="btn btn-sm btn-outline-primary" id="toggleTotalesBtn">
+                        <i class="fas fa-eye"></i> Mostrar Totales
+                    </button>
+                </div>
             </div>
-          </div>
-          <!-- ISSS Empleado Total -->
-          <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="small-box bg-warning">
-              <div class="inner">
-                <h3 id="totalIsssEmpleado"></h3>
-                <p>ISSS Empleado Total</p>
+            <div class="report-wrapper">
+              <div class="card-body">
+                <table id="reporteMensualTable" class="table table-bordered table-striped" style="width:100%;">
+                  <thead>
+                    <tr>
+                      <th>Código</th>
+                      <th>Nombre</th>
+                      <th>Salario Bruto</th>
+                      <th>ISSS Empl.</th>
+                      <th>AFP Empl.</th>
+                      <th>Renta</th>
+                      <th>ISSS Pat.</th>
+                      <th>AFP Pat.</th>
+                      <th>Salario Neto</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                  <tfoot>
+                    <tr>
+                      <th colspan="2" style="text-align:right">Total:</th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                    </tr>
+                  </tfoot>
+                </table>
               </div>
-              <div class="icon">
-                <i class="fas fa-hospital-user"></i>
+    
+              <div id="totalsSidebar">
+                  <h5><i class="fas fa-chart-pie"></i> Totales del Reporte</h5>
+                  <hr>
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="small-box bg-info">
+                        <div class="inner">
+                          <h3 id="totalSalarioBrutoMensual"></h3>
+                          <p>Salario Bruto Mensual Total</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="small-box bg-dark">
+                        <div class="inner">
+                          <h3 id="totalSalarioNetoMensual"></h3>
+                          <p>Salario Neto Mensual Total</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-wallet"></i></div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="small-box bg-warning">
+                        <div class="inner">
+                          <h3 id="totalIsssEmpleado"></h3>
+                          <p>ISSS Empleado Total</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-hospital-user"></i></div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="small-box bg-danger">
+                        <div class="inner">
+                          <h3 id="totalAfpEmpleado"></h3>
+                          <p>AFP Empleado Total</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-hand-holding-usd"></i></div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="small-box bg-secondary">
+                        <div class="inner">
+                          <h3 id="totalRentaEmpleado"></h3>
+                          <p>Renta Empleado Total</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="small-box bg-success">
+                        <div class="inner">
+                          <h3 id="totalIsssPatronal"></h3>
+                          <p>ISSS Patronal Total</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-building"></i></div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="small-box bg-primary">
+                        <div class="inner">
+                          <h3 id="totalAfpPatronal"></h3>
+                          <p>AFP Patronal Total</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-piggy-bank"></i></div>
+                      </div>
+                    </div>
+                  </div>
               </div>
-              <a href="#" class="small-box-footer">Más info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- AFP Empleado Total -->
-          <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="small-box bg-danger">
-              <div class="inner">
-                <h3 id="totalAfpEmpleado"></h3>
-                <p>AFP Empleado Total</p>
-              </div>
-              <div class="icon">
-                <i class="fas fa-hand-holding-usd"></i>
-              </div>
-              <a href="#" class="small-box-footer">Más info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- Renta Empleado Total -->
-          <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="small-box bg-secondary">
-              <div class="inner">
-                <h3 id="totalRentaEmpleado"></h3>
-                <p>Renta Empleado Total</p>
-              </div>
-              <div class="icon">
-                <i class="fas fa-file-invoice-dollar"></i>
-              </div>
-              <a href="#" class="small-box-footer">Más info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- ISSS Patronal Total -->
-          <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="small-box bg-success">
-              <div class="inner">
-                <h3 id="totalIsssPatronal"></h3>
-                <p>ISSS Patronal Total</p>
-              </div>
-              <div class="icon">
-                <i class="fas fa-building"></i>
-              </div>
-              <a href="#" class="small-box-footer">Más info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- AFP Patronal Total -->
-          <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="small-box bg-primary">
-              <div class="inner">
-                <h3 id="totalAfpPatronal"></h3>
-                <p>AFP Patronal Total</p>
-              </div>
-              <div class="icon">
-                <i class="fas fa-piggy-bank"></i>
-              </div>
-              <a href="#" class="small-box-footer">Más info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- Salario Neto Mensual Total -->
-          <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="small-box bg-dark">
-              <div class="inner">
-                <h3 id="totalSalarioNetoMensual"></h3>
-                <p>Salario Neto Mensual Total</p>
-              </div>
-              <div class="icon">
-                <i class="fas fa-wallet"></i>
-              </div>
-              <a href="#" class="small-box-footer">Más info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        </div>
       </div>
     </div>
-  </section>
-
-  </div> <!-- /.content-Wrapper, Contains page content. -->
-  {% endblock %}
+  </div>
+  </div> {% endblock %}
 
 {% block loginUser %}
-<!--	{% include 'layout-login-user.html' %} -->
 {% endblock %}
