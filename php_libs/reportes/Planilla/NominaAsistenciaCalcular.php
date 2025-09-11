@@ -100,7 +100,7 @@ if ($DepartamentoEmpresa == '02' && $NombreRuta != '00') {
 if ($DepartamentoEmpresa != '00') {
     $query .= " AND p.codigo_departamento_empresa = '$DepartamentoEmpresa'";
 }
-$query .= " ORDER BY p.codigo_departamento_empresa, p.apellidos, p.nombres, p.codigo"; // AÑADIDA: p.codigo al ORDER BY
+$query .= " ORDER BY p.codigo"; // AÑADIDA: p.codigo al ORDER BY
 
 try {
     $stmt_codigos_personal = $dblink->query($query);
@@ -684,14 +684,17 @@ class PDF extends FPDF
         $reporte_trabajo_display .= date('d', strtotime($fecha_periodo_inicio)) . ' al ' . date('d', strtotime($fecha_periodo_fin)) . ' de ' . utf8_decode(strftime('%B', strtotime($fecha_periodo_inicio))) . ' de ' . date('Y', strtotime($fecha_periodo_inicio));
         
         $reporte_ruta_display = utf8_decode($departamentoEmpresaTexto);
-        if (!empty($RutaText) && $RutaText != '00' && $RutaText != 'Seleccionar...') { // Si se seleccionó una ruta específica
+        if (!empty($RutaText) && $RutaText != '00' && $RutaText != 'Seleccionar...' && $departamentoEmpresaTexto == 'Motorista') { // Si se seleccionó una ruta específica
             $reporte_ruta_display .= utf8_decode(' (Ruta: ') . utf8_decode($RutaText) . utf8_decode(')');
+        }else{
+            $reporte_ruta_display = $departamentoEmpresaTexto;
         }
 
         // Arial bold 11
         $this->SetFont('Arial','B',11);
         $this->SetX(30);
         $this->Cell(100,6, $reporte_trabajo_display,0,1,"L",false);
+        
         $this->SetX(30);
         $this->Cell(100,6, $reporte_ruta_display,0,1,"L",false);
         

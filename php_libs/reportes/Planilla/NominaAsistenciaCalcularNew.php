@@ -569,7 +569,7 @@ class PDF extends FPDF
     function Header() {
         global $fecha_periodo_inicio, $fecha_periodo_fin, $departamentoEmpresaTexto, $RutaText, $quincena, $rango_fechas;
         // Variables adicionales para el Header (asegurarse de que estén definidas en el ámbito global del script principal)
-        global $_SESSION, $persona_responsable; 
+        global $_SESSION, $persona_responsable, $DepartamentoEmpresa; 
 
         // --- INICIO CÓDIGO DEL USUARIO PARA EL HEADER ---
         // Logo
@@ -602,8 +602,10 @@ class PDF extends FPDF
         $this->SetFont('Arial','B',11);
         $this->SetX(30);
         $this->Cell(100,6, $reporte_trabajo_display,0,1,"L",false);
+        if ($departamentoEmpresaTexto == 'Motorista') {
         $this->SetX(30);
         $this->Cell(100,6, $reporte_ruta_display,0,1,"L",false);
+        }
         
         // Persona Responsable del Punteo.
         $this->SetFont('Arial','B',9);
