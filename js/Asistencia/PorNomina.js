@@ -247,6 +247,8 @@ $("#BotonJornada, #BotonLicencia, #BotonCerrar").on('click',function () {
         // Valor por defecto.
         $('#CJ').val(2);  // CODIGO JORNADA
         $('#CTL').val(1);  // CODIGO JORNADA
+        // cargar los datos relacionados con el catalogo jornada.
+            listar_jornada();
 		// lista de códigos que NO deben mostrar HoraExtra
         var codigosNo = ["01","04","05","06","07","09","08"];
 		// traer el valor actual del CodigoDepartamentoEmpresa.
@@ -263,7 +265,7 @@ $("#BotonJornada, #BotonLicencia, #BotonCerrar").on('click',function () {
         } else {
             $("#HoraExtra").hide();
         }
-    		listar_jornada();
+
 	}
 	else if (this.value == "Licencia") {
         //
