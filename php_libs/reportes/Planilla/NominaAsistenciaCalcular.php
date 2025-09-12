@@ -289,6 +289,18 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
             'paga_salario_diario' => true,
             'agrega_nocturnidad' => true,
             'agrega_extra' => $salario_diario
+        ],
+        // Trabajo en Vaación + pago diaro + nocturnidad + 1 tanda.
+        '41242445' => [
+            'paga_salario_diario' => true,
+            'agrega_nocturnidad' => true,
+            'agrega_extra' => $salario_diario
+        ],
+        // Trabajo en Vaación + pago diaro + nocturnidad + 1 media tanda.
+        '41241445' => [
+            'paga_salario_diario' => true,
+            'agrega_nocturnidad' => true,
+            'agrega_extra' => $salario_diario /2 // Media Tanda, mitad del pago diario.
         ]
     ];
 

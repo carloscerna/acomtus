@@ -121,26 +121,38 @@ $("#goBuscarPersonalAsistencia").on('click', function (e) {
 ///////////////////////////////////////////////////////////////////////////////	  
 $("#Jornada, #Permiso").change(function () {
 	if ($("#Jornada").is(":checked")) {
+		// traer el valor actual del CodigoDepartamentoEmpresa.
+		var codigoDepartamentoEmpresa = $("#CodigoDepartamentoEmpresa").val();
 		$('#DivJornada').show();
 		$('#DivPermisos').hide();
 		//
 		$("#JornadaTV").hide();
 		$("#JornadaDescanso").hide();
 		$("#JornadaAsueto").hide();
-        // div de la Hora Extra.
-        $("#HoraExtra").show();
+
 		// VOLVER A COLOCAR EN VALOR "no" AMBAS BOOLEAN
 		$("#BooleanTV").val('no');
 		$("#BooleanDescanso").val('no');
 		listar_jornada();
 		// ELIMINAR UN ITEM DE LSTJORNADA
 		$("#lstJornada option[value='0H']").remove();
-		//
-		HoraExtra();
-		if(valor != 0){
-			$("#lstHoraExtra").val(valor); // Asignar el valor seleccionado a lstHoraExtra
-			alert("Valor: " + valor);
-		}
+		// lista de códigos que NO deben mostrar HoraExtra
+			var codigosNo = ["01","04","05","06","07","09","08"];
+
+			if (!codigosNo.includes(codigoDepartamentoEmpresa)) {
+				$("#HoraExtra").show();
+				HoraExtra();
+
+				if (valor != 0) {
+					$("#lstHoraExtra").val(valor);
+					alert("Valor: " + valor);
+				}
+			} else {
+				$("#HoraExtra").hide();
+			}
+
+		
+
 	}
 	else if ($("#Permiso").is(":checked")) {
 		$('#DivPermisos').show();
@@ -235,6 +247,7 @@ $("#lstTipoLicencia").change(function () {
 				//
 				$("#JornadaTV").show();
 				$("#JornadaDescanso").hide();
+				$("#chkNocturnidadTV").prop("checked", false);
 				listar_jornada_vacacion(2);
 			}else if(elegido == '14'){	// SE HA SELECCIONADO TRABAJO EN DESCANSO
 				// VOLVER A COLOCAR EN VALOR "si"
@@ -300,12 +313,17 @@ $("#goEnviar").on('click', function(){
 			}
 			//alert(TipoLicenciaChecks);
 			// casilla de verificación revisar el valor.
-			var chkNocturnidad = "no";
+			/*var chkNocturnidad = "no";
 			if ($("#chkNocturnidad").is(':checked')) {
 				//
 				chkNocturnidad = "si";
-			}
+			}*/
 			//alert(TipoLicenciaChecks);
+			var chkNocturnidad = 
+						($("#chkNocturnidad").is(':checked') || $("#chkNocturnidadTV").is(':checked')) 
+							? "si" 
+							: "no";
+
 		///////////////////////////////////////////////////////////////			
 		// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
 		///////////////////////////////////////////////////////////////
@@ -345,6 +363,7 @@ $("#goEnviar").on('click', function(){
 						$("#JornadaExtraSi").prop("checked", false);
 						$("#JornadaExtraNo").prop("checked", true);
 						$("#chkNocturnidad").prop("checked", false);
+						$("#chkNocturnidadTV").prop("checked", false);
 						$("#lstJornada").prop("readonly", false);
 
 						// limpiar el control de la foto

@@ -223,6 +223,17 @@ $("#chkNocturnidadAsueto").on('click',function () {
         $("#CJN").val("4");
     }
 });
+
+// VALIDAR NOCTURNIDAD TRABAJO EN VACACIONES	
+///////////////////////////////////////////////////////////////////////////////	          
+$("#chkNocturnidadTV").on('click',function () {
+    if ($("#chkNocturnidadTV").is(':checked')) {
+        //
+        $("#CJN").val("5");
+    }else{
+        $("#CJN").val("4");
+    }
+});
 ///////////////////////////////////////////////////////////////////////////////	  
 // SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL MOTORISTA.
 ///////////////////////////////////////////////////////////////////////////////	  
@@ -236,8 +247,22 @@ $("#BotonJornada, #BotonLicencia, #BotonCerrar").on('click',function () {
         // Valor por defecto.
         $('#CJ').val(2);  // CODIGO JORNADA
         $('#CTL').val(1);  // CODIGO JORNADA
-        // div de la Hora Extra.
-        $("#HoraExtra").show();
+		// lista de códigos que NO deben mostrar HoraExtra
+        var codigosNo = ["01","04","05","06","07","09","08"];
+		// traer el valor actual del CodigoDepartamentoEmpresa.
+		var codigoDepartamentoEmpresa = $("#CodigoDepartamentoEmpresa").val();
+
+        if (!codigosNo.includes(codigoDepartamentoEmpresa)) {
+            $("#HoraExtra").show();
+            HoraExtra();
+
+            if (valor != 0) {
+                $("#lstHoraExtra").val(valor);
+                alert("Valor: " + valor);
+            }
+        } else {
+            $("#HoraExtra").hide();
+        }
     		listar_jornada();
 	}
 	else if (this.value == "Licencia") {
@@ -641,6 +666,7 @@ $("#goGuardarPunteo").on('click', function(){
                                 $("#NocturnidadSiNo").show();
                                 //
                                 $("#chkNocturnidad").prop("checked", false);
+                                $("#chkNocturnidadTV").prop("checked", false);
                             }else{
                                 $("#NocturnidadSiNo").hide();
                             }
