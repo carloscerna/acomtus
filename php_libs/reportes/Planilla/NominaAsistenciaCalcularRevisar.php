@@ -979,7 +979,7 @@ function CuadrosFaltantes($columnas){
 function Punto1T(){
     global $pdf, $fillFecha, $w, $codigo_produccion, $DepartamentoEmpresa, $Jornada, $NombresCodigoDE,$link, $CantidadHoraExtraDiurna;
     if($DepartamentoEmpresa == $NombresCodigoDE["Motorista"]){
-        $link = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=" . $codigo_produccion;
+            
     // Establce un punto en media (.) si se establece el valor como una 1T (1 Tanda).
         $pdf->SetDrawColor(0,0,0);
         $pdf->SetFont('Arial','B',20); // I : Italica; U: Normal;

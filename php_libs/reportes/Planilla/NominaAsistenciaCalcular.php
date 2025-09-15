@@ -317,8 +317,8 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
     ];
 
 
-    // Weekly tracking for 7mo day deduction
-    $weekly_tracking = []; // Key: week_start_date (Monday), Value: ['has_deductible_event' => bool, 'has_descanso' => bool, 'descanso_date' => date_string]
+    // Weekly tracking for 7mo day deduction y 4H
+    $weekly_tracking = []; // Key: week_start_date (Monday)
 
     foreach ($rango_fechas as $fecha_actual) {
         $row_asistencia = $asistencia_data_precargada[$codigo_personal][$fecha_actual] ?? null;
@@ -355,15 +355,17 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         $week_start_date = $week_start_date_obj->format('Y-m-d');
 
 
-        // Initialize weekly tracking for this week if not already
+        // IMPORTANTE: Inicializar todas las claves para esta semana si no existen.
         if (!isset($weekly_tracking[$week_start_date])) {
             $weekly_tracking[$week_start_date] = [
-                'has_deductible_event' => false, // F or C
-                'has_descanso' => false,        // Descanso day (41344444)
-                'descanso_date' => null,        // Date of Descanso
-                'deducted_7mo' => false         // Flag to prevent multiple 7mo deductions for same week
+                'has_deductible_event' => false,
+                'has_descanso' => false,
+                'descanso_date' => null,
+                'deducted_7mo' => false,
+                'four_h_count' => 0 // Se añadió esta clave para el nuevo cálculo
             ];
         }
+
 
         if ($row_asistencia) {
             $is_activity_recorded = true;
@@ -378,13 +380,34 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
             $CodigoJornadaE4H = trim($row_asistencia['codigo_jornada_e_4h'] ?? '');
             $CodigoJornadaNocturna = trim($row_asistencia['codigo_jornada_nocturna'] ?? '');
 
-            // Formar el CodigoJornadaTodas temporal para la primera validación
             $CodigoJornadaTodas_temp = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.$CodigoJornadaNocturna;
             $CodigoJornadaTodas = $CodigoJornadaTodas_temp; // Asignar al final, podría ser sobreescrito por FALTA/AS
 
 
+            // --- NUEVA LÓGICA PARA EL CÓDIGO 1144444 (el segundo o más es media jornada) ---
+            if (trim($CodigoJornadaTodas_temp) == '1144444') {
+                $weekly_tracking[$week_start_date]['four_h_count']++;
+                if ($weekly_tracking[$week_start_date]['four_h_count'] > 1) {
+                    $salario_dia_actual = $salario_diario / 2; // Paga como media jornada
+                    $horas_jornada_para_este_dia = $jornada_base_default / 2;
+                } else {
+                    $salario_dia_actual = $salario_diario; // El primer día se paga como jornada completa
+                    $horas_jornada_para_este_dia = $jornada_base_default;
+                }
+            } 
+            // --- Lógica para DÍAS DE CASTIGO 'C' o FALTA 'F' (doble descuento) ---
+            else if (in_array(trim($CodigoJornadaTodas_temp), $double_deduction_codes)) {
+                $salario_dia_actual = -($salario_diario * 1); // El día no se paga. No suma al salario base.
+                $monto_horas_extra_dia_actual = 0; // No hay pago de HE
+                $descuento_dia_actual = 0; // Doble descuento
+                $es_dia_pagado_para_hora_extra = false;
+                $horas_extra_registradas = 0; // No contar horas extra si es castigo/falta
+                
+                // Marcar que hubo un evento deducible en esta semana para el 7mo día
+                $weekly_tracking[$week_start_date]['has_deductible_event'] = true;
+            }
             // --- Lógica para códigos que NO SUMAN AL SALARIO (solo visualización) ---
-            if (in_array(trim($CodigoJornadaTodas_temp), $non_contributory_codes_display_only)) {
+            else if (in_array(trim($CodigoJornadaTodas_temp), $non_contributory_codes_display_only)) {
                 $salario_dia_actual = 0; // NO se suma al salario
                 $monto_horas_extra_dia_actual = 0; // No hay pago de HE
                 $descuento_dia_actual = 0; // No es una "falta" deducible
@@ -392,17 +415,6 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
                 $horas_extra_registradas = 0; // No contar horas extra si es solo visualización
 
             } 
-            // --- Lógica para DÍAS DE CASTIGO 'C' o FALTA 'F' (doble descuento) ---
-            else if (in_array(trim($CodigoJornadaTodas_temp), $double_deduction_codes)) {
-                $salario_dia_actual = $salario_diario; // <<--- CAMBIO CLAVE: El día SÍ se paga para el cálculo del bruto.
-                $monto_horas_extra_dia_actual = 0; // No hay pago de HE
-                $descuento_dia_actual = $salario_diario * 2; // Doble descuento
-                $es_dia_pagado_para_hora_extra = false;
-                $horas_extra_registradas = 0; // No contar horas extra si es castigo/falta
-                
-                // Marcar que hubo un evento deducible en esta semana para el 7mo día
-                $weekly_tracking[$week_start_date]['has_deductible_event'] = true;
-            }
             // --- Lógica para códigos de NOCTURNIDAD ESPECÍFICOS ---
             else if (isset($nocturnidad_codes_specific[trim($CodigoJornadaTodas_temp)])) {
                 $noct_config = $nocturnidad_codes_specific[trim($CodigoJornadaTodas_temp)];
