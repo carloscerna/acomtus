@@ -196,7 +196,7 @@ try {
 
 // --- NUEVA FUNCIÓN PARA PROCESAR DATOS DE ASISTENCIA Y CALCULAR TOTALES ---
 // Esta función NO imprime, solo calcula y retorna.
-function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario_mensual, $jornada_base_default, $asistencia_data_precargada, $NombresCodigoLicenciaPermiso, $jornada_imagenes_map, $FechaDescripcionAsueto, $codigo_departamento_empleado) { // Added $codigo_departamento_empleado
+function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario_mensual, $jornada_base_default, $asistencia_data_precargada, $NombresCodigoLicenciaPermiso, $jornada_imagenes_map, $FechaDescripcionAsueto, $codigo_departamento_empleado, $initial_isss_days = 0, $deductible_events_carry_over = []) { // Added $codigo_departamento_empleado
     $total_salario_devengado_empleado = 0; // Para jornadas normales, descanso, vacaciones, licencias
     $total_salario_asuetos = 0; // Salario específico de asuetos (solo el adicional por trabajar asueto)
     $total_monto_horas_extra_empleado = 0;
@@ -204,6 +204,9 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
     $total_otras_deducciones_empleado = 0; // Para futuras deducciones no calculadas aquí
     $total_horas_extra_cantidad = 0; // Cantidad total de horas extra
     $total_deduccion_7mo = 0; // Inicializar deducción del 7mo día
+    $isss_consecutive_days = $initial_isss_days; // <<< MODIFICADO: Usa el valor de arrastre de la quincena anterior
+    $weekly_tracking = $deductible_events_carry_over; // <<< MODIFICADO: Se inicia con los datos de arrastre.
+    $current_streak_length = $initial_isss_days;
     
     // Nueva variable para acumular el valor de Trabajo Descanso
     $total_trabajo_extra_empleado = 0; // Renombrado de total_trabajo_descanso_extra_empleado
@@ -223,11 +226,54 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
 
     $daily_attendance_details = []; // Almacenará los códigos e imágenes para cada día
 
+     // >>> INICIA NUEVA LÓGICA DE PRE-ANÁLISIS DE ISSS <<<
+    
+    // 1. Primero, analizamos todo el período para identificar la longitud total de cada racha de incapacidad.
+    $isss_day_info = [];
+    $current_streak_length = $initial_isss_days;
+    $streak_dates = [];
+
+    $flush_streak = function() use (&$isss_day_info, &$current_streak_length, &$streak_dates) {
+        if ($current_streak_length > 0) {
+            foreach ($streak_dates as $index => $date_in_streak) {
+                $isss_day_info[$date_in_streak] = [
+                    'day_of_streak' => ($index + 1),
+                    'total_length' => $current_streak_length
+                ];
+            }
+        }
+        // Resetear para la próxima racha
+        $current_streak_length = 0;
+        $streak_dates = [];
+    };
+
+    foreach ($rango_fechas as $fecha_actual) {
+        $row_asistencia = $asistencia_data_precargada[$codigo_personal][$fecha_actual] ?? null;
+        $codigo_dia = '';
+        if ($row_asistencia) {
+            $codigo_dia = trim($row_asistencia['codigo_jornada'] ?? '') . trim($row_asistencia['codigo_tipo_licencia'] ?? '') . trim($row_asistencia['codigo_jornada_asueto'] ?? '') . trim($row_asistencia['codigo_jornada_vacaciones'] ?? '') . trim($row_asistencia['codigo_jornada_descanso'] ?? '') . trim($row_asistencia['codigo_jornada_e_4h'] ?? '') . trim($row_asistencia['codigo_jornada_nocturna'] ?? '');
+        }
+
+        if (trim($codigo_dia) === '4244444') {
+            $current_streak_length++;
+            $streak_dates[] = $fecha_actual;
+        } else {
+            // La racha terminó, la procesamos y guardamos su información
+            $flush_streak();
+        }
+    }
+    // Procesar la última racha si el período terminó en incapacidad
+    $flush_streak();
+    
+    // <<< FINALIZA NUEVA LÓGICA DE PRE-ANÁLISIS DE ISSS >>>
+
+    // Se elimina el contador anterior "$isss_consecutive_days" de esta sección.
+    
     // MODIFICACIÓN: Redondear salario diario a dos decimales
     $salario_diario = $salario_mensual / 30; // Salario diario basado en 30 días, redondeado a 2 decimales
 
     // Códigos que no deben sumar al salario (solo visualización)
-    $non_contributory_codes_display_only = ['4144444', '4344444', '4244444']; 
+    $non_contributory_codes_display_only = ['4144444', '4344444']; 
     // Códigos que implican doble descuento y pueden activar 7mo día
     $double_deduction_codes = ['41044444', '4444444']; // 'C' (Castigo), 'F' (Falta)
 
@@ -383,6 +429,7 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
             $CodigoJornadaTodas_temp = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.$CodigoJornadaNocturna;
             $CodigoJornadaTodas = $CodigoJornadaTodas_temp; // Asignar al final, podría ser sobreescrito por FALTA/AS
 
+            
 
             // --- NUEVA LÓGICA PARA EL CÓDIGO 1144444 (el segundo o más es media jornada) ---
             if (trim($CodigoJornadaTodas_temp) == '1144444') {
@@ -406,6 +453,24 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
                 // Marcar que hubo un evento deducible en esta semana para el 7mo día
                 $weekly_tracking[$week_start_date]['has_deductible_event'] = true;
             }
+            // >>> LÓGICA DE ISSS COMPLETAMENTE REEMPLAZADA <<<
+            else if (trim($CodigoJornadaTodas_temp) == '4244444') {
+                $streak_info = $isss_day_info[$fecha_actual] ?? ['total_length' => 0];
+                $total_streak_length = $streak_info['total_length'];
+
+                // 2. Aplicamos la nueva regla de pago basada en la longitud total de la racha.
+                if ($total_streak_length === 3) {
+                    // Si la incapacidad dura exactamente 3 días, se pagan los 3.
+                    $salario_dia_actual = $salario_diario;
+                } else {
+                    // Si dura 1, 2, o más de 3 días, no se paga.
+                    $salario_dia_actual = 0;
+                }
+                
+                $es_dia_pagado_para_hora_extra = false;
+                $horas_extra_registradas = 0;
+            }
+            // >>> FIN DE LA LÓGICA REEMPLAZADA <<<
             // --- Lógica para códigos que NO SUMAN AL SALARIO (solo visualización) ---
             else if (in_array(trim($CodigoJornadaTodas_temp), $non_contributory_codes_display_only)) {
                 $salario_dia_actual = 0; // NO se suma al salario
@@ -626,7 +691,19 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
     } // Cierre del foreach ($rango_fechas as $fecha_actual)
 
     // --- CÁLCULO DE DEDUCCIONES DEL 7mo DÍA (DESPUÉS DE PROCESAR TODOS LOS DÍAS) ---
+    global $fecha_periodo_fin; // Hacemos accesible la fecha fin de la quincena
+
     foreach ($weekly_tracking as $week_start => $week_data) {
+
+        // <<< INICIA NUEVA LÓGICA >>>
+        // Criterio 2: Si la semana termina DESPUÉS del cierre de la quincena,
+        // no se procesa el descuento ahora, se hará en la siguiente quincena.
+        $week_end_date = (new DateTime($week_start))->modify('+6 days')->format('Y-m-d');
+        if ($week_end_date > $fecha_periodo_fin) {
+            continue; // Saltar esta semana, el descuento se pospone.
+        }
+    // <<< FINALIZA NUEVA LÓGICA >>>
+
         if ($week_data['has_deductible_event'] && $week_data['has_descanso'] && !$week_data['deducted_7mo']) {
             // Deduce el salario diario del día de descanso
             $total_deduccion_7mo += $salario_diario; // El valor del 7mo es el salario de un día normal
@@ -881,6 +958,113 @@ foreach ($datos_empleado_principal as $row_empleado) {
     
     $nombre_completo = trim(utf8_decode($nombres_empleado . ' ' . $apellidos_empleado));
 
+   // <<< INICIA NUEVO BLOQUE DE CÓDIGO >>>
+    // Criterio 1: Revisar si un evento deducible (falta/castigo) ocurrió en la
+    // parte de la semana que corresponde a la quincena anterior.
+    $deductible_events_carry_over = [];
+    $fecha_inicio_dt = new DateTime($fecha_periodo_inicio);
+    $day_of_week_num = (int)$fecha_inicio_dt->format('N'); // 1 = Lunes, 7 = Domingo
+
+    // Si la quincena no empieza un lunes, revisamos los días previos de esa misma semana.
+    if ($day_of_week_num > 1) {
+        $week_start_dt = (clone $fecha_inicio_dt)->modify('last monday');
+        $week_start_str = $week_start_dt->format('Y-m-d');
+        $check_date_dt = (clone $fecha_inicio_dt)->modify('-1 day');
+
+         // Consultamos la BD para los días anteriores
+         while ($check_date_dt >= $week_start_dt) {
+            $fecha_str = $check_date_dt->format('Y-m-d');
+
+            // 1. Preparamos y ejecutamos la consulta para obtener los códigos de asistencia del día.
+            $stmt_check = $dblink->prepare("
+                SELECT pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, 
+                       pa.codigo_jornada_vacaciones, pa.codigo_jornada_descanso, 
+                       pa.codigo_jornada_e_4h, pa.codigo_jornada_nocturna
+                FROM personal_asistencia pa
+                WHERE pa.codigo_personal = :codigo AND pa.fecha = :fecha
+            ");
+            $stmt_check->bindParam(':codigo', $codigo_personal);
+            $stmt_check->bindParam(':fecha', $fecha_str);
+            $stmt_check->execute();
+            $asistencia_anterior = $stmt_check->fetch(PDO::FETCH_ASSOC);
+
+            $codigo_anterior_combinado = '';
+            if ($asistencia_anterior) {
+                // 2. Concatenamos todos los campos de código en una sola cadena.
+                $codigo_anterior_combinado = 
+                    trim($asistencia_anterior['codigo_jornada'] ?? '') .
+                    trim($asistencia_anterior['codigo_tipo_licencia'] ?? '') .
+                    trim($asistencia_anterior['codigo_jornada_asueto'] ?? '') .
+                    trim($asistencia_anterior['codigo_jornada_vacaciones'] ?? '') .
+                    trim($asistencia_anterior['codigo_jornada_descanso'] ?? '') .
+                    trim($asistencia_anterior['codigo_jornada_e_4h'] ?? '') .
+                    trim($asistencia_anterior['codigo_jornada_nocturna'] ?? '');
+            }
+
+            // 3. Verificamos si el código combinado es un Castigo ('41044444') o una Falta ('4444444').
+            $deductible_codes = ['41044444', '4444444'];
+            if (in_array(trim($codigo_anterior_combinado), $deductible_codes)) {
+                // 4. Si hay coincidencia, marcamos la semana como que tiene un evento deducible.
+                $deductible_events_carry_over[$week_start_str] = [
+                    'has_deductible_event' => true,
+                    'has_descanso' => false,
+                    'descanso_date' => null,
+                    'deducted_7mo' => false,
+                    'four_h_count' => 0 // Se incluye para mantener la estructura consistente
+                ];
+                // 5. Rompemos el bucle porque ya encontramos la falta; no necesitamos seguir buscando hacia atrás.
+                break;
+            }
+            
+            // Pasamos al día anterior.
+            $check_date_dt->modify('-1 day');
+        }
+    }
+    // <<< FINALIZA NUEVO BLOQUE DE CÓDIGO >>>
+
+// <<< INICIA NUEVO BLOQUE DE CÓDIGO >>>
+    // Revisar si la incapacidad (ISSS) viene de la quincena anterior.
+    $carry_over_isss_days = 0;
+    $fecha_inicio_actual_dt = new DateTime($fecha_periodo_inicio);
+    $fecha_a_revisar = clone $fecha_inicio_actual_dt;
+
+    // Revisamos hasta 4 días hacia atrás para ser eficientes.
+    for ($k = 0; $k < 4; $k++) {
+        $fecha_a_revisar->modify('-1 day');
+        $fecha_str = $fecha_a_revisar->format('Y-m-d');
+
+        $stmt_check = $dblink->prepare("
+            SELECT pa.codigo_jornada, pa.codigo_tipo_licencia, pa.codigo_jornada_asueto, 
+                   pa.codigo_jornada_vacaciones, pa.codigo_jornada_descanso, 
+                   pa.codigo_jornada_e_4h, pa.codigo_jornada_nocturna
+            FROM personal_asistencia pa
+            WHERE pa.codigo_personal = :codigo AND pa.fecha = :fecha
+        ");
+        $stmt_check->bindParam(':codigo', $codigo_personal);
+        $stmt_check->bindParam(':fecha', $fecha_str);
+        $stmt_check->execute();
+        $asistencia_anterior = $stmt_check->fetch(PDO::FETCH_ASSOC);
+
+        $codigo_anterior_combinado = '';
+        if ($asistencia_anterior) {
+            $codigo_anterior_combinado = 
+                trim($asistencia_anterior['codigo_jornada'] ?? '') .
+                trim($asistencia_anterior['codigo_tipo_licencia'] ?? '') .
+                trim($asistencia_anterior['codigo_jornada_asueto'] ?? '') .
+                trim($asistencia_anterior['codigo_jornada_vacaciones'] ?? '') .
+                trim($asistencia_anterior['codigo_jornada_descanso'] ?? '') .
+                trim($asistencia_anterior['codigo_jornada_e_4h'] ?? '') .
+                trim($asistencia_anterior['codigo_jornada_nocturna'] ?? '');
+        }
+
+        if (trim($codigo_anterior_combinado) === '4244444') {
+            $carry_over_isss_days++;
+        } else {
+            break; // La racha de incapacidad se rompió, no seguimos buscando.
+        }
+    }
+    // <<< FINALIZA NUEVO BLOQUE DE CÓDIGO >>>
+
     // 1. PROCESAR DATOS Y OBTENER TOTALES PARA EL EMPLEADO ACTUAL (incluyendo detalles diarios)
     $results = processEmployeeAttendanceData(
         $rango_fechas,
@@ -891,7 +1075,9 @@ foreach ($datos_empleado_principal as $row_empleado) {
         $NombresCodigoLicenciaPermiso,
         $jornada_imagenes_map,
         $FechaDescripcionAsueto, // Pass Asueto dates here
-        $codigo_departamento_empleado // Pass department code
+        $codigo_departamento_empleado, // Pass department code
+        $carry_over_isss_days, // <<< MODIFICADO: Se pasa el nuevo parámetro
+        $deductible_events_carry_over // <<< NUEVO PARÁMETRO
     );
 
     // Nuevas variables para los totales (usando el operador null coalescing para evitar "Undefined index" si la clave falta)
