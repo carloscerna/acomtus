@@ -151,20 +151,21 @@ while ($row_img = $consulta_imagenes->fetch(PDO::FETCH_ASSOC)) {
 }
 
 function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario_mensual, $jornada_base_default, &$asistencia_por_empleado_y_fecha, $NombresCodigoLicenciaPermiso, $jornada_imagenes_map, $FechaDescripcionAsueto, $codigo_departamento_empleado, $initial_isss_days = 0) {
-    global $dblink, $fecha_periodo_fin, $fecha_periodo_inicio;
+    global $dblink, $fecha_periodo_inicio, $fecha_periodo_fin;
+    // --- INICIALIZACIÓN DE TOTALES PARA EL EMPLEADO ---
     $total_salario_devengado_empleado = 0;
     $total_salario_asuetos = 0;
     $total_monto_horas_extra_empleado = 0;
     $total_descuentos_empleado = 0;
-    $total_otras_deducciones_empleado = 0;
-    $total_horas_extra_cantidad = 0;
     $total_trabajo_extra_empleado = 0;
     $total_monto_nocturnidad_empleado = 0;
     $total_nocturnidad_cantidad_empleado = 0;
+    $total_horas_extra_cantidad = 0;
     $daily_attendance_details = [];
-
     $salario_diario = round($salario_mensual / 30, 4);
 
+    // --- LÓGICA PRE-CÁLCULO (Se mantienen igual) ---
+    // Conteo de rachas de ISSS
     $isss_day_info = [];
     $temp_streak_counter = $initial_isss_days;
     $streak_dates = [];
@@ -175,196 +176,150 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
             $streak_dates[] = $fecha_actual;
         } else {
             if (!empty($streak_dates)) {
-                 foreach ($streak_dates as $date_in_streak) {
-                    $isss_day_info[$date_in_streak] = ['total_length' => $temp_streak_counter];
-                }
+                 foreach ($streak_dates as $date_in_streak) {$isss_day_info[$date_in_streak] = ['total_length' => $temp_streak_counter];}
             }
             $temp_streak_counter = 0;
             $streak_dates = [];
         }
     }
     if (!empty($streak_dates)) {
-        foreach ($streak_dates as $date_in_streak) {
-            $isss_day_info[$date_in_streak] = ['total_length' => $temp_streak_counter];
-        }
+        foreach ($streak_dates as $date_in_streak) {$isss_day_info[$date_in_streak] = ['total_length' => $temp_streak_counter];}
     }
 
-    $non_contributory_codes_display_only = ['4344444']; // Se quita '4144444' (Permiso)
-    $double_deduction_codes = ['41044444', '4444444'];
+    // Definición de códigos (Se mantienen igual)
+    $non_contributory_codes_display_only = ['4344444'];
+    $deduction_codes = ['41044444', '4444444', '4144444']; // Unificamos todos los que descuentan
     $asueto_worked_codes = ['41614444' => $salario_diario / 2, '41624444' => $salario_diario, '41634444' => $salario_diario + ($salario_diario / 2)];
     $trabajo_descanso_codes = ['41444144' => $salario_diario / 2, '41444244' => $salario_diario, '41444344' => $salario_diario + ($salario_diario / 2)];
     $trabajo_vacacion_codes = ['41241444' => $salario_diario / 2, '41242444' => $salario_diario, '41243444' => $salario_diario + ($salario_diario / 2)];
     $trabajo_descanso_asueto_codes = ['41744444' => $salario_diario, '41514444' => $salario_diario / 2, '41524444' => $salario_diario, '41534444' => $salario_diario + ($salario_diario / 2)];
     $nocturnidad_base_value = 0.57;
     $nocturnidad_codes_specific = [
-        '2144445' => ['paga_salario_diario' => true, 'agrega_nocturnidad' => true, 'agrega_extra' => 0],
-        '1144445' => ['paga_salario_diario' => true, 'agrega_nocturnidad' => true, 'agrega_extra' => 0],
-        '1144425' => ['paga_salario_diario' => true, 'agrega_nocturnidad' => true, 'agrega_extra' => $salario_diario],
-        '11444450' => ['paga_salario_diario' => true, 'agrega_nocturnidad' => true, 'agrega_extra' => 0],
-        '2124445' => ['paga_salario_diario' => true, 'agrega_nocturnidad' => true, 'agrega_extra' => $salario_diario],
-        '41242445' => ['paga_salario_diario' => true, 'agrega_nocturnidad' => true, 'agrega_extra' => $salario_diario],
-        '41241445' => ['paga_salario_diario' => true, 'agrega_nocturnidad' => true, 'agrega_extra' => $salario_diario / 2]
+        '2144445' => true, '1144445' => true, '1144425' => true, '11444450' => true, '2124445' => true, '41242445' => true, '41241445' => true
     ];
     $fixed_extra_codes = [
-        '1144424' => ['paga_salario_diario' => true, 'agrega_extra' => $salario_diario],
-        '3144444' => ['paga_salario_diario' => true, 'agrega_extra' => $salario_diario / 2]
+        '1144424' => $salario_diario, '3144444' => $salario_diario / 2
     ];
     $weekly_four_h_count = [];
 
+    // --- BUCLE PRINCIPAL DE CÁLCULO DIARIO (REESTRUCTURADO) ---
     foreach ($rango_fechas as $fecha_actual) {
         $row_asistencia = $asistencia_por_empleado_y_fecha[$codigo_personal][$fecha_actual] ?? null;
-        $horas_extra_registradas = 0;
+        $CodigoJornadaTodas = $row_asistencia ? buscarCodigoDeAsistencia($dblink, $codigo_personal, $fecha_actual, $asistencia_por_empleado_y_fecha) : '';
+        
+        // --- INICIALIZACIÓN DE VARIABLES DIARIAS ---
         $salario_dia_actual = 0;
-        $monto_horas_extra_dia_actual = 0;
         $descuento_dia_actual = 0;
-        $monto_nocturnidad_dia_actual = 0;
-        $monto_extra_especifico = 0;
+        $bono_dia_actual = 0; // Para asuetos, descansos, etc.
+        $nocturnidad_dia_actual = 0;
         $es_dia_pagado_para_hora_extra = false;
-        $CodigoJornadaTodas = '';
 
-        $date_obj = new DateTime($fecha_actual);
-        $week_start_date = ($date_obj->format('N') == 1) ? $date_obj->format('Y-m-d') : (clone $date_obj)->modify('last monday')->format('Y-m-d');
-        if (!isset($weekly_four_h_count[$week_start_date])) {
-            $weekly_four_h_count[$week_start_date] = 0;
-        }
-
+        // --- 1. DETERMINAR EL ESTADO BASE DEL DÍA (PAGO, SIN PAGO O DESCUENTO) ---
         if ($row_asistencia) {
-            $horas_extra_registradas = (float)($row_asistencia['hora_extra'] ?? 0);
-            $CodigoJornada = trim($row_asistencia['codigo_jornada'] ?? '');
-            $CodigoLicencia = trim($row_asistencia['codigo_tipo_licencia'] ?? '');
-            $CodigoJornadaAsueto = trim($row_asistencia['codigo_jornada_asueto'] ?? '');
-            $CodigoJornadaVacaciones = trim($row_asistencia['codigo_jornada_vacaciones'] ?? '');
-            $CodigoJornadaDescanso = trim($row_asistencia['codigo_jornada_descanso'] ?? '');
-            $CodigoJornadaE4H = trim($row_asistencia['codigo_jornada_e_4h'] ?? '');
-            $CodigoJornadaNocturna = trim($row_asistencia['codigo_jornada_nocturna'] ?? '');
-            $CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.$CodigoJornadaNocturna;
-
-            if (trim($CodigoJornadaTodas) == '1144444') {
-                $weekly_four_h_count[$week_start_date]++;
-                if ($weekly_four_h_count[$week_start_date] > 1) {
-                    $salario_dia_actual = $salario_diario / 2;
-                } else {
-                    $salario_dia_actual = $salario_diario;
-                }
-            } 
-            else if (in_array(trim($CodigoJornadaTodas), $double_deduction_codes)) {
-                $salario_dia_actual = 0; // No se gana salario por este día
-                $descuento_dia_actual = $salario_diario; // Se aplica una penalidad de un día de salario
-                $horas_extra_registradas = 0;
+            // Regla de Media Jornada (4h)
+            if ($CodigoJornadaTodas == '1144444') {
+                $date_obj_media = new DateTime($fecha_actual);
+                $week_start_date_media = ($date_obj_media->format('N') == 1) ? $date_obj_media->format('Y-m-d') : (clone $date_obj_media)->modify('last monday')->format('Y-m-d');
+                $weekly_four_h_count[$week_start_date_media] = ($weekly_four_h_count[$week_start_date_media] ?? 0) + 1;
+                $salario_dia_actual = ($weekly_four_h_count[$week_start_date_media] > 1) ? $salario_diario / 2 : $salario_diario;
+                $es_dia_pagado_para_hora_extra = true;
             }
-            else if (trim($CodigoJornadaTodas) == '4244444') {
+            // Regla de ISSS (solo paga el 3er día)
+            else if ($CodigoJornadaTodas == '4244444') {
                 $total_streak_length = $isss_day_info[$fecha_actual]['total_length'] ?? 0;
                 $salario_dia_actual = ($total_streak_length === 3) ? $salario_diario : 0;
-                $es_dia_pagado_para_hora_extra = false;
-                $horas_extra_registradas = 0;
+                // No se considera día pagado para H.E. a menos que se especifique
             }
-            else if (trim($CodigoJornadaTodas) == '4144444') { // Permiso sin goce de sueldo
-                $salario_dia_actual = 0; // No se paga el día
-                $descuento_dia_actual = $salario_diario; // Se descuenta el valor del día
-                $horas_extra_registradas = 0;
+            // Regla de Códigos que descuentan el día
+            else if (in_array($CodigoJornadaTodas, $deduction_codes)) {
+                $descuento_dia_actual = $salario_diario;
             }
-            else if (in_array(trim($CodigoJornadaTodas), $non_contributory_codes_display_only)) {
+            // Regla de Códigos que no pagan ni descuentan
+            else if (in_array($CodigoJornadaTodas, $non_contributory_codes_display_only)) {
                 $salario_dia_actual = 0;
-                $horas_extra_registradas = 0;
-            } 
-            else if (isset($nocturnidad_codes_specific[trim($CodigoJornadaTodas)])) {
-                $noct_config = $nocturnidad_codes_specific[trim($CodigoJornadaTodas)];
-                if ($noct_config['paga_salario_diario']) {
-                    $salario_dia_actual = $salario_diario;
-                    $es_dia_pagado_para_hora_extra = true;
-                }
-                if ($noct_config['agrega_nocturnidad'] && ($codigo_departamento_empleado == '08' || $codigo_departamento_empleado == '09')) {
-                    $monto_nocturnidad_dia_actual = $nocturnidad_base_value; 
-                    $total_nocturnidad_cantidad_empleado++;
-                }
-                if ($noct_config['agrega_extra'] > 0) {
-                    $monto_extra_especifico = $noct_config['agrega_extra'];
-                }
-                if (trim($CodigoJornadaNocturna) == '5') {
-                    $horas_extra_registradas = 0;
-                }
             }
-            else { 
+            // Regla de Licencias Parciales
+            else if (trim($row_asistencia['codigo_jornada'] ?? '') == '4') {
+                 $licencia_info = $NombresCodigoLicenciaPermiso[$row_asistencia['codigo_tipo_licencia']] ?? ['horas' => $jornada_base_default];
+                 $valor_hora_normal = ($jornada_base_default > 0) ? ($salario_diario / $jornada_base_default) : 0;
+                 $salario_dia_actual = $valor_hora_normal * (float)($licencia_info['horas'] ?? 0);
+                 $es_dia_pagado_para_hora_extra = true;
+            }
+            // Regla por defecto: Día normal pagado
+            else {
+                $salario_dia_actual = $salario_diario;
                 $es_dia_pagado_para_hora_extra = true;
-                if (isset($asueto_worked_codes[trim($CodigoJornadaTodas)])) {
-                    $total_salario_asuetos += $asueto_worked_codes[trim($CodigoJornadaTodas)];
-                    $salario_dia_actual = $salario_diario;
-                }
-                else if (!empty($CodigoJornadaAsueto) && $CodigoJornadaAsueto == '2144444') { 
-                    $salario_dia_actual = $salario_diario;
-                } 
-                else if (isset($trabajo_descanso_asueto_codes[trim($CodigoJornadaTodas)])) {
-                    if (trim($CodigoJornadaTodas) != '41744444') {
-                        $total_salario_asuetos += $trabajo_descanso_asueto_codes[trim($CodigoJornadaTodas)];
-                    }
-                    $salario_dia_actual = $salario_diario;
-                }
-                else if (isset($trabajo_vacacion_codes[trim($CodigoJornadaTodas)])) {
-                    $total_trabajo_extra_empleado += $trabajo_vacacion_codes[trim($CodigoJornadaTodas)];
-                    $salario_dia_actual = $salario_diario;
-                }
-                else if (isset($trabajo_descanso_codes[trim($CodigoJornadaTodas)])) {
-                    $total_trabajo_extra_empleado += $trabajo_descanso_codes[trim($CodigoJornadaTodas)];
-                    $salario_dia_actual = $salario_diario;
-                }
-                else if (isset($fixed_extra_codes[trim($CodigoJornadaTodas)])) {
-                    $fixed_extra_config = $fixed_extra_codes[trim($CodigoJornadaTodas)];
-                    if ($fixed_extra_config['paga_salario_diario']) { $salario_dia_actual = $salario_diario; }
-                    if ($fixed_extra_config['agrega_extra'] > 0) { $monto_extra_especifico = $fixed_extra_config['agrega_extra']; }
-                    $horas_extra_registradas = 0;
-                }
-                else if (!empty($CodigoJornada) && $CodigoJornada == '4') {
-                    $licencia_info = $NombresCodigoLicenciaPermiso[$row_asistencia['codigo_tipo_licencia']] ?? ['horas' => $jornada_base_default];
-                    $valor_hora_normal = ($jornada_base_default > 0) ? ($salario_diario / $jornada_base_default) : 0;
-                    $salario_dia_actual = $valor_hora_normal * (float)($licencia_info['horas'] ?? 0);
-                }
-                else if (!empty($CodigoJornada) || !empty($CodigoJornadaDescanso) || !empty($CodigoJornadaVacaciones) || !empty($CodigoJornadaE4H) || !empty($CodigoLicencia)) {
-                     $salario_dia_actual = $salario_diario;
-                }
-                else if (!empty($CodigoJornadaNocturna)) {
-                    $salario_dia_actual = $salario_diario;
-                    if ($codigo_departamento_empleado == '08' || $codigo_departamento_empleado == '09') {
-                        $monto_nocturnidad_dia_actual = $nocturnidad_base_value;
-                        $total_nocturnidad_cantidad_empleado++;
-                    }
-                    if (trim($CodigoJornadaNocturna) == '5') {
-                        $horas_extra_registradas = 0;
-                    }
-                }
             }
-        } else {
-            if (!isset($FechaDescripcionAsueto[$fecha_actual])) {
+        } else { // No hay registro de asistencia
+            if (isset($FechaDescripcionAsueto[$fecha_actual])) { // Es asueto no trabajado
+                $salario_dia_actual = $salario_diario;
+                $total_salario_asuetos += $salario_diario; // Se suma aquí como informativo, pero el pago ya está en el salario
+                $CodigoJornadaTodas = 'AS';
+            } else { // Es una falta genérica
                 $descuento_dia_actual = $salario_diario;
                 $CodigoJornadaTodas = 'FALTA_GENERICA';
-            } else {
-                $salario_dia_actual = $salario_diario;
-                $total_salario_asuetos += $salario_diario;
-                $CodigoJornadaTodas = 'AS';
             }
         }
-        
+
+        // --- 2. CALCULAR BONIFICACIONES ADICIONALES (EXTRAS) ---
+        // Estas bonificaciones se suman al salario base del día
+        if ($row_asistencia) {
+            if (isset($asueto_worked_codes[$CodigoJornadaTodas])) {
+                $bono_dia_actual += $asueto_worked_codes[$CodigoJornadaTodas];
+            }
+            if (isset($trabajo_descanso_codes[$CodigoJornadaTodas])) {
+                $bono_dia_actual += $trabajo_descanso_codes[$CodigoJornadaTodas];
+            }
+            if (isset($trabajo_vacacion_codes[$CodigoJornadaTodas])) {
+                $bono_dia_actual += $trabajo_vacacion_codes[$CodigoJornadaTodas];
+            }
+            if (isset($trabajo_descanso_asueto_codes[$CodigoJornadaTodas])) {
+                if ($CodigoJornadaTodas != '41744444') { // Este código paga doble salario, no bono.
+                     $bono_dia_actual += $trabajo_descanso_asueto_codes[$CodigoJornadaTodas];
+                }
+            }
+            if (isset($fixed_extra_codes[$CodigoJornadaTodas])) {
+                $bono_dia_actual += $fixed_extra_codes[$CodigoJornadaTodas];
+            }
+            
+            // Cálculo de Nocturnidad
+            if (isset($nocturnidad_codes_specific[$CodigoJornadaTodas]) && ($codigo_departamento_empleado == '08' || $codigo_departamento_empleado == '09')) {
+                $nocturnidad_dia_actual = $nocturnidad_base_value;
+                $total_nocturnidad_cantidad_empleado++;
+            }
+        }
+
+        // --- 3. CÁLCULO DE HORAS EXTRA REGISTRADAS ---
+        $monto_horas_extra_dia_actual = 0;
+        $horas_extra_registradas = (float)($row_asistencia['hora_extra'] ?? 0);
+
+        // Las horas extra solo se pagan si el día fue considerado "pagado"
         if ($es_dia_pagado_para_hora_extra && $horas_extra_registradas > 0) {
             $factor_hora_extra = ($codigo_departamento_empleado == '02' || $codigo_departamento_empleado == '03') ? 2 : 1;
             $valor_hora_normal_base = ($jornada_base_default > 0) ? ($salario_diario / $jornada_base_default) : 0;
-            $monto_horas_extra_dia_actual = $horas_extra_registradas * ($valor_hora_normal_base * $factor_hora_extra); 
-            $total_horas_extra_cantidad += $horas_extra_registradas; 
+            $monto_horas_extra_dia_actual = $horas_extra_registradas * ($valor_hora_normal_base * $factor_hora_extra);
+            $total_horas_extra_cantidad += $horas_extra_registradas;
+
+            if (strpos($CodigoJornadaTodas, '_HE') === false) {
+                 $CodigoJornadaTodas .= str_replace('.', '', (string)$horas_extra_registradas);
+            }
         }
 
+        // --- 4. SUMAS FINALES PARA EL DÍA ---
         $total_salario_devengado_empleado += $salario_dia_actual;
-        $total_monto_horas_extra_empleado += $monto_horas_extra_dia_actual;
         $total_descuentos_empleado += $descuento_dia_actual;
-        $total_monto_nocturnidad_empleado += $monto_nocturnidad_dia_actual;
-        $total_trabajo_extra_empleado += $monto_extra_especifico;
-        
-        if ($horas_extra_registradas > 0 && strpos($CodigoJornadaTodas, '_HE') === false) { 
-            $CodigoJornadaTodas .= str_replace('.', '', (string)$horas_extra_registradas); 
-        }
-        
+        $total_trabajo_extra_empleado += $bono_dia_actual;
+        $total_monto_nocturnidad_empleado += $nocturnidad_dia_actual;
+        $total_monto_horas_extra_empleado += $monto_horas_extra_dia_actual;
+
+        // Guardar detalles para el PDF
         $image_filename = $jornada_imagenes_map[trim($CodigoJornadaTodas)] ?? '';
         $daily_attendance_details[$fecha_actual] = ['image_filename' => $image_filename];
     }
-
+    
+    // --- LÓGICA POST-CÁLCULO (DEDUCCIÓN 7MO DÍA - Se mantiene igual) ---
     $total_deduccion_7mo = 0;
+    $deductible_codes = ['41044444', '4444444', 'FALTA_GENERICA', '4144444']; 
     $flexible_week_depts = ['02', '03', '04', '06', '08', '09'];
     $is_flexible_week_employee = in_array($codigo_departamento_empleado, $flexible_week_depts);
     $semanas_a_revisar = [];
@@ -392,24 +347,14 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
             $end_date = $dias_de_descanso[$i + 1];
             $semanas_a_revisar[] = ['start' => $start_date, 'end' => $end_date];
         }
-        // --- INICIO DEL NUEVO BLOQUE ---
-        // Proyecta la última semana a partir del último descanso encontrado.
         if (!empty($dias_de_descanso)) {
-            $ultimo_descanso = end($dias_de_descanso); // Obtiene la fecha del último descanso
+            $ultimo_descanso = end($dias_de_descanso);
             $start_date_ultima_semana = (new DateTime($ultimo_descanso))->modify('+1 day');
-            
-            // Asume un ciclo de 7 días: el fin de la semana es 6 días después de su inicio.
-            $end_date_ultima_semana = (clone $start_date_ultima_semana)->modify('+6 days');
-
-            // Solo añade esta semana si su inicio ocurre antes de que termine la quincena.
             if ($start_date_ultima_semana->format('Y-m-d') <= $fecha_periodo_fin) {
-                $semanas_a_revisar[] = [
-                    'start' => $start_date_ultima_semana->format('Y-m-d'),
-                    'end' => $end_date_ultima_semana->format('Y-m-d')
-                ];
+                $end_date_ultima_semana = (clone $start_date_ultima_semana)->modify('+6 days');
+                $semanas_a_revisar[] = ['start' => $start_date_ultima_semana->format('Y-m-d'), 'end' => $end_date_ultima_semana->format('Y-m-d')];
             }
         }
-        // --- FIN DEL NUEVO BLOQUE ---
     } else {
         $start_range = new DateTime($fecha_periodo_inicio);
         $end_range = new DateTime($fecha_periodo_fin);
@@ -421,63 +366,13 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         }
     }
 
-// --- CÁLCULO FINAL EXCLUSIVO PARA EL SÉPTIMO DÍA ---
-$total_deduccion_7mo = 0;
-// El permiso 'P' también cuenta como falta para el 7mo día
-$deductible_codes = ['41044444', '4444444', 'FALTA_GENERICA', '4144444']; 
+  foreach ($semanas_a_revisar as $semana) {
+        error_log("====== EMPLEADO: $codigo_personal ======");
+        error_log("🔍 Revisando semana del " . $semana['start'] . " al " . $semana['end']);
 
-foreach ($semanas_a_revisar as $semana) {
-    // La regla de posponer solo aplica aquí, para el 7mo día
-    if ($semana['end'] > $fecha_periodo_fin) {
-        continue;
-    }
-
-    $falta_en_la_semana = false;
-    $period = new DatePeriod(new DateTime($semana['start']), new DateInterval('P1D'), (new DateTime($semana['end']))->modify('+1 day'));
-    
-    foreach ($period as $dia) {
-        $fecha_dia_str = $dia->format('Y-m-d');
-        $codigo_del_dia = buscarCodigoDeAsistencia($dblink, $codigo_personal, $fecha_dia_str, $asistencia_por_empleado_y_fecha);
-        
-        if (empty($codigo_del_dia) && !isset($FechaDescripcionAsueto[$fecha_dia_str])) {
-            $codigo_del_dia = 'FALTA_GENERICA';
-        }
-        
-        if (in_array($codigo_del_dia, $deductible_codes)) {
-            $falta_en_la_semana = true;
-            break; // Solo necesitamos saber si hubo al menos una falta
-        }
-    }
-
-    // Si hubo falta, se añade el descuento del 7mo día
-    if ($falta_en_la_semana) {
-        $deptos_con_descuento_7mo = ['02', '03', '06'];
-        if (in_array($codigo_departamento_empleado, $deptos_con_descuento_7mo)) {
-            $total_deduccion_7mo += $salario_diario;
-        }
-    }
-}
-// Sumamos el total de 7mos calculados al total de descuentos generales.
-$total_descuentos_empleado += $total_deduccion_7mo;
-/*
-
-
-    // --- INICIO CÓDIGO DE RASTREO DE CÓDIGOS DIARIOS ---
-    if ($codigo_personal == '12995') {
-        echo "<pre>";
-        echo "--- RASTREANDO CÓDIGOS DIARIOS PARA EMPLEADO: $codigo_personal ---\n";
-    }
-
-    $total_deduccion_7mo = 0;
-    $deductible_codes = ['41044444', '4444444', 'FALTA_GENERICA', '4144444']; 
-
-    foreach ($semanas_a_revisar as $semana) {
-        if ($codigo_personal == '12995') {
-            echo "\n--- Rastreando Semana del " . $semana['start'] . " al " . $semana['end'] . " ---\n";
-        }
-
-        if ($semana['end'] > $fecha_periodo_fin) {
-             if ($codigo_personal == '12995') { echo "--> Veredicto: Semana POSPUESTA para el 7mo día.\n"; }
+        // Omitir semanas que ni siquiera han comenzado en el período de pago
+        if (new DateTime($semana['start']) > new DateTime($fecha_periodo_fin)) {
+            error_log("  -> Semana omitida (comienza después del período de pago).");
             continue;
         }
 
@@ -486,68 +381,58 @@ $total_descuentos_empleado += $total_deduccion_7mo;
         
         foreach ($period as $dia) {
             $fecha_dia_str = $dia->format('Y-m-d');
-            // 1. Obtenemos el código crudo de la base de datos
+
+            // Solo nos interesan los días que están dentro de la quincena actual para encontrar faltas
+            if (new DateTime($fecha_dia_str) > new DateTime($fecha_periodo_fin)) {
+                continue;
+            }
+
             $codigo_del_dia = buscarCodigoDeAsistencia($dblink, $codigo_personal, $fecha_dia_str, $asistencia_por_empleado_y_fecha);
             
-            $codigo_del_dia_evaluado = $codigo_del_dia;
             if (empty($codigo_del_dia) && !isset($FechaDescripcionAsueto[$fecha_dia_str])) {
-                $codigo_del_dia_evaluado = 'FALTA_GENERICA';
+                $codigo_del_dia = 'FALTA_GENERICA';
             }
-            
-            // 2. Verificamos si ese código está en la lista de descuentos
-            $es_falta = in_array($codigo_del_dia_evaluado, $deductible_codes);
 
-            if ($es_falta) {
+            error_log("  -> Día: $fecha_dia_str, Código: $codigo_del_dia");
+
+            if (in_array($codigo_del_dia, $deductible_codes)) {
                 $falta_en_la_semana = true;
-            }
-
-            // 3. Imprimimos el resultado de la evaluación para este día
-            if ($codigo_personal == '12995') {
-                echo "Fecha: " . $fecha_dia_str . " | Código: " . ($codigo_del_dia ?: '[VACÍO]') . " | ¿Se considera falta?: " . ($es_falta ? 'SÍ' : 'NO') . "\n";
+                error_log("    ❌ ¡FALTA O CASTIGO ENCONTRADO! El código '$codigo_del_dia' activa el descuento.");
+                break; 
             }
         }
 
-        if ($codigo_personal == '12995') {
-            echo "--> Veredicto de la semana: " . ($falta_en_la_semana ? 'SÍ HUBO FALTA' : 'NO HUBO FALTA') . "\n";
-        }
-
+        // === INICIO DE LA CORRECCIÓN CLAVE ===
+        // Verificamos si hubo falta Y si la semana TERMINÓ dentro de la quincena
         if ($falta_en_la_semana) {
-            $deptos_con_descuento_7mo = ['02', '03', '06'];
-            if (in_array($codigo_departamento_empleado, $deptos_con_descuento_7mo)) {
-                $total_deduccion_7mo += $salario_diario;
+            if (new DateTime($semana['end']) <= new DateTime($fecha_periodo_fin)) {
+                $deptos_con_descuento_7mo = ['02', '03', '06'];
+                if (in_array($codigo_departamento_empleado, $deptos_con_descuento_7mo)) {
+                    $total_deduccion_7mo += $salario_diario;
+                    error_log("  💰 ¡DESCUENTO 7MO APLICADO! La semana terminó en la quincena. Total 7mo ahora: $" . round($total_deduccion_7mo, 2));
+                } else {
+                    error_log("  -> Falta encontrada, pero el depto '$codigo_departamento_empleado' no aplica a descuento de 7mo día.");
+                }
+            } else {
+                // Si la semana no ha terminado, lo indicamos en el log y no hacemos nada.
+                error_log("  ⏳ SÉPTIMO PENDIENTE. La semana termina el " . $semana['end'] . ", fuera de esta quincena. No se descuenta el 7mo ahora.");
             }
+        } else {
+            error_log("  ✅ Semana sin faltas. No se aplica descuento de 7mo.");
         }
+        // === FIN DE LA CORRECCIÓN CLAVE ===
     }
     $total_descuentos_empleado += $total_deduccion_7mo;
 
-    if ($codigo_personal == '12995') {
-        echo "\n--- FIN DEL RASTREO ---\n</pre>";
-        die();
-    }
-    // --- FIN CÓDIGO DE RASTREO ---
-
-*/
+    // --- CÁLCULO DE TOTALES FINALES (Se mantienen igual) ---
     $total_extra_empleado = $total_salario_asuetos + $total_monto_horas_extra_empleado + $total_trabajo_extra_empleado + $total_monto_nocturnidad_empleado;
     $total_salario_gross_empleado = $total_salario_devengado_empleado + $total_extra_empleado;
-    $salario_liquido_final_empleado = $total_salario_gross_empleado - $total_descuentos_empleado - $total_otras_deducciones_empleado;
+    $salario_liquido_final_empleado = $total_salario_gross_empleado - $total_descuentos_empleado;
 
     return [
-        'total_salario_devengado' => $total_salario_devengado_empleado,
-        'total_salario_asuetos' => $total_salario_asuetos,
-        'total_monto_horas_extra' => $total_monto_horas_extra_empleado,
-        'total_descuentos' => $total_descuentos_empleado,
-        'salario_liquido_final' => $salario_liquido_final_empleado,
-        'total_extra_general' => $total_extra_empleado,
-        'total_horas_extra_cantidad' => $total_horas_extra_cantidad,
-        'total_salario_gross' => $total_salario_gross_empleado,
-        'daily_details' => $daily_attendance_details,
-        'total_trabajo_extra_empleado' => $total_trabajo_extra_empleado,
-        'total_monto_nocturnidad' => $total_monto_nocturnidad_empleado,
-        'total_nocturnidad_cantidad' => $total_nocturnidad_cantidad_empleado
+        'total_salario_devengado' => $total_salario_devengado_empleado, 'total_salario_asuetos' => $total_salario_asuetos, 'total_monto_horas_extra' => $total_monto_horas_extra_empleado, 'total_descuentos' => $total_descuentos_empleado, 'salario_liquido_final' => $salario_liquido_final_empleado, 'total_extra_general' => $total_extra_empleado, 'total_horas_extra_cantidad' => $total_horas_extra_cantidad, 'total_salario_gross' => $total_salario_gross_empleado, 'daily_details' => $daily_attendance_details, 'total_trabajo_extra_empleado' => $total_trabajo_extra_empleado, 'total_monto_nocturnidad' => $total_monto_nocturnidad_empleado, 'total_nocturnidad_cantidad' => $total_nocturnidad_cantidad_empleado
     ];
 }
-// --- FIN DE LA FUNCIÓN processEmployeeAttendanceData ---
-
 
 // INICIO DE LA CLASE PDF (deberías tener una estructura similar)
 class PDF extends FPDF
