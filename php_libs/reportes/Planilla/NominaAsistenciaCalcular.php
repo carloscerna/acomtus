@@ -202,7 +202,7 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
     ];
     $weekly_four_h_count = [];
 
-error_log("INICIANDO CÁLCULO PARA EMPLEADO: $codigo_personal");
+  //  error_log("INICIANDO CÁLCULO PARA EMPLEADO: $codigo_personal");
 
     // --- BUCLE PRINCIPAL DE CÁLCULO DIARIO (REESTRUCTURADO) ---
     foreach ($rango_fechas as $fecha_actual) {
@@ -317,7 +317,7 @@ error_log("INICIANDO CÁLCULO PARA EMPLEADO: $codigo_personal");
         
         // --- NUEVO BLOQUE DE DEPURACIÓN DIARIA ---
         $log_diario = "Día: $fecha_actual | Código: $CodigoJornadaTodas | Devengado: " . round($salario_dia_actual, 2) . " | Bono: " . round($bono_dia_actual, 2) . " | Noct: " . round($nocturnidad_dia_actual, 2) . " | H.Extra: " . round($monto_horas_extra_dia_actual, 2);
-        error_log($log_diario);
+       //error_log($log_diario);
 
         // Guardar detalles para el PDF
         $image_filename = $jornada_imagenes_map[trim($CodigoJornadaTodas)] ?? '';
@@ -374,12 +374,12 @@ error_log("INICIANDO CÁLCULO PARA EMPLEADO: $codigo_personal");
     }
 
   foreach ($semanas_a_revisar as $semana) {
-        error_log("====== EMPLEADO: $codigo_personal ======");
-        error_log("🔍 Revisando semana del " . $semana['start'] . " al " . $semana['end']);
+   //     error_log("====== EMPLEADO: $codigo_personal ======");
+     //   error_log("🔍 Revisando semana del " . $semana['start'] . " al " . $semana['end']);
 
         // Omitir semanas que ni siquiera han comenzado en el período de pago
         if (new DateTime($semana['start']) > new DateTime($fecha_periodo_fin)) {
-            error_log("  -> Semana omitida (comienza después del período de pago).");
+       //     error_log("  -> Semana omitida (comienza después del período de pago).");
             continue;
         }
 
@@ -400,11 +400,11 @@ error_log("INICIANDO CÁLCULO PARA EMPLEADO: $codigo_personal");
                 $codigo_del_dia = 'FALTA_GENERICA';
             }
 
-            error_log("  -> Día: $fecha_dia_str, Código: $codigo_del_dia");
+          //  error_log("  -> Día: $fecha_dia_str, Código: $codigo_del_dia");
 
             if (in_array($codigo_del_dia, $deductible_codes)) {
                 $falta_en_la_semana = true;
-                error_log("    ❌ ¡FALTA O CASTIGO ENCONTRADO! El código '$codigo_del_dia' activa el descuento.");
+             //   error_log("    ❌ ¡FALTA O CASTIGO ENCONTRADO! El código '$codigo_del_dia' activa el descuento.");
                 break; 
             }
         }
@@ -416,16 +416,16 @@ error_log("INICIANDO CÁLCULO PARA EMPLEADO: $codigo_personal");
                 $deptos_con_descuento_7mo = ['02', '03', '06'];
                 if (in_array($codigo_departamento_empleado, $deptos_con_descuento_7mo)) {
                     $total_deduccion_7mo += $salario_diario;
-                    error_log("  💰 ¡DESCUENTO 7MO APLICADO! La semana terminó en la quincena. Total 7mo ahora: $" . round($total_deduccion_7mo, 2));
+                   // error_log("  💰 ¡DESCUENTO 7MO APLICADO! La semana terminó en la quincena. Total 7mo ahora: $" . round($total_deduccion_7mo, 2));
                 } else {
-                    error_log("  -> Falta encontrada, pero el depto '$codigo_departamento_empleado' no aplica a descuento de 7mo día.");
+                  //  error_log("  -> Falta encontrada, pero el depto '$codigo_departamento_empleado' no aplica a descuento de 7mo día.");
                 }
             } else {
                 // Si la semana no ha terminado, lo indicamos en el log y no hacemos nada.
-                error_log("  ⏳ SÉPTIMO PENDIENTE. La semana termina el " . $semana['end'] . ", fuera de esta quincena. No se descuenta el 7mo ahora.");
+               // error_log("  ⏳ SÉPTIMO PENDIENTE. La semana termina el " . $semana['end'] . ", fuera de esta quincena. No se descuenta el 7mo ahora.");
             }
         } else {
-            error_log("  ✅ Semana sin faltas. No se aplica descuento de 7mo.");
+         //   error_log("  ✅ Semana sin faltas. No se aplica descuento de 7mo.");
         }
         // === FIN DE LA CORRECCIÓN CLAVE ===
     }
@@ -435,7 +435,7 @@ error_log("INICIANDO CÁLCULO PARA EMPLEADO: $codigo_personal");
     $total_extra_empleado = $total_salario_asuetos + $total_monto_horas_extra_empleado + $total_trabajo_extra_empleado + $total_monto_nocturnidad_empleado;
     $total_salario_gross_empleado = $total_salario_devengado_empleado + $total_extra_empleado;
     $salario_liquido_final_empleado = $total_salario_gross_empleado - $total_descuentos_empleado;
-
+/*
     error_log(" "); error_log("💰====== RESUMEN FINAL PARA EMPLEADO: $codigo_personal ======");
     error_log("  (+) Salario Devengado (Suma de días pagados): $" . round($total_salario_devengado_empleado, 2));
     error_log("  (+) [EXTRAS] Asuetos($" . round($total_salario_asuetos, 2) . ") + H.Extra($" . round($total_monto_horas_extra_empleado, 2) . ") + Trab.Extra($" . round($total_trabajo_extra_empleado, 2) . ") + Noct.($" . round($total_monto_nocturnidad_empleado, 2) . ") = Total Extras: $" . round($total_extra_empleado, 2));
@@ -443,7 +443,7 @@ error_log("INICIANDO CÁLCULO PARA EMPLEADO: $codigo_personal");
     error_log("  (-) Descuentos (Solo Séptimos Días): $" . round($total_descuentos_empleado, 2));
     error_log("  💵 (=) SALARIO LÍQUIDO FINAL (Bruto - Descuentos): $" . round($salario_liquido_final_empleado, 2));
     error_log("====================================================="); error_log(" ");
-
+*/
 
     return [
         'total_salario_devengado' => $total_salario_devengado_empleado, 'total_salario_asuetos' => $total_salario_asuetos, 'total_monto_horas_extra' => $total_monto_horas_extra_empleado, 'total_descuentos' => $total_descuentos_empleado, 'salario_liquido_final' => $salario_liquido_final_empleado, 'total_extra_general' => $total_extra_empleado, 'total_horas_extra_cantidad' => $total_horas_extra_cantidad, 'total_salario_gross' => $total_salario_gross_empleado, 'daily_details' => $daily_attendance_details, 'total_trabajo_extra_empleado' => $total_trabajo_extra_empleado, 'total_monto_nocturnidad' => $total_monto_nocturnidad_empleado, 'total_nocturnidad_cantidad' => $total_nocturnidad_cantidad_empleado
