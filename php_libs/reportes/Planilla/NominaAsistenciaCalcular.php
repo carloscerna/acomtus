@@ -202,6 +202,8 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
     ];
     $weekly_four_h_count = [];
 
+error_log("INICIANDO CÁLCULO PARA EMPLEADO: $codigo_personal");
+
     // --- BUCLE PRINCIPAL DE CÁLCULO DIARIO (REESTRUCTURADO) ---
     foreach ($rango_fechas as $fecha_actual) {
         $row_asistencia = $asistencia_por_empleado_y_fecha[$codigo_personal][$fecha_actual] ?? null;
@@ -311,6 +313,11 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         $total_trabajo_extra_empleado += $bono_dia_actual;
         $total_monto_nocturnidad_empleado += $nocturnidad_dia_actual;
         $total_monto_horas_extra_empleado += $monto_horas_extra_dia_actual;
+
+        
+        // --- NUEVO BLOQUE DE DEPURACIÓN DIARIA ---
+        $log_diario = "Día: $fecha_actual | Código: $CodigoJornadaTodas | Devengado: " . round($salario_dia_actual, 2) . " | Bono: " . round($bono_dia_actual, 2) . " | Noct: " . round($nocturnidad_dia_actual, 2) . " | H.Extra: " . round($monto_horas_extra_dia_actual, 2);
+        error_log($log_diario);
 
         // Guardar detalles para el PDF
         $image_filename = $jornada_imagenes_map[trim($CodigoJornadaTodas)] ?? '';
@@ -422,12 +429,21 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         }
         // === FIN DE LA CORRECCIÓN CLAVE ===
     }
-    $total_descuentos_empleado += $total_deduccion_7mo;
+    $total_descuentos_empleado = $total_deduccion_7mo;
 
     // --- CÁLCULO DE TOTALES FINALES (Se mantienen igual) ---
     $total_extra_empleado = $total_salario_asuetos + $total_monto_horas_extra_empleado + $total_trabajo_extra_empleado + $total_monto_nocturnidad_empleado;
     $total_salario_gross_empleado = $total_salario_devengado_empleado + $total_extra_empleado;
     $salario_liquido_final_empleado = $total_salario_gross_empleado - $total_descuentos_empleado;
+
+    error_log(" "); error_log("💰====== RESUMEN FINAL PARA EMPLEADO: $codigo_personal ======");
+    error_log("  (+) Salario Devengado (Suma de días pagados): $" . round($total_salario_devengado_empleado, 2));
+    error_log("  (+) [EXTRAS] Asuetos($" . round($total_salario_asuetos, 2) . ") + H.Extra($" . round($total_monto_horas_extra_empleado, 2) . ") + Trab.Extra($" . round($total_trabajo_extra_empleado, 2) . ") + Noct.($" . round($total_monto_nocturnidad_empleado, 2) . ") = Total Extras: $" . round($total_extra_empleado, 2));
+    error_log("  (=) Salario Bruto (Devengado + Extras): $" . round($total_salario_gross_empleado, 2));
+    error_log("  (-) Descuentos (Solo Séptimos Días): $" . round($total_descuentos_empleado, 2));
+    error_log("  💵 (=) SALARIO LÍQUIDO FINAL (Bruto - Descuentos): $" . round($salario_liquido_final_empleado, 2));
+    error_log("====================================================="); error_log(" ");
+
 
     return [
         'total_salario_devengado' => $total_salario_devengado_empleado, 'total_salario_asuetos' => $total_salario_asuetos, 'total_monto_horas_extra' => $total_monto_horas_extra_empleado, 'total_descuentos' => $total_descuentos_empleado, 'salario_liquido_final' => $salario_liquido_final_empleado, 'total_extra_general' => $total_extra_empleado, 'total_horas_extra_cantidad' => $total_horas_extra_cantidad, 'total_salario_gross' => $total_salario_gross_empleado, 'daily_details' => $daily_attendance_details, 'total_trabajo_extra_empleado' => $total_trabajo_extra_empleado, 'total_monto_nocturnidad' => $total_monto_nocturnidad_empleado, 'total_nocturnidad_cantidad' => $total_nocturnidad_cantidad_empleado
