@@ -863,5 +863,5 @@ foreach ($datos_empleado_principal as $row_empleado) {
 $modo = "I"; // Envia al navegador (I), Descarga el archivo (D), Guardar el fichero en un local(F).
 $print_nombre = mb_convert_encoding("Planilla: $departamentoEmpresaTexto - $quincena - $mes.pdf","ISO-8859-1");
 $pdf->Output($print_nombre,$modo);
-
+// archivo funcionando correctamente.
 ?>
