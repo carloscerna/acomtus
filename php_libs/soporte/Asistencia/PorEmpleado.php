@@ -254,18 +254,7 @@ if($errorDbConexion == false){
 				$boolean_RadiosE = trim($_POST['RadiosE']);
 				$HoraExtra = trim($_POST['lstHoraExtra']);
 
-				// CALULAR CUANDO SEA EXTRA EL 4 HORAS.
-				if($boolean_RadiosE == "si"){
-					$codigo_jornada_4_extra = trim($_POST['lstJornadaExtraCuatroHoras']);
-				}else{
-					$codigo_jornada_4_extra = '4';
-				}
-				// GUARDAR NOCTURNIDAD.
-				if($BooleanNocturnidad == "si"){
-					$codigo_jornada_nocturnidad = '5';
-				}else{
-					$codigo_jornada_nocturnidad = '4';
-				}
+
 				// VALIDAR VALORES PARA TIPO LICENCIA JORNADA.
 				if($tipolicenciacheck == "on"){
 					$codigo_tipo_licencia = trim($_POST['lstTipoLicencia']);
@@ -296,6 +285,18 @@ if($errorDbConexion == false){
 					$codigo_jornada_asueto = trim($_POST['lstJornadaAsueto']);
 				}else{
 					$codigo_jornada_asueto = trim($_POST['lstJornadaAsueto']);
+				}
+				// CALULAR CUANDO SEA EXTRA EL 4 HORAS.
+				if($boolean_RadiosE == "si"){
+					$codigo_jornada_4_extra = trim($_POST['lstJornadaExtraCuatroHoras']);
+				}else{
+					$codigo_jornada_4_extra = '4';
+				}
+				// GUARDAR NOCTURNIDAD.
+				if($BooleanNocturnidad == "si"){
+					$codigo_jornada_nocturnidad = '5';
+				}else{
+					$codigo_jornada_nocturnidad = '4';
 				}
 				// 	validar la fecha de la producción.
 				$fechas = explode("-",$fecha);

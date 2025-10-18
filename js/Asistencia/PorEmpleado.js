@@ -176,10 +176,12 @@ $("#Jornada, #Permiso").change(function () {
 $("#JornadaExtraSi, #JornadaExtraNo").change(function () {
 	if ($("#JornadaExtraSi").is(":checked")) {
 		$('#JornadaExtra4Horas').show();
+		$('#HoraExtra').show();
 		listar_jornada_cuatro_horas(2);
 	}
 	else if ($("#JornadaExtraNo").is(":checked")) {
 		$('#JornadaExtra4Horas').hide();
+		$('#HoraExtra').hide();
 	}
 });
 ///////////////////////////////////////////////////////////////////////////////	  

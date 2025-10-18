@@ -238,9 +238,13 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
                 $dias_isss_acumulados++; 
 
                 // Regla: Pagar solo los días 1, 2 y 3 de la racha. Días 4 en adelante no se pagan.
-                if ($dias_isss_acumulados <= 3) {
-                    $salario_dia_actual = $salario_diario; // Pagar el día (Días 1, 2 y 3)
-                } else {
+                if ($dias_isss_acumulados === 3) {
+                    $salario_dia_actual = $salario_diario * 3; // Pagar el día (Días 1, 2 y 3)
+                } elseif($dias_isss_acumulados >= 1 && $dias_isss_acumulados < 3) {
+                    // Día 1,: No pagar ni descontar
+                    $salario_dia_actual = 0; 
+                }
+                else {
                     $salario_dia_actual = 0; // No pagar el día (Días 4 en adelante)
                 }
 
