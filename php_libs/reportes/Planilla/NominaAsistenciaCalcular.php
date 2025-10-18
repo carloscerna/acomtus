@@ -163,6 +163,7 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
     $total_horas_extra_cantidad = 0;
     $daily_attendance_details = [];
     $salario_diario = round($salario_mensual / 30, 4);
+    $dias_isss_acumulados = 0; // Usaremos esta variable
 
     // --- LÓGICA PRE-CÁLCULO (Se mantienen igual) ---
     // Conteo de rachas de ISSS
@@ -190,9 +191,14 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
     $non_contributory_codes_display_only = ['4344444'];
     $deduction_codes = ['41044444', '4444444', '4144444']; // Unificamos todos los que descuentan
     $asueto_worked_codes = ['41614444' => $salario_diario / 2, '41624444' => $salario_diario, '41634444' => $salario_diario + ($salario_diario / 2)];
-    $trabajo_descanso_codes = ['41444144' => $salario_diario / 2, '41444244' => $salario_diario, '41444344' => $salario_diario + ($salario_diario / 2)];
+    $trabajo_descanso_codes = ['41444144' => $salario_diario / 2, '41444244' => $salario_diario, '41444344' => $salario_diario + ($salario_diario / 2),
+        // --- NUEVA LÓGICA PARA 11444144 ---
+        // Paga 1 Día Base (en la lógica normal) + (1 Tanda + 4HE) = 2 días de salario adicional.
+        '11444144' => $salario_diario * 2 // Monto adicional a sumar a la base.
+    ];
     $trabajo_vacacion_codes = ['41241444' => $salario_diario / 2, '41242444' => $salario_diario, '41243444' => $salario_diario + ($salario_diario / 2)];
-    $trabajo_descanso_asueto_codes = ['41744444' => $salario_diario, '41514444' => $salario_diario / 2, '41524444' => $salario_diario, '41534444' => $salario_diario + ($salario_diario / 2)];
+    $trabajo_descanso_asueto_codes = [
+        '41744444' => $salario_diario, '41514444' => $salario_diario / 2, '41524444' => $salario_diario, '41534444' => $salario_diario + ($salario_diario / 2)];
     $nocturnidad_base_value = 0.57;
     $nocturnidad_codes_specific = [
         '2144445' => true, '1144445' => true, '1144425' => true, '11444450' => true, '2124445' => true, '41242445' => true, '41241445' => true
@@ -226,11 +232,22 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
                 $salario_dia_actual = ($weekly_four_h_count[$week_start_date_media] > 1) ? $salario_diario / 2 : $salario_diario;
                 $es_dia_pagado_para_hora_extra = true;
             }
-            // Regla de ISSS (solo paga el 3er día)
+            // --- Lógica para CÓDIGO 4244444 (ISSS) ---
             else if ($CodigoJornadaTodas == '4244444') {
-                $total_streak_length = $isss_day_info[$fecha_actual]['total_length'] ?? 0;
-                $salario_dia_actual = ($total_streak_length === 3) ? $salario_diario : 0;
-                // No se considera día pagado para H.E. a menos que se especifique
+                // Incrementamos el contador. Este es el N° de día en la racha continua.
+                $dias_isss_acumulados++; 
+
+                // Regla: Pagar solo los días 1, 2 y 3 de la racha. Días 4 en adelante no se pagan.
+                if ($dias_isss_acumulados <= 3) {
+                    $salario_dia_actual = $salario_diario; // Pagar el día (Días 1, 2 y 3)
+                } else {
+                    $salario_dia_actual = 0; // No pagar el día (Días 4 en adelante)
+                }
+
+                $es_dia_pagado_para_hora_extra = false;
+                $monto_horas_extra_dia_actual = 0;
+                $descuento_dia_actual = 0;
+                // No se necesitan horas de jornada, ya que es incapacidad.
             }
             // Regla de Códigos que descuentan el día
             else if (in_array($CodigoJornadaTodas, $deduction_codes)) {
@@ -307,6 +324,9 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
             }
         }
 
+        if ($CodigoJornadaTodas !== '4244444' && $row_asistencia) {
+            $dias_isss_acumulados = 0;
+        }
         // --- 4. SUMAS FINALES PARA EL DÍA ---
         $total_salario_devengado_empleado += $salario_dia_actual;
         $total_descuentos_empleado += $descuento_dia_actual;
