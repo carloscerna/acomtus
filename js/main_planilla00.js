@@ -9,20 +9,11 @@ var value = "";
 var RutaText = "";
 var DepartamentoText = "";
 var reporteMensualDataTable; // Variable global para la instancia de DataTables
-var revisionMotoristaDataTable; // Variable global para la instancia de DataTables (Revisión)
 
 $(function(){ // iNICIO DEL fUNCTION.
 ///////////////////////////////////////////////////////////////////////////////
 // FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-//	FUNCION LISTAR BUSQUEDA DE LOS REGISTROS
-///////////////////////////////////////////////////////////////////////////////
-// Escribir la fecha actual.
-var now = new Date();                
-var day = ("0" + now.getDate()).slice(-2);
-var month = ("0" + (now.getMonth() + 1)).slice(-2);
-var year = now.getFullYear(); // <-- La declaración de 'year' estaba aquí.
 $(document).ready(function(){
 	// CSS NONE;
 	$("#CodigoRutaResponsable").css("display", "none");
@@ -42,75 +33,31 @@ $(document).ready(function(){
 		listar_ruta();
 		listar_ann(year);
 		listar_departamento_cargo();	// Departamentos que existen en la Empresa.
-	
-	// --- INICIO: LÓGICA DE SELECTOR DE MES Y QUINCENA MODERNIZADA ---
-	
-	// 1. Cargar botones de mes
-    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    const d = new Date();
-    const currentMonth = d.getMonth() + 1; // 1 a 12
-
-    let mesHtml = '';
-    for (let i = 1; i <= 12; i++) {
-        const monthValue = ("0" + i).slice(-2);
-        const isActive = i === currentMonth ? ' active' : '';
-        mesHtml += `<button class="btn btn-outline-info${isActive}" data-value="${monthValue}">${monthNames[i - 1].substring(0, 3)}</button>`;
-    }
-    $('#mesSelector').html(mesHtml);
-    $('#lstFechaMes').val(("0" + currentMonth).slice(-2)); // Establecer valor inicial del input hidden
-
-    // 2. Eventos para botones de Mes
-    $('#mesSelector button').on('click', function() {
-        $('#mesSelector button').removeClass('active');
-        $(this).addClass('active');
-        $('#lstFechaMes').val($(this).data('value'));
-    });
-    // Establecer el mes activo al cargar
-    $(`#mesSelector button[data-value="${$('#lstFechaMes').val()}"]`).addClass('active');
-
-    // 3. Eventos para botones de Quincena
-    $('#quincenaSelector button').on('click', function() {
-        $('#quincenaSelector button').removeClass('active');
-        $(this).addClass('active');
-        $('#lstQuincena').val($(this).data('value'));
-    });
-	
-	// --- FIN: LÓGICA DE SELECTOR DE MES Y QUINCENA MODERNIZADA ---
-
+			$("#lstFechaMes").prop('selectedIndex', mes);
 	// onchange de lstruta Y lstDepartamentoEmpresa
 		$("#lstRuta").change(function ()
 		{
 			$("#CodigoRutaResponsable").css("display", "none");
 			$("label[for=CodigoRutaResponsable]").text("");
 		});
-	
 	// Parametros para el lstDepartamentoEmpresa. si el valor cambia.
 	$("#lstDepartamentoEmpresa").change(function ()
 	{
-		var codigo_cargo = $(this).val();
-		var codigo_ruta = "999"
-		
-		// 1. Mostrar/Ocultar Div de Ruta y Botón de Revisión
-		$("#DivRuta").toggle(codigo_cargo === '02');
-		$("#goRevisionMotoristas").toggle(codigo_cargo === '02');
+		//
+		$("#CodigoRutaResponsable").css("display", "block");	
+		//
+		$("#lstDepartamentoEmpresa option:selected").each(function () {
+			codigo_cargo = $(this).val();
+			codigo_ruta = "999"
+			if(codigo_cargo != "00"){
+				$.post("includes/cargar_responsable_asistencia.php", { codigo_ruta: codigo_ruta, codigo_cargo: codigo_cargo },
+				function(data){
+					$("label[for=CodigoRutaResponsable]").text(data[0].CodigoRutaResponsable);
+				}, "json");			
+			}
 
-		// 2. Cargar Responsable y Resumen de Empleados
-		if(codigo_cargo != "00"){
-			$.post("includes/cargar_responsable_asistencia.php", { codigo_ruta: codigo_ruta, codigo_cargo: codigo_cargo },
-			function(data){
-				// Cargar Responsable
-				$("label[for=CodigoRutaResponsable]").text(data[0].CodigoRutaResponsable);
-
-				// Cargar Resumen (empleados y encargados)
-				$("#totalEmpleadosDepto").text(data[0].TotalEmpleados || 0);
-				$("#encargadosAsignados").text(data[0].TotalEncargados || 0);
-				$("#CardResumen").show();
-			}, "json");			
-		} else {
-            $("#CardResumen").hide();
-        }
+		});
 	});
-	
 	// Parametros para el lstruta. si el valor cambia.
 	$("#lstRuta").change(function ()
 	{
@@ -124,16 +71,25 @@ $(document).ready(function(){
 				$.post("includes/cargar_responsable_asistencia.php", { codigo_ruta: codigo_ruta, codigo_cargo: codigo_cargo },
 				function(data){
 					$("label[for=CodigoRutaResponsable]").text(data[0].CodigoRutaResponsable);
-					$("#totalEmpleadosDepto").text(data[0].TotalEmpleados || 0); // Actualiza total empleados por ruta
 				}, "json");			
-			} else {
-                // Llama al cambio de departamento para resetear el responsable y contar todos los empleados del depto.
-                $("#lstDepartamentoEmpresa").trigger('change');
-            }
+			}
 			
 		});
 	});
 });		
+///////////////////////////////////////////////////////////////////////////////
+//	FUNCION LISTAR BUSQUEDA DE LOS REGISTROS
+///////////////////////////////////////////////////////////////////////////////
+// Escribir la fecha actual.
+	var now = new Date();                
+	var day = ("0" + now.getDate()).slice(-2);
+	var month = ("0" + (now.getMonth() + 1)).slice(-2);
+	var year = now.getFullYear();
+	today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+	// PARA SELECCIONA REL MES ACTUAL.
+	const d = new Date();
+	var mes = d.getMonth();
+
 ///////////////////////////////////////////////////////////////////////////////
 // EVENTOS PARA LOS BOTONES DE REPORTES
 ///////////////////////////////////////////////////////////////////////////////	  
@@ -182,7 +138,7 @@ $(document).ready(function(){
 		AbrirVentana(varenviar);   
 	});
 
-    // Evento para el botón de Reporte Mensual (no modificado)
+    // Evento para el botón de Reporte Mensual
     $("#goReporteMensual").on('click', function (e) {
         e.preventDefault(); 
 
@@ -202,104 +158,112 @@ $(document).ready(function(){
         }
         $('#reporteMensualCardTitle').text(cardTitle);
 
-        // ... (Lógica de AJAX para NominaMensualReporte.php y DataTables) ...
-    });
-	
-	// --- NUEVO EVENTO PARA REVISIÓN DE MOTORISTAS ---
-    $("#goRevisionMotoristas").on('click', function (e) {
-        e.preventDefault(); 
-
-        var fechaMes = $("#lstFechaMes").val();
-        var fechaAnn = $("#lstFechaAño").val();
-        var quincena = $("#lstQuincena").val();
-        var DepartamentoEmpresa = $("#lstDepartamentoEmpresa").val();
-        var DepartamentoText = $("#lstDepartamentoEmpresa option:selected").text();
-        var ruta = $("#lstRuta").val();
-        var RutaText = $("#lstRuta option:selected").text();
-
-        if (DepartamentoEmpresa !== '02') {
-            toastr.error("Esta revisión es solo para el departamento de Motoristas.", "Sistema");
-            return;
-        }
-
-        $('#motoristaRevisionTitle').text(`Revisión de Controles | ${DepartamentoText} - ${RutaText} | Q${quincena} ${fechaMes}/${fechaAnn}`);
-
         $.ajax({
-            url: "php_libs/soporte/Asistencia/RevisionControlesMotorista.php", // NUEVO SCRIPT PHP
+            url: "php_libs/reportes/Planilla/NominaMensualReporte.php",
             type: "GET",
             dataType: "json",
-            data: { fechaMes, fechaAnn, quincena, DepartamentoEmpresa, ruta },
+            data: { fechaMes, fechaAnn, DepartamentoEmpresa, ruta },
             beforeSend: function() {
-                toastr.info("Cargando reporte de revisión de controles...", "Sistema");
+                toastr.info("Cargando reporte mensual...", "Sistema");
             },
             success: function(response) {
                 if (response.data && response.data.length > 0) {
-                    toastr.success("Reporte de revisión cargado exitosamente.", "Sistema");
+                    toastr.success("Reporte mensual cargado exitosamente.", "Sistema");
                     
-                    $('#motoristaRevisionModal').modal('show');
+                    $('#reporteMensualModal').modal('show');
 
                     // Destruye la tabla si ya existe para evitar errores
-                    if ($.fn.DataTable.isDataTable('#revisionMotoristaTable')) {
-                        $('#revisionMotoristaTable').DataTable().destroy();
-                        $('#revisionMotoristaTable tbody').empty();
+                    if ($.fn.DataTable.isDataTable('#reporteMensualTable')) {
+                        $('#reporteMensualTable').DataTable().destroy();
+                        $('#reporteMensualTable tbody').empty();
                     }
 
-                    revisionMotoristaDataTable = $('#revisionMotoristaTable').DataTable({
+                    reporteMensualDataTable = $('#reporteMensualTable').DataTable({
                         data: response.data,
                         columns: [
-                            { data: 'codigo_personal' },
+                            { data: 'codigo_personal', render: (data, type) => type === 'display' ? String(data) : data },
                             { data: 'nombre_completo' },
-                            { data: 'fecha' },
-                            { data: 'dia_semana' },
-                            { 
-                                data: 'asistencia_punteada',
-                                render: function(data, type) {
-                                    // DataTables renderiza la celda como HTML si type es 'display'
-                                    if (type === 'display') {
-                                        return data; 
-                                    }
-                                    // Para otros tipos (exportación), retorna el código de la imagen
-                                    return $(data).attr('alt') || '';
-                                }
-                            },
-                            { data: 'razon_no_control' }
+                            { data: 'salario_bruto_mensual', render: (data, type) => type === 'display' ? formatCurrency(data) : data },
+                            { data: 'isss_empleado_mensual', render: (data, type) => type === 'display' ? formatCurrency(data) : data },
+                            { data: 'afp_empleado_mensual', render: (data, type) => type === 'display' ? formatCurrency(data) : data },
+                            { data: 'renta_empleado_mensual', render: (data, type) => type === 'display' ? formatCurrency(data) : data },
+                            { data: 'isss_patronal_mensual', render: (data, type) => type === 'display' ? formatCurrency(data) : data },
+                            { data: 'afp_patronal_mensual', render: (data, type) => type === 'display' ? formatCurrency(data) : data },
+                            { data: 'salario_neto_mensual', render: (data, type) => type === 'display' ? formatCurrency(data) : data }
                         ],
                         dom: 'Bfrtip',
-                        buttons: [ 'copy', 'csv', 'excelHtml5', 'pdf', 'print'],
+                        buttons: [
+                            'copy', 
+                            'csv',
+                            {
+                                extend: 'excelHtml5',
+                                footer: true,
+                                title: () => `Reporte Mensual Planilla - ${$('#lstFechaMes option:selected').text()} ${$("#lstFechaAño").val()}`,
+                                messageTop: () => {
+                                    let depto = $("#lstDepartamentoEmpresa option:selected").text();
+                                    let ruta = $("#lstRuta option:selected").text();
+                                    let codDepto = $("#lstDepartamentoEmpresa").val();
+                                    if (codDepto && codDepto !== '00') {
+                                        if (codDepto === '02' && $("#lstRuta").val() !== '00') {
+                                            return `Departamento: ${depto} | Ruta: ${ruta}`;
+                                        }
+                                        return `Departamento: ${depto}`;
+                                    }
+                                    return 'Reporte General';
+                                }
+                            },
+                            'pdf', 
+                            'print'
+                        ],
                         paging: true,
                         lengthChange: true,
                         searching: true,
                         ordering: true,
                         info: true,
                         autoWidth: false,
-                        responsive: true
+                        responsive: true,
+                        footerCallback: function (row, data, start, end, display) {
+                            var api = this.api();
+                            const intVal = (i) => typeof i === 'string' ? i.replace(/[\$,]/g, '') * 1 : typeof i === 'number' ? i : 0;
+                            
+                            const pageTotal = (colIndex) => api.column(colIndex, { page: 'current' }).data().reduce((a, b) => intVal(a) + intVal(b), 0);
+
+                            $(api.column(2).footer()).html(formatCurrency(pageTotal(2)));
+                            $(api.column(3).footer()).html(formatCurrency(pageTotal(3)));
+                            $(api.column(4).footer()).html(formatCurrency(pageTotal(4)));
+                            $(api.column(5).footer()).html(formatCurrency(pageTotal(5)));
+                            $(api.column(6).footer()).html(formatCurrency(pageTotal(6)));
+                            $(api.column(7).footer()).html(formatCurrency(pageTotal(7)));
+                            $(api.column(8).footer()).html(formatCurrency(pageTotal(8)));
+
+                            $('#totalSalarioBrutoMensual').text(formatCurrency(pageTotal(2)));
+                            $('#totalIsssEmpleado').text(formatCurrency(pageTotal(3)));
+                            $('#totalAfpEmpleado').text(formatCurrency(pageTotal(4)));
+                            $('#totalRentaEmpleado').text(formatCurrency(pageTotal(5)));
+                            $('#totalIsssPatronal').text(formatCurrency(pageTotal(6)));
+                            $('#totalAfpPatronal').text(formatCurrency(pageTotal(7)));
+                            $('#totalSalarioNetoMensual').text(formatCurrency(pageTotal(8)));
+                        }
                     });
                 } else {
-                    toastr.success("No se encontraron discrepancias de controles en el período seleccionado.", "Sistema");
+                    toastr.warning("No se encontraron datos para el mes y año seleccionados.", "Sistema");
                 }
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                toastr.error("Error al cargar el reporte de revisión: " + textStatus, "Sistema");
-                $('#motoristaRevisionModal').modal('hide');
+                toastr.error("Error al cargar el reporte mensual: " + textStatus + " - " + errorThrown, "Sistema");
+                $('#reporteMensualModal').modal('hide');
             }
         });
     });
 
     // Ajusta las columnas de la tabla cuando el modal se muestra
-    $('#motoristaRevisionModal').on('shown.bs.modal', function () {
-        if (revisionMotoristaDataTable) {
-            revisionMotoristaDataTable.columns.adjust().responsive.recalc();
-        }
-    });
-
-    // Ajusta las columnas de la tabla cuando el modal se muestra (EXISTENTE)
     $('#reporteMensualModal').on('shown.bs.modal', function () {
         if (reporteMensualDataTable) {
             reporteMensualDataTable.columns.adjust().responsive.recalc();
         }
     });
 
-    // Lógica para el botón que muestra y oculta el panel lateral de totales (EXISTENTE)
+    // Lógica para el botón que muestra y oculta el panel lateral de totales
     $('#toggleTotalesBtn').on('click', function() {
         $('#totalsSidebar').toggleClass('open');
         var btn = $(this);
@@ -348,15 +312,6 @@ function listar_ann(codigo_ann){
         data.forEach(item => {
             miselect.append(`<option value="${item.codigo}" ${codigo_ann == item.codigo ? 'selected' : ''}>${item.descripcion}</option>`);
         });
-		// Inicializar el año actual
-		if ($('#lstFechaAño option').length > 0) {
-            const currentYear = new Date().getFullYear().toString();
-            if ($('#lstFechaAño').find(`option[value="${currentYear}"]`).length) {
-                $('#lstFechaAño').val(currentYear);
-            } else {
-                $('#lstFechaAño').prop('selectedIndex', 0);
-            }
-        }
     }, "json");    
 }
 
