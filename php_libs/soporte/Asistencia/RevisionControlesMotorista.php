@@ -163,17 +163,27 @@ foreach ($asistencia_punteada as $codigo_personal => $fechas_asistencia) {
             
             // Obtener el nombre del archivo de imagen para el código
             $image_filename = $jornada_imagenes_map[$codigo_asistencia] ?? 'default.png'; // Usar default si no se encuentra
-            
+            $image_full_url = "{$image_base_url}{$image_filename}";
+                      
             // Construir la etiqueta HTML de la imagen
             $imagen_tag = "<img src='{$image_base_url}{$image_filename}' alt='{$codigo_asistencia}' style='width: 30px; height: 30px; border: 1px solid #ccc; border-radius: 3px;'>";
             
+            // Definición de $accion_btn
+                $accion_btn = "<button class='btn btn-sm btn-info btn-revisar-control' 
+                data-codigo='{$codigo_personal}' 
+                data-fecha='{$fecha}' 
+                title='Revisar Control'>
+                <i class='fas fa-search'></i> Revisar
+                </button>";
+                
             $response["data"][] = [
                 'codigo_personal' => $codigo_personal,
                 'nombre_completo' => $nombre_completo,
                 'fecha' => date('d/m/Y', strtotime($fecha)), // Formato dd/mm/yyyy
                 'dia_semana' => $dias_semana_es[$dia_semana_en],
                 'asistencia_punteada' => $imagen_tag, // Se envía la etiqueta HTML de la imagen
-                'razon_no_control' => 'Falta Control de Producción'
+                'razon_no_control' => 'Falta Control de Producción',
+                'accion' => $accion_btn // Nueva columna
             ];
         }
     }

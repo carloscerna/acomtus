@@ -262,7 +262,12 @@ $(document).ready(function(){
                                     return $(data).attr('alt') || '';
                                 }
                             },
-                            { data: 'razon_no_control' }
+                            { data: 'razon_no_control' },
+                            { 
+                                data: 'accion', 
+                                orderable: false, // No ordenar por esta columna
+                                render: (data) => data // Renderizar el botón como HTML
+                            } // <<-- NUEVA COLUMNA AÑADIDA
                         ],
                         dom: 'Bfrtip',
                         buttons: [ 'copy', 'csv', 'excelHtml5', 'pdf', 'print'],
@@ -283,6 +288,16 @@ $(document).ready(function(){
                 $('#motoristaRevisionModal').modal('hide');
             }
         });
+    });
+
+    // 2. Manejar el evento click del botón 'Revisar' DENTRO DEL MODAL
+    $('#revisionMotoristaTable tbody').on('click', '.btn-revisar-control', function() {
+        var codigo = $(this).data('codigo');
+        var fecha = $(this).data('fecha'); // Formato YYYY-MM-DD
+        
+        // Llama al script intermediario que buscará el codigo_produccion y redirigirá al PDF
+        var url = `/acomtus/php_libs/reportes/Planilla/GenerarDetalleMotorista.php?codigo=${codigo}&fecha=${fecha}`;
+        AbrirVentana(url);
     });
 
     // Ajusta las columnas de la tabla cuando el modal se muestra

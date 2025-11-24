@@ -1,0 +1,84 @@
+{# Esta plantilla extiende tu layout principal #}
+{% extends 'default_layout.html' %}
+
+{# Bloque 1: CSS Adicional (Leaflet.draw) #}
+{% block extraCSS %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+    <style>
+        /* Estilos específicos del mapa */
+        #mapa-admin {
+            height: 600px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+    </style>
+{% endblock %}
+
+
+{# Bloque 2: Contenido Principal de la Página #}
+{% block contenidos %}
+  <div class="content-wrapper">
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Editor de Trazado de Rutas</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="index.php">Tablero</a></li>
+              <li class="breadcrumb-item active">Admin. Trazados</li>
+            </ol>
+          </div>
+        </div>
+      </div></section>
+
+    <section class="content">
+      <div class="container-fluid">
+        
+        <div class="alert alert-info" role="alert">
+            <strong>Instrucciones:</strong>
+            <ol class="mb-0">
+                <li>Selecciona una ruta del menú desplegable.</li>
+                <li>Usa la herramienta de línea (✍️) a la izquierda del mapa para dibujar el trazado.</li>
+                <li>Haz clic en el último punto para terminar. La ruta se guardará automáticamente.</li>
+            </ol>
+        </div>
+
+        <div id="alert-container-admin"></div>
+
+        <div class="card card-primary shadow-sm mb-3">
+            <div class="card-header">
+                <h3 class="card-title">1. Selecciona la Ruta a Editar</h3>
+            </div>
+            <div class="card-body">
+                <select id="selectorRutaAdmin" class="form-select form-select-lg">
+                    <option value="0" disabled selected>-- Cargando rutas... --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card card-primary shadow-sm">
+            <div class="card-header">
+                <h3 class="card-title">2. Dibuja el Trazado</h3>
+            </div>
+            <div class="card-body">
+                <div id="mapa-admin"></div>
+            </div>
+        </div>
+
+      </div></section>
+    </div>
+  {% endblock %}
+
+
+{# Bloque 3: JavaScript Adicional (Leaflet.draw y nuestro admin.js) #}
+{% block javascripts %}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+     
+    <script src="./js/admin.js?v=1.0" defer></script>
+{% endblock %}
