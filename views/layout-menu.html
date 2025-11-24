@@ -165,6 +165,54 @@
             </li>
           </ul>
         </li>
+
+<!-- /. GESTION DE PERSONAL -->
+<li class="nav-item has-treeview">
+  <a href="#" class="nav-link">
+    <i class="nav-icon fas fa-address-card"></i>
+    <p>
+      Administración
+      <i class="fas fa-angle-left right"></i>
+      <span class="badge badge-info right"></span>
+    </p>
+  </a>
+  <ul class="nav nav-treeview">
+    <li class="nav-item">
+      <a href="asistencia.php" class="nav-link">
+        <i class="fal fa-clipboard-user nav-icon"></i>
+        <p>Asistencia</p>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="planilla.php" class="nav-link">
+        <i class="far fa-file-invoice-dollar nav-icon"></i>
+        <p>Planilla</p>
+      </a>
+    </li>
+  </ul>
+  <a href="#" class="nav-link">
+    <i class="nav-icon fas fa-map-marked-alt"></i>
+    <p>
+      Gestión de Transporte
+      <i class="fas fa-angle-left right"></i>
+    </p>
+  </a>
+  <ul class="nav nav-treeview">
+    <li class="nav-item">
+      <a href="mapa_trazados.php" class="nav-link">
+        <i class="fas fa-drafting-compass nav-icon"></i>
+        <p>Admin. Trazados de Ruta</p>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="mapa_horarios.php" class="nav-link">
+        <i class="fas fa-clock nav-icon"></i>
+        <p>Admin. Horarios</p>
+      </a>
+    </li>
+  </ul>
+
+</li>        
   {% endif %}
 <!-- PERFIL GESTION DE PERSONAL. -->
 {% if codigo_perfil == '02' %}
