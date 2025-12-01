@@ -280,6 +280,212 @@ function calcularSeptimoDia($dblink, $codigo_personal, $codigo_depto, $fecha_per
     return $dinero_descontado_por_septimos;
 }
 
+function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
+    // --- A. CONFIGURACIÓN PREDETERMINADA ---
+    // Usamos ZapfDingbats por defecto para dibujar el círculo
+    $borde_color = [50, 50, 200]; 
+    $relleno_color = [255, 255, 255]; 
+    
+    // CONFIGURACIÓN DEL PUNTO (CÍRCULO)
+    $fuente_actual = 'ZapfDingbats'; // Fuente de símbolos
+    $simbolo_central = 'l';          // En ZapfDingbats, 'l' es un círculo negro
+    $texto_color = [0, 0, 0];        
+    $tamano_fuente_central = 5;     // Tamaño del punto
+    $ajuste_y_simbolo = 0;           // Ajuste vertical
+    $ajuste_y = 0;
+
+    $texto_sup_der = '';          
+    $texto_inf_der = '';          
+    $texto_inf_izq = ''; // --- NUEVO: Abajo Izquierda ---
+
+    // --- B. MAPA DE CÓDIGOS ---
+    // Si es un código especial, cambiamos la fuente a ARIAL y ponemos la letra
+    
+    switch ($codigo) {
+        // CASO: FALTAS (F)
+        case '4444444': 
+        case 'FALTA':
+        case 'FALTA_GENERICA':
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'F';
+            $texto_color = [200, 0, 0]; // Rojo
+            $tamano_fuente_central = 10;
+            $ajuste_y_simbolo = 1; // Las letras necesitan bajar un poquito
+
+            // --- CAMBIO DE COLOR ---
+            $relleno_color = [255, 255, 255]; // Fondo Blanco
+            $texto_color = [200, 0, 0];       // ROJO (R=200, G=0, B=0)
+            break;
+
+        // CASO: CASTIGOS (C)
+        case '41044444':
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'C';
+            $texto_color = [200, 0, 0]; 
+            $tamano_fuente_central = 10;
+            $ajuste_y_simbolo = 1;
+
+            // --- CAMBIO DE COLOR ---
+            $relleno_color = [255, 255, 255]; // Fondo Blanco
+            $texto_color = [200, 0, 0];       // ROJO (R=200, G=0, B=0)
+            break;
+
+        // CASO: DESCANSOS (D)
+        case '41344444':
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'D';
+            $tamano_fuente_central = 10;
+            $ajuste_y_simbolo = 1;
+
+            // --- CAMBIO DE COLOR ---
+            $relleno_color = [255, 255, 255]; // Fondo Blanco
+            $texto_color = [0, 128, 0];       // VERDE OSCURO (R=0, G=128, B=0)
+
+            break;
+
+        // CASO: ISSS
+        case '4244444':
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'ISSS'; 
+            $tamano_fuente_central = 6; // Letra más pequeña
+            $ajuste_y_simbolo = 1.5;
+
+                        // --- CAMBIO DE COLOR ---
+            $relleno_color = [255, 255, 255]; // Fondo Blanco
+            $texto_color = [0, 0, 200];       // AZUL (R=0, G=0, B=200)
+            break;
+
+        // CASO: PERMISO (PP)
+        case '4144444':  // Permiso Personal (Revisa cual es tu codigo exacto de PP)
+            $fuente_central = 'Arial';
+            
+            // Definir símbolo
+            if ($codigo == '4244444') {
+                $simbolo_central = 'ISSS';
+                $tamano_fuente = 6;
+                $ajuste_y = 1.5;
+            } else {
+                $simbolo_central = 'PP';
+                $tamano_fuente = 9;
+                $ajuste_y = 1;
+            }
+
+            // --- CAMBIO DE COLOR ---
+            $relleno_color = [255, 255, 255]; // Fondo Blanco
+            $texto_color = [0, 0, 200];       // AZUL (R=0, G=0, B=200)
+            break;
+
+        // CASO: 4 HORAS (4H)
+        case '1144444': 
+            $fuente_actual = 'Arial';
+            $simbolo_central = '4H';
+            $tamano_fuente_central = 9;
+            $ajuste_y_simbolo = 1;
+            break;
+
+        // CASO: ASUETO (AS)
+        case 'AS':
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'AS';
+            $tamano_fuente_central = 9;
+            $relleno_color = [240, 240, 240]; 
+            $ajuste_y_simbolo = 1;
+            break;
+            
+        // CASO: VACACIONES (V)
+        case 'V':
+        case '41241444':
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'V';
+            $tamano_fuente_central = 10;
+            $ajuste_y_simbolo = 1;
+            break;
+            
+        default:
+            // Si no coincide con ninguno, se queda con la configuración por defecto
+            // (ZapfDingbats + 'l' = Punto Negro)
+            // Agregamos caso especial para tu código "2144444" explícitamente si quieres:
+            if ($codigo == '2144444') {
+                // Se mantiene el punto por defecto
+            }
+            break;
+    }
+
+    // --- C. LÓGICA PARA EXTRAS (Esquinas) ---
+    // (Esto siempre usa Arial)
+    
+    if (strpos($codigo, '_HE') !== false) {
+        $partes = explode('_HE', $codigo);
+        $horas = end($partes); 
+        $texto_sup_der = $horas . "HE";
+    } 
+    elseif ($codigo == '1144425') {
+         $fuente_actual = 'Arial'; // Cambiamos a Arial porque vamos a escribir 4H
+         $simbolo_central = '4H';
+         $tamano_fuente_central = 9;
+         $ajuste_y_simbolo = 1;
+    // A. PARA SUBIR EL CENTRO:
+         // En PDF, la Y crece hacia abajo. Para subir, necesitamos restar.
+         // Antes tenías 1 (bajar). Probemos con -1 o -1.5 (subir).
+         $ajuste_y = -1.5; 
+
+         // B. PARA SEPARAR LAS ESQUINAS:
+         $texto_inf_izq = 'N';  // A la izquierda
+         $texto_inf_der = '1T'; // A la derecha
+    }
+    
+    // Nocturnidad
+    if (substr($codigo, -1) == '5' || in_array($codigo, ['2144445'])) {
+        $texto_inf_der = trim($texto_inf_der . " N");
+    }
+
+   // --- 4. DIBUJO FINAL ---
+
+    // Fondo y Borde
+    $pdf->SetFillColor($relleno_color[0], $relleno_color[1], $relleno_color[2]);
+    $pdf->SetDrawColor($borde_color[0], $borde_color[1], $borde_color[2]);
+    $pdf->SetLineWidth(0.3);
+    $pdf->Rect($x, $y, $w, $h, 'DF'); 
+
+    // Símbolo Central
+    if (!empty($simbolo_central)) {
+        $pdf->SetTextColor($texto_color[0], $texto_color[1], $texto_color[2]);
+        $style = ($fuente_actual == 'Arial') ? 'B' : '';
+        $pdf->SetFont($fuente_actual, $style, $tamano_fuente_central);
+        
+        // Calculamos centro y aplicamos el ajuste_y
+        $pos_y_centro = $y + ($h / 2) - ($tamano_fuente_central / 4) + $ajuste_y;
+        if ($fuente_actual == 'ZapfDingbats') $pos_y_centro += 1; 
+
+        $pdf->SetXY($x, $pos_y_centro);
+        $pdf->Cell($w, 0, utf8_decode($simbolo_central), 0, 0, 'C');
+    }
+
+    // Textos de Esquinas (Negro y Pequeño)
+    $pdf->SetTextColor(0, 0, 0); 
+    $pdf->SetFont('Arial', 'B', 4.5);
+
+    // Esquina Superior Derecha
+    if (!empty($texto_sup_der)) {
+        $pdf->SetXY($x, $y + 1); 
+        $pdf->Cell($w - 0.5, 0, $texto_sup_der, 0, 0, 'R');
+    }
+
+    // Esquina Inferior Derecha
+    if (!empty($texto_inf_der)) {
+        $pdf->SetXY($x, $y + $h - 1); 
+        $pdf->Cell($w - 0.5, 0, $texto_inf_der, 0, 0, 'R');
+    }
+
+    // --- NUEVO: Esquina Inferior Izquierda ---
+    if (!empty($texto_inf_izq)) {
+        $pdf->SetXY($x + 0.5, $y + $h - 1); // +0.5 margen izquierdo
+        $pdf->Cell($w - 0.5, 0, $texto_inf_izq, 0, 0, 'L'); // 'L' = Left Align
+    }
+}
+
+
+
 // --- FUNCIÓN AUXILIAR ---
 function buscarCodigoDeAsistencia($dblink, $codigo_personal, $fecha_str, &$datos_precargados) {
     if (isset($datos_precargados[$codigo_personal][$fecha_str])) {
@@ -1019,22 +1225,49 @@ foreach ($datos_empleado_principal as $row_empleado) {
 
     $pdf->SetX(10); 
 
-    $pdf->Cell($w_initial_fixed[0], 6, $i, 1, 0, 'C', true); 
-    $pdf->Cell($w_initial_fixed[1], 6, $codigo_personal, 1, 0, 'L', true); 
-    $pdf->Cell($w_initial_fixed[2], 6, $nombre_completo, 1, 0, 'L', true); 
+    // Define la altura antes del bucle (puedes probar con 8, 9 o 10)
+        $h_fila = 9;    
+    $pdf->Cell($w_initial_fixed[0], $h_fila, $i, 1, 0, 'C', true); 
+    // --- CAMBIO AQUÍ: AUMENTAR TAMAÑO DE FUENTE ---
+    // Cambiamos de tamaño 7 a tamaño 9 (o 10 si cabe) solo para los montos
+    $pdf->SetFont('Arial', '', 8); 
+    // ----------------------------------------------
+    $pdf->Cell($w_initial_fixed[1], $h_fila, $codigo_personal, 1, 0, 'L', true); 
+    // --- CAMBIO AQUÍ: AUMENTAR TAMAÑO DE FUENTE ---
+    // Cambiamos de tamaño 7 a tamaño 9 (o 10 si cabe) solo para los montos
+    $pdf->SetFont('Arial', '', 7); 
+    // ----------------------------------------------
+    $pdf->Cell($w_initial_fixed[2], $h_fila, $nombre_completo, 1, 0, 'L', true); 
 
     foreach ($rango_fechas as $fecha_actual) {
-        $daily_detail = $daily_attendance_details[$fecha_actual] ?? ['image_filename' => ''];
-        $image_filename = $daily_detail['image_filename'];
-        
-        $image_full_path = $image_base_path . $image_filename;
+        // Necesitamos recuperar el código del día para saber qué dibujar
+        // Como 'daily_details' solo guardaba la imagen, recuperamos el código nuevamente
+        // O mejor aún, guarda el código en $daily_attendance_details cuando lo procesas arriba.
 
-        if (!empty($image_filename) && file_exists($image_full_path)) {
-            $pdf->Cell($daily_col_width, 6, '', 1, 0, 'C', true); 
-            $pdf->Image($image_full_path, $pdf->GetX() - $daily_col_width + 0.5, $pdf->GetY() + 0.5, $daily_col_width - 1, 5); 
-        } else {
-            $pdf->Cell($daily_col_width, 6, '', 1, 0, 'C', true); 
+        // OPCIÓN RÁPIDA: Recalcularlo aquí (o usa la variable si la guardaste)
+        $codigo_dia_actual = buscarCodigoDeAsistencia($dblink, $codigo_personal, $fecha_actual, $asistencia_por_empleado_y_fecha);
+        if (empty($codigo_dia_actual) && !isset($FechaDescripcionAsueto[$fecha_actual])) {
+             $codigo_dia_actual = 'FALTA'; // O vacío
         }
+
+        // Guardamos posición actual
+        $x_actual = $pdf->GetX();
+        $y_actual = $pdf->GetY();
+        
+        // 1. Dibujamos la celda de fondo (blanca o gris si es fin de semana)
+        $pdf->Cell($daily_col_width, $h_fila, '', 0, 0, 'C', true);
+        
+        // 2. Llamamos a nuestra función de dibujo vectorial sobre la celda
+        // Solo dibujamos si hay código y no es un día vacío futuro
+        if (!empty($codigo_dia_actual)) {
+                dibujarCeldaAsistencia($pdf, $x_actual, $y_actual, $daily_col_width, $h_fila, $codigo_dia_actual);
+            } else {
+                $pdf->SetDrawColor(0,0,0);
+                $pdf->Rect($x_actual, $y_actual, $daily_col_width, $h_fila);
+            }
+
+        // Movemos el cursor para la siguiente celda manualmente porque usamos Rect y SetXY
+        $pdf->SetXY($x_actual + $daily_col_width, $y_actual);
     }
 
     $pdf->SetFillColor($current_row_fill_color[0], $current_row_fill_color[1], $current_row_fill_color[2]); 
@@ -1043,26 +1276,31 @@ foreach ($datos_empleado_principal as $row_empleado) {
         return ($value == 0) ? '' : number_format($value, $decimals, '.', ',');
     };
 
-    $pdf->Cell($w_financial_fixed[0], 6, $format_num($total_salarios_a_mostrar, 2), 1, 0, 'R', true); 
-    $pdf->Cell($w_financial_fixed[1], 6, $format_num($total_salario_asuetos_a_mostrar, 2), 1, 0, 'R', true); 
-    $pdf->Cell($w_financial_fixed[2], 6, $format_num($total_trabajo_extra_empleado_a_mostrar, 2), 1, 0, 'R', true); 
+// --- CAMBIO AQUÍ: AUMENTAR TAMAÑO DE FUENTE ---
+    // Cambiamos de tamaño 7 a tamaño 9 (o 10 si cabe) solo para los montos
+    $pdf->SetFont('Arial', '', 7); 
+    // ----------------------------------------------
+
+    $pdf->Cell($w_financial_fixed[0], $h_fila, $format_num($total_salarios_a_mostrar, 2), 1, 0, 'R', true); 
+    $pdf->Cell($w_financial_fixed[1], $h_fila, $format_num($total_salario_asuetos_a_mostrar, 2), 1, 0, 'R', true); 
+    $pdf->Cell($w_financial_fixed[2], $h_fila, $format_num($total_trabajo_extra_empleado_a_mostrar, 2), 1, 0, 'R', true); 
 
     if ($DepartamentoEmpresa == '08' || $DepartamentoEmpresa == '09') {
         $noct_display_string_C = $format_num($total_nocturnidad_cantidad_a_mostrar, 0); 
         $noct_display_string_V = $format_num($total_monto_nocturnidad_a_mostrar, 2); 
-        $pdf->Cell($w_financial_fixed[3]/2, 6, $noct_display_string_C, 1, 0, 'C', true); 
-        $pdf->Cell($w_financial_fixed[3]/2, 6, $noct_display_string_V, 1, 0, 'C', true); 
+        $pdf->Cell($w_financial_fixed[3]/2, $h_fila, $noct_display_string_C, 1, 0, 'C', true); 
+        $pdf->Cell($w_financial_fixed[3]/2, $h_fila, $noct_display_string_V, 1, 0, 'C', true); 
     } else {
         // Nada
     }
 
     $he_display_string_C = $format_num($total_horas_extra_cantidad_a_mostrar, 0); 
     $he_display_string_V = $format_num($total_monto_horas_extra_a_mostrar, 2); 
-    $pdf->Cell($w_financial_fixed[4]/2, 6, $he_display_string_C, 1, 0, 'C', true); 
-    $pdf->Cell($w_financial_fixed[4]/2, 6, $he_display_string_V, 1, 0, 'C', true); 
+    $pdf->Cell($w_financial_fixed[4]/2, $h_fila, $he_display_string_C, 1, 0, 'C', true); 
+    $pdf->Cell($w_financial_fixed[4]/2, $h_fila, $he_display_string_V, 1, 0, 'C', true); 
 
-    $pdf->Cell($w_financial_fixed[5], 6, $format_num($total_extra_general_a_mostrar, 2), 1, 0, 'R', true); 
-    $pdf->Cell($w_financial_fixed[6], 6, $format_num($salario_liquido_final_a_mostrar, 2), 1, 1, 'R', true); 
+    $pdf->Cell($w_financial_fixed[5], $h_fila, $format_num($total_extra_general_a_mostrar, 2), 1, 0, 'R', true); 
+    $pdf->Cell($w_financial_fixed[6], $h_fila, $format_num($salario_liquido_final_a_mostrar, 2), 1, 1, 'R', true); 
     
     $row_fill_flag = !$row_fill_flag;
     $pdf->Ln(2); 
