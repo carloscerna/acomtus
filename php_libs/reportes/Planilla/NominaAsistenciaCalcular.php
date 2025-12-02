@@ -292,6 +292,9 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
     $tamano_fuente_central = 5;      // Tamaño original
     $ajuste_y_simbolo = 1;            // Para subir/bajar
 
+// --- NUEVA VARIABLE DE CONFIGURACIÓN ---
+    $tamano_fuente_esquinas = 4.5; // Valor por defecto (pequeño)
+
     // Variables de Esquinas
     $texto_sup_der = ''; // Arriba Derecha
     $texto_inf_der = ''; // Abajo Derecha
@@ -397,11 +400,14 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
          $tamano_fuente_central = 9;
          
          // A. SUBIR EL CENTRO (Valor negativo sube)
-         $ajuste_y_simbolo = -1.5; 
+         $ajuste_y_simbolo = 2; 
 
          // B. SEPARAR LAS ESQUINAS
          $texto_inf_izq = 'N';  // Izquierda
          $texto_inf_der = '1T'; // Derecha
+
+         // --- AQUÍ AUMENTAS EL TAMAÑO SOLO PARA ESTE CÓDIGO ---
+         $tamano_fuente_esquinas = 6; // Antes era 4.5, ahora será más grande
     }
     
     // Lógica de Nocturnidad genérica (para otros códigos que no sean el especial)
@@ -434,7 +440,7 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
         }
 
         $pdf->SetXY($x, $pos_y_centro);
-        $pdf->Cell($w, 0, utf8_decode($simbolo_central), 0, 0, 'C');
+        $pdf->Cell($w, 0, ($simbolo_central), 0, 0, 'C');
     }
 
     // Textos de Esquinas (Siempre Arial Negro Pequeño)
@@ -460,16 +466,29 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
         $pdf->Cell($w - 0.2, 0, $texto_sup_der, 0, 0, 'R'); 
     }
 
-    // Esquina Inferior Derecha
+// --- AQUÍ USAMOS LA VARIABLE ---
+    $pdf->SetFont('Arial', 'B', $tamano_fuente_esquinas); 
+    // -------------------------------
+
+// --- CONFIGURACIÓN DE MÁRGENES ---
+    // Entre más pequeño este número, más pegado al borde estará el texto.
+    // 0.5 = Normal
+    // 0.2 = Muy pegado (Lo que buscas)
+    $margen_lateral = 0.1; 
+    // ---------------------------------
+
+    // Esquina Inferior Derecha (Para el "1T")
     if (!empty($texto_inf_der)) {
         $pdf->SetXY($x, $y + $h - 1); 
-        $pdf->Cell($w - 0.5, 0, $texto_inf_der, 0, 0, 'R');
+        // Restamos el margen para que se pegue al borde derecho
+        $pdf->Cell($w - $margen_lateral, 0, $texto_inf_der, 0, 0, 'R');
     }
 
-    // --- NUEVO: Esquina Inferior Izquierda ---
+    // Esquina Inferior Izquierda (Para la "N")
     if (!empty($texto_inf_izq)) {
-        $pdf->SetXY($x + 0.5, $y + $h - 1); // Margen izquierdo 0.5
-        $pdf->Cell($w - 0.5, 0, $texto_inf_izq, 0, 0, 'L'); // 'L' de Left
+        // Sumamos el margen a X para separarlo apenas del borde izquierdo
+        $pdf->SetXY($x + $margen_lateral, $y + $h - 1); 
+        $pdf->Cell($w - $margen_lateral, 0, $texto_inf_izq, 0, 0, 'L'); 
     }
 }
 
@@ -886,12 +905,12 @@ class PDF extends FPDF
         $this->SetXY(30,5);
         $this->Cell(100,7,mb_convert_encoding($_SESSION["nombre_institucion"],"ISO-8859-1"),0,1,"L",false);
         
-        $reporte_trabajo_display = utf8_decode('Reporte de trabajo correspondiente a la quincena del ');
-        $reporte_trabajo_display .= date('d', strtotime($fecha_periodo_inicio)) . ' al ' . date('d', strtotime($fecha_periodo_fin)) . ' de ' . utf8_decode(strftime('%B', strtotime($fecha_periodo_inicio))) . ' de ' . date('Y', strtotime($fecha_periodo_inicio));
+        $reporte_trabajo_display = ('Reporte de trabajo correspondiente a la quincena del ');
+        $reporte_trabajo_display .= date('d', strtotime($fecha_periodo_inicio)) . ' al ' . date('d', strtotime($fecha_periodo_fin)) . ' de ' . (strftime('%B', strtotime($fecha_periodo_inicio))) . ' de ' . date('Y', strtotime($fecha_periodo_inicio));
         
-        $reporte_ruta_display = utf8_decode($departamentoEmpresaTexto);
+        $reporte_ruta_display = ($departamentoEmpresaTexto);
         if (!empty($RutaText) && $RutaText != '00' && $RutaText != 'Seleccionar...' && $departamentoEmpresaTexto == 'Motorista') { 
-            $reporte_ruta_display .= utf8_decode(' (Ruta: ') . utf8_decode($RutaText) . utf8_decode(')');
+            $reporte_ruta_display .= (' (Ruta: ') . ($RutaText) . (')');
         }else{
             $reporte_ruta_display = $departamentoEmpresaTexto;
         }
@@ -941,7 +960,7 @@ class PDF extends FPDF
             } else {
                 $this->SetFillColor(200, 220, 255); 
             }
-            $this->Cell($daily_col_width, $half_header_height, utf8_decode(strtoupper($spanish_day_name)), 1, 0, 'C', true);
+            $this->Cell($daily_col_width, $half_header_height, (strtoupper($spanish_day_name)), 1, 0, 'C', true);
         }
 
         $this->SetFillColor(180, 200, 230); 
@@ -949,13 +968,13 @@ class PDF extends FPDF
         $this->SetFillColor(200, 220, 255); 
         $this->Cell($w_financial_fixed[1], $header_height, 'AS', 1, 0, 'C', true); 
         $this->SetFillColor(180, 200, 230); 
-        $this->Cell($w_financial_fixed[2], $half_header_height, utf8_decode('EXTRA'), 1, 0, 'C', true); 
+        $this->Cell($w_financial_fixed[2], $half_header_height, ('EXTRA'), 1, 0, 'C', true); 
         $this->SetFillColor(200, 220, 255); 
         if ($DepartamentoEmpresa == '08' || $DepartamentoEmpresa == '09') {
-        $this->Cell($w_financial_fixed[3], $half_header_height, utf8_decode('Nocturnidad'), 1, 0, 'C', true); 
+        $this->Cell($w_financial_fixed[3], $half_header_height, ('Nocturnidad'), 1, 0, 'C', true); 
         }
         $this->SetFillColor(180, 200, 230); 
-        $this->Cell($w_financial_fixed[4], $half_header_height, utf8_decode('Hora Extra'), 1, 0, 'C', true); 
+        $this->Cell($w_financial_fixed[4], $half_header_height, ('Hora Extra'), 1, 0, 'C', true); 
         $this->SetFillColor(200, 220, 255); 
         $this->Cell($w_financial_fixed[5], $half_header_height, 'Total', 1, 0, 'C', true); 
         $this->SetFillColor(180, 200, 230); 
@@ -998,7 +1017,7 @@ class PDF extends FPDF
     function Footer() {
         $this->SetY(-15);
         $this->SetFont('Arial', 'I', 8);
-        $this->Cell(0, 10, utf8_decode('Página ').$this->PageNo().'/{nb}', 0, 0, 'C');
+        $this->Cell(0, 10, ('Página ').$this->PageNo().'/{nb}', 0, 0, 'C');
     }
 }
 
@@ -1034,7 +1053,7 @@ foreach ($datos_empleado_principal as $row_empleado) {
     $salario_mensual = (float)$row_empleado['salario'];
     $codigo_departamento_empleado = TRIM($row_empleado['codigo_departamento_empresa']);
     
-    $nombre_completo = trim(utf8_decode($nombres_empleado . ' ' . $apellidos_empleado));
+    $nombre_completo = trim(($nombres_empleado . ' ' . $apellidos_empleado));
 
     // --- 1. CÁLCULO DE ARRASTRE (CARRY OVER) - UNA SOLA VEZ ---
     $deductible_events_carry_over = [];
