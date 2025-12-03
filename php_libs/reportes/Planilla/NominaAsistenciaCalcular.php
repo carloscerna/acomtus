@@ -293,7 +293,7 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
     $ajuste_y_simbolo = 1;            // Para subir/bajar
 
 // --- NUEVA VARIABLE DE CONFIGURACIÓN ---
-    $tamano_fuente_esquinas = 4.5; // Valor por defecto (pequeño)
+    $tamano_fuente_esquinas = 6; // Valor por defecto (pequeño)
 
     // Variables de Esquinas
     $texto_sup_der = ''; // Arriba Derecha
@@ -342,14 +342,65 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
                 $ajuste_y_simbolo = 3;
             }
             break;
+// =========================================================
+        // GRUPO: TRABAJO ASUETO (TA) - VARIAS TANDAS
+        // =========================================================
+        // Estilo: Fondo Amarillo, Texto "TA" Rojo
+        
+        case '41614444': // Trabajo Asueto Media Tanda (4H)
+        case '41624444': // Trabajo Asueto Una Tanda (1T)
+        case '41634444': // Trabajo Asueto Una Tanda y Media (1.5T)
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'TA';
+            
+            // Colores: Fondo Amarillo [255, 255, 0], Texto Rojo [200, 0, 0]
+            $relleno_color = [255, 255, 0]; 
+            $texto_color = [200, 0, 0];     
+            
+            $tamano_fuente_central = 12; 
+            $ajuste_y_simbolo = 2;
 
+            // Diferenciamos qué texto poner en la esquina inferior derecha
+            if ($codigo == '41614444') {
+                $texto_inf_der = '4H';   // Media Tanda
+            } elseif ($codigo == '41624444') {
+                $texto_inf_der = '1T';   // Una Tanda
+            } elseif ($codigo == '41634444') {
+                $texto_inf_der = '1.5T'; // Tanda y Media
+            }
+            break;
         // GRUPO: ASUETOS (Fondo Gris)
-        case 'AS':
+        // =========================================================
+        // GRUPO: TRABAJO ASUETO (TA) CON NOCTURNIDAD (Amarillo)
+        // =========================================================
+        case '41944445': // Asueto + Nocturnidad (TA + N)
+        case '41924445': // Asueto + 1T + Nocturnidad (TA + N + 1T)
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'TA';
+            
+            // Colores: Fondo Amarillo, Texto Rojo
+            $relleno_color = [255, 255, 0]; // Amarillo
+            $texto_color = [200, 0, 0];     // Rojo
+            
+            $tamano_fuente_central = 10; 
+            $ajuste_y_simbolo = 1;
+
+            // Configuración de Esquinas
+            $texto_inf_izq = 'N'; // La "N" va a la Izquierda (como en tu imagen)
+
+            // Si es el código que lleva Tanda Extra, agregamos "1T" a la derecha
+            if ($codigo == '41924445') {
+                $texto_inf_der = '1T';
+            }
+            break;
         case '41644444':
             $fuente_actual = 'Arial'; 
-            $simbolo_central = 'AS';
-            $relleno_color = [240, 240, 240]; 
-            $tamano_fuente_central = 9; 
+            $simbolo_central = 'A';
+            // Colores: Fondo Amarillo, Texto Rojo
+            $relleno_color = [255, 255, 0]; // Amarillo
+            $texto_color = [200, 0, 0];     // Rojo
+
+            $tamano_fuente_central = 10; 
             $ajuste_y_simbolo = 3;
             break;
 
@@ -360,7 +411,55 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
             $tamano_fuente_central = 9; 
             $ajuste_y_simbolo = 3;
             break;
-// =========================================================
+
+        // =========================================================
+        // GRUPO: TRABAJO DESCANSO ASUETO (TDA)
+        // =========================================================
+        // Estilo: Fondo Amarillo, Texto "TDA" Rojo
+        
+        case '41544444': // TDA (Genérico)
+        case '41514444': // TDA Media Tanda (4H)
+        case '41524444': // TDA Una Tanda (1T)
+        case '41534444': // TDA Una Tanda y Media (1.5T)
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'TDA';
+            
+            // Colores: Fondo Amarillo [255, 255, 0], Texto Rojo [200, 0, 0]
+            $relleno_color = [255, 255, 0]; 
+            $texto_color = [200, 0, 0];     
+            
+            // Ajustamos fuente un poco más chica para que quepan las 3 letras
+            $tamano_fuente_central = 9; 
+            $ajuste_y_simbolo = 1;
+
+            // Diferenciamos la esquina inferior derecha
+            if ($codigo == '41514444') {
+                $texto_inf_der = '4H';
+            } elseif ($codigo == '41524444') {
+                $texto_inf_der = '1T';
+            } elseif ($codigo == '41534444') {
+                $texto_inf_der = '1.5T';
+            }
+            break;
+
+        // =========================================================
+        // GRUPO: DESCANSO ASUETO (DA)
+        // =========================================================
+        // Estilo: Fondo Amarillo, Texto "DA" Verde (Para diferenciar del TA rojo)
+        
+        case '41744444': // Descanso Asueto
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'DA';
+            
+            // Colores: Fondo Amarillo
+            $relleno_color = [255, 255, 0]; 
+            // Usamos Verde Oscuro para la "D" predominante
+            $texto_color = [0, 128, 0];      
+            
+            $tamano_fuente_central = 10; 
+            $ajuste_y_simbolo = 1;
+            break;
+        // =========================================================
         // GRUPO: PUNTO NORMAL + HORAS EXTRA (HE)
         // =========================================================
         // Nota: No cambiamos $simbolo_central porque ya es el Punto (ZapfDingbats) por defecto.
@@ -380,6 +479,29 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
 
         case '21444441': // ID 44: Punto + 1HE
             $texto_sup_der = '1 HE';
+            break;
+
+        // =========================================================
+        // GRUPO: SIN JORNADA / SIN PUNTEO (0H)
+        // =========================================================
+        // Estilo: Fondo Blanco, Texto "0H" Negro
+        // Representa la imagen "0H SIN PUNTEO ASISTENCIA"
+        
+        case '4144444': // Sin Jornada
+            $fuente_actual = 'Arial';
+            $simbolo_central = '0H';
+            
+            // Colores: 
+            // Fondo Gris Claro [225, 225, 225] (Diferente al blanco y al amarillo)
+            $relleno_color = [225, 225, 225]; 
+            $texto_color = [0, 0, 0];     // Negro
+            
+            $tamano_fuente_central = 10; 
+            $ajuste_y_simbolo = 2;
+            
+            // Opcional: Si quieres ser más específico, puedes agregar "S/J" (Sin Jornada)
+            // en la esquina inferior derecha descomentando la siguiente línea:
+            // $texto_inf_der = 'S/J'; 
             break;
         default:
             // Por defecto se queda con ZapfDingbats (Punto)
@@ -411,8 +533,14 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
     }
     
     // Lógica de Nocturnidad genérica (para otros códigos que no sean el especial)
-    if (substr($codigo, -1) == '5' && $codigo != '1144425') {
-        $texto_inf_der = trim($texto_inf_der . " N");
+
+// Lógica de Nocturnidad genérica
+    // Excluimos los códigos que ya configuramos manualmente dentro del switch
+    $excepciones_nocturnidad = ['1144425', '41944445', '41924445'];
+
+    if (substr($codigo, -1) == '5' && !in_array($codigo, $excepciones_nocturnidad)) {
+        $tamano_fuente_esquinas = 6; // Antes era 4.5, ahora será más grande
+        $texto_inf_izq = trim($texto_inf_izq . " N");
     }
 
     // --- 4. DIBUJO FINAL ---
