@@ -293,7 +293,7 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
     $ajuste_y_simbolo = 1;            
 
     // Configuración Esquinas
-    $tamano_fuente_esquinas = 4.5;    // Tamaño por defecto (pequeño)
+    $tamano_fuente_esquinas = 6.5;    // Tamaño por defecto (pequeño)
     $texto_sup_der = ''; 
     $texto_inf_der = ''; 
     $texto_inf_izq = ''; 
@@ -322,19 +322,134 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
             $texto_color = [200, 0, 0]; 
             $tamano_fuente_central = 10; $ajuste_y_simbolo = 3;
             break;
-
+        // =========================================================
+        // GRUPO: UNA TANDA Y MEDIA (1.5T)
+        // =========================================================
+        // Representa: 1.5 Tandas (Jornada extendida)
+        
+        case '3144444': // Una Tanda y Media (Normal)
+            case '3144445': // Una Tanda y Media + Nocturnidad
+                $fuente_actual = 'Arial';
+                $simbolo_central = '1.5T';
+                
+                // Colores: Fondo Blanco, Texto Negro
+                $relleno_color = [255, 255, 255]; 
+                $texto_color = [0, 0, 0];     
+                
+                $tamano_fuente_central = 9; 
+                $ajuste_y_simbolo = 3;
+    
+                // Si es el código con nocturnidad (termina en 5), 
+                // la lógica genérica al final de la función se encargará de poner la "N".
+                // Pero si quieres asegurarte o ponerla en otro lado, puedes hacerlo aquí:
+                if ($codigo == '3144445') {
+                    $texto_inf_der = 'N'; 
+                }
+                break;
         // ---------------------------------------------------------
         // GRUPO: DESCANSOS (D) Y VACACIONES (V) - VERDE
         // ---------------------------------------------------------
-        case '41344444': // Descanso
-        case '41144444': // Vacacion
-        case '41241444': // Trabajo Vacacion
-             $fuente_actual = 'Arial';
-             if ($codigo == '41344444') $simbolo_central = 'D';
-             else $simbolo_central = 'V'; 
-             $texto_color = [0, 128, 0]; 
-             $tamano_fuente_central = 10; $ajuste_y_simbolo = 3;
-             break;
+        // =========================================================
+        // GRUPO: DESCANSO (D) Y TRABAJO DESCANSO (TD)
+        // =========================================================
+        // Estilo: Fondo Blanco, Texto Verde
+        
+        case '41344444': // Descanso Normal
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'D';
+            
+            // Colores: Fondo Blanco, Texto Verde Oscuro
+            $relleno_color = [255, 255, 255]; 
+            $texto_color = [0, 128, 0]; 
+            
+            $tamano_fuente_central = 10; 
+            $ajuste_y_simbolo = 3; // Ajuste para la 'D'
+            break;
+
+        case '41444144': // Trabajo Descanso Media Tanda (4H)
+        case '41444244': // Trabajo Descanso Una Tanda (1T)
+        case '41444344': // Trabajo Descanso Tanda y Media (1.5T)
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'TD';
+            
+            // Colores: Fondo Blanco, Texto Verde Oscuro
+            $relleno_color = [255, 255, 255]; 
+            $texto_color = [0, 128, 0]; 
+            
+            $tamano_fuente_central = 10; 
+            $ajuste_y_simbolo = 3;
+
+            // Cantidades en la esquina inferior derecha
+            if ($codigo == '41444144') {
+                $texto_inf_der = '4H';   // Media Tanda
+            } elseif ($codigo == '41444244') {
+                $texto_inf_der = '1T';   // Una Tanda
+            } elseif ($codigo == '41444344') {
+                $texto_inf_der = '1.5T'; // Tanda y Media
+            }
+            break;
+// =========================================================
+        // GRUPO: VACACIONES (V) - FONDO BLANCO / TEXTO VERDE
+        // =========================================================
+        case '41144444': // Vacación Normal
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'V';
+            // Colores: Fondo Blanco, Texto Verde
+            $relleno_color = [255, 255, 255]; 
+            $texto_color = [0, 180, 60]; // Verde "Vacación"
+            $tamano_fuente_central = 12; 
+            $ajuste_y_simbolo = 3;
+            break;
+
+        // =========================================================
+        // GRUPO: TRABAJO VACACIÓN (TV) - FONDO BLANCO / TEXTO VERDE
+        // =========================================================
+        // Representa: TV (Trabajo en Vacación) + Cantidad (4H, 1T, etc)
+        
+        case '41241444': // TV Media Tanda (4H)
+        case '41242444': // TV Una Tanda (1T)
+        case '41243444': // TV Tanda y Media (1.5T)
+        case '41242445': // TV Una Tanda + Nocturnidad (TV + 1T + N)
+        case '41243445': // TV Media Tanda + Nocturnidad (TV + 4H + N) (Revisa si es media o tanda completa)
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'TV';
+            
+            // Colores: Fondo Blanco, Texto Verde
+            $relleno_color = [255, 255, 255]; 
+            $texto_color = [0, 180, 60]; 
+            
+            $tamano_fuente_central = 10; 
+            $ajuste_y_simbolo = 2;
+
+            // Cantidades en la esquina derecha
+            if ($codigo == '41241444') $texto_inf_der = '4H';
+            elseif ($codigo == '41242444' || $codigo == '41242445') $texto_inf_der = '1T';
+            elseif ($codigo == '41243444') $texto_inf_der = '1.5T';
+            elseif ($codigo == '41243445') $texto_inf_der = '4H'; // Asumiendo media tanda por el nombre
+
+            // Nocturnidad a la izquierda
+            if (in_array($codigo, ['41242445', '41243445'])) {
+                $texto_inf_izq = 'N';
+            }
+            break;
+
+        // =========================================================
+        // GRUPO: VACACIÓN DESCANSO ASUETO (VDA) - FONDO AMARILLO
+        // =========================================================
+        // Estilo: Fondo Amarillo, Texto "VDA" Rojo (Para máxima alerta)
+        
+        case '41944444': // Vacación Descanso Asueto
+            $fuente_actual = 'Arial';
+            $simbolo_central = 'VDA';
+            
+            // Colores: Fondo Amarillo Brillante
+            $relleno_color = [255, 255, 0]; 
+            // Texto Rojo (destaca sobre amarillo y alerta del asueto)
+            $texto_color = [200, 0, 0];      
+            
+            $tamano_fuente_central = 9; // Letra un poco más pequeña para que quepa VDA
+            $ajuste_y_simbolo = 2;
+            break;
 
         // ---------------------------------------------------------
         // GRUPO: ISSS y PERMISOS (PP) - AZUL
@@ -364,7 +479,7 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
             $simbolo_central = 'TA';
             $relleno_color = [255, 255, 0]; // Amarillo
             $texto_color = [200, 0, 0];     // Rojo
-            $tamano_fuente_central = 12; $ajuste_y_simbolo = 2;
+            $tamano_fuente_central = 9; $ajuste_y_simbolo = 2;
 
             // Textos específicos
             if ($codigo == '41614444') $texto_inf_der = '4H';
@@ -454,11 +569,11 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
     
     // Nocturnidad Genérica (Para todos los demás códigos que terminan en 5)
     // Excluimos los que ya configuramos manualmente arriba
-    $excepciones_nocturnidad = ['1144425', '41944445', '41924445'];
+    $excepciones_nocturnidad = ['1144425', '41944445', '41924445', '41242445', '41243445', '3144445'];
 
     if (substr($codigo, -1) == '5' && !in_array($codigo, $excepciones_nocturnidad)) {
         // CORRECCIÓN: La N genérica suele ir a la DERECHA ("... N")
-        $texto_inf_der = trim($texto_inf_der . " N");
+        $texto_inf_izq = trim($texto_inf_izq . " N");
     }
 
     // --- 4. DIBUJO FINAL ---
@@ -494,15 +609,25 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
         $pdf->Cell($w - $margen_lateral, 0, $texto_sup_der, 0, 0, 'R'); 
     }
 
-    // Inf Derecha
+    // --- CONFIGURACIÓN VERTICAL INFERIOR ---
+    // Cuanto mayor sea este número, más ARRIBA quedará el texto.
+    // 1.0 = Estándar
+    // 0.5 = Muy pegado al borde de abajo
+    // 2.0 = Bastante subido
+    $margen_inferior = 1.5; 
+    // --------------------------------------
+
+    // Esquina Inferior Derecha
     if (!empty($texto_inf_der)) {
-        $pdf->SetXY($x, $y + $h - 1); 
+        // Aquí se aplica la resta
+        $pdf->SetXY($x, $y + $h - $margen_inferior); 
         $pdf->Cell($w - $margen_lateral, 0, $texto_inf_der, 0, 0, 'R');
     }
 
-    // Inf Izquierda
+    // Esquina Inferior Izquierda
     if (!empty($texto_inf_izq)) {
-        $pdf->SetXY($x + $margen_lateral, $y + $h - 1); 
+        // Aquí también se aplica para que queden alineados
+        $pdf->SetXY($x + $margen_lateral, $y + $h - $margen_inferior); 
         $pdf->Cell($w - $margen_lateral, 0, $texto_inf_izq, 0, 0, 'L'); 
     }
 }
