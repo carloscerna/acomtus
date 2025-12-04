@@ -546,7 +546,53 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
             $relleno_color = [225, 225, 225]; // Gris
             $tamano_fuente_central = 10; $ajuste_y_simbolo = 2;
             break;
-
+        // =========================================================
+        // GRUPO: MEDIA TANDA CON EXTRAS (Complejos)
+        // =========================================================
+        // Estilo: Fondo Blanco, Centro "4H"
+        // Esquema: 4H (Centro) + Tanda Extra (Abajo Der) + HE (Arriba Der)
+        
+        case '1144424':  // Media Tanda + 1 Tanda Extra
+        case '11444344': // Media Tanda + 1.5 Tandas Extra
+        case '11444144': // Media Tanda + 4 HE (Sin tanda extra)
+        
+        // Variantes con 1 Tanda Extra + Horas Extras
+        case '11444244': // ... + 1T + 4HE
+        case '11444243': // ... + 1T + 3HE
+        case '11444242': // ... + 1T + 2HE
+        case '11444241': // ... + 1T + 1HE
+                
+                $fuente_actual = 'Arial';
+                $simbolo_central = '4H';
+                
+                // Colores: Fondo Blanco, Texto Negro
+                $relleno_color = [255, 255, 255]; 
+                $texto_color = [0, 0, 0]; 
+                
+                $tamano_fuente_central = 9; 
+                $ajuste_y_simbolo = 2;
+    
+                // --- LÓGICA DE TANDA EXTRA (Abajo Derecha) ---
+                // ID 9, ID 35 y los del ID 45 al 48
+                if ($codigo == '11444344') {
+                    $texto_inf_der = '1.5T';
+                } 
+                elseif ($codigo == '1144424' || in_array($codigo, ['11444244','11444243','11444242','11444241'])) {
+                    $texto_inf_der = '1T';
+                }
+    
+                // --- LÓGICA DE HORAS EXTRAS (Arriba Derecha) ---
+                // ID 14 (Solo HE) y los del ID 45 al 48 (Tanda + HE)
+                if ($codigo == '11444244' || $codigo == '11444144') {
+                    $texto_sup_der = '4 HE';
+                } elseif ($codigo == '11444243') {
+                    $texto_sup_der = '3 HE';
+                } elseif ($codigo == '11444242') {
+                    $texto_sup_der = '2 HE';
+                } elseif ($codigo == '11444241') {
+                    $texto_sup_der = '1 HE';
+                }
+                break;
         default: break;
     }
 
