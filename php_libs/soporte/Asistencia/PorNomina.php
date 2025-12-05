@@ -352,7 +352,7 @@ if($errorDbConexion == false){
 														//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
 														$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
 																					".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
-																					".".$CodigoJornadaNocturna;
+																					".".$CodigoJornadaNocturna.".".$HoraExtra;
 													}
 
 												// Condiciones para la Imagen.
@@ -430,7 +430,7 @@ if($errorDbConexion == false){
 											//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
 												$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
 																			".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
-																			".".$CodigoJornadaNocturna;
+																			".".$CodigoJornadaNocturna.".".$HoraExtra;
 											// Condiciones para la Imagen.
 												$buscar = array_search($CodigoJornadaTodas, $CodigoJornadaImagen['codigo']);
 												if(!empty($buscar)){
@@ -530,6 +530,27 @@ if($errorDbConexion == false){
 								$datos[$fila_array]["descripcion_completa"] = $descripcion_completa;
 									$fila_array++;
 								}
+				break;
+
+				case 'EliminarAsistencia':
+				$id_asistencia = trim($_POST['id_asistencia']);
+				
+				if(!empty($id_asistencia)){
+					// Borramos físicamente el registro (o podrías cambiarle estatus a 0 si prefieres historial)
+					$query = "DELETE FROM personal_asistencia WHERE id_ = :id";
+					$stmt = $dblink->prepare($query);
+					$stmt->bindParam(':id', $id_asistencia);
+					
+					if($stmt->execute()){
+						$respuestaOK = true;
+						$mensajeError = "Asistencia eliminada/reiniciada correctamente.";
+					} else {
+						$respuestaOK = false;
+						$mensajeError = "Error al eliminar en BD.";
+					}
+				} else {
+					$mensajeError = "No hay registro previo para eliminar.";
+				}
 				break;
             default:
 				$mensajeError = 'Esta acción no se encuentra disponible';

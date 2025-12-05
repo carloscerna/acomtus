@@ -1,986 +1,564 @@
-// id de user global
+// =========================================================================
+// VARIABLES GLOBALES
+// =========================================================================
 var id_ = 0;
 var accion = "todos";
-var tabla = "";
-var miselect = "";
-var today = "";
-var CodigoRuta = "";
-var today = "";
-var codigo_personal = "";
 var fecha = "";
 var codigo_personal = "";
 var codigo_departamento_empresa = "";
-$(function(){ // iNICIO DEL fUNCTION.
-    // Escribir la fecha actual.
-        var now = new Date();                
-        var day = ("0" + now.getDate()).slice(-2);
-        var month = ("0" + (now.getMonth() + 1)).slice(-2);
-        var year = now.getFullYear();
+var CodigoRuta = "";
 
-        fecha = now.getFullYear()+"-"+(month)+"-"+(day) ;
-        $('#FechaListadoEmpleados').val(fecha);
-///////////////////////////////////////////////////////////////////////////////
-// FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
-///////////////////////////////////////////////////////////////////////////////
-	$(document).ready(function(){
-		// LLAMAR A LA TABLA PERSONAL.
-		    codigo_personal = $("#CodigoPersonal").val();
-            codigo_departamento_empresa = $("#CodigoDepartamentoEmpresa").val();
-        //
-            $('#listadoEmpleadosNomina').append("<tr><td>Buscando Registros... Por Favor Espere.</td></tr>"); 
-        //
-            buscar_personal(codigo_personal);
-            CodigoRuta = $("#CodigoRuta").val();
-        // Rellenar Hora Extra.
-            HoraExtra();
-	});		
-// cuando la fecha cambie.
+// ESTADO DE LA INTERFAZ (Tu "Memoria RAM" visual)
+var estadoUI = {
+    tipo: 'laborado', // laborado, asueto, vacacion, descanso, permiso, falta
+    duracion: '1T',   // 1T, 4H, 1.5T
+    nocturnidad: false,
+    tandaExtra: false, 
+    horasExtras: 0
+};
+
+// =========================================================================
+// INICIO (DOCUMENT READY)
+// =========================================================================
+$(function(){ 
+    
+    // Configuración inicial de fechas
+    var now = new Date();                
+    var day = ("0" + now.getDate()).slice(-2);
+    var month = ("0" + (now.getMonth() + 1)).slice(-2);
+    fecha = now.getFullYear()+"-"+(month)+"-"+(day);
+    $('#FechaListadoEmpleados').val(fecha);
+
+    // Cargar tabla al iniciar
+    $(document).ready(function(){
+        codigo_personal = $("#CodigoPersonal").val();
+        codigo_departamento_empresa = $("#CodigoDepartamentoEmpresa").val();
+        
+        $('#listadoEmpleadosNomina').append("<tr><td>Buscando Registros... Por Favor Espere.</td></tr>"); 
+        
+        buscar_personal(codigo_personal);
+        CodigoRuta = $("#CodigoRuta").val();
+    });     
+
+    // Cambio de fecha
     $("#FechaListadoEmpleados").change(function(){
         fecha = $('#FechaListadoEmpleados').val();
-        $('#listadoEmpleadosNomina').empty();
-        $('#listadoEmpleadosNomina').append("<tr><td>Buscando Registros... Por Favor Espere.</td></tr>"); 
-            buscar_personal(codigo_personal);
+        $('#listadoEmpleadosNomina').empty().append("<tr><td>Buscando Registros...</td></tr>"); 
+        buscar_personal(codigo_personal);
     });
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // BLOQUE PARA ADMINISTRAR LAS ASIGNATURAS.
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // BLOQUE EXTRAER INFORMACIÓN DEL REGISTROS ()
-        //
-		$('body').on('click','#listadoEmpleadosNomina a',function (e){
-			e.preventDefault();
-			// Id Usuario
-                Id_Editar_Eliminar = $(this).attr('href');
-                accion_ok = $(this).attr('data-accion');
-                    // EDITAR LA ASIGNATURA
-                    if($(this).attr('data-accion') == 'editarAsistencia'){
-                        // Valor de la acción
-                            accion = 'EditarJornada';
-                            //
-                            $('#VentanaPunteo').modal("show");
-                            Datos = $(this).find("td:eq(2)").text();
-                            // Llamar al archivo php para hacer la consulta y presentar los datos.
-                            $.post("php_libs/soporte/Asistencia/PorNomina.php",  { Id_: Id_Editar_Eliminar, accion: accion},
-                                function(data) {
-                                // Llenar el formulario con los datos del registro seleccionado tabs-1
-                                // Datos Generales
-                                    $("label[for=CodigoNombreEmpleado]").text(data[0].CodigoPersonal + "-" + data[0].NombreCompleto);
-                                    $("#FotoEmpleado").attr("src",data[0].Foto);
-                                    $("#ImagenJornada").attr("src",data[0].ImgJornada);
-                                    //
-                                    $('#Id_').val(data[0].Id_);
-                                    $("#CJTodos").val(data[0].CodigoJornadaTodas);
-                                    $("#CJTodosSeparador").val(data[0].CodigoJornadaTodasSeparador);
-                                    var todosSeparador = data[0].CodigoJornadaTodasSeparador;
-                                    let CJTodosSeparador = todosSeparador.split(".");
-                                        $('#CJ').val(CJTodosSeparador[0]);  // CODIGO JORNADA
-                                        $('#CTL').val(CJTodosSeparador[1]); // CODIGO TIPO LICENCIA
-                                        $('#CJA').val(CJTodosSeparador[2]); // CODIGO JORNADA ASUETO
-                                        $('#CJV').val(CJTodosSeparador[3]); //  CODIGO JORNADA VACACION
-                                        $('#CJD').val(CJTodosSeparador[4]); // CODIGO JORNADA DESCANSO
-                                        $('#CJE4H').val(CJTodosSeparador[5]);   //  CODIGO JORNADA EXTRA 4 HORAS
-                                        $('#CJN').val(CJTodosSeparador[6]); //  CODIGO JORNADA NOCTURNA+
 
-                                        let valor = CJTodosSeparador[7];
-                                        console.log("valor: "  + valor);
-                                        if (valor === undefined || valor === null) {
-                                            valor = 0;
-                                        }     
-                                        $("#lstHoraExtra").val(valor);                                   
-                                            // Ejemplo de uso: seleccionar la opción con value=2
-                                            //seleccionarHoraExtra(valor);
-                                    //  ACTIVAR O DESACTIVAR ELEMENTOS.
-                                        // presar CHECK BOX NOCTURNIDAD. MANTENIMIENTO Y VIGILANCIA
-                                        if(codigo_departamento_empresa == "08" || codigo_departamento_empresa == "09"){
-                                            $("#NocturnidadSiNo").show();
-                                            //
-                                            $("#chkNocturnidad").prop("checked", false);
-                                        }else{
-                                            $("#NocturnidadSiNo").hide();
-                                        }
-                                    // ocultar o mostrar depende de la Licencia de Asueto.
-                                        if($("#CTL").val() == "16" || $("#CTL").val() == "15"){
-                                            $("#BotonJornada").prop("disabled", true);
-                                            $('#JornadaExtra').hide();
-                                            $('#JornadaExtra4Horas').hide();
-                                            $("#DivPermisos").show();
-                                            // listar tipo de licencia.
-                                                listar_tipo_licencia($("#CTL").val());
-                                                $("#JornadaAsueto").show();
-                                                listar_jornada_asueto($("#CJA").val());
-                                        }else{
-                                            $("#BotonJornada").prop("disabled", false);
-                                            $('#JornadaExtra').hide();
-                                            $('#JornadaExtra4Horas').hide();
-                                            $("#DivPermisos").hide();
-                                            $("#JornadaAsueto").hide();
-                                            // div de la Hora Extra.
-                                            $("#HoraExtra").hide();
-                                        }
-                                    // reestablecer el accion a=ActualizarJOrnada
-                                        accion = "ActualizarJornada";
-                                },"json");
-                    }
-                    // ELIMINAR REGISTRO ASIGNATURA.
-                    if($(this).attr('data-accion') == 'eliminar_asignatura'){
-                        //	ENVIAR MENSAJE CON SWEETALERT 2, PARA CONFIRMAR SI ELIMINA EL REGISTRO.
-                        const swalWithBootstrapButtons = Swal.mixin({
-                            customClass: {
-                            confirmButton: 'btn btn-success',
-                            cancelButton: 'btn btn-danger'
-                            },
-                            buttonsStyling: false
-                        })
-                        //
-                        swalWithBootstrapButtons.fire({
-                            title: '¿Qué desea hacer?',
-                            text: 'Eliminar el Registro Seleccionado!',
-                            showCancelButton: true,
-                            confirmButtonText: 'Sí, Eliminar!',
-                            cancelButtonText: 'No, Cancelar!',
-                            reverseButtons: true,
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                            allowEnterKey: false,
-                            stopKeydownPropagation: false,
-                            closeButtonAriaLabel: 'Cerrar Alerta',
-                            type: 'question'
-                        }).then((result) => {
-                            if (result.value) {
-                            // PROCESO PARA ELIMINAR REGISTRO.
-                                    // ejecutar Ajax.. 
-                                    $.ajax({
-                                    cache: false,                     
-                                    type: "POST",                     
-                                    dataType: "json",                     
-                                    url:"php_libs/soporte/Mantenimiento/Servicio Educativo/phpAjaxServicioEducativo.php",                     
-                                    data: {                     
-                                            accion_buscar: 'eliminar_asignatura', codigo_id_: Id_Editar_Eliminar,
-                                            },                     
-                                    success: function(response) {                     
-                                            if (response.respuesta === true) {                     		
-                                                // Asignamos valor a la variable acción
-                                                    $('#accion_asignatura').val('BuscarAsignatura');
-                                                    var codigo_se = $("#lstcodigose").val();
-                                                    accion = 'BuscarAsignatura';
-                                                    //
-                                                    //  CONDICONAR EL SELECT SERVICIO EDUCATIVO.
-                                                    //
-                                                    if(codigo_se == "00"){
-                                                        $("#AlertSE").css("display", "block");
-                                                        return;
-                                                    }
-                                                    // Llamar al archivo php para hacer la consulta y presentar los datos.
-                                                    $.post("php_libs/soporte/Mantenimiento/Servicio Educativo/phpAjaxServicioEducativo.php",  {accion: accion, codigo_se: codigo_se},
-                                                        function(response) {
-                                                        if (response.respuesta === true) {
-                                                            toastr["info"]('Registros Encontrados', "Sistema");
-                                                        }
-                                                        if (response.respuesta === false) {
-                                                            toastr["warning"]('Registros No Encontrados', "Sistema");
-                                                        }                                                                                    // si es exitosa la operación
-                                                            $('#listaContenidoSE').empty();
-                                                            $('#listaContenidoSE').append(response.contenido);
-                                                        },"json");
-                                            }
-                                            if (response.respuesta === false) {                     		
-                                                toastr["info"]('Registro no Eliminado... El còdigo está está activo en la Tabla Notas.', "Sistema");
-                                            }
-                                    }                     
-                                    });
-                            //////////////////////////////////////
-                            } else if (
-                            /* Read more about handling dismissals below */
-                            result.dismiss === Swal.DismissReason.cancel
-                            ) {
-                            swalWithBootstrapButtons.fire(
-                                'Cancelar',
-                                'Su Registro no ha sido Eliminado :)',
-                                'error'
-                            )
-                            }
-                        })
-                    }
-        });
-///////////////////////////////////////////////////////////////////////////////	  
-// VALIDAR NOCTURNIDAD
-///////////////////////////////////////////////////////////////////////////////	          
-    $("#chkNocturnidad").on('click',function () {
-        if ($("#chkNocturnidad").is(':checked')) {
-            //
-            $("#CJN").val("5");
-        }else{
-            $("#CJN").val("4");
-        }
-    });
-///////////////////////////////////////////////////////////////////////////////	  
-// VALIDAR NOCTURNIDAD ASUETO
-///////////////////////////////////////////////////////////////////////////////	          
-$("#chkNocturnidadAsueto").on('click',function () {
-    if ($("#chkNocturnidadAsueto").is(':checked')) {
-        //
-        $("#CJN").val("5");
-    }else{
-        $("#CJN").val("4");
-    }
-});
-
-// VALIDAR NOCTURNIDAD TRABAJO EN VACACIONES	
-///////////////////////////////////////////////////////////////////////////////	          
-$("#chkNocturnidadTV").on('click',function () {
-    if ($("#chkNocturnidadTV").is(':checked')) {
-        //
-        $("#CJN").val("5");
-    }else{
-        $("#CJN").val("4");
-    }
-});
-///////////////////////////////////////////////////////////////////////////////	  
-// SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL MOTORISTA.
-///////////////////////////////////////////////////////////////////////////////	  
-$("#BotonJornada, #BotonLicencia, #BotonCerrar").on('click',function () {
-	if (this.value == "Jornada") {
-		$('#DivJornada').show();
-		$('#DivPermisos').hide();
-		//
-		$("#JornadaTV").hide();
-		$("#JornadaDescanso").hide();
-        // Valor por defecto.
-        $('#CJ').val(2);  // CODIGO JORNADA
-        $('#CTL').val(1);  // CODIGO JORNADA
-        // cargar los datos relacionados con el catalogo jornada.
-            listar_jornada();
-		// lista de códigos que NO deben mostrar HoraExtra
-        var codigosNo = ["01","04","05","06","07","09","08"];
-		// traer el valor actual del CodigoDepartamentoEmpresa.
-		var codigoDepartamentoEmpresa = $("#CodigoDepartamentoEmpresa").val();
-
-        if (!codigosNo.includes(codigoDepartamentoEmpresa)) {
-            $("#HoraExtra").show();
-            HoraExtra();
-
-            if (valor != 0) {
-                $("#lstHoraExtra").val(valor);
-                alert("Valor: " + valor);
-            }
-        } else {
-            $("#HoraExtra").hide();
-        }
-
-	}
-	else if (this.value == "Licencia") {
-        //
-		$('#DivPermisos').show();
-		$('#DivJornada').hide();
-		//
-		$("#JornadaTV").hide();
-		$("#JornadaDescanso").hide();
-        // div de la Hora Extra.
-        $("#HoraExtra").hide();
-		// Listar tipo licencia.
-			listar_tipo_licencia();
-        // Valor por defecto.
-            $('#CJ').val(4);  // CODIGO JORNADA
-            $('#CTL').val(2);  // CODIGO JORNADA
-	}else if (this.value == "Cerrar") {
-        $('#DivPermisos').hide();
-		$('#DivJornada').hide();
-		//
-		$("#JornadaTV").hide();
-		$("#JornadaDescanso").hide();
-                // div de la Hora Extra.
-                $("#HoraExtra").hide();
-        // Activar y bloquear Permiso y seleccionar un item.
-        $("#JornadaExtraSi").prop("checked", false);
-        $("#JornadaExtraNo").prop("checked", true);
-        $("#chkNocturnidad").prop("checked", false);
-    }
-});
-///////////////////////////////////////////////////////////////////////////////	  
-// SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL JORNAA 4 HORAS.
-///////////////////////////////////////////////////////////////////////////////	  
-$("#JornadaExtraSi, #JornadaExtraNo").change(function () {
-	if ($("#JornadaExtraSi").is(":checked")) {
-        //  MOSTRAR RADIO BUTTONS.
-            $('#JornadaExtra4Horas').show();
-            $('#CJE4H').val(2);  // CODIGO JORNADA MEDIA TANDA.
-        //  OCULTAR RADIO BUTTON 
-            $('#Jornada4HLicenciaPermiso').hide();
-        //  LISTAR CATALOGO.
-    		    listar_jornada_cuatro_horas(2);
-                                    // div de la Hora Extra.
-                                    $("#HoraExtra").show();
-                                    // ubicarme en el valor 0
-                $("#lstHoraExtra").val(4);
-	}
-	else if ($("#JornadaExtraNo").is(":checked")) {
-        //  VALORES POR DEFECTO DE LA 
-            $('#CJE4H').val(4);  // CODIGO JORNADA MEDIA 
-        //  OCULTAR RADIO BUTTONS.
-    		$('#JornadaExtra4Horas').hide();
-        //  OCULTAR RADIO BUTTON 
-            $('#Jornada4HLicenciaPermiso').show();
-                                // div de la Hora Extra.
-                                $("#HoraExtra").hide();
-                                // ubicarme en el valor 0
-            $("#lstHoraExtra").val(0);
-	}
-});
-///////////////////////////////////////////////////////////////////////////////	  
-// SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL JORNAA 4 HORAS.
-///////////////////////////////////////////////////////////////////////////////	  
-$("#Jornada4HLicenciaPermisoSI, #Jornada4HLicenciaPermisoNO").change(function () {
-	if ($("#Jornada4HLicenciaPermisoSI").is(":checked")) {
-        //  MOSTRAR RADIO BUTTONS.
-            $('#DivJornada4HLicenciaPermiso').show();
-            $('#CJE4H').val(4);  // CODIGO JORNADA 4H
-            $('#CTL').val(2);  // CODIGO TIPO LICENCIA
-        //  OCULTAR RADIO BUTTONS.
-    		$('#JornadaExtra4Horas').hide();
-        //
-            $('#JornadaExtra').hide();
-        //
-    		    listar_tipo_licencia_4HLicenciaPermiso(2);
-	}
-	else if ($("#Jornada4HLicenciaPermisoNO").is(":checked")) {
-        //  VALORES POR DEFECTO DE LA 
-            $('#CJE4H').val(4);  // CODIGO JORNADA 4H
-            $('#CTL').val(1);  // CODIGO TIPO LICENCIA
-        //  OCULTAR RADIO BUTTONS. 4H LICENCIAS PERMISO
-		    $('#DivJornada4HLicenciaPermiso').hide();
-            $('#Jornada4HLicenciaPermiso').show();
-        // MOSTRAR 
-            $('#JornadaExtra4Horas').hide();
-            $('#JornadaExtra').show();
-	}
-});
-///////////////////////////////////////////////////////////////////////////////	  
-// SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL MOTORISTA.
-///////////////////////////////////////////////////////////////////////////////	  
-// BUSCA PARA COLOCAR VISIBLE EL EXTRA DE 4 HORAS
-$("#lstJornada").change(function () {
-	var miselect=$("#lstJornada");
-	$("#lstJornada option:selected").each(function () {
-			// ELEJIR EL VALOR DEL SELECT
-			    ValorJornada=$(this).val();
-                //alert(ValorJornada);
-            // cabmiar el valor del text o hidden.
-                $('#CJ').val(ValorJornada);  // CODIGO JORNADA
-			// SE HA SELECCIONADO TRABAJÓ EN VACACIÓN
-			if(ValorJornada == '1'){
-				// VOLVER A COLOCAR EN VALOR "si"
-                    $("#CTL").val(1)    // CODIGO JORANDA TIPO LICENCIA.
-                    $('#CJE4H').val(4);  // CODIGO JORNADA MEDIA TANDA.
-	    			$("#JornadaExtra").show();
-                    $("#Jornada4HLicenciaPermiso").show();
-                    // div de la Hora Extra.
-                        $("#HoraExtra").hide();
-                                        // ubicarme en el valor 0
-                    $("#lstHoraExtra").val(0);
-    				//listar_jornada_cuatro_horas(4);
-			}else if(ValorJornada == "2")
-            {
-                    // div de la Hora Extra.
-                    $("#HoraExtra").show();   
-                                    // ubicarme en el valor 0
-                                    $("#lstHoraExtra").val(0);             
-            }
-            else if(ValorJornada == "4")
-            {
-                // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
-                $("#CJ").val(4);    // VALOR PREDETERMINADO.
-                $("#CTL").val(1)    // CODIGO JORANDA TIPO LICENCIA.
-                $("#CJV").val(4);    // valor actual de lstJornadaTV
-                $("#CJD").val(4);    // valor actual de lstJornadaDescanso
-                $("#CJA").val(4);    // valor actual de lstJornadaAsueto
-                $('#CJE4H').val(4);  // CODIGO JORNADA 4 HORAS EXTRAS
-                $("#CJN").val(4);   // CODIGO JORNADA NOCTURNIDAD
-                    // div de la Hora Extra.
-                    $("#HoraExtra").hide();
-                                    // ubicarme en el valor 0
-                                    $("#lstHoraExtra").val(0);
-            }else{
-                //  VALORES POR DEFECTO DE LA 
-                    $('#CJE4H').val(4);  // CODIGO JORNADA MEDIA TANDA.
-                //
-				    $("#JornadaExtra").hide();
-				    $("#JornadaExtra4Horas").hide();
-                    $("#Jornada4HLicenciaPermiso").hide();
-                    $("#DivJornada4HLicenciaPermiso").hide();
-                    // div de la Hora Extra.
-                    $("#HoraExtra").hide();
-				// Activar y bloquear Permiso y seleccionar un item.
-    				$("#JornadaExtraSi").prop("checked", false);
-	    			$("#JornadaExtraNo").prop("checked", true);
-                // Activar y bloquear Permiso y seleccionar un item.
-    				$("#Jornada4HLicenciaPermisoSI").prop("checked", false);
-	    			$("#Jornada4HLicenciaPermisoNO").prop("checked", true);
-                // ubicarme en el valor 0
-                    $("#lstHoraExtra").val(0);
-			}
-		});
-});
-// CUANDO SE ENCUENTRA EL CAMBIO DEL DEPARTAMENTO EN LA EMPRESA
-$("#lstTipoLicencia").change(function () {
-	var miselect=$("#lstTipoLicencia");
-    $("#CJ").val(4);    // VALOR PREDETERMINADO.
-    $("#CTL").val(2);    // VALOR PREDETERMINADO.
-    $("#CJA").val(4);    // VALOR PREDETERMINADO.
-                // ubicarme en el valor 0
-                $("#lstHoraExtra").val(0);
+    // =========================================================================
+    // EVENTOS DEL MODAL (NUEVA LÓGICA TÁCTIL)
+    // =========================================================================
     
-	$("#lstTipoLicencia option:selected").each(function () {
-			// ELEJIR EL VALOR DEL SELECT
-			TipoLicencia = $(this).val();
-			// SE HA SELECCIONADO TRABAJÓ EN VACACIÓN
-			if(TipoLicencia == '12'){
-				//
-				$("#JornadaTV").show();
-				$("#JornadaDescanso").hide();
-                $("#JornadaAsueto").hide();
-				    listar_jornada_vacacion(2); // UNA TANDA.
-                // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
-                    $("#CJ").val(4);    // VALOR PREDETERMINADO.
-                    $("#CTL").val(TipoLicencia)
-                    $("#CJV").val(2);    // valor actual de lstJornadaTV
-			}else if(TipoLicencia == '13'){
-				//
-				$("#JornadaTV").hide();
-				$("#JornadaDescanso").hide();
-                $("#JornadaAsueto").hide();
-                // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
-                    $("#CJ").val(4);    // VALOR PREDETERMINADO.
-                    $("#CTL").val(TipoLicencia)
-                    $("#CJV").val(4);    // valor actual de lstJornadaTV
-            }else if(TipoLicencia == '14'){	// SE HA SELECCIONADO TRABAJO EN DESCANSO
-                //
-				$("#JornadaTV").hide();
-				$("#JornadaDescanso").show();
-                $("#JornadaAsueto").hide();
-				    listar_jornada_descanso(2); // Una tanda
-                        // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
-                        $("#CJ").val(4);    // VALOR PREDETERMINADO.
-                        $("#CTL").val(TipoLicencia)
-                        $("#CJD").val(2);    // valor actual de lstJornadaDescanso
-            }else if(TipoLicencia == '15'){	// SE HA SELECCIONADO TRABAJO EN DESCANSO ASUETO
-                //
-                $("#JornadaTV").hide();
-                $("#JornadaDescanso").hide();
-                $("#JornadaAsueto").show();
-                    listar_jornada_asueto(4); // Una tanda
-                        // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
-                        $("#CJ").val(4);    // VALOR PREDETERMINADO.
-                        $("#CTL").val(TipoLicencia)
-                        $("#CJD").val(4);    // valor actual de lstJornadaDescanso
-                        $("#CJV").val(4);    // valor actual de lstJornadaDescanso
-                        $("#CJA").val(4);    // valor actual de lstJornadaAsueto
-                        $("#CJE4H").val(4);    // valor actual de lstJornadaAsueto
-                        $("#CJN").val(4);    // valor actual de lstJornadaAsueto
-			}else if(TipoLicencia == '19'){	// SE HA SELECCIONADO TRABAJO EN ASUETO
+    // 1. ABRIR MODAL Y CARGAR DATOS (EditarJornada)
+    $('body').on('click','#listadoEmpleadosNomina a',function (e){
+        e.preventDefault();
+        
+        if($(this).attr('data-accion') == 'editarAsistencia'){
+            accion = 'EditarJornada';
+            Id_Editar_Eliminar = $(this).attr('href'); // Viene en formato codificado
+            $('#VentanaPunteo').modal("show");
+            
+            // Llamada AJAX para traer los datos guardados
+            $.post("php_libs/soporte/Asistencia/PorNomina.php", { Id_: Id_Editar_Eliminar, accion: accion},
+                function(data) {
+                    // A. Llenar Datos Visuales Básicos
+                    $("label[for=CodigoNombreEmpleado]").text(data[0].CodigoPersonal + " - " + data[0].NombreCompleto);
+                    $("#FotoEmpleado").attr("src", data[0].Foto);
+                    $("#ImagenJornada").attr("src", data[0].ImgJornada);
+                    $('#Id_').val(data[0].Id_);
 
-                // presar CHECK BOX NOCTURNIDAD. MANTENIMIENTO Y VIGILANCIA
-                if(codigo_departamento_empresa == "08" || codigo_departamento_empresa == "09"){
-                    $("#NocturnidadSiNoAsueto").show();
-                    //
-                    $("#chkNocturnidadAsueto").prop("checked", false);
+                    // B. Botón Borrar/Reiniciar
+                    if (data[0].Id_ > 0) {
+                        $("#btnEliminarPunteo").show().attr("data-id", data[0].Id_);
+                    } else {
+                        $("#btnEliminarPunteo").hide();
+                    }
+
+                    // C. "HIDRATAR" EL ESTADO UI DESDE LA BD
+                    // Aquí leemos los códigos extraños y encendemos los botones correctos
+                    let sep = data[0].CodigoJornadaTodasSeparador.split(".");
+                    // Índices: 0=CJ, 1=CTL, 2=CJA, 3=CJV, 4=CJD, 5=CJE4H, 6=CJN, 7=HE
                     
-				    listar_jornada_asueto(4); // cero horas.
-                        // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
-                        $("#CJ").val(4);    // VALOR PREDETERMINADO.
-                        $("#CTL").val(TipoLicencia)
-                        $("#CJA").val(4);    // valor actual de lstJornadaAsueto
-                }else{
-                    $("#NocturnidadSiNoAsueto").hide();
-                    $("#chkNocturnidadAsueto").prop("checked", false);
+                    mapearEstadoDesdeBD(sep);
                     
-				    listar_jornada_asueto(2); // Una tanda
-                        // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
-                        $("#CJ").val(4);    // VALOR PREDETERMINADO.
-                        $("#CTL").val(TipoLicencia)
-                        $("#CJA").val(2);    // valor actual de lstJornadaAsueto
+                    // D. NUEVO: APLICAR PERMISOS DE DEPARTAMENTO
+                        aplicarPermisosDepartamento(); // <--- AGREGAR AQUÍ
+
+                    calcularYActualizar();
+
+                },"json");
+        }
+    });
+
+    // 2. BOTÓN GUARDAR
+    $("#goGuardarPunteo").on('click', function(){
+        $("#formPunteo").submit();
+    });
+
+    // 3. BOTÓN REINICIAR / ELIMINAR (NUEVO)
+    $("#btnEliminarPunteo").on("click", function() {
+        let idAsistencia = $(this).attr("data-id");
+        
+        Swal.fire({
+            title: '¿Reiniciar Asistencia?',
+            text: "Se borrará todo lo ingresado hoy para este empleado.",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, borrar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.value) {
+                $.post("php_libs/soporte/Asistencia/PorNomina.php", {
+                    accion: 'EliminarAsistencia',
+                    id_asistencia: idAsistencia
+                }, function(response) {
+                    if(response.respuesta) {
+                        toastr.success("Registro reiniciado.");
+                        $('#VentanaPunteo').modal("hide");
+                        buscar_personal($("#CodigoPersonal").val()); // Recargar tabla
+                    } else {
+                        toastr.error(response.mensaje);
+                    }
+                }, "json");
+            }
+        })
+    });
+
+    // 4. VALIDACIÓN Y ENVÍO DEL FORMULARIO
+    $('#formPunteo').validate({
+        submitHandler: function(){  
+            var str = $('#formPunteo').serialize();
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url:"php_libs/soporte/Asistencia/PorNomina.php",
+                data: str + "&id=" + Math.random(),
+                success: function(response){
+                    if(response.respuesta){
+                        toastr["success"](response.mensaje, "Guardado");
+                        $('#VentanaPunteo').modal("hide");
+                        buscar_personal($("#CodigoPersonal").val());
+                    } else {
+                        toastr["error"](response.mensaje, "Error");
+                    }      
                 }
-				//
-				$("#JornadaTV").hide();
-				$("#JornadaDescanso").hide();
-                $("#JornadaAsueto").show();
-                //
-            }else if(TipoLicencia == "16"){ // cuado es solo el asueto y ha trabajado.
-                //
-                $("#JornadaTV").hide();
-                $("#JornadaDescanso").hide();
-                $("#JornadaAsueto").show();
-                // licencias o permisos TIEMPO EXTRA Y VALOR PREDETERMINADO.
-                $("#CJ").val(4);    // VALOR PREDETERMINADO.
-                $("#CTL").val(TipoLicencia)
-                listar_jornada_asueto(4); // Una tanda
-                $("#CJA").val(4);    // valor actual de lstJornadaAsueto
-                $("#CJD").val(4);    // valor actual de lstJornadaDescanso
-                $("#CJV").val(4);    // valor actual de lstJornadaTV
-            }else{
-				// OCULTAR
-				$("#JornadaDescanso").hide();
-				$("#JornadaTV").hide();
-                $("#JornadaAsueto").hide();
-                // Ocultar check Nocturnidad
-                    $("#NocturnidadSiNoAsuetoNormal").hide();
-                    $("#chkNocturnidadNormal").prop("checked", false);
+            });
+        }
+    });
 
-                    $("#chkNocturnidad").prop("checked", false);
-                    $("#NocturnidadSiNoAsueto").hide();
-                // licencias o permisos sin tiempo extra.
-                $("#CTL").val(TipoLicencia);
-			}
-		});
-});
-// BUSCA PARA COLOCAR VISIBLE EL EXTRA DE 4 HORAS
-$("#lstJornadaExtraCuatroHoras").change(function () {
-	var miselect=$("#lstJornadaExtraCuatroHoras");
-	$("#lstJornadaExtraCuatroHoras option:selected").each(function () {
-			// ELEJIR EL VALOR DEL SELECT
-			    ValorJornada=$(this).val();
-            // cabmiar el valor del text o hidden.
-                $('#CJE4H').val(ValorJornada);  // CODIGO JORNADA
-		});
-});
-// BUSCA PARA COLOCAR VISIBLE 4H licencias y permisos.
-$("#lstJornada4HLicenciaPermiso").change(function () {
-	var miselect=$("#lstJornada4HLicenciaPermiso");
-	$("#lstJornada4HLicenciaPermiso option:selected").each(function () {
-			// ELEJIR EL VALOR DEL SELECT
-			    ValorJornada=$(this).val();
-            // cabmiar el valor del text o hidden.
-                $('#CTL').val(ValorJornada);  // CODIGO JORNADA
-		});
-});
-// BUSCA PARA COLOCAR VISIBLE EL EXTRA EN TRABAJO EN VACACIÓN.
-$("#lstJornadaTV").change(function () {
-	$("#lstJornadaTV option:selected").each(function () {
-		// ELEJIR EL VALOR DEL SELECT
-			CodigoJornada = $(this).val();
-		// SE HA SELECCIONADO TRABAJÓ EN VACACIÓN
-			$("#CJV").val(CodigoJornada);
-	});
-});
-// BUSCA PARA COLOCAR VISIBLE EL EXTRA EN TRABAJO EN DESCANSO.
-$("#lstJornadaDescanso").change(function () {
-	$("#lstJornadaDescanso option:selected").each(function () {
-		// ELEJIR EL VALOR DEL SELECT
-			CodigoJornada = $(this).val();
-		// SE HA SELECCIONADO TRABAJÓ EN VACACIÓN
-			$("#CJD").val(CodigoJornada);
-	});
-});
-// BUSCA PARA COLOCAR VISIBLE EL EXTRA EN TRABAJO EN DESCANSO.
-$("#lstJornadaAsueto").change(function () {
-	$("#lstJornadaAsueto option:selected").each(function () {
-		// ELEJIR EL VALOR DEL SELECT
-			CodigoJornada = $(this).val();
-		// SE HA SELECCIONADO TRABAJÓ EN VACACIÓN
-			$("#CJA").val(CodigoJornada);
-	});
-});
-///////////////////////////////////////////////////////////////////////////////
-/// EVENTOS JQUERY Y para disparar la busqueda. del por nombre motorista.
-///////////////////////////////////////////////////////////////////////////////
-$("#goGuardarPunteo").on('click', function(){
-	$("#formPunteo").submit();
-});
-///////////////////////////////////////////////////////
-// Validar Formulario, para la ACTUALIZAR DE PERSONAL ASISTENCIA.
- //////////////////////////////////////////////////////
- $('#formPunteo').validate({
-	ignore:"",
-	rules:{
-			//CodigoPersonal: {required: true},
-			//NombrePersonal: {required: true},
-			},
-			errorElement: "em",
-			errorPlacement: function ( error, element ) {
-				// Add the `invalid-feedback` class to the error element
-				error.addClass( "invalid-feedback" );
-				if ( element.prop( "type" ) === "checkbox" ) {
-					error.insertAfter( element.next( "label" ) );
-				} else {
-					error.insertAfter( element );
-				}
-			},
-				highlight: function ( element, errorClass, validClass ) {
-							$( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
-						},
-				unhighlight: function (element, errorClass, validClass) {
-							$( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
-						},
-				invalidHandler: function() {
-					setTimeout(function() {
-						toastr.error("Faltan Datos...");
-				});            
-			},
-		submitHandler: function(){	
-		var str = $('#formPunteo, #formAsistenciaPorNomina').serialize();
-//		alert(str);
-		///////////////////////////////////////////////////////////////			
-		// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
-		///////////////////////////////////////////////////////////////
-			$.ajax({
-				beforeSend: function(){
+}); // Fin Function
 
-				},
-				cache: false,
-				type: "POST",
-				dataType: "json",
-				url:"php_libs/soporte/Asistencia/PorNomina.php",
-				data: str + "&id=" + Math.random(),
-				success: function(response){
-					// Validar mensaje de error
-					if(response.respuesta == false){
-						toastr["error"](response.mensaje, "Sistema");
-					}
-					else{
-						toastr["info"](response.mensaje, "Sistema");
-						// LIMPIAR VARIABLES.ab-b-l
-                            $('#DivPermisos').hide();
-                            $('#DivJornada').hide();
-                            $("#JornadaTV").hide();
-                            $("#JornadaDescanso").hide();
-						//
-                            $("#JornadaExtra").hide();
-                            $("#JornadaExtra4Horas").hide();
-                            $("#JornadaAsueto").hide();
-                            $("#DivJornada4HLicenciaPermiso").hide();
-						// Activar y bloquear Permiso y seleccionar un item.
-                            $("#JornadaExtraSi").prop("checked", false);
-                            $("#JornadaExtraNo").prop("checked", true);
-                            $("#chkNocturnidad").prop("checked", false);
-                        // Activar y bloquear Permiso y seleccionar un item.
-                            $("#Jornada4HLicenciaPermisoSI").prop("checked", false);
-                            $("#Jornada4HLicenciaPermisoNO").prop("checked", true);
-						// focus
-    					    $("#CodigoPersonal").focus();
-                        //
-                        // LLAMAR A LA TABLA PERSONAL.
-                            codigo_personal = $("#CodigoPersonal").val();
-                        // Abrir ventana modal.
-                            $('#VentanaPunteo').modal("hide");
-                        //
-                            $('#listadoEmpleadosNomina').append("<tr><td>Buscando Registros... Por Favor Espere.</td></tr>"); 
-                        //
-                        // presar CHECK BOX NOCTURNIDAD. MANTENIMIENTO Y VIGILANCIA
-                            if(codigo_departamento_empresa == "08" || codigo_departamento_empresa == "09"){
-                                $("#NocturnidadSiNo").show();
-                                //
-                                $("#chkNocturnidad").prop("checked", false);
-                                $("#chkNocturnidadTV").prop("checked", false);
-                            }else{
-                                $("#NocturnidadSiNo").hide();
-                            }
-                        // ocultar
-                            $('#JornadaExtra').hide();
-                            $('#JornadaExtra4Horas').hide();
-                            $('#Jornada4HLicenciaPermiso').hide();
-                            $("#DivJornada4HLicenciaPermiso").hide();
-                        ///
-                            buscar_personal(codigo_personal);
-					}      
-				},
-			});
-		},
-});
+// =========================================================================
+// LÓGICA DE NEGOCIO (EL CEREBRO DE LA ASISTENCIA)
+// =========================================================================
 
-});		
-
-////////////////////////////////////////////////////////////
-// FUNCION LISTAR TABLA perosnal solo motoristas
-////////////////////////////////////////////////////////////
-// FUNCION LISTAR TABLA catalogo_jornada
-////////////////////////////////////////////////////////////
-function listar_jornada(codigo_jornada){
-    var miselect=$("#lstJornada");
-    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
-    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+// --- 1. INTERACCIÓN UI (Clics en botones) ---
+// --- 1. FUNCIÓN AL HACER CLIC EN LOS BOTONES PRINCIPALES ---
+function seleccionarTipo(tipo) {
+    estadoUI.tipo = tipo;
     
-    $.post("php_libs/soporte/Asistencia/PorNomina.php", {accion_buscar: 'BuscarJornada'},
-        function(data) {
-            miselect.empty();
-            for (var i=0; i<data.length; i++) {
-				// VALIDAR CODIGO JORNADA IGUAL A 0H
-				if(data[i].codigo == '5'){
+    // UI: Marcar tarjeta activa visualmente
+    $(".opcion-card").removeClass("active bg-primary text-white border-primary shadow");
+    $(`[data-tipo='${tipo}']`).addClass("active bg-primary text-white border-primary shadow");
+    
+    // UI: Mostrar/Ocultar paneles
+    // Para Motoristas (02), ocultamos la configuración al inicio si no es Laborado,
+    // pero la mostramos si el usuario quiere agregar detalles (ej: Trabajo en Asueto).
+    if(tipo === 'falta' || tipo === 'permiso') {
+        $("#panel-configuracion").slideUp();
+    } else {
+        $("#panel-configuracion").slideDown();
+    }
 
-				}else{
-					if(codigo_jornada == data[i].codigo){
-						miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].descripcion_completa +'</option>');
-              		  }else{
-						if(i==1){
-							miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
-                            // cabmiar el valor del text o hidden.
-                                $('#CJ').val(data[i].codigo);  // CODIGO JORNADA
-						}else{
-							miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " +  data[i].descripcion_completa + '</option>');
-						}
-					}
-				}
-            }
-    }, "json");    
+    // --- REINICIO DE ESTADO (CRUCIAL PARA TU SOLICITUD) ---
+    // Si cambio de botón, limpio la duración para mostrar la imagen "Default" primero.
+    if(tipo === 'laborado') {
+        // Si es trabajo, por defecto marcamos 1 Tanda
+        if(estadoUI.duracion === '' || estadoUI.duracion === null) setDuracion('1T');
+    } else {
+        // Para Asueto, Descanso, Vacación: LIMPIAMOS duración para ver la imagen base
+        estadoUI.duracion = ''; 
+        // Limpiamos visualmente los botones de duración
+        $("[data-dur]").removeClass("active btn-secondary").addClass("btn-outline-secondary");
+    }
+
+    // Resetear extras
+    estadoUI.tandaExtra = false;
+    $("#btn-tanda-extra").hide();
+    
+    // Calcular inmediatamente para mostrar la imagen base
+    calcularYActualizar();
 }
+
+// --- 2. EL MOTOR DE CÓDIGOS (AJUSTADO A TUS CÓDIGOS) ---
+function calcularYActualizar() {
+    // Valores Neutros (Base: 4.1.4.4.4.4.4)
+    let CJ='4', CTL='1', CJA='4', CJV='4', CJD='4', CJE4H='4', CJN='4';
+    let urlImagen = "../acomtus/img/Catalogo Jornada/Ninguno.jpg"; 
+    let resumen = estadoUI.tipo.toUpperCase();
+
+    // Nocturnidad General
+    if(estadoUI.nocturnidad) CJN = '5';
+
+    switch (estadoUI.tipo) {
+        // ------------------------------------------------------------------
+        // CASO: TRABAJO (Laborado)
+        // ------------------------------------------------------------------
+        case 'laborado':
+            // Por defecto si no hay duración, asumimos 1T o esperamos selección
+            if(estadoUI.duracion === '1T' || estadoUI.duracion === '') {
+                CJ = '2'; // Código: 2144444
+                urlImagen = "../acomtus/img/Catalogo Jornada/PuntoUnaTanda.jpg";
+                
+                if(estadoUI.horasExtras > 0) urlImagen = "../acomtus/img/Catalogo Jornada/PuntoUnaTanda" + estadoUI.horasExtras + "HE.jpg";
+                if(estadoUI.nocturnidad) urlImagen = "../acomtus/img/Catalogo Jornada/PuntoUnaTandaYNocturnidad.jpg";
+            }
+            else if(estadoUI.duracion === '1.5T') {
+                CJ = '3'; // Código: 3144444
+                urlImagen = "../acomtus/img/Catalogo Jornada/UnaTandaYMedia.jpg";
+                if(estadoUI.nocturnidad) urlImagen = "../acomtus/img/Catalogo Jornada/UnaTandaYMediaYNocturnidad.jpg";
+            }
+            else if(estadoUI.duracion === '4H') {
+                CJ = '1'; // Código: 1144444
+                urlImagen = "../acomtus/img/Catalogo Jornada/MediaTanda.jpg";
+                
+                // Variantes complejas de Media Tanda
+                if(estadoUI.tandaExtra) {
+                    CJE4H = '2'; // Media Tanda + 1T
+                    urlImagen = "../acomtus/img/Catalogo Jornada/MediaTandaExtraUnaTanda.jpg";
+                    if(estadoUI.horasExtras == 4) urlImagen = "../acomtus/img/Catalogo Jornada/MediaTandaExtraUnaTanda4HE.jpg";
+                } 
+                else if(estadoUI.horasExtras > 0) {
+                    // Solo HE (Asumiendo nombre imagen, valida si existe)
+                    urlImagen = "../acomtus/img/Catalogo Jornada/MediaTanda" + estadoUI.horasExtras + "HE.jpg"; 
+                }
+            }
+            break;
+
+        // ------------------------------------------------------------------
+        // CASO: ASUETO (A)
+        // ------------------------------------------------------------------
+        case 'asueto':
+            // DEFAULT: Código 41644444 (Asueto.jpg)
+            if(estadoUI.duracion === '') {
+                CJA = '6'; // El '6' en la 3ra posición genera el 416...
+                urlImagen = "../acomtus/img/Catalogo Jornada/Asueto.jpg";
+            }
+            // SI TRABAJA EN ASUETO (Desglose posterior)
+            else if(estadoUI.duracion === '1T') { 
+                CJA = '2'; // Trabajo Asueto 1T
+                urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoAsuetoUnaTanda.jpg";
+            }
+            else if(estadoUI.duracion === '4H') { 
+                CJA = '1'; // Trabajo Asueto Media
+                urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoAsuetoMediaTanda.jpg";
+            }
+            else if(estadoUI.duracion === '1.5T') { 
+                CJA = '3'; // Trabajo Asueto 1.5
+                urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoAsuetoUnaTandaYMedia.jpg";
+            }
+            
+            if(estadoUI.nocturnidad && estadoUI.duracion !== '') {
+                urlImagen = "../acomtus/img/Catalogo Jornada/AsuetoYNocturnidad.jpg";
+            }
+            break;
+
+        // ------------------------------------------------------------------
+        // CASO: DESCANSO (D)
+        // ------------------------------------------------------------------
+        case 'descanso':
+            // DEFAULT: Código 41344444 (Descanso.jpg)
+            if(estadoUI.duracion === '') {
+                CJA = '3'; // El '3' en la 3ra posición genera el 413...
+                urlImagen = "../acomtus/img/Catalogo Jornada/Descanso.jpg";
+            }
+            // SI TRABAJA EN DESCANSO (Desglose posterior)
+            // Nota: Aquí usamos CJD (Posición 5) para trabajo en descanso según lógica anterior?
+            // Ojo: En tus códigos anteriores TrabajoDescansoUnaTanda era 41444244 (CJD=2)
+            else if(estadoUI.duracion === '1T') { 
+                CJD = '2'; 
+                urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoUnaTanda.jpg"; 
+            }
+            else if(estadoUI.duracion === '4H') { 
+                CJD = '1'; 
+                urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoMediaTanda.jpg"; 
+            }
+            else if(estadoUI.duracion === '1.5T') { 
+                CJD = '3'; 
+                urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoUnaTandaYMedia.jpg"; 
+            }
+            break;
+
+        // ------------------------------------------------------------------
+        // CASO: VACACIÓN (V)
+        // ------------------------------------------------------------------
+        case 'vacacion':
+            // DEFAULT: Código 41144444 (Vacacion.jpg)
+            if(estadoUI.duracion === '') {
+                CJA = '1'; // El '1' en la 3ra posición genera el 411...
+                urlImagen = "../acomtus/img/Catalogo Jornada/Vacacion.jpg";
+            }
+            // SI TRABAJA EN VACACIÓN
+            else if(estadoUI.duracion === '1T') { 
+                CJV = '2'; 
+                urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionUnaTanda.jpg"; 
+            }
+            else if(estadoUI.duracion === '4H') { 
+                CJV = '1'; 
+                urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionMediaTanda.jpg"; 
+            }
+            else if(estadoUI.duracion === '1.5T') { 
+                CJV = '3'; 
+                urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionUnaTandaYMedia.jpg"; 
+            }
+            
+            if(estadoUI.nocturnidad && estadoUI.duracion !== '') {
+                urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionUnaTandaNocturnidad.jpg";
+            }
+            break;
+
+        // ------------------------------------------------------------------
+        // CASOS SIMPLES
+        // ------------------------------------------------------------------
+        case 'permiso':
+            // Código: 4344444
+            CTL = '3'; // El '3' en la 2da posición genera 4.3...
+            urlImagen = "../acomtus/img/Catalogo Jornada/Permiso.jpg";
+            break;
+
+        case 'falta':
+            // Código: 4444444
+            CTL = '4'; // El '4' en la 2da posición genera 4.4...
+            urlImagen = "../acomtus/img/Catalogo Jornada/Falta.jpg";
+            break;
+    }
+
+    // Actualizar Inputs Ocultos
+    $("#CJ").val(CJ); $("#CTL").val(CTL); $("#CJA").val(CJA); 
+    $("#CJV").val(CJV); $("#CJD").val(CJD); $("#CJE4H").val(CJE4H); 
+    $("#CJN").val(CJN); $("#lstHoraExtra").val(estadoUI.horasExtras);
+
+    // Actualizar Visuales
+    $("#ImagenJornada").attr("src", urlImagen);
+    $("#lblResumenCodigo").text(resumen);
+    
+    // Debug Código (Opcional)
+    let debugCode = `${CJ}.${CTL}.${CJA}.${CJV}.${CJD}.${CJE4H}.${CJN}.${estadoUI.horasExtras}`;
+    $("#debug-codigo-bd").text(debugCode);
+}
+
+function setDuracion(val) {
+    estadoUI.duracion = val;
+    
+    // UI Botones
+    $("[data-dur]").removeClass("active btn-secondary").addClass("btn-outline-secondary");
+    $(`[data-dur='${val}']`).addClass("active btn-secondary").removeClass("btn-outline-secondary");
+    
+    // Lógica especial: Botón "+1 Tanda Extra" solo visible en Media Tanda (4H) Laborada
+    if(estadoUI.tipo === 'laborado' && val === '4H') {
+        $("#btn-tanda-extra").fadeIn();
+    } else {
+        estadoUI.tandaExtra = false; // Reset
+        $("#btn-tanda-extra").hide().removeClass("active");
+    }
+    
+    calcularYActualizar();
+}
+
+function toggleNocturnidad() {
+    estadoUI.nocturnidad = !estadoUI.nocturnidad;
+    // UI Botón
+    if(estadoUI.nocturnidad) $("#btn-nocturnidad").addClass("active btn-dark text-white").removeClass("btn-outline-dark");
+    else $("#btn-nocturnidad").removeClass("active btn-dark text-white").addClass("btn-outline-dark");
+    
+    calcularYActualizar();
+}
+
+function toggleTandaExtra() {
+    estadoUI.tandaExtra = !estadoUI.tandaExtra;
+    // UI Botón
+    if(estadoUI.tandaExtra) $("#btn-tanda-extra").addClass("active btn-primary text-white").removeClass("btn-outline-primary");
+    else $("#btn-tanda-extra").removeClass("active btn-primary text-white").addClass("btn-outline-primary");
+    
+    calcularYActualizar();
+}
+
+function setHE(num) {
+    estadoUI.horasExtras = parseInt(num);
+    $("[data-he]").removeClass("active btn-secondary").addClass("btn-outline-secondary");
+    $(`[data-he='${num}']`).addClass("active btn-secondary").removeClass("btn-outline-secondary");
+    calcularYActualizar();
+}
+
+
+// --- 3. HIDRATACIÓN (BD -> UI) ---
+// Esta función lee los códigos guardados (ej: 2.1.4.4...) y enciende los botones al abrir el modal
+// --- 3. HIDRATACIÓN (BD -> UI) ---
+function mapearEstadoDesdeBD(codigos) {
+    // Array: 0=CJ, 1=CTL, 2=CJA, 3=CJV, 4=CJD, 5=CJE4H, 6=CJN, 7=HE
+    // Nota: Gracias al cambio en PHP, codigos[7] siempre existirá.
+    
+    let cj = codigos[0];
+    let ctl = codigos[1];
+    let cja = codigos[2];
+    let cjv = codigos[3];
+    let cjd = codigos[4];
+    let cje4h = codigos[5];
+    let cjn = codigos[6];
+    
+    // CORRECCIÓN: Leer HE de forma segura. Si viene vacío o undefined, es 0.
+    let he = parseInt(codigos[7] || 0);
+
+    // Reiniciamos UI visualmente antes de aplicar lógica
+    $(".opcion-card").removeClass("active bg-primary text-white border-primary shadow");
+    
+    // 1. Lógica para determinar el TIPO DE ACCIÓN
+    if (cja != '4') {
+        seleccionarTipo('asueto');
+    }
+    else if (cjv != '4') {
+        seleccionarTipo('vacacion');
+    }
+    else if (cjd != '4') {
+        seleccionarTipo('descanso');
+    }
+    else if (ctl != '1') {
+        // Si tiene licencia (diferente de 1) es Permiso
+        seleccionarTipo('permiso');
+    }
+    else if (cj != '4') {
+        // Si jornada es 1, 2 o 3, es Laborado
+        seleccionarTipo('laborado');
+    }
+    else {
+        // CASO: "SIN JORNADA" O "FALTA" (4.1.4.4.4.4.4)
+        // Aquí decidimos: ¿Queremos que salga marcado como 'Falta'?
+        // O ¿Queremos que salga 'Limpio' para que el usuario elija?
+        
+        // OPCIÓN A: Marcar como FALTA (Si tu sistema considera Sin Jornada = Falta)
+        //seleccionarTipo('falta'); 
+        
+        // OPCIÓN B (Si prefieres neutro): Descomenta las siguientes líneas
+        
+        estadoUI.tipo = 'ninguno';
+        $("#panel-configuracion").hide();
+        $("#lblResumenCodigo").text("SIN PUNTEO");
+        return; // Salimos para no configurar nada más
+        
+    }
+
+    // 2. Determinar Duración (Solo si no es falta/permiso)
+    let codigoActivo = '4';
+    if(estadoUI.tipo == 'laborado') codigoActivo = cj;
+    if(estadoUI.tipo == 'asueto') codigoActivo = cja;
+    if(estadoUI.tipo == 'vacacion') codigoActivo = cjv;
+    if(estadoUI.tipo == 'descanso') codigoActivo = cjd;
+
+    if(codigoActivo == '1') setDuracion('4H');
+    else if(codigoActivo == '2') setDuracion('1T');
+    else if(codigoActivo == '3') setDuracion('1.5T');
+
+    // 3. Extras (Nocturnidad)
+    if(cjn == '5') {
+        estadoUI.nocturnidad = true;
+        $("#btn-nocturnidad").addClass("active btn-dark text-white").removeClass("btn-outline-dark");
+    } else {
+        estadoUI.nocturnidad = false;
+        $("#btn-nocturnidad").removeClass("active btn-dark text-white").addClass("btn-outline-dark");
+    }
+
+    // 4. Tanda Extra (Caso especial Media Tanda + 1T)
+    if(cje4h == '2') { 
+        estadoUI.tandaExtra = true;
+        $("#btn-tanda-extra").addClass("active btn-primary text-white").removeClass("btn-outline-primary").show();
+    } else {
+        estadoUI.tandaExtra = false;
+        $("#btn-tanda-extra").removeClass("active btn-primary text-white").addClass("btn-outline-primary");
+        if(estadoUI.duracion !== '4H') $("#btn-tanda-extra").hide();
+    }
+
+    // 5. Horas Extras (Ahora sí se lee correctamente)
+    setHE(he);
+}
+// =========================================================================
+// FUNCIONES AUXILIARES (Existentes que no tocamos mucho)
+// =========================================================================
 
 function buscar_personal(codigo_personal){
-    codigo_personal = $("#CodigoPersonal").val();
-    codigo_departamento_empresa = $("#CodigoDepartamentoEmpresa").val();
-    //
+    // Tu función original de búsqueda de empleados (Resumida para no repetir todo el bloque si ya lo tienes)
+    var codigo_depto = $("#CodigoDepartamentoEmpresa").val();
+    
     $.post("php_libs/soporte/Asistencia/PorNomina.php", {
-		accion_buscar: 'BuscarPersonalRutaCodigo', codigo_personal: codigo_personal, fecha: fecha, codigo_departamento_empresa: codigo_departamento_empresa},
-        function(data) {
-			if(data[0].respuestaOK == true){
-				// CUANDO SEA OTRO DEPARTAMENTO
-				if(codigo_departamento_empresa == "02"){
-					$("#LblDescripcion").html("Ruta: " + data[0].Descripcion + " - Empleados: " + data[0].TotalEmpleados)
-                    $("#CodigoRuta").val(data[0].Codigo)
-                    CodigoRuta = data[0].Codigo;
-				}else{
-					$("#LblDescripcion").html("Departamento: " + data[0].Descripcion + " - Empleados: " + data[0].TotalEmpleados)
-				}
-				//	MENSAJE DEL SISEMA
-			}else{
-				$("#LblDescripcion").html(data[0].mensajeError)
-			}
-
+        accion_buscar: 'BuscarPersonalRutaCodigo', 
+        codigo_personal: codigo_personal, 
+        fecha: fecha, 
+        codigo_departamento_empresa: codigo_depto
+    }, function(data) {
+        if(data[0].respuestaOK == true){
+            $("#LblDescripcion").html((codigo_depto=="02"?"Ruta: ":"Departamento: ") + data[0].Descripcion + " - Empleados: " + data[0].TotalEmpleados);
+            if(codigo_depto=="02") $("#CodigoRuta").val(data[0].Codigo);
+            
+            // Cargar Lista
             $.ajax({
-                beforeSend: function(){
-
-                },
-                cache: false,
                 type: "POST",
                 dataType: "json",
                 url:"php_libs/soporte/Asistencia/PorNomina.php",
-                data: {                     
-                    accion_buscar: 'BuscarEmpleadosPorRuta', CodigoRuta: CodigoRuta, fecha: fecha, codigo_personal_encargado: codigo_personal, CodigoDepartamentoEmpresa: codigo_departamento_empresa
-                    },  
+                data: { 
+                    accion_buscar: 'BuscarEmpleadosPorRuta', 
+                    CodigoRuta: data[0].Codigo, 
+                    fecha: fecha, 
+                    codigo_personal_encargado: codigo_personal, 
+                    CodigoDepartamentoEmpresa: codigo_depto
+                },  
                 success: function(response){
-                    // Validar mensaje de error
-                    if(response.respuesta == false){
-
-                    }else{
-                        toastr["success"](response.mensaje, "Sistema");
-                        $('#listadoEmpleadosNomina').empty();
-                        $('#listadoEmpleadosNomina').append(response.contenido);
-                        // MostrarMensaje
-                        if(response.mensajeAsueto === ""){
-                            $("#MostrarMensajes").hide();
-                        }else{
-                            $("label[for=LblMensaje]").text("Asueto: " + response.mensajeAsueto);
-                            $("#MostrarMensajes").show();
-                        }
-
-                    }               
-                },
-            });            
-        }, "json");    
+                    $('#listadoEmpleadosNomina').empty().append(response.contenido);
+                    if(response.mensajeAsueto !== "") {
+                        $("#MostrarMensajes").show().find("label").text("Asueto: " + response.mensajeAsueto);
+                    } else {
+                        $("#MostrarMensajes").hide();
+                    }
+                }
+            });   
+        } else {
+            $("#LblDescripcion").html(data[0].mensajeError);
+        }
+    }, "json");
 }
-function buscarPersonalPorRuta(CodigoRuta){
-///////////////////////////////////////////////////////////////			
-			// BUSCAR REGISTROS EN BASE LA CODIGO DE RUTA.
-			///////////////////////////////////////////////////////////////
-            $.ajax({
-                beforeSend: function(){
 
-                },
-                cache: false,
-                type: "POST",
-                dataType: "json",
-                url:"php_libs/soporte/Asistencia/PorNomina.php",
-                data: {                     
-                    accion_buscar: 'BuscarEmpleadosPorRuta', CodigoRuta: CodigoRuta,
-                    },  
-                success: function(response){
-                    // Validar mensaje de error
-                    if(response.respuesta == false){
-
-                    }else{
-                        $('#listadoEmpleadosNomina').empty();
-                        $('#listadoEmpleadosNomina').append(response.contenido);
-                        }               
-                },
-            });
-}
-// Mensaje de Carga de Ajax.
 function configureLoadingScreen(screen){
-    $(document)
-    .ajaxStart(function () {
-        screen.fadeIn();
-    })
-    .ajaxStop(function () {
-        screen.fadeOut();
-    });
+    $(document).ajaxStart(function () { screen.fadeIn(); }).ajaxStop(function () { screen.fadeOut(); });
 }
-//LISTAR JORNADA 4 HORAS
-function listar_jornada_cuatro_horas(codigo_jornada){
-    var miselect=$("#lstJornadaExtraCuatroHoras");
-    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
-    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+
+// --- FUNCION PARA FILTRAR BOTONES SEGÚN DEPARTAMENTO ---
+function aplicarPermisosDepartamento() {
+    // Obtenemos el código del departamento (asegúrate que esta variable tenga valor)
+    // Puede venir del input hidden global o pasarlo como parámetro
+    var depto = $("#CodigoDepartamentoEmpresa").val(); 
+    console.log("Aplicando permisos para departamento: " + depto);
+    // 1. REGLA NOCTURNIDAD (Solo Vigilancia 08 y Mantenimiento 09)
+    var deptosNocturnidad = ['08', '09'];
     
-    $.post("php_libs/soporte/Asistencia/PorNomina.php", {accion_buscar: 'BuscarJornada'},
-        function(data) {
-            miselect.empty();
-            for (var i=0; i<data.length; i++) {
-                if(codigo_jornada == data[i].codigo){
-                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
-                }else{
-                    if(data[i].codigo == 4 || data[i].codigo == 5)
-                    {
-
-                    }else{
-                        miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
-                    }
-                }
-            }
-    }, "json");    
-}
-// FUNCION LISTAR TABLA catalogo_tipo_licencia.
-////////////////////////////////////////////////////////////
-function listar_tipo_licencia(codigo_tipo_licencia){
-    var miselect=$("#lstTipoLicencia");
-    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
-    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
-    
-    $.post("php_libs/soporte/Asistencia/PorNomina.php", {accion_buscar: 'BuscarTipoLicencia'},
-        function(data) {
-            miselect.empty();
-            for (var i=0; i<data.length; i++) {
-                if(codigo_tipo_licencia == data[i].codigo){
-                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
-                }else{
-                    if(data[i].codigo == 1)
-                    {
-
-                    }else{
-                        miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
-                    }
-                }
-            }
-    }, "json");    
-}
-// FUNCION LISTAR TABLA catalogo_tipo_licencia 4h
-////////////////////////////////////////////////////////////
-function listar_tipo_licencia_4HLicenciaPermiso(codigo_tipo_licencia){
-    var miselect=$("#lstJornada4HLicenciaPermiso");
-    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
-    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
-    
-    $.post("php_libs/soporte/Asistencia/PorNomina.php", {accion_buscar: 'BuscarTipoLicencia'},
-        function(data) {
-            miselect.empty();
-            for (var i=0; i<data.length; i++) {
-                if(codigo_tipo_licencia == data[i].codigo){
-                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
-                }else{
-                    if(data[i].codigo == 2 || data[i].codigo == 3 || data[i].codigo == 4 || data[i].codigo == 10)
-                    {
-                        miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
-                    }
-                }
-            }
-    }, "json");    
-}
-// JORNADA EXTRA TRABAJO EN VACACIÓN.
-function listar_jornada_vacacion(codigo_jornada){
-    var miselect=$("#lstJornadaTV");
-    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
-    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
-    
-    $.post("php_libs/soporte/Asistencia/PorNomina.php", {accion_buscar: 'BuscarJornada'},
-        function(data) {
-            miselect.empty();
-            for (var i=0; i<data.length; i++) {
-                if(codigo_jornada == data[i].codigo){
-                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
-                }else{
-                    if(data[i].codigo == 4 || data[i].codigo == 5)
-                    {
-
-                    }else{
-                        miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
-                    }
-                }
-            }
-    }, "json");    
-}
-// FUNCION LISTAR TABLA catalogo_jornada descanso
-////////////////////////////////////////////////////////////
-function listar_jornada_descanso(codigo_jornada){
-    var miselect=$("#lstJornadaDescanso");
-    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
-    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
-    
-    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarJornada'},
-        function(data) {
-            miselect.empty();
-            for (var i=0; i<data.length; i++) {
-                if(codigo_jornada == data[i].codigo){
-                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + '</option>');
-                }else{
-                    if(data[i].codigo == 4 || data[i].codigo == 5)
-                    {
-
-                    }else{
-                        miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + '</option>');
-                    }
-                }
-            }
-    }, "json");    
-}
-// JORNADA EXTRA TRABAJO EN VACACIÓN.
-function listar_jornada_asueto(codigo_jornada){
-    var miselect=$("#lstJornadaAsueto");
-    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
-    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
-    
-    $.post("php_libs/soporte/Asistencia/PorNomina.php", {accion_buscar: 'BuscarJornada'},
-        function(data) {
-            miselect.empty();
-            for (var i=0; i<data.length; i++) {
-                if(codigo_jornada == data[i].codigo){
-                    miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].descripcion + " - " + data[i].descripcion_completa + '</option>');
-                }else{
-                    if(data[i].codigo == 5)
-                    {
-
-                    }else{
-                        miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " +  data[i].descripcion_completa + '</option>');
-                    }
-                }
-            }
-    }, "json");    
-}
-
-function HoraExtra() {
-    // Obtener el elemento select
-    let select = document.getElementById("lstHoraExtra");
-
-    // Limpiar el select antes de llenarlo
-    select.innerHTML = "";
-
-    // Definir las opciones
-    let opciones = [
-        { value: 0, text: "Seleccionar..." },
-        { value: 1, text: "1 Hora" },
-        { value: 2, text: "2 Horas" },
-        { value: 3, text: "3 Horas" },
-        { value: 4, text: "4 Horas" }
-    ];
-
-    // Agregar las opciones al select
-    opciones.forEach(opcion => {
-        let option = document.createElement("option");
-        option.value = opcion.value;
-        option.textContent = opcion.text;
-        select.appendChild(option);
-    });
-}
-function seleccionarHoraExtra(valor) {
-    let select = document.getElementById("lstHoraExtra");
-
-    // Asegurar que el valor está dentro de los permitidos
-    if ([0, 1, 2, 3, 4].includes(valor)) {
-        select.value = valor;
+    if (deptosNocturnidad.includes(depto)) {
+        $("#bloque-nocturnidad").show();
     } else {
-        console.warn("Valor no válido");
+        $("#bloque-nocturnidad").hide();
+        // Importante: Si se oculta, apagamos la variable para que no guarde basura
+        estadoUI.nocturnidad = false;
+        $("#btn-nocturnidad").removeClass("active btn-dark text-white").addClass("btn-outline-dark");
+    }
+
+    // 2. REGLA HORAS EXTRAS (Solo Motoristas 02 y Revisadores 03)
+    var deptosHE = ['02', '03'];
+    
+    if (deptosHE.includes(depto)) {
+        $("#bloque-horas-extras").show();
+    } else {
+        $("#bloque-horas-extras").hide();
+        // Si se oculta, reseteamos a 0
+        setHE(0);
     }
 }

@@ -1,217 +1,176 @@
-<!-- VENTANA MODAL - MODIFICAR LA FECHA DE LA FACTURA -->
+<style>
+    /* Estilos para botones tipo tarjeta */
+    .opcion-card {
+        cursor: pointer;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+        transition: all 0.2s;
+        margin-bottom: 10px;
+        background: #f9f9f9;
+    }
+    .opcion-card:hover { background: #e0e0e0; }
+    .opcion-card.active {
+        border-color: #007bff;
+        background-color: #e7f1ff;
+        font-weight: bold;
+        color: #0056b3;
+    }
+    .seccion-titulo { font-size: 0.9rem; color: #666; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #eee;}
+    .fila-grid { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+    .col-grid { flex: 1 0 30%; max-width: 48%; } /* 2 o 3 por fila en móvil */
+</style>
 <div class="row m-1 p-1 text-dark">
 <div class="col">
 <div class="modal fade" data-backdrop="static" data-keyboard="false" id="VentanaPunteo" tabindex="-1" role="document" aria-labelledby="VentanaPunteo" aria-hidden="true">
 <div class="modal-dialog modal-lg">
-	<div class="modal-content">
-		<div class="modal-header bg-cyan">
-			<h6 class="modal-title" id="">
-				<label for="CodigoNombreEmpleado"></label>
-			</h6>
-			<button class="close" data-dismiss="modal" aria-label="Cerrar" id="VentanaPunteo2">
-				<span aria-hidden="true">&times;</span>
-			</button>
-		</div>
-		<!-- FORMULARIO PRINCIPAL. -->
-		<form  action="" method="post" name="formPunteo" id="formPunteo" role="form">
-			<!-- VARIABLES QUE AYUDARAN AL PUNTEO -->
-			<input type="hidden" id="accion_buscar" name="accion_buscar" value="ActualizarJornada">
-			<input type="hidden" id="Id_" name="Id_" value="0">
-			<input type="hidden" id="CJTodos" name="CJTodos" value="0">
-			<input type="hidden" id="CJTodosSeparador" name="CJTodosSeparador" value="0">
-			<input type="hidden" id="CJ" name="CJ" value="0" style="width: 30px;">
-			<input type="hidden" id="CTL" name="CTL" value="0" style="width: 30px;">
-			<input type="hidden" id="CJA" name="CJA" value="0" style="width: 30px;">
-			<input type="hidden" id="CJV" name="CJV" value="0" style="width: 30px;">
-			<input type="hidden" id="CJD" name="CJD" value="0" style="width: 30px;">
-			<input type="hidden" id="CJE4H" name="CJE4H" value="0" style="width: 30px;">
-			<input type="hidden" id="CJN" name="CJN" value="0" style="width: 30px;"><div class="modal-body">
-				<div class="container">
-					<div class="row border border-info rounded p-2">
-						<div class="col col-md-4 col-sm-3">
-							<img src="#" class="rounded" alt="#" width="80" height="90" id="FotoEmpleado">
-						</div>
-						<div class="col col-md-4 col-sm-3">
-							<img src="#" class="rounded" alt="#" width="80" height="90" id="ImagenJornada">
-						</div>
-						<div class="col col-md-4 col-sm-3">
-							<button type="button" class="btn btn-primary btn-lg btn-block" id="BotonJornada" value="Jornada">Jornada</button>
-							<button type="button" class="btn btn-info btn-lg btn-block" id="BotonLicencia" value="Licencia">Licencia o Permiso</button>
-						</div>
-					</div> <!-- ROW -->
-					<!-- JORNA NORMAL -->
-						<div class="from-group row">
-							<div class="col col-md-6">
-								<fieldset id="DivJornada" style="display: none;">
-									<legend class="text-bold text-blue">Jornada</legend>
-										<!-- BLOQUE PARA LA JORNADA-->
-										<div class="border border-info rounded p-1">
-											<label for="lstJornada">Por</label>
-												<select class="custom-select" name="lstJornada" id="lstJornada"></select>  
-											<!-- SELECT CATALOGO JORNADA -->
-											<div class="form-group p-1 align-self-end" id="NocturnidadSiNo" style="display: none;">
-												<div class="form-check form-check-inline">
-												<input class="form-check-input" type="checkbox" name="chkNocturnidad" id="chkNocturnidad" value="Si">
-												<label class="form-check-label text-info" for="chkNocturnidad">
-													Nocturnidad
-												</label>
-												</div>
-											</div>    
-										</div>
-								</fieldset>
-								<!-- BLOQUE PARA LOS PERMISOS-->
-								<fieldset id="DivPermisos" style="display: none;">
-									<legend class="text-bold text-blue">Licencias, Permisos u Otros</legend>
-										<div class="border border-danger rounded p-2">
-											<label for="lstTipoLicencia">Por</label>
-											<select class="custom-select" name="lstTipoLicencia" id="lstTipoLicencia"></select>                                      
-										</div>
-								</fieldset>
-							</div>
+    <div class="modal-content">
+        <div class="modal-header bg-cyan">
+            <h6 class="modal-title" id="">
+                <label for="CodigoNombreEmpleado"></label>
+            </h6>
+            <button class="close" data-dismiss="modal" aria-label="Cerrar" id="VentanaPunteo2">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        
+        <form action="" method="post" name="formPunteo" id="formPunteo" role="form">
+            
+            <input type="hidden" id="accion_buscar" name="accion_buscar" value="ActualizarJornada">
+            <input type="hidden" id="Id_" name="Id_" value="0">
+            <input type="hidden" id="CJTodos" name="CJTodos" value="0">
+            <input type="hidden" id="CJTodosSeparador" name="CJTodosSeparador" value="0">
+            
+            <input type="hidden" id="CJ" name="CJ" value="4">    <input type="hidden" id="CTL" name="CTL" value="1">  <input type="hidden" id="CJA" name="CJA" value="4">  <input type="hidden" id="CJV" name="CJV" value="4">  <input type="hidden" id="CJD" name="CJD" value="4">  <input type="hidden" id="CJE4H" name="CJE4H" value="4"><input type="hidden" id="CJN" name="CJN" value="4">  <input type="hidden" id="lstHoraExtra" name="lstHoraExtra" value="0">
 
-							<div class="col col-md-6 p-1 m-1">
-								<!-- DEFINIR CUANDO SE HAYA SELECCIONADO 4H Y PREGUNTAR SI HIZO TIEMPO EXTRA -->
-									<!-- SELECT CATALOGO JORNADA EXTRA RADIOS-->
-									<div class="form-group" id="JornadaExtra" style="display: none;">
-										<div>
-										<label class="form-check-label text-info" for="">
-											Jornada Extra en 4 horas
-										</label>
-										</div>
+            <div class="modal-body bg-light">
+                <div class="container-fluid">
+                    
+                    <div class="row border-bottom pb-3 mb-3 bg-white rounded shadow-sm pt-2">
+                        <div class="col-4 text-center border-right">
+                            <label class="small text-muted font-weight-bold">EMPLEADO</label><br>
+                            <img src="#" class="rounded border" alt="Empleado" width="70" height="80" id="FotoEmpleado">
+                        </div>
+                        <div class="col-4 text-center border-right">
+                            <label class="small text-muted font-weight-bold">PUNTEO (PREVIA)</label><br>
+                            <img src="#" class="rounded border" alt="Punteo" width="70" height="80" id="ImagenJornada">
+                        </div>
+                        <div class="col-4 d-flex flex-column align-items-center justify-content-center bg-light">
+                           <small class="text-muted">ESTADO ACTUAL</small>
+                           <h5 class="text-primary font-weight-bold text-center m-0" id="lblResumenCodigo">...</h5>
+                        </div>
+                    </div>
 
-										<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="RadiosE" id="JornadaExtraSi" value="si">
-										<label class="form-check-label text-info" for="JornadaExtraSi">
-											Si
-										</label>
-										</div>
-										<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="RadiosE" id="JornadaExtraNo" value="no" checked>
-										<label class="form-check-label" for="JornadaExtraNo">
-											No
-										</label>
-										</div>
-									</div>
-										<!-- SELECT CATALOGO JORNADA 4 extra-->
-										<div class="form-group p-1 m-1 border border-primary" id="JornadaExtra4Horas" style="display: none;">
-											<label class="form-check-label text-info" for="JornadaExtra4">
-											</label>
-											<span class="badge badge-primary" id="TextExtra4Descripcion"></span>
-											<!-- BLOQUE PARA LA JORNADA POR ASUENTO-->
-											<div class="border border-info rounded p-3">
-											<label for="lstJornadaExtraCuatroHoras">Por</label>
-											<select class="custom-select" name="lstJornadaExtraCuatroHoras" id="lstJornadaExtraCuatroHoras"></select>      
-											</div>
-										</div>
-									<!-- SELECT CATALOGO JORNADA 4H Licencias o Permiso-->
-									<div class="form-group" id="Jornada4HLicenciaPermiso" style="display: none;">
-										<div>
-										<label class="form-check-label text-info" for="">
-											Jornada 4H (Licencia o Permiso)
-										</label>
-										</div>
+                    <div class="text-secondary font-weight-bold small mb-2 pl-1 text-uppercase">
+                        <i class="fas fa-hand-pointer"></i> 1. Seleccione Acción
+                    </div>
+                    
+                    <div class="row px-1" id="grupo-tipo">
+                        <div class="col-4 px-1 mb-2">
+                            <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center active" onclick="seleccionarTipo('laborado')" data-tipo="laborado" style="cursor:pointer; border: 1px solid #ddd;">
+                                <i class="fas fa-briefcase text-primary fa-2x mb-1"></i>
+                                <div class="font-weight-bold small">Trabajó</div>
+                            </div>
+                        </div>
+                        <div class="col-4 px-1 mb-2">
+                            <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center" onclick="seleccionarTipo('asueto')" data-tipo="asueto" style="cursor:pointer; border: 1px solid #ddd;">
+                                <i class="fas fa-star text-warning fa-2x mb-1"></i>
+                                <div class="font-weight-bold small">Asueto</div>
+                            </div>
+                        </div>
+                        <div class="col-4 px-1 mb-2">
+                            <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center" onclick="seleccionarTipo('descanso')" data-tipo="descanso" style="cursor:pointer; border: 1px solid #ddd;">
+                                <i class="fas fa-couch text-info fa-2x mb-1"></i>
+                                <div class="font-weight-bold small">Descanso</div>
+                            </div>
+                        </div>
+                        <div class="col-4 px-1 mb-2">
+                            <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center" onclick="seleccionarTipo('vacacion')" data-tipo="vacacion" style="cursor:pointer; border: 1px solid #ddd;">
+                                <i class="fas fa-plane text-success fa-2x mb-1"></i>
+                                <div class="font-weight-bold small">Vacación</div>
+                            </div>
+                        </div>
+                        <div class="col-4 px-1 mb-2">
+                            <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center" onclick="seleccionarTipo('permiso')" data-tipo="permiso" style="cursor:pointer; border: 1px solid #ddd;">
+                                <i class="fas fa-file-medical text-purple fa-2x mb-1"></i>
+                                <div class="font-weight-bold small">Permiso</div>
+                            </div>
+                        </div>
+                        <div class="col-4 px-1 mb-2">
+                            <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center" onclick="seleccionarTipo('falta')" data-tipo="falta" style="cursor:pointer; border: 1px solid #ddd;">
+                                <i class="fas fa-times-circle text-danger fa-2x mb-1"></i>
+                                <div class="font-weight-bold small">Falta</div>
+                            </div>
+                        </div>
+                    </div>
 
-										<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="Radios4hLP" id="Jornada4HLicenciaPermisoSI" value="si">
-										<label class="form-check-label text-info" for="Jornada4HLicenciaPermisoSI">
-											Si
-										</label>
-										</div>
-										<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="Radios4hLP" id="Jornada4HLicenciaPermisoNO" value="no" checked>
-										<label class="form-check-label" for="Jornada4HLicenciaPermisoNO">
-											No
-										</label>
-										</div>
-									</div>
-										<!-- SELECT CATALOGO JORNADA 4H LICENCIAS O PERMISOS-->
-										<div class="form-group p-1 m-1 border border-primary" id="DivJornada4HLicenciaPermiso" style="display: none;">
-											<label class="form-check-label text-info" for="JornadaExtra4">
-											</label>
-											<span class="badge badge-primary" id="TextExtra4HDescripcionLicenciaPermiso"></span>
-											<!-- BLOQUE -->
-											<div class="border border-info rounded p-3">
-												<label for="lstJornada4HLicenciaPermiso">Por</label>
-												<select class="custom-select" name="lstJornada4HLicenciaPermiso" id="lstJornada4HLicenciaPermiso"></select>      
-											</div>
-										</div>
-										<!-- SELECT CATALOGO JORNADA 4 extra-->
-										<!-- SELECT CATALOGO JORNADA SE ACTIVARA CUANDO SE SELECCIONE Trabajó en Vacación-->
-										<div class="form-group" id="JornadaTV" style="display: none;">
-											<label class="form-check-label text-info" for="JornadaTV">
-											  Jornada (Trabajó en Vacación)
-											</label>
-											<span class="badge badge-primary" id="TextTVDescripcion"></span>
-											<!-- BLOQUE PARA LA JORNADA POR ASUENTO-->
-											<div class="border border-info rounded p-3">
-											  <label for="lstJornadaTV">Por</label>
-											  <select class="custom-select" name="lstJornadaTV" id="lstJornadaTV"></select>      
-											</div>
-											<!-- SELECT CATALOGO JORNADA TV (NOCTURNIDAD)-->
-											<div class="form-group p-1 align-self-end" id="NocturnidadSiNoTV" style="display: block;">
-												<div class="form-check form-check-inline">
-													<input class="form-check-input" type="checkbox" name="chkNocturnidadTV" id="chkNocturnidadTV" value="Si">
-													<label class="form-check-label text-info" for="chkNocturnidadTV">
-													Nocturnidad
-													</label>
-												</div>
-												</div>  
-										</div>
-										 <!-- SELECT CATALOGO JORNADA SE ACTIVARA CUANDO SE SELECCIONE Trabajó en Descanso-->
-										 <div class="form-group" id="JornadaDescanso" style="display: none;">
-											<label class="form-check-label text-info" for="JornadaDescanso">
-											  Jornada (Trabajó en Descanso)
-											</label>
-											<span class="badge badge-primary" id="TextDescansoDescripcion"></span>
-											<!-- BLOQUE PARA LA JORNADA POR DESCANSO-->
-											<div class="border border-info rounded p-3">
-											  <label for="lstJornadaDescanso">Por</label>
-											  <select class="custom-select" name="lstJornadaDescanso" id="lstJornadaDescanso"></select>      
-											</div>
-										</div>
-										<!-- SELECT CATALOGO JORNADA SE ACTIVARA CUANDO LA FECHA SEA DE ASUETO-->
-										<div class="form-group" id="JornadaAsueto" style="display: none;">
-											<label class="form-check-label text-info" for="JornadaAsueto">
-											  Jornada (Trabajó en Asueto)
-											</label>
-											<span class="badge badge-primary" id="TextAsuetoDescripcion"></span>
-										  <!-- BLOQUE PARA LA JORNADA POR ASUENTO-->
-										  <div class="border border-info rounded p-3">
-											<label for="lstJornadaAsueto">Por</label>
-											<select class="custom-select" name="lstJornadaAsueto" id="lstJornadaAsueto"></select>      
-										  </div>
-											<div class="form-group p-1 align-self-end" id="NocturnidadSiNoAsueto" style="display: none;">
-												<div class="form-check form-check-inline">
-												<input class="form-check-input" type="checkbox" name="chkNocturnidadAsueto" id="chkNocturnidadAsueto" value="Si">
-												<label class="form-check-label text-info" for="chkNocturnidadAsueto">
-													Nocturnidad
-												</label>
-												</div>
-											</div>
-										</div>
-										<!-- SELECT HORA EXTRA-->
-										<div class="form-group" id="HoraExtra" style="display: none;">
-											<label class="form-check-label text-info" for="HoraExtra">
-											  Hora Extra
-											</label>
-										  <!-- BLOQUE PARA LA HORA EXTRA.-->
-										  <div class="border border-info rounded p-3">
-											<label for="lstHoraExtra">Por</label>
-											<select class="custom-select" name="lstHoraExtra" id="lstHoraExtra"></select>
-										  </div>
-										</div>
-							</div>
-						</div>
-					<!-- JORNA NORMAL -->
-				</div> <!-- CONTAINER -->
-			</div> <!-- MODAL BODY -->
-				<!-- footer modal -->
-				<div class="modal-footer bg-gradient-dark">
-					<button type="button" class="btn btn-default" data-dismiss="modal" id="BotonCerrar" value="Cerrar">Cerrar</button>
-					<button type="button" class="btn btn-primary" id="goGuardarPunteo">Guardar</button>
-				</div>
-			</form>
-	</div>
+
+                        
+            <div id="panel-configuracion" class="mt-2 p-3 bg-white rounded border shadow-sm">
+            
+            <div id="bloque-duracion" class="mb-3">
+                <label class="text-secondary font-weight-bold small text-uppercase mb-2">
+                    <i class="fas fa-clock"></i> 2. Duración
+                </label>
+                <div class="btn-group w-100 btn-group-lg" role="group">
+                    <button type="button" class="btn btn-outline-secondary active" onclick="setDuracion('1T')" data-dur="1T">1 Tanda</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="setDuracion('4H')" data-dur="4H">Media (4H)</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="setDuracion('1.5T')" data-dur="1.5T">1.5 T</button>
+                </div>
+            </div>
+
+            <div class="row" id="bloque-extras">
+                <label class="col-12 text-secondary font-weight-bold small text-uppercase mb-2">
+                    <i class="fas fa-plus-circle"></i> 3. Adicionales
+                </label>
+                
+                <div class="col-6 pr-1" id="bloque-nocturnidad">
+                    <button type="button" class="btn btn-block btn-lg btn-outline-dark" id="btn-nocturnidad" onclick="toggleNocturnidad()">
+                        <i class="fas fa-moon"></i> Nocturnidad
+                    </button>
+                </div>
+
+                <div class="col-6 pl-1" id="bloque-tanda-extra">
+                    <button type="button" class="btn btn-block btn-lg btn-outline-primary" id="btn-tanda-extra" onclick="toggleTandaExtra()" style="display:none;">
+                        +1 Tanda
+                    </button>
+                </div>
+
+                <div class="col-12 mt-3" id="bloque-horas-extras">
+                    <div class="d-flex align-items-center justify-content-between bg-light rounded p-1 border">
+                        <span class="font-weight-bold text-muted mr-2 pl-2">Horas Extra:</span>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-secondary active" onclick="setHE(0)" data-he="0">0</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setHE(1)" data-he="1">1</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setHE(2)" data-he="2">2</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setHE(3)" data-he="3">3</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setHE(4)" data-he="4">4</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+                    <div class="mt-3 p-2 alert alert-secondary text-center small" style="border: 1px dashed #999;">
+                        <strong><i class="fas fa-terminal"></i> Resumen Técnico (Debug):</strong><br>
+                        <span id="resumen-texto-debug" class="text-dark">---</span><br>
+                        Código BD: <span id="debug-codigo-bd" class="font-weight-bold font-monospace bg-white px-1 rounded text-danger">0.0.0.0.0.0.0</span>
+                    </div>
+
+                </div> </div> <div class="modal-footer bg-dark">
+                <button type="button" class="btn btn-danger mr-auto" id="btnEliminarPunteo" style="display:none;">
+                    <i class="fas fa-trash-alt"></i> Reiniciar
+                </button>
+
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="BotonCerrar">Cerrar</button>
+                <button type="button" class="btn btn-primary font-weight-bold px-4" id="goGuardarPunteo">
+                    <i class="fas fa-save"></i> GUARDAR
+                </button>
+            </div>
+
+        </form>
+    </div>
 </div>
 </div>
 </div>
