@@ -423,14 +423,28 @@ if($errorDbConexion == false){
 												$CodigoJornadaDescanso = trim($listado_g['codigo_jornada_descanso']);
 												$CodigoJornadaE4H = trim($listado_g['codigo_jornada_e_4h']);
 												$CodigoJornadaNocturna = trim($listado_g['codigo_jornada_nocturna']);
-											//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-												$CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.
-																	$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.
-																	$CodigoJornadaNocturna;
-											//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-												$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
-																			".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
-																			".".$CodigoJornadaNocturna.".".$HoraExtra;
+												$HoraExtra = trim($listado_g['hora_extra']);
+
+												if($HoraExtra != 0){
+													//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
+													$CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.
+													$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.
+													$CodigoJornadaNocturna.$HoraExtra;
+													//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
+													$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
+														".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
+														".".$CodigoJornadaNocturna.".".$HoraExtra;
+												}
+												else{
+													//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
+														$CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.
+														$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.
+														$CodigoJornadaNocturna;
+													//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
+													$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
+																				".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
+																				".".$CodigoJornadaNocturna.".".$HoraExtra;
+												}
 											// Condiciones para la Imagen.
 												$buscar = array_search($CodigoJornadaTodas, $CodigoJornadaImagen['codigo']);
 												if(!empty($buscar)){
@@ -460,6 +474,48 @@ if($errorDbConexion == false){
 				//
 					$codigo_perfil = trim($_POST["CodigoPerfil"]);
 					$codigo_personal_usuario = trim($_POST["CodigoPersonal"]);
+
+
+					// 1. ARMAR EL CÓDIGO TOTAL PARA VALIDAR
+					// Nota: La lógica de armado debe ser idéntica a la que usas para buscar la imagen
+					if($HoraExtra != 0){
+						$CodigoJornadaValidar = $codigo_jornada . $codigo_tipo_licencia . $codigo_jornada_asueto .
+												$codigo_jornada_vacaciones . $codigo_jornada_descanso . $codigo_jornada_4_extra .
+												$codigo_jornada_nocturnidad . $HoraExtra;
+					} else {
+						$CodigoJornadaValidar = $codigo_jornada . $codigo_tipo_licencia . $codigo_jornada_asueto .
+												$codigo_jornada_vacaciones . $codigo_jornada_descanso . $codigo_jornada_4_extra . // OJO: Verifica si usas $codigo_jornada_4_extra o _e_4h aquí
+												$codigo_jornada_nocturnidad;
+					}
+
+					// 2. CONSULTAR A LA BASE DE DATOS
+					$queryValidar = "SELECT count(*) as existe FROM catalogo_jornada_imagenes WHERE codigo = '$CodigoJornadaValidar'";
+					$consultaValidar = $dblink->query($queryValidar);
+					$validacion = $consultaValidar->fetch(PDO::FETCH_ASSOC);
+
+					if ($validacion['existe'] == 0) {
+						// --- EL CÓDIGO NO EXISTE EN EL CATÁLOGO ---
+						
+						// Opción A: REBOTAR (Recomendado para fase de pruebas)
+						$respuestaOK = false;
+						$mensajeError = "Error Crítico: El código generado ($CodigoJornadaValidar) no existe en el catálogo de imágenes. Avise a Soporte.";
+						// Salimos del switch y devolvemos el error al JS
+						break; 
+
+						/* // Opción B: FORZAR GENÉRICO (Si prefieres que guarde "algo" siempre)
+						// Descomenta esto si prefieres la Opción B
+						$codigo_jornada = '4';
+						$codigo_tipo_licencia = '1';
+						$codigo_jornada_asueto = '4';
+						$codigo_jornada_vacaciones = '4';
+						$codigo_jornada_descanso = '4';
+						$codigo_jornada_4_extra = '4';
+						$codigo_jornada_nocturnidad = '4';
+						$HoraExtra = '0';
+						// Esto guardará el código 4144444 (Sin Jornada) en la BD.
+						*/
+					}
+
 				// 	VERIFICAR QUE TIPO DE USUARIO DESEA MODIFICAR EL REGISTRO DEL PUNTEADO.
 				if($codigo_perfil == '01' || $codigo_perfil == '02' || $codigo_perfil == '05' || $codigo_perfil == '07' || $codigo_perfil == '08' || $codigo_perfil == '09' || $codigo_perfil == '10' || $codigo_perfil == '11'){
 					$query_update = "UPDATE personal_asistencia SET

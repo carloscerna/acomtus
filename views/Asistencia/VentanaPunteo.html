@@ -103,9 +103,97 @@
                                 <div class="font-weight-bold small">Falta</div>
                             </div>
                         </div>
+
+                        <div id="subpanel-permisos" class="mt-2 mb-2" style="display:none;">
+                            <div class="seccion-titulo text-muted font-weight-bold small mb-2 pl-1 text-uppercase">
+                                <i class="fas fa-list-ul"></i> 1.1 Tipo de Permiso
+                            </div>
+                            <div class="row px-1">
+                                <div class="col-6 px-1">
+                                    <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center active" 
+                                         onclick="seleccionarSubTipo('3')" data-sub="3" style="border: 1px solid #ddd;">
+                                        <i class="fas fa-user-clock text-purple fa-2x mb-1"></i>
+                                        <div class="font-weight-bold small">Personal (PP)</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 px-1">
+                                    <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center" 
+                                         onclick="seleccionarSubTipo('2')" data-sub="2" style="border: 1px solid #ddd;">
+                                        <i class="fas fa-user-md text-danger fa-2x mb-1"></i>
+                                        <div class="font-weight-bold small">ISSS / Salud</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <div id="subpanel-faltas" class="mt-2 mb-2" style="display:none;">
+                            <div class="seccion-titulo text-muted font-weight-bold small mb-2 pl-1 text-uppercase">
+                                <i class="fas fa-exclamation-triangle"></i> 1.1 Tipo de Ausencia
+                            </div>
+                            <div class="row px-1">
+                                <div class="col-6 px-1">
+                                    <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center active" 
+                                         onclick="seleccionarSubTipo('4')" data-sub="4" style="border: 1px solid #ddd;">
+                                        <i class="fas fa-times-circle text-danger fa-2x mb-1"></i>
+                                        <div class="font-weight-bold small">Falta (F)</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 px-1">
+                                    <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center" 
+                                         onclick="seleccionarSubTipo('10')" data-sub="10" style="border: 1px solid #ddd;">
+                                        <i class="fas fa-gavel text-dark fa-2x mb-1"></i>
+                                        <div class="font-weight-bold small">Castigo (C)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-
+                    <div id="subpanel-asueto" class="mt-2 mb-2" style="display:none;">
+                        <div class="seccion-titulo text-muted font-weight-bold small mb-2 pl-1 text-uppercase">
+                            <i class="fas fa-random"></i> Tipo de Asueto
+                        </div>
+                        <div class="row px-1">
+                            <div class="col-4 px-1">
+                                <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center active" 
+                                     onclick="seleccionarSubTipo('16')" data-sub="16" style="border: 1px solid #ddd;">
+                                    <div class="font-weight-bold small">Normal</div>
+                                </div>
+                            </div>
+                            <div class="col-4 px-1">
+                                <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center" 
+                                     onclick="seleccionarSubTipo('17')" data-sub="17" style="border: 1px solid #ddd;">
+                                    <div class="font-weight-bold small">Descanso (DA)</div>
+                                </div>
+                            </div>
+                            <div class="col-4 px-1">
+                                <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center" 
+                                     onclick="seleccionarSubTipo('15')" data-sub="15" style="border: 1px solid #ddd;">
+                                    <div class="font-weight-bold small">Trabajo (TDA)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div id="subpanel-vacacion" class="mt-2 mb-2" style="display:none;">
+                        <div class="seccion-titulo text-muted font-weight-bold small mb-2 pl-1 text-uppercase">
+                            <i class="fas fa-random"></i> Tipo de Vacación
+                        </div>
+                        <div class="row px-1">
+                            <div class="col-6 px-1">
+                                <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center active" 
+                                     onclick="seleccionarSubTipo('11')" data-sub="11" style="border: 1px solid #ddd;">
+                                    <div class="font-weight-bold small">Normal (V)</div>
+                                </div>
+                            </div>
+                            <div class="col-6 px-1">
+                                <div class="card p-2 text-center opcion-card shadow-sm h-100 justify-content-center" 
+                                     onclick="seleccionarSubTipo('19_vda')" data-sub="19_vda" style="border: 1px solid #ddd;">
+                                    <div class="font-weight-bold small">V + D + A (VDA)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                         
             <div id="panel-configuracion" class="mt-2 p-3 bg-white rounded border shadow-sm">
             
@@ -158,16 +246,19 @@
                         Código BD: <span id="debug-codigo-bd" class="font-weight-bold font-monospace bg-white px-1 rounded text-danger">0.0.0.0.0.0.0</span>
                     </div>
 
-                </div> </div> <div class="modal-footer bg-dark">
-                <button type="button" class="btn btn-danger mr-auto" id="btnEliminarPunteo" style="display:none;">
-                    <i class="fas fa-trash-alt"></i> Reiniciar
-                </button>
+                </div>
+             </div>
+                
+                <div class="modal-footer bg-dark">
+                    <button type="button" class="btn btn-danger mr-auto" id="btnEliminarPunteo" style="display:none;">
+                        <i class="fas fa-trash-alt"></i> Reiniciar
+                    </button>
 
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="BotonCerrar">Cerrar</button>
-                <button type="button" class="btn btn-primary font-weight-bold px-4" id="goGuardarPunteo">
-                    <i class="fas fa-save"></i> GUARDAR
-                </button>
-            </div>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" id="BotonCerrar">Cerrar</button>
+                    <button type="button" class="btn btn-primary font-weight-bold px-4" id="goGuardarPunteo">
+                        <i class="fas fa-save"></i> GUARDAR
+                    </button>
+                </div>
 
         </form>
     </div>
