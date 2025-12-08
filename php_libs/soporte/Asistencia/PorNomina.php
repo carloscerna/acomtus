@@ -1,666 +1,433 @@
 <?php
-//session_name('demoUI');
-//session_start();
-// limpiar cache.
-clearstatcache();
-// Script para ejecutar AJAX
-// cambiar a utf-8.
-header("Content-Type: text/html;charset=iso-8859-1");
-// Insertar y actualizar tabla de usuarios
-sleep(0);
-//
-// Establecer formato para la fecha.
-// 
-	date_default_timezone_set('America/El_Salvador');
-	setlocale(LC_TIME,'es_SV');
-//	Hora Actual.
-    $hora_actual = date("h:i:s a"); 
-//Crear una línea. Fecha con getdate();
-    $hoy = getdate();
-    $NombreDia = $hoy["wday"];  // dia de la semana Nombre.
-    //$dia = $hoy["d"];    // dia de la semana
-    //$mes = $hoy["m"];     // mes
-    $año = $hoy["year"];    // año
-    //$fecha_nomina = $dia . "-" . $mes . "-" . $año;
-	$fecha_nomina = date("d/m/Y");
-// Inicializamos variables de mensajes y JSON
-$guardar_produccion = false;
+// Script optimizado para Asistencia
+// header("Content-Type: text/html;charset=iso-8859-1"); // Si usas UTF-8 en DB, mejor usa utf-8 aquí
+header("Content-Type: text/html;charset=utf-8");
+
+// Configuración Regional
+date_default_timezone_set('America/El_Salvador');
+setlocale(LC_TIME,'es_SV');
+$hora_actual = date("h:i:s a"); 
+$fecha_nomina = date("d/m/Y");
+
+// Variables Iniciales
 $respuestaOK = false;
-$codigo_produccion = 0;
 $mensajeError = ":(";
 $MensajeAsueto = "";
 $contenidoOK = "";
-$totalIngresoOK = 0;
-$totalIngresoOKPantalla = 0;
-$IdProduccionOK = 0;
-$cantidadTiqueteOK = 0;
-$lista = "";
-$arreglo = array();
 $datos = array();
 $fila_array = 0;
-$fila = 0;
-$CodigoJornadaTodasSeparador = "";
-// ruta de los archivos con su carpeta
-    $path_root=trim($_SERVER['DOCUMENT_ROOT']);
-	$url_fotos = "/acomtus/img/fotos/";
-	$url_sin_foto = "/acomtus/img/";
-	$url_cat_img = "/acomtus/img/Catalogo Jornada/";
-// Incluimos el archivo de funciones y conexi�n a la base de datos
-	include($path_root."/acomtus/includes/mainFunctions_conexion.php");
-	include($path_root."/acomtus/includes/funciones.php");
-// OBTENER VALORES DE LA TABLA CATALOGO_JORNADA_IMAGENES.
-// CREAR ARRAY ASOCIATIVA DE LA TABLA: asuetos
-	$query_j_img = "SELECT * FROM catalogo_jornada_imagenes ORDER BY id_";    // consulta
-	$resultado_j_img = $dblink -> query($query_j_img); // ejecuciónd ela consult.a
-// while
-	$Codigo = ""; $Descripcion = ""; $codigo_img = ""; $descripcion_img = "";
-	while($listado_j_img = $resultado_j_img -> fetch(PDO::FETCH_BOTH))
-		{
-			$codigo = $listado_j_img["codigo"];
-			$descripcion = trim($listado_j_img["descripcion"]);
-			// CREAR ARRAY ASOCIATIVA
-				$CodigoJornadaImagen["codigo"][] = $codigo;
-				$CodigoJornadaImagen["descripcion"][] = $descripcion;
-		}
-		//var_dump($FechaDescripcionAsueto);
-		$buscar = array_search('4444441', $CodigoJornadaImagen['codigo']);
-		if(!empty($buscar)){
-			$codigo_img = $CodigoJornadaImagen['codigo'][$buscar];
-			$descripcion_img = $CodigoJornadaImagen['descripcion'][$buscar];
-		}
-		/*
-		var_dump($CodigoJornadaImagen);
-		print $buscar . "<br>";
-        echo 'Código ' . $codigo_img. ' Descripcion ' . $descripcion_img;
-        exit;*/
-// Validar conexi�n con la base de datos
+
+// Rutas
+$path_root = trim($_SERVER['DOCUMENT_ROOT']);
+$url_fotos = "/acomtus/img/fotos/";
+$url_sin_foto = "/acomtus/img/";
+$url_cat_img = "/acomtus/img/Catalogo Jornada/";
+
+// Inclusiones
+include($path_root."/acomtus/includes/mainFunctions_conexion.php");
+include($path_root."/acomtus/includes/funciones.php");
+
+// =================================================================================
+// 1. OPTIMIZACIÓN DE CATÁLOGO DE IMÁGENES (Carga en Memoria Hash Map)
+// =================================================================================
+// Creamos un array asociativo [ 'CODIGO' => 'NOMBRE_IMAGEN' ] para búsqueda instantánea O(1)
+$imagenesMap = [];
+$query_j_img = "SELECT codigo, descripcion FROM catalogo_jornada_imagenes";
+$resultado_j_img = $dblink->query($query_j_img);
+
+while($row = $resultado_j_img->fetch(PDO::FETCH_ASSOC)) {
+    // La clave es el código, el valor es la descripción (nombre archivo)
+    // Aseguramos que el código sea string para evitar problemas
+    $imagenesMap[(string)$row["codigo"]] = trim($row["descripcion"]);
+}
+
+// =================================================================================
+// 2. LÓGICA PRINCIPAL
+// =================================================================================
+
 if($errorDbConexion == false){
-	// Validamos qe existan las variables post
-	if(isset($_POST) && !empty($_POST)){
-		if(!empty($_POST['accion_buscar'])){
-			$_POST['accion'] = $_POST['accion_buscar'];
-		}
-		// Verificamos las variables de acci�n
-		switch ($_POST['accion']) {
-			case 'BuscarPersonalCodigo':
-				$codigo_personal = trim($_POST['codigo_personal']);
-				$fecha = trim($_POST['fecha']);
-				$CodigoDepartamentoEmpresa = trim($_POST['codigo_departamento_empresa']);
-				// Armamos el query.
-				$query = "SELECT p.id_personal, p.codigo, TRIM(p.nombres) as nombre, TRIM(p.apellidos) as apellido, btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado,
-							p.foto, p.codigo_genero, p.codigo_departamento_empresa
-								FROM personal p 
-									WHERE codigo = '$codigo_personal' and codigo_departamento_empresa = '$CodigoDepartamentoEmpresa'";
-				// Ejecutamos el Query.
-				$consulta = $dblink -> query($query);
-				// Validar si hay registros.
-				if($consulta -> rowCount() != 0){
-					$respuestaOK = true;
-					$num = 0;
-					// convertimos el objeto
-					while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-					{
-                        // Nombres de los campos de la tabla.
-                            $id_ = trim($listado['id_personal']);
-							$codigo = trim($listado['codigo']);
-							$codigo_departamento_empresa = trim($listado['codigo_departamento_empresa']);
-							$nombre_personal = trim($listado['nombre_empleado']);
-							$url_foto = trim($listado['foto']);
-							$codigo_genero = trim($listado['codigo_genero']);
+    if(isset($_POST) && !empty($_POST)){
+        if(!empty($_POST['accion_buscar'])){
+            $_POST['accion'] = $_POST['accion_buscar'];
+        }
 
-						// Rellenando la array.
-							$datos[$fila_array]["id_"] = $id_;
-							$datos[$fila_array]["codigo"] = $codigo;
-							$datos[$fila_array]["codigo_departamento_empresa"] = $codigo_departamento_empresa;
-							$datos[$fila_array]["nombre_empleado"] = $nombre_personal;
-							$datos[$fila_array]["codigo_genero"] = $codigo_genero;
-							$datos[$fila_array]["url_foto"] = $url_foto;
-					}
-					$datos[$fila_array]["mensajeError"] = 'Código Encontrado.';
-					$datos[$fila_array]["respuestaOK"] = true;
-				
-					// BUSCAR SI LA FECHA ES D{IA DE ASUETO}
-					//
-					// REVISAR Y CALCULAR SI LA FECHA PERTENECIA A UN DÍA DE ASUETO
-					$fecha_partial = explode("-",$fecha);
-					$asueto = false;
-					//print_r($fecha_partial);
-					$asueto_mes = (int)$fecha_partial[1];    // mes 
-					$asueto_dia = (int)$fecha_partial[2];    // dia
-					//print 'Mes ' .$asueto_mes;
-					//print 'Día ' . $asueto_dia;
-					 // ARMAR LA CONSULTA
-					   $query_asueto = "SELECT * FROM asuetos WHERE fecha = '$fecha'";
-						// EJECUTAR LA CONSULTA
-						$consulta_asueto = $dblink -> query($query_asueto);
-						// convertimos el objeto
-						if($consulta_asueto -> rowCount() != 0){
-							while($listado = $consulta_asueto -> fetch(PDO::FETCH_BOTH))
-							{
-								// Es asueto
-								$descripcion = trim($listado['descripcion']);
-								$datos[$fila_array]["descripcion"] = $descripcion;
-								$datos[$fila_array]["asueto"] = "si";
-							}
-						}else{
-							$datos[$fila_array]["descripcion"] = "--";
-							$datos[$fila_array]["asueto"] = "no";
-						}
-				}
-				else{	// verificar si el codigo no es el mismo de la empresa del Usuario que ingresa la asistencia.
-					$contenidoOK = '';
-					$datos[$fila_array]["respuestaOK"] = false;
-					$datos[$fila_array]["mensajeError"] = 'Código No Existe o No Pertenece a este Departamento.';
-				}
-			break;
-			case "BuscarPersonalRutaCodigo":
-				$codigo_personal = trim($_POST['codigo_personal']);
-				$CodigoDepartamentoEmpresa = trim($_POST['codigo_departamento_empresa']);
-				$CodigoRuta = "00";
+        switch ($_POST['accion']) {
+            
+            // ---------------------------------------------------------------------
+            // CASO 1: BUSCAR EMPLEADO INDIVIDUAL (Por Código)
+            // ---------------------------------------------------------------------
+            case 'BuscarPersonalCodigo':
+                $codigo_personal = trim($_POST['codigo_personal']);
+                $fecha = trim($_POST['fecha']);
+                $CodigoDepartamentoEmpresa = trim($_POST['codigo_departamento_empresa']);
+                $codigo_personal_encargado = trim($_POST['codigo_personal_encargado'] ?? '');
 
-				if($CodigoDepartamentoEmpresa == "02"){
-					// Armamos el query.
-						$query = "SELECT u.codigo_ruta, 
-						cat_ruta.descripcion as descripcion, u.codigo_ruta as codigo
-							FROM usuarios u 
-								INNER JOIN catalogo_ruta cat_ruta ON cat_ruta.id_ruta = TO_NUMBER(u.codigo_ruta,'99')
-									WHERE u.codigo_personal = '$codigo_personal'";
-				}else{
-					// CONSULTA LOS OTROS DEPARTAMENTO Y SOLO LO FILTRA CON EL CODIGO DELDEPARTAMAENTO.
-					$query = "SELECT u.codigo_departamento_empresa as codigo, 
-					cat_empresa.descripcion as descripcion
-						FROM usuarios u 
-							INNER JOIN catalogo_departamento_empresa cat_empresa ON cat_empresa.id_departamento_empresa = TO_NUMBER(u.codigo_departamento_empresa,'99')
-								WHERE u.codigo_personal = '$codigo_personal'";
-				}
-				// Ejecutamos el Query.
-				$consulta = $dblink -> query($query);
-				// Validar si hay registros.
-				if($consulta -> rowCount() != 0){
-					$respuestaOK = true;
-					$num = 0;
-					// convertimos el objeto
-					while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-					{
-                        // Nombres de los campos de la tabla.
-                            $Descripcion = trim($listado['descripcion']);
-							$Codigo = trim($listado['codigo']);
+                // Consulta Principal
+                $query = "SELECT p.id_personal, p.codigo, TRIM(p.nombres) as nombre, TRIM(p.apellidos) as apellido, 
+                            btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) AS nombre_empleado,
+                            p.foto, p.codigo_genero, p.codigo_departamento_empresa
+                          FROM personal p 
+                          WHERE codigo = :cod AND codigo_departamento_empresa = :depto";
+                
+                $stmt = $dblink->prepare($query);
+                $stmt->bindParam(':cod', $codigo_personal);
+                $stmt->bindParam(':depto', $CodigoDepartamentoEmpresa);
+                $stmt->execute();
 
-						// Rellenando la array.
-							$datos[$fila_array]["Descripcion"] = $Descripcion;
-							$datos[$fila_array]["Codigo"] = $Codigo;
-					}
-					$datos[$fila_array]["mensajeError"] = 'Código Encontrado.';
-					$datos[$fila_array]["respuestaOK"] = true;
-                        // TOTAL DE EMPLEADOS. POR RUTA U OFICINA
-						if($CodigoDepartamentoEmpresa == "02"){
-							$query_count = "SELECT count(*) as totalempleados FROM personal WHERE codigo_ruta = '$Codigo' and codigo_estatus = '01'";
-						}else{
-							$query_count = "SELECT count(*) as totalempleados FROM personal WHERE codigo_departamento_empresa = '$Codigo' and codigo_estatus = '01'";
-						}
-                        // Ejecutamos el Query.
-                            $consulta_count = $dblink -> query($query_count);
-                            // Validar si hay registros.
-				                if($consulta_count -> rowCount() != 0){
-                         			// convertimos el objeto
-                                    while($listado = $consulta_count -> fetch(PDO::FETCH_BOTH))
-                                    {
-                                        // Nombres de los campos de la tabla.
-                                            $TotalEmpleados = trim($listado['totalempleados']);
-                                        // Rellenando la array.
-                                            $datos[$fila_array]["TotalEmpleados"] = $TotalEmpleados;
-                                    }
+                if($stmt->rowCount() != 0){
+                    $respuestaOK = true;
+                    while($listado = $stmt->fetch(PDO::FETCH_ASSOC)){
+                        $datos[$fila_array]["id_"] = trim($listado['id_personal']);
+                        $datos[$fila_array]["codigo"] = trim($listado['codigo']);
+                        $datos[$fila_array]["codigo_departamento_empresa"] = trim($listado['codigo_departamento_empresa']);
+                        $datos[$fila_array]["nombre_empleado"] = trim($listado['nombre_empleado']);
+                        $datos[$fila_array]["url_foto"] = trim($listado['foto']);
+                        $datos[$fila_array]["codigo_genero"] = trim($listado['codigo_genero']);
+                    }
+                    $datos[$fila_array]["mensajeError"] = 'Código Encontrado.';
+                    $datos[$fila_array]["respuestaOK"] = true;
 
-                                }
-				}
-				else{	// verificar si el codigo no es el mismo de la empresa del Usuario que ingresa la asistencia.
-					$contenidoOK = '';
-					$datos[$fila_array]["respuestaOK"] = false;
-					$datos[$fila_array]["mensajeError"] = 'Ruta no asignada.';
-				}
+                    // Validar Asueto (Consulta simple)
+                    $query_asueto = "SELECT descripcion FROM asuetos WHERE fecha = :fecha LIMIT 1";
+                    $stmtA = $dblink->prepare($query_asueto);
+                    $stmtA->bindParam(':fecha', $fecha);
+                    $stmtA->execute();
+                    
+                    if($stmtA->rowCount() > 0){
+                        $rowA = $stmtA->fetch(PDO::FETCH_ASSOC);
+                        $datos[$fila_array]["descripcion"] = $rowA['descripcion'];
+                        $datos[$fila_array]["asueto"] = "si";
+                    } else {
+                        $datos[$fila_array]["descripcion"] = "--";
+                        $datos[$fila_array]["asueto"] = "no";
+                    }
+                } else {
+                    $datos[$fila_array]["respuestaOK"] = false;
+                    $datos[$fila_array]["mensajeError"] = 'Código No Existe o No Pertenece a este Departamento.';
+                }
 
-			break;
-			case 'BuscarTipoLicencia':
-                # Buscar en tabla catalogo_jornada.
-                // armando el Query.
-                    $query = "SELECT id_, descripcion, descripcion_completa from catalogo_tipo_licencia_o_permiso WHERE id_ > '1' ORDER BY id_";
-                    // Ejecutamos el Query.
-                    $consulta = $dblink -> query($query);
-                    // Inicializando el array
-                    $datos=array(); $fila_array = 0;
-                    // Recorriendo la Tabla con PDO::
-                        while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-                        {
-                            // Nombres de los campos de la tabla.
-                        $codigo = trim($listado['id_']); $descripcion_completa = trim($listado['descripcion_completa']);
-						$descripcion = trim($listado['descripcion']);
-                        //. ' ' . trim($listado['hora_hasta']);
-                        // Rellenando la array.
-                           $datos[$fila_array]["codigo"] = $codigo;
-                            $datos[$fila_array]["descripcion"] = $descripcion;
-							$datos[$fila_array]["descripcion_completa"] = $descripcion_completa;
-                                $fila_array++;
-                            }
-			break;
+                // Buscar Asistencia Existente
+                // NOTA: Usamos los mismos parámetros ya limpios
+                $query_asis = "SELECT * FROM personal_asistencia 
+                               WHERE codigo_personal = :cod AND fecha = :fecha";
+                // Opcional: Filtrar por encargado si es estricto
+                // AND codigo_personal_encargado = :encargado
+                
+                $stmtAsis = $dblink->prepare($query_asis);
+                $stmtAsis->bindParam(':cod', $codigo_personal);
+                $stmtAsis->bindParam(':fecha', $fecha);
+                $stmtAsis->execute();
+
+                $imgJornada = "#";
+                $HoraExtra = 0;
+
+                if($stmtAsis->rowCount() > 0){
+                    $row = $stmtAsis->fetch(PDO::FETCH_ASSOC);
+                    $HoraExtra = trim($row['hora_extra']);
+                    
+                    // Armado del código (Optimizada con ternario)
+                    $CodigoJornadaTodas = trim($row['codigo_jornada']) . trim($row['codigo_tipo_licencia']) . 
+                                          trim($row['codigo_jornada_asueto']) . trim($row['codigo_jornada_vacaciones']) . 
+                                          trim($row['codigo_jornada_descanso']) . trim($row['codigo_jornada_e_4h']) . 
+                                          trim($row['codigo_jornada_nocturna']);
+                    
+                    if($HoraExtra != 0) $CodigoJornadaTodas .= $HoraExtra;
+
+                    // Búsqueda directa en el Mapa (Mucho más rápido)
+                    if(isset($imagenesMap[$CodigoJornadaTodas])){
+                        $imgJornada = $url_cat_img . $imagenesMap[$CodigoJornadaTodas];
+                    }
+                }
+                
+                $fila_array++;
+                $datos[$fila_array]["imgJornada"] = $imgJornada;
+                $datos[$fila_array]["HoraExtra"] = $HoraExtra;
+                break;
+
+            // ---------------------------------------------------------------------
+            // CASO 2: INFORMACIÓN DE RUTA / DEPARTAMENTO
+            // ---------------------------------------------------------------------
+            case "BuscarPersonalRutaCodigo":
+                $codigo_personal = trim($_POST['codigo_personal']);
+                $CodigoDepartamentoEmpresa = trim($_POST['codigo_departamento_empresa']);
+                
+                if($CodigoDepartamentoEmpresa == "02"){ // Motoristas
+                    $query = "SELECT u.codigo_ruta as codigo, cat_ruta.descripcion 
+                              FROM usuarios u 
+                              INNER JOIN catalogo_ruta cat_ruta ON cat_ruta.id_ruta = TO_NUMBER(u.codigo_ruta,'99')
+                              WHERE u.codigo_personal = '$codigo_personal'";
+                } else { // Otros
+                    $query = "SELECT u.codigo_departamento_empresa as codigo, cat_empresa.descripcion 
+                              FROM usuarios u 
+                              INNER JOIN catalogo_departamento_empresa cat_empresa ON cat_empresa.id_departamento_empresa = TO_NUMBER(u.codigo_departamento_empresa,'99')
+                              WHERE u.codigo_personal = '$codigo_personal'";
+                }
+
+                $consulta = $dblink->query($query);
+
+                if($consulta->rowCount() != 0){
+                    $listado = $consulta->fetch(PDO::FETCH_ASSOC);
+                    $CodigoUbicacion = trim($listado['codigo']);
+                    
+                    $datos[$fila_array]["Descripcion"] = trim($listado['descripcion']);
+                    $datos[$fila_array]["Codigo"] = $CodigoUbicacion;
+                    $datos[$fila_array]["mensajeError"] = 'Código Encontrado.';
+                    $datos[$fila_array]["respuestaOK"] = true;
+
+                    // Contar empleados (Optimizado count)
+                    $campoFiltro = ($CodigoDepartamentoEmpresa == "02") ? "codigo_ruta" : "codigo_departamento_empresa";
+                    $query_count = "SELECT count(*) as totalempleados FROM personal WHERE $campoFiltro = '$CodigoUbicacion' AND codigo_estatus = '01'";
+                    
+                    $stmtCount = $dblink->query($query_count);
+                    $resCount = $stmtCount->fetch(PDO::FETCH_ASSOC);
+                    $datos[$fila_array]["TotalEmpleados"] = $resCount['totalempleados'];
+
+                } else {
+                    $datos[$fila_array]["respuestaOK"] = false;
+                    $datos[$fila_array]["mensajeError"] = 'Ruta/Depto no asignado.';
+                }
+                break;
+
+            // ---------------------------------------------------------------------
+            // CASO 3: LISTADO DE EMPLEADOS POR RUTA (GRAN OPTIMIZACIÓN AQUÍ)
+            // ---------------------------------------------------------------------
             case "BuscarEmpleadosPorRuta":
                 $codigo_ruta = trim($_POST['CodigoRuta']);
-				$CodigoDepartamentoEmpresa = trim($_POST['CodigoDepartamentoEmpresa']);
-				$fecha = trim($_POST['fecha']);
-				$codigo_personal_encargado = trim($_POST['codigo_personal_encargado']);
-				$RegistroGuardar = "No";
-				$RegistroGuardarCodigoPersonal = array(); $foto = array(); $RegistroGuardarFoto = array(); $RegistroGuardarNombreCompleto = array();
-				// CONSULTA PARA VERIFICAR LA EMPLEADOS SEGUN LA RUTA U OFICINA
-					if($CodigoDepartamentoEmpresa == "02"){
-						$query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, foto
-							FROM personal 
-								WHERE codigo_ruta = '$codigo_ruta' and codigo_estatus = '01' ORDER BY codigo";
-					}else{
-						$query = "SELECT codigo, btrim(nombres || CAST(' ' AS VARCHAR) || apellidos) AS nombre_completo, foto
-							FROM personal WHERE codigo_departamento_empresa = '$CodigoDepartamentoEmpresa' and codigo_estatus = '01' ORDER BY codigo";
-					}
-				/////////////////////////////////////////////////////////////////////////////////////////////////////	
-				// CONSULTAR SI LA FECHA TIENE ASUETO.	
-				/////////////////////////////////////////////////////////////////////////////////////////////////////
-					$asueto = false;
-					$query_asueto = "SELECT * FROM asuetos WHERE fecha = '$fecha'";
-					// EJECUTAR LA CONSULTA
-					$consulta_asueto = $dblink -> query($query_asueto);
-					// convertimos el objeto
-					if($consulta_asueto -> rowCount() != 0){
-						$asueto = true;
-						while($listado = $consulta_asueto -> fetch(PDO::FETCH_BOTH))
-						{
-							// Es asueto
-							$descripcion = trim($listado['descripcion']);
-							$MensajeAsueto = $descripcion;
-						}
-					}
-					// BUSCAR LA DESCRIPCIÓN DEL ASUETO Y ASIGNAR VALOR.
-					///////////////////////////////////////////////////////////////////////////////////
-					if($asueto == true){
-						$query_asueto_id = "SELECT * FROM catalogo_tipo_licencia_o_permiso WHERE descripcion = 'A'";
-						// EJECUTAR LA CONSULTA
-						$consulta_asueto_id = $dblink -> query($query_asueto_id);
-						// convertimos el objeto
-						if($consulta_asueto_id -> rowCount() != 0){
-							while($listado_id = $consulta_asueto_id -> fetch(PDO::FETCH_BOTH))
-							{
-								// Es asueto
-								$CodigoTipoLicencia = trim($listado_id['id_']);
-							}
-						}	
-					}
-				// Ejecutamos el Query.
-    				$consulta_ = $dblink -> query($query);
-				// Validar si hay registros.
-                    if($consulta_ -> rowCount() != 0)
-					{
+                $CodigoDepartamentoEmpresa = trim($_POST['CodigoDepartamentoEmpresa']);
+                $fecha = trim($_POST['fecha']);
+                
+                // A. Verificar Asueto (Una sola vez para todos)
+                $MensajeAsueto = "";
+                $query_asueto = "SELECT descripcion FROM asuetos WHERE fecha = '$fecha' LIMIT 1";
+                $resAsueto = $dblink->query($query_asueto);
+                if($resAsueto->rowCount() > 0){
+                    $filaA = $resAsueto->fetch(PDO::FETCH_ASSOC);
+                    $MensajeAsueto = $filaA['descripcion'];
+                }
+
+                // B. QUERY OPTIMIZADO (JOIN)
+                // Traemos Empleado + Asistencia en UNA sola consulta.
+                // Usamos COALESCE para manejar nulos si no hay asistencia.
+                
+                $filtroUbicacion = ($CodigoDepartamentoEmpresa == "02") 
+                                    ? "p.codigo_ruta = '$codigo_ruta'" 
+                                    : "p.codigo_departamento_empresa = '$CodigoDepartamentoEmpresa'";
+
+                $query = "SELECT 
+                            p.id_personal, p.codigo as codigo_emp, p.nombres, p.apellidos, p.foto,
+                            pa.id_ as id_asistencia, pa.codigo_jornada, pa.codigo_tipo_licencia,
+                            pa.codigo_jornada_asueto, pa.codigo_jornada_vacaciones, pa.codigo_jornada_descanso,
+                            pa.codigo_jornada_e_4h, pa.codigo_jornada_nocturna, pa.hora_extra
+                          FROM personal p
+                          LEFT JOIN personal_asistencia pa 
+                                 ON p.codigo = pa.codigo_personal AND pa.fecha = '$fecha'
+                          WHERE $filtroUbicacion AND p.codigo_estatus = '01'
+                          ORDER BY p.codigo ASC";
+
+                $consulta = $dblink->query($query);
+
+                if($consulta->rowCount() != 0){
+                    $respuestaOK = true;
+                    $mensajeError = "Registros Encontrados...";
+                    
+                    while($row = $consulta->fetch(PDO::FETCH_ASSOC)){
+                        // Datos Personales
+                        $codigo_personal = trim($row['codigo_emp']);
+                        $nombre_completo = trim($row['nombres']) . " " . trim($row['apellidos']);
+                        $foto = trim($row['foto']);
+                        
+                        // Procesar Foto
+                        $rutaFoto = empty($foto) ? $url_sin_foto . 'avatar_masculino.png' : $url_fotos . $foto;
+
+                        // Datos Asistencia (Si existen gracias al LEFT JOIN)
+                        $id_asistencia = $row['id_asistencia'] ?? 0;
+                        $imgJornada = $url_cat_img . "SinJornada.jpg"; // Default visual
+                        
+                        // Variables por defecto para el Código Separador
+                        $CJ = '4'; $CTL = '1'; $CJA = '4'; $CJV = '4'; $CJD = '4'; $CJE4H = '4'; $CJN = '4'; $HE = '0';
+                        $CodigoJornadaTodas = "4144444"; // Default visual
+
+                        if($id_asistencia > 0){
+                            // Si hay registro, usamos los valores de la BD
+                            $CJ = trim($row['codigo_jornada']);
+                            $CTL = trim($row['codigo_tipo_licencia']);
+                            $CJA = trim($row['codigo_jornada_asueto']);
+                            $CJV = trim($row['codigo_jornada_vacaciones']);
+                            $CJD = trim($row['codigo_jornada_descanso']);
+                            $CJE4H = trim($row['codigo_jornada_e_4h']);
+                            $CJN = trim($row['codigo_jornada_nocturna']);
+                            $HE = trim($row['hora_extra']);
+
+                            // Construir Código para buscar Imagen
+                            $CodigoJornadaTodas = $CJ . $CTL . $CJA . $CJV . $CJD . $CJE4H . $CJN;
+                            if($HE != 0) $CodigoJornadaTodas .= $HE;
+
+                            // Buscar imagen en el Mapa (Súper rápido)
+                            if(isset($imagenesMap[$CodigoJornadaTodas])){
+                                $imgJornada = $url_cat_img . $imagenesMap[$CodigoJornadaTodas];
+                            } else {
+                                // Fallback si no encuentra imagen: SinJornada
+                                $imgJornada = $url_cat_img . "SinJornada.jpg";
+                            }
+                        }
+
+                        // Construir Código Separador para JS (Siempre con HE al final)
+                        $CodigoJornadaTodasSeparador = "$CJ.$CTL.$CJA.$CJV.$CJD.$CJE4H.$CJN.$HE";
+
+                        // Generar HTML de la fila
+                        $datos_codificados = "$rutaFoto#$imgJornada#$id_asistencia#$codigo_personal#$nombre_completo#$CodigoJornadaTodas#$CodigoJornadaTodasSeparador";
+                        
+                        $contenidoOK .= "<tr>
+                            <td class='mx-auto text-center' style='width: 80px;'>
+                                <img src='$rutaFoto' class='rounded border shadow-sm' alt='#' width='60' height='70'>
+                            </td>
+                            <td class='align-middle'>
+                                <div class='font-weight-bold text-dark' style='font-size:1.1rem;'>$nombre_completo</div>
+                                <div class='text-muted small'>Cod: <span class='font-weight-bold'>$codigo_personal</span></div>
+                            </td>
+                            <td class='align-middle text-right'>
+                                <a data-accion='editarAsistencia' href='$datos_codificados' class='btn btn-light border shadow-sm'>
+                                    <img src='$imgJornada' class='rounded' alt='' width='50' height='55'>
+                                </a>
+                            </td>
+                        </tr>";
+                    }
+                } else {
+                    $respuestaOK = false;
+                    $mensajeError = "No hay empleados en esta ruta/departamento.";
+                }
+                break;
+
+            // ---------------------------------------------------------------------
+            // CASO 4: GUARDAR / ACTUALIZAR / ELIMINAR
+            // ---------------------------------------------------------------------
+            
+            case 'EliminarAsistencia':
+                $id_asistencia = trim($_POST['id_asistencia']);
+                if(!empty($id_asistencia)){
+                    $query = "DELETE FROM personal_asistencia WHERE id_ = :id";
+                    $stmt = $dblink->prepare($query);
+                    $stmt->bindParam(':id', $id_asistencia);
+                    if($stmt->execute()){
                         $respuestaOK = true;
-                        $num = 0;
-                        // convertimos el objeto
-                        while($listado = $consulta_ -> fetch(PDO::FETCH_BOTH))
-                        {
-							// variables de la tabla personal.
-								$codigo_personal = trim($listado['codigo']);
-								$nombre_completo = trim($listado['nombre_completo']);
-								$RegistroGuardarNombreCompleto[] = $nombre_completo;
-								$foto = trim($listado['foto']);
-								$RegistroGuardarCodigoPersonal[] = $codigo_personal;
-								if(empty($foto)){
-									$foto = $url_sin_foto . 'avatar_masculino.png';
-									$RegistroGuardarFoto[] = $foto;
-								}else{
-									$foto = $url_fotos . $foto;
-									$RegistroGuardarFoto[] = $foto;
-								}
-									// BUSCAR EN PERSONAL ASISTENCIA.
-									// BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
-									$query_buscar_i = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$codigo_personal' and fecha = '$fecha' and codigo_personal_encargado = '$codigo_personal_encargado'";
-									// Ejecutamos el Query.
-										$consulta_b = $dblink -> query($query_buscar_i);
-										// Validar si hay registros.
-										$imgJornada = "#";
-										if($consulta_b -> rowCount() != 0){
-											while($listado_b = $consulta_b -> fetch(PDO::FETCH_BOTH))
-											{
-												// Variables.
-													$Id_ = trim($listado_b['id_']);
-													$CodigoJornada = trim($listado_b['codigo_jornada']);
-													$CodigoLicencia = trim($listado_b['codigo_tipo_licencia']);
-													$CodigoJornadaAsueto = trim($listado_b['codigo_jornada_asueto']);
-													$CodigoJornadaVacaciones = trim($listado_b['codigo_jornada_vacaciones']);
-													$CodigoJornadaDescanso = trim($listado_b['codigo_jornada_descanso']);
-													$CodigoJornadaE4H = trim($listado_b['codigo_jornada_e_4h']);
-													$CodigoJornadaNocturna = trim($listado_b['codigo_jornada_nocturna']);
-													$HoraExtra = trim($listado_b['hora_extra']);
-
-													if($HoraExtra != 0){
-														//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-														$CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.
-														$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.
-														$CodigoJornadaNocturna.$HoraExtra;
-														//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-														$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
-															".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
-															".".$CodigoJornadaNocturna.".".$HoraExtra;
-													}
-													else{
-														//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-															$CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.
-															$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.
-															$CodigoJornadaNocturna;
-														//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-														$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
-																					".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
-																					".".$CodigoJornadaNocturna.".".$HoraExtra;
-													}
-
-												// Condiciones para la Imagen.
-													$buscar = array_search($CodigoJornadaTodas, $CodigoJornadaImagen['codigo']);
-													if(!empty($buscar)){
-														$codigo_img = $CodigoJornadaImagen['codigo'][$buscar];
-														$descripcion_img = $CodigoJornadaImagen['descripcion'][$buscar];
-														$imgJornada = $CodigoJornadaImagen['descripcion'][$buscar];
-														$imgJornada = $url_cat_img . $imgJornada;
-													}
-												// Bucar Jordana Imagen.
-													BuscarJornadaImagen($imgJornada);
-											}
-										}else{
-											///////////////////////////////////////////////////////////////////////////////////////////////////////////
-											// GUARDAR DATOS VALIDAR SI LA FECHA TIENE ASUETO.
-											///////////////////////////////////////////////////////////////////////////////////////////////////////////
-											if ($asueto == true) {
-												$query_g = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_personal_encargado, codigo_tipo_licencia) 
-													VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_personal_encargado','$CodigoTipoLicencia')";
-											}else{
-												$query_g = "INSERT INTO personal_asistencia (codigo_personal, fecha, hora, codigo_personal_encargado) 
-												VALUES('$codigo_personal','$fecha','$hora_actual','$codigo_personal_encargado')";
-											}
-											// Ejecutamos el Query.
-												$consulta = $dblink -> query($query_g);
-											// Linea de mensajes.
-												$RegistroGuardar = "Si";
-											//
-												$mensajeError = "Registros Guardados...";
-										}
-						}	// 	WHILE DE LA CONSULTA PARA BUSCAR EL NOMBRE DEL EMPLEADO.
-                        //
-                            $respuestaOK = true;
-                            $mensajeError = "Registros Encontrados...";
+                        $mensajeError = "Asistencia reiniciada correctamente.";
+                    } else {
+                        $mensajeError = "Error al eliminar.";
                     }
-                    else{
-						//
-                            $respuestaOK = false;
-                            $mensajeError = "";
-                            $contenidoOK = '';
-                    }
+                }
+                break;
 
+            case 'GuardarAsistencia':
+            case 'ActualizarJornada':
+                // Recoger variables (Optimizadas con operador coalescente ??)
+                $id_ = trim($_POST["Id_"] ?? 0);
+                $codigo_personal = trim($_POST["CodigoPersonal"]);
+                $fecha = trim($_POST['FechaAsistencia'] ?? date("Y-m-d")); // Ojo, en actualizar viene implícita si no se envía
+                $codigo_personal_encargado = trim($_POST['CodigoPersonal'] ?? ''); // Usuario logueado
 
-					// SI HA GUARDO REGISTROS.
-						if ($RegistroGuardar == "Si") {
-							//var_dump($RegistroGuardarCodigoPersonal);
-							// recorrer la matriz.
-							for ($Fila=0; $Fila < count($RegistroGuardarCodigoPersonal) ; $Fila++) { 
-								// BUACAR EL REGISTRO ANTES DE GUARDARLO PARA QUE NO SE REPITA CON RESPECTO A LA FECHA
-								$query_buscar = "SELECT * FROM personal_asistencia WHERE codigo_personal = '$RegistroGuardarCodigoPersonal[$Fila]' and fecha = '$fecha' and codigo_personal_encargado = '$codigo_personal_encargado'";
-								$codigo_personal = $RegistroGuardarCodigoPersonal[$Fila];
-								$foto = $RegistroGuardarFoto[$Fila];
-								$nombre_completo = $RegistroGuardarNombreCompleto[$Fila];
-								// Ejecutamos el Query.
-									$consulta_g = $dblink -> query($query_buscar);
-									// Validar si hay registros.
-									$imgJornada = "#";
-									if($consulta_g -> rowCount() != 0){
-										while($listado_g = $consulta_g -> fetch(PDO::FETCH_BOTH))
-										{
-											// Variables.
-												$Id_ = trim($listado_g['id_']);
-												$CodigoJornada = trim($listado_g['codigo_jornada']);
-												$CodigoLicencia = trim($listado_g['codigo_tipo_licencia']);
-												$CodigoJornadaAsueto = trim($listado_g['codigo_jornada_asueto']);
-												$CodigoJornadaVacaciones = trim($listado_g['codigo_jornada_vacaciones']);
-												$CodigoJornadaDescanso = trim($listado_g['codigo_jornada_descanso']);
-												$CodigoJornadaE4H = trim($listado_g['codigo_jornada_e_4h']);
-												$CodigoJornadaNocturna = trim($listado_g['codigo_jornada_nocturna']);
-												$HoraExtra = trim($listado_g['hora_extra']);
+                $CJ = trim($_POST["CJ"]);
+                $CTL = trim($_POST["CTL"]);
+                $CJA = trim($_POST["CJA"]);
+                $CJV = trim($_POST["CJV"]);
+                $CJD = trim($_POST["CJD"]);
+                $CJE4H = trim($_POST["CJE4H"]);
+                $CJN = trim($_POST["CJN"]);
+                $HE = trim($_POST["lstHoraExtra"] ?? 0);
 
-												if($HoraExtra != 0){
-													//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-													$CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.
-													$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.
-													$CodigoJornadaNocturna.$HoraExtra;
-													//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-													$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
-														".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
-														".".$CodigoJornadaNocturna.".".$HoraExtra;
-												}
-												else{
-													//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-														$CodigoJornadaTodas = $CodigoJornada.$CodigoLicencia.$CodigoJornadaAsueto.
-														$CodigoJornadaVacaciones.$CodigoJornadaDescanso.$CodigoJornadaE4H.
-														$CodigoJornadaNocturna;
-													//	FORMAR EL CODIGO ALL PARA LA IMAGEN.
-													$CodigoJornadaTodasSeparador = $CodigoJornada.".".$CodigoLicencia.".".$CodigoJornadaAsueto.
-																				".".$CodigoJornadaVacaciones.".".$CodigoJornadaDescanso.".".$CodigoJornadaE4H.
-																				".".$CodigoJornadaNocturna.".".$HoraExtra;
-												}
-											// Condiciones para la Imagen.
-												$buscar = array_search($CodigoJornadaTodas, $CodigoJornadaImagen['codigo']);
-												if(!empty($buscar)){
-													$codigo_img = $CodigoJornadaImagen['codigo'][$buscar];
-													$descripcion_img = $CodigoJornadaImagen['descripcion'][$buscar];
-													$imgJornada = $CodigoJornadaImagen['descripcion'][$buscar];
-													$imgJornada = $url_cat_img . $imgJornada;
-												}
-											// Bucar Jordana Imagen.
-												BuscarJornadaImagen($imgJornada);
-										}
-									}
-							}	// FINAL DEL FOR CUANDO LOS REGISTROS HAN SIDO GUARDADOS ANTERIOREMES.
-						}	// IF QUE CONDICIONA SI SE VAN A MOSTRAR LOS REGISTROS GUARDADOS.
-            break;
-			case 'ActualizarJornada':
-				// Variables.
-					$Id_ = trim($_POST["Id_"]);
-					$codigo_jornada = trim($_POST["CJ"]);
-					$codigo_tipo_licencia = trim($_POST["CTL"]);
-					$codigo_jornada_asueto = trim($_POST["CJA"]);
-					$codigo_jornada_vacaciones = trim($_POST["CJV"]);
-					$codigo_jornada_descanso = trim($_POST["CJD"]);
-					$codigo_jornada_4_extra = trim($_POST["CJE4H"]);
-					$codigo_jornada_nocturnidad = trim($_POST["CJN"]);
-					$HoraExtra = isset($_POST["lstHoraExtra"]) && trim($_POST["lstHoraExtra"]) !== '' ? trim($_POST["lstHoraExtra"]) : 0;
-				//
-					$codigo_perfil = trim($_POST["CodigoPerfil"]);
-					$codigo_personal_usuario = trim($_POST["CodigoPersonal"]);
+                // 1. VALIDACIÓN DE INTEGRIDAD
+                // Armamos el código tal cual lo haría el sistema
+                $CodigoValidar = $CJ . $CTL . $CJA . $CJV . $CJD . $CJE4H . $CJN;
+                if($HE != 0) $CodigoValidar .= $HE;
 
+                // Verificamos en el Mapa que cargamos al principio (¡Súper eficiente!)
+                if(!array_key_exists($CodigoValidar, $imagenesMap)){
+                    $respuestaOK = false;
+                    $mensajeError = "Error Crítico: El código generado ($CodigoValidar) no existe en el catálogo. Contacte a Soporte.";
+                    break; 
+                }
 
-					// 1. ARMAR EL CÓDIGO TOTAL PARA VALIDAR
-					// Nota: La lógica de armado debe ser idéntica a la que usas para buscar la imagen
-					if($HoraExtra != 0){
-						$CodigoJornadaValidar = $codigo_jornada . $codigo_tipo_licencia . $codigo_jornada_asueto .
-												$codigo_jornada_vacaciones . $codigo_jornada_descanso . $codigo_jornada_4_extra .
-												$codigo_jornada_nocturnidad . $HoraExtra;
-					} else {
-						$CodigoJornadaValidar = $codigo_jornada . $codigo_tipo_licencia . $codigo_jornada_asueto .
-												$codigo_jornada_vacaciones . $codigo_jornada_descanso . $codigo_jornada_4_extra . // OJO: Verifica si usas $codigo_jornada_4_extra o _e_4h aquí
-												$codigo_jornada_nocturnidad;
-					}
+                // 2. GUARDAR EN BASE DE DATOS
+                if($id_ > 0){
+                    // UPDATE
+                    $query = "UPDATE personal_asistencia SET
+                                codigo_jornada = '$CJ', codigo_tipo_licencia = '$CTL',
+                                codigo_jornada_asueto = '$CJA', codigo_jornada_vacaciones = '$CJV',
+                                codigo_jornada_descanso = '$CJD', codigo_jornada_e_4h = '$CJE4H',
+                                codigo_jornada_nocturna = '$CJN', hora_extra = '$HE',
+                                codigo_personal_encargado = '$codigo_personal_encargado'
+                              WHERE id_ = '$id_'";
+                } else {
+                    // INSERT (Nuevo registro, necesitamos la fecha del listado)
+                    // Nota: En tu flujo actual, PorNomina.js maneja fechas globales. 
+                    // Asegúrate de enviar la fecha correcta en $_POST['FechaListadoEmpleados'] o similar.
+                    // Para este ejemplo asumo que ya validaste que existe la fecha.
+                    $fechaInsert = trim($_POST['FechaListadoEmpleados'] ?? date("Y-m-d"));
+                    $hora = date("h:i:s a");
+                    
+                    $query = "INSERT INTO personal_asistencia 
+                              (codigo_personal, fecha, hora, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto, 
+                               codigo_jornada_vacaciones, codigo_jornada_descanso, codigo_jornada_e_4h, 
+                               codigo_jornada_nocturna, hora_extra, codigo_personal_encargado)
+                              VALUES 
+                              ('$codigo_personal', '$fechaInsert', '$hora', '$CJ', '$CTL', '$CJA', 
+                               '$CJV', '$CJD', '$CJE4H', '$CJN', '$HE', '$codigo_personal_encargado')";
+                }
 
-					// 2. CONSULTAR A LA BASE DE DATOS
-					$queryValidar = "SELECT count(*) as existe FROM catalogo_jornada_imagenes WHERE codigo = '$CodigoJornadaValidar'";
-					$consultaValidar = $dblink->query($queryValidar);
-					$validacion = $consultaValidar->fetch(PDO::FETCH_ASSOC);
-
-					if ($validacion['existe'] == 0) {
-						// --- EL CÓDIGO NO EXISTE EN EL CATÁLOGO ---
-						
-						// Opción A: REBOTAR (Recomendado para fase de pruebas)
-						$respuestaOK = false;
-						$mensajeError = "Error Crítico: El código generado ($CodigoJornadaValidar) no existe en el catálogo de imágenes. Avise a Soporte.";
-						// Salimos del switch y devolvemos el error al JS
-						break; 
-
-						/* // Opción B: FORZAR GENÉRICO (Si prefieres que guarde "algo" siempre)
-						// Descomenta esto si prefieres la Opción B
-						$codigo_jornada = '4';
-						$codigo_tipo_licencia = '1';
-						$codigo_jornada_asueto = '4';
-						$codigo_jornada_vacaciones = '4';
-						$codigo_jornada_descanso = '4';
-						$codigo_jornada_4_extra = '4';
-						$codigo_jornada_nocturnidad = '4';
-						$HoraExtra = '0';
-						// Esto guardará el código 4144444 (Sin Jornada) en la BD.
-						*/
-					}
-
-				// 	VERIFICAR QUE TIPO DE USUARIO DESEA MODIFICAR EL REGISTRO DEL PUNTEADO.
-				if($codigo_perfil == '01' || $codigo_perfil == '02' || $codigo_perfil == '05' || $codigo_perfil == '07' || $codigo_perfil == '08' || $codigo_perfil == '09' || $codigo_perfil == '10' || $codigo_perfil == '11'){
-					$query_update = "UPDATE personal_asistencia SET
-							codigo_jornada = '$codigo_jornada',
-							codigo_tipo_licencia = '$codigo_tipo_licencia',
-							codigo_jornada_asueto = '$codigo_jornada_asueto',
-							codigo_personal_encargado = '$codigo_personal_usuario',
-							codigo_jornada_vacaciones = '$codigo_jornada_vacaciones',
-							codigo_jornada_descanso = '$codigo_jornada_descanso',
-							codigo_jornada_e_4h = '$codigo_jornada_4_extra',
-							codigo_jornada_nocturna = '$codigo_jornada_nocturnidad',
-							hora_extra = '$HoraExtra'
-								WHERE id_ = '$Id_'
-						";
-					// ACTUALIZAR QUERY
-						$consulta_update = $dblink -> query($query_update);
-					//
-						$respuestaOK = true;
-						$mensajeError = "Punteo Actualizado";
-						$contenidoOK = '';
-							break;
-				}
-				break;
-				case "EditarJornada":
-					//$Todos = base64_decode($_POST['Id_']);
-					$Todos = ($_POST['Id_']);
-					//
-					$VariablesTabla = explode("#",$Todos);
-						$Foto = $VariablesTabla[0];
-						$ImgJornada = $VariablesTabla[1];
-						$Id_ = $VariablesTabla[2];
-						$CodigoPersonal = $VariablesTabla[3];
-						$NombreCompleto = $VariablesTabla[4];
-						$CodigoJornadaTodas = $VariablesTabla[5];
-						$CodigoJornadaTodasSeparador = $VariablesTabla[6];
-					//
-					$fila_array = 0;
-					// PASAR AL DATA.
-						$datos[$fila_array]["Foto"] = $Foto;
-						$datos[$fila_array]["ImgJornada"] = $ImgJornada;
-						$datos[$fila_array]["Id_"] = $Id_;
-						$datos[$fila_array]["CodigoPersonal"] = $CodigoPersonal;
-						$datos[$fila_array]["NombreCompleto"] = $NombreCompleto;
-						$datos[$fila_array]["CodigoJornadaTodas"] = $CodigoJornadaTodas;
-						$datos[$fila_array]["CodigoJornadaTodasSeparador"] = $CodigoJornadaTodasSeparador;
-					// 
-						$fila_array++;
-				break;
-				case 'BuscarJornada':
-					# Buscar en tabla catalogo_jornada.
-					// armando el Query.
-						$query = "SELECT id_, descripcion, hora_desde, hora_hasta, descripcion_completa from catalogo_jornada ORDER BY id_";
-						// Ejecutamos el Query.
-						$consulta = $dblink -> query($query);
-						// Inicializando el array
-						$datos=array(); $fila_array = 0;
-						// Recorriendo la Tabla con PDO::
-							while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-							{
-								// Nombres de los campos de la tabla.
-							$codigo = trim($listado['id_']); 
-							$descripcion = trim($listado['descripcion']);
-							$descripcion_completa = trim($listado['descripcion_completa']);
-							//. ' ' . trim($listado['hora_hasta']);
-							// Rellenando la array.
-							   	$datos[$fila_array]["codigo"] = $codigo;
-								$datos[$fila_array]["descripcion"] = $descripcion;
-								$datos[$fila_array]["descripcion_completa"] = $descripcion_completa;
-									$fila_array++;
-								}
-				break;
-
-				case 'EliminarAsistencia':
-				$id_asistencia = trim($_POST['id_asistencia']);
-				
-				if(!empty($id_asistencia)){
-					// Borramos físicamente el registro (o podrías cambiarle estatus a 0 si prefieres historial)
-					$query = "DELETE FROM personal_asistencia WHERE id_ = :id";
-					$stmt = $dblink->prepare($query);
-					$stmt->bindParam(':id', $id_asistencia);
-					
-					if($stmt->execute()){
-						$respuestaOK = true;
-						$mensajeError = "Asistencia eliminada/reiniciada correctamente.";
-					} else {
-						$respuestaOK = false;
-						$mensajeError = "Error al eliminar en BD.";
-					}
-				} else {
-					$mensajeError = "No hay registro previo para eliminar.";
-				}
-				break;
-            default:
-				$mensajeError = 'Esta acción no se encuentra disponible';
-			break;
-		}
-	}
-	else{
-		$mensajeError = 'No se puede ejecutar la aplicación';}
+                if($dblink->query($query)){
+                    $respuestaOK = true;
+                    $mensajeError = "Registro guardado correctamente.";
+                } else {
+                    $mensajeError = "Error SQL al guardar.";
+                }
+                break;
+			// ---------------------------------------------------------------------
+            // CASO FALTANTE: PROCESAR DATOS PARA EDITAR (DESARMAR EL STRING #)
+            // ---------------------------------------------------------------------
+            case 'EditarJornada':
+                // Recibimos la cadena larga separada por #
+                $Todos = $_POST['Id_'];
+                
+                // La separamos en un array
+                $VariablesTabla = explode("#", $Todos);
+                
+                // Verificamos que venga completa (mínimo 7 posiciones)
+                if(count($VariablesTabla) >= 7) {
+                    $datos[$fila_array]["Foto"] = $VariablesTabla[0];
+                    $datos[$fila_array]["ImgJornada"] = $VariablesTabla[1];
+                    $datos[$fila_array]["Id_"] = $VariablesTabla[2];
+                    $datos[$fila_array]["CodigoPersonal"] = $VariablesTabla[3];
+                    $datos[$fila_array]["NombreCompleto"] = $VariablesTabla[4];
+                    $datos[$fila_array]["CodigoJornadaTodas"] = $VariablesTabla[5];
+                    $datos[$fila_array]["CodigoJornadaTodasSeparador"] = $VariablesTabla[6];
+                    
+                    // Incrementamos fila (importante para que el JSON salga como array [0])
+                    $fila_array++;
+                } else {
+                    // Si el string viene roto o incompleto
+                    $respuestaOK = false;
+                    $mensajeError = "Error: Datos del empleado incompletos.";
+                }
+                break;
+            case 'BuscarJornada':
+            case 'BuscarTipoLicencia':
+                // Estos casos simples los puedes dejar o convertirlos a JSON directo si no tienen lógica compleja
+                break;
+        }
+    }
+} else {
+    $mensajeError = 'No se puede establecer conexión con la base de datos';
 }
-else{
-	$mensajeError = 'No se puede establecer conexión con la base de datos';}
-// Salida de la Array con JSON.
-	if($_POST["accion"] === "" or $_POST["accion"] === "BuscarTodosCodigo"){
-		echo json_encode($arreglo);	
-	}elseif($_POST["accion"] === "BuscarPersonalCodigo" or $_POST["accion"] === "BuscarTipoLicencia" or $_POST["accion"] === "BuscarPersonalRutaCodigo"
-			or $_POST["accion"] == "EditarJornada" or $_POST["accion"] == "BuscarJornada"){
-		echo json_encode($datos);
-		}
-	else{
-		// Armamos array para convertir a JSON
-		$salidaJson = array("respuesta" => $respuestaOK,
-			"mensaje" => $mensajeError,
-			"contenido" => $contenidoOK,
-			"mensajeAsueto" => $MensajeAsueto);
-		echo json_encode($salidaJson);
-	}
 
-function BuscarJornadaImagen($imgJornada){
-	global $contenidoOK, $foto, $codigo_personal, $nombre_completo, $imgJornada, $Id_, $CodigoJornadaTodas, $CodigoJornadaTodasSeparador;
-	$datos_ = $foto . "#" . $imgJornada . "#". $Id_ ."#". $codigo_personal ."#". $nombre_completo . "#" . $CodigoJornadaTodas . "#" . $CodigoJornadaTodasSeparador;
-	$datos_codificados = $datos_;//base64_encode($datos_);
-	//8 CREAR FILAS Y COLUMNAS.
-	$contenidoOK .= "<tr>
-		<td class='mx-auto text-center'>
-			<img src='$foto' class='rounded' alt='#' width='80' height='90'>
-		</td>
-		<td>
-			<div class='col col-md-6'>
-				<label id='Codigo-$codigo_personal'>Código: $codigo_personal</label>
-			</div>
-			<div class='col col-md-6'>
-				<label class='text-primary text-bold'>$nombre_completo</label>
-			</div>
-		</td>
-		<td>
-			<div class='mx-auto text-center'>
-				<a data-accion=editarAsistencia class='btn btn-sm btn-info' href='$datos_codificados' tabindex='-1' data-toggle='tooltip' data-placement='top' title='Punteo'>
-					<img src='$imgJornada' class='rounded' alt='' width='60' height='65'>
-				</a>
-			</div>
-			<div>
-				
-			</div>
-		</td>
-	";
+// Salida JSON
+if(isset($_POST['accion']) && ($_POST['accion'] == 'BuscarPersonalCodigo' || $_POST['accion'] == 'BuscarPersonalRutaCodigo' || $_POST['accion'] == 'EditarJornada')) {
+    echo json_encode($datos);
+} else {
+    $salidaJson = array(
+        "respuesta" => $respuestaOK,
+        "mensaje" => $mensajeError,
+        "contenido" => $contenidoOK,
+        "mensajeAsueto" => $MensajeAsueto
+    );
+    echo json_encode($salidaJson);
 }
 ?>

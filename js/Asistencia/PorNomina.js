@@ -398,7 +398,7 @@ function calcularYActualizar() {
                 if(estadoUI.nocturnidad && estadoUI.duracion !== '') CTL = '19';
 
                 if(estadoUI.duracion === '') {
-                    CJA = '6'; urlImagen = "../acomtus/img/Catalogo Jornada/Asueto.jpg";
+                    CJA = '4'; urlImagen = "../acomtus/img/Catalogo Jornada/Asueto.jpg";
                 }
                 else if(estadoUI.duracion === '1T') { 
                     CJA = '2'; urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoAsuetoUnaTanda.jpg";
@@ -419,60 +419,113 @@ function calcularYActualizar() {
             break;
 
         // ------------------------------------------------------------------
-        // CASO: DESCANSO (D) -> Código: 4.13.4.4...
+        // CASO: DESCANSO (D)
+        // Puro: CTL=13 | Trabajado (TD): CTL=14
         // ------------------------------------------------------------------
         case 'descanso':
-            // DEFAULT (Descanso Puro)
+            // 1. DESCANSO PURO
             if(estadoUI.duracion === '') {
-                // CORRECCIÓN: Usamos CTL (Posición 2) en vez de CJA
-                CTL = '13'; 
-                urlImagen = "../acomtus/img/Catalogo Jornada/Descanso.jpg";
+                CTL = '13'; // Código 13 para D
+                CJA = '4';  // Limpieza (antes era 3)
+                CJD = '4';  // Limpieza
+                urlImagen = "../acomtus/img/Catalogo Jornada/Descanso.jpg"; // 41344444
             }
-            // TRABAJO EN DESCANSO
-            else if(estadoUI.duracion === '1T') { 
-                CJD = '2'; urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoUnaTanda.jpg"; 
-            }
-            else if(estadoUI.duracion === '4H') { 
-                CJD = '1'; urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoMediaTanda.jpg"; 
-            }
-            else if(estadoUI.duracion === '1.5T') { 
-                CJD = '3'; urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoUnaTandaYMedia.jpg"; 
-            }
-            break;
-
-       // ------------------------------------------------------------------
-        // CASO: VACACIÓN (Incluye VDA)
-        // ------------------------------------------------------------------
-        case 'vacacion':
-            let subV = estadoUI.subTipoId;
-
-            // --- CASO 1: VDA (Vacación Descanso Asueto) ---
-            if (subV === '19_vda') {
-                CTL = '19'; // Código Licencia 19
-                CJA = '4';
-                // Nota: Verificamos conflicto con Asueto Nocturno. 
-                // Asueto Nocturno usa CTL 19 pero CJN 5. VDA usa CTL 19 y CJN 4.
-                CJN = '4'; 
-                urlImagen = "../acomtus/img/Catalogo Jornada/VacacionDescansoAsueto.jpg"; // 41944444
-            }
-            // --- CASO 2: VACACIÓN NORMAL O TRABAJO VACACIÓN ---
+            // 2. TRABAJO EN DESCANSO (TD)
             else {
-                CTL = '11'; 
+                CTL = '14'; // CAMBIO: Licencia 14 es "Trabajo en Descanso"
                 
-                if(estadoUI.duracion === '') {
-                    CJA = '1'; urlImagen = "../acomtus/img/Catalogo Jornada/Vacacion.jpg";
-                }
-                else if(estadoUI.duracion === '1T') { 
-                    CJV = '2'; urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionUnaTanda.jpg"; 
+                // Asignamos duración a CJD (Posición 5)
+                if(estadoUI.duracion === '1T') { 
+                    CJD = '2'; // 4.14.4.4.2...
+                    urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoUnaTanda.jpg"; 
                 }
                 else if(estadoUI.duracion === '4H') { 
-                    CJV = '1'; urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionMediaTanda.jpg"; 
+                    CJD = '1'; // 4.14.4.4.1...
+                    urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoMediaTanda.jpg"; 
                 }
                 else if(estadoUI.duracion === '1.5T') { 
-                    CJV = '3'; urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionUnaTandaYMedia.jpg"; 
+                    CJD = '3'; // 4.14.4.4.3...
+                    urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoUnaTandaYMedia.jpg"; 
                 }
+            }
+
+// =========================================================
+                // LÓGICA FUTURA: NOCTURNIDAD EN DESCANSO (TD + N)
+                // =========================================================
+                // Descomentar esto cuando tengas las imágenes y los códigos en BD.
+                // Los códigos generados terminarán en 5 (ej: 4.14.4.4.2.4.5.0)
                 
-                if(estadoUI.nocturnidad && estadoUI.duracion !== '') urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionUnaTandaNocturnidad.jpg";
+                /*
+                if(estadoUI.nocturnidad) {
+                    // Nota: CJN se pone en 5 automáticamente por la regla global al final de la función.
+                    
+                    if(estadoUI.duracion === '1T') {
+                        // Código esperado: 41444245
+                        urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoUnaTandaNocturnidad.jpg";
+                    }
+                    else if(estadoUI.duracion === '4H') {
+                        // Código esperado: 41444145
+                        urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoMediaTandaNocturnidad.jpg";
+                    }
+                    else if(estadoUI.duracion === '1.5T') {
+                        // Código esperado: 41444345
+                        urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoUnaTandaYMediaNocturnidad.jpg";
+                    }
+                }
+                */
+
+            break;
+
+    // ------------------------------------------------------------------
+        // CASO: VACACIÓN (V) 
+        // Pura: CTL=11 | Trabajada (TV): CTL=12
+        // ------------------------------------------------------------------
+        case 'vacacion':
+            // 1. SUBTIPO VDA (Vacación Descanso Asueto)
+            if (estadoUI.subTipoId === '19_vda') {
+                CTL = '19'; 
+                CJA = '4'; CJN = '4'; // Limpieza
+                urlImagen = "../acomtus/img/Catalogo Jornada/VacacionDescansoAsueto.jpg";
+            }
+            else {
+                // 2. VACACIÓN PURA (Sin duración)
+                if(estadoUI.duracion === '') {
+                    CTL = '11'; // Código 11 para V
+                    CJA = '4';  // CORRECCIÓN: Estaba en 1, debe ser 4 (Neutro)
+                    CJV = '4';  // CORRECCIÓN: Estaba en 1, debe ser 4 (Neutro)
+                    urlImagen = "../acomtus/img/Catalogo Jornada/Vacacion.jpg"; // 41144444
+                }
+                // 3. TRABAJO EN VACACIÓN (TV)
+                else {
+                    CTL = '12'; // CAMBIO: Licencia 12 es "Trabajo en Vacación"
+                    CJA = '4';
+                    
+                    // Asignamos duración a CJV (Posición 4)
+                    if(estadoUI.duracion === '1T') { 
+                        CJV = '2'; // 4.12.4.2...
+                        urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionUnaTanda.jpg"; 
+                    }
+                    else if(estadoUI.duracion === '4H') { 
+                        CJV = '1'; // 4.12.4.1...
+                        urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionMediaTanda.jpg"; 
+                    }
+                    else if(estadoUI.duracion === '1.5T') { 
+                        CJV = '3'; // 4.12.4.3...
+                        urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionUnaTandaYMedia.jpg"; 
+                    }
+                    
+                    // NOCTURNIDAD EN TV
+                    if(estadoUI.nocturnidad) {
+                        if(estadoUI.duracion === '1T') {
+                            urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionUnaTandaNocturnidad.jpg"; // 41242445
+                        }
+                        else if(estadoUI.duracion === '4H') {
+                            // Nota: Asumo que Media Tanda Noc sigue el patrón CJV=1. 
+                            // Si tu código DB es 41243445, cambia este CJV a '3', pero por lógica debería ser '1'.
+                            urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoVacacionMediaTandaNocturnidad.jpg"; 
+                        }
+                    }
+                }
             }
             break;
         // ------------------------------------------------------------------
