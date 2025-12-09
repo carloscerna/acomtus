@@ -449,13 +449,13 @@ function calcularYActualizar() {
                 }
             }
 
-// =========================================================
+                // =========================================================
                 // LÓGICA FUTURA: NOCTURNIDAD EN DESCANSO (TD + N)
                 // =========================================================
                 // Descomentar esto cuando tengas las imágenes y los códigos en BD.
                 // Los códigos generados terminarán en 5 (ej: 4.14.4.4.2.4.5.0)
                 
-                /*
+                
                 if(estadoUI.nocturnidad) {
                     // Nota: CJN se pone en 5 automáticamente por la regla global al final de la función.
                     
@@ -472,7 +472,7 @@ function calcularYActualizar() {
                         urlImagen = "../acomtus/img/Catalogo Jornada/TrabajoDescansoUnaTandaYMediaNocturnidad.jpg";
                     }
                 }
-                */
+                
 
             break;
 
