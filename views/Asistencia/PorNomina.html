@@ -1,131 +1,207 @@
 {# Heredando la plantilla principal #}
-
 {% extends 'default_layout.html' %}
 
 {% block extraCSS %}
 <link href="css/styles-loading.css" rel="stylesheet">
 <style>
-  /* mensajes de error para el validate de los form de input*/
-  input.error {
-      border-color: #f00 !important;
+  /* ESTILOS PERSONALIZADOS PARA NÓMINA */
+  
+  /* Contenedor Principal */
+  .main-card {
+      border: 0;
+      border-radius: 15px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+      overflow: hidden;
   }
-  small.required {
-      color:#f00;
+
+  /* Encabezado Azul */
+  .card-header-custom {
+      background: linear-gradient(135deg, #0056b3 0%, #004494 100%);
+      color: white;
+      padding: 1.5rem;
+  }
+
+  /* Input de Fecha */
+  .date-control {
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      height: 50px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #495057;
+      text-align: center;
+      transition: all 0.2s;
+  }
+  .date-control:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,.15);
+  }
+
+  /* Tabla Moderna */
+  #listadoEmpleados {
+      width: 100% !important;
+      border-collapse: separate;
+      border-spacing: 0 5px; /* Espacio entre filas */
+  }
+  
+  #listadoEmpleados thead th {
+      border: none;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #6c757d;
+      letter-spacing: 1px;
+      padding: 15px;
+  }
+
+  #listadoEmpleados tbody tr {
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+      transition: transform 0.2s;
+  }
+
+  #listadoEmpleados tbody tr:hover {
+      transform: scale(1.01);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      z-index: 10;
+      position: relative;
+  }
+
+  #listadoEmpleados td {
+      border: none;
+      padding: 15px;
+      vertical-align: middle;
+  }
+  
+  /* Ajustes para Móvil */
+  @media (max-width: 576px) {
+      .card-header-custom { padding: 1rem; }
+      .breadcrumb { display: none; } /* Ahorrar espacio */
+      
+      /* Hacer la tabla más compacta en móvil */
+      #listadoEmpleados td { padding: 10px 5px; }
   }
 </style>
 {% endblock %}
 
 {% block javascripts %}
-    <!-- JS para esta página. -->
     <script type="text/JavaScript" src="js/Asistencia/PorNomina.js"></script> 
-<!-- DEINIR EL AJAX START- STOP Y ERROR -->
-<script>
-  $(document).ready(function () { 
-    var screen = $('#loading-screen');
-      configureLoadingScreen(screen);
-  })
-</script>
+    <script>
+      $(document).ready(function () { 
+        var screen = $('#loading-screen');
+        configureLoadingScreen(screen);
+      })
+    </script>
 {% endblock %}
 
 {% block contenidos %}
-<!-- Content Wrapper. Contains page content -->
-<div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <section class="content-header p-0" style="background-color: rgb(234, 236, 238);">
+<div class="content-wrapper bg-light">
+    
+    <section class="content-header pt-3 pb-2">
       <div class="container-fluid">
-        <div class="row">
+        <div class="row align-items-center">
           <div class="col-sm-6">
-            <h4></h4>
+            <h4 class="font-weight-bold text-dark mb-0">Planilla Diaria</h4>
+            <small class="text-muted">Gestión masiva de asistencia</small>
           </div>
           <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="asistencia.php"> Asistencia</a></li>
-              <li class="breadcrumb-item active">Seleccionar</li>
+            <ol class="breadcrumb float-sm-right bg-transparent p-0 m-0">
+              <li class="breadcrumb-item"><a href="asistencia.php">Inicio</a></li>
+              <li class="breadcrumb-item"><a href="Seleccionar.php">Seleccionar</a></li>
+              <li class="breadcrumb-item active">Nómina</li>
             </ol>
           </div>
         </div>
-      </div><!-- /.container-fluid -->
+      </div>
     </section>
   
-  <!-- Small boxes (Stat box) -->
-    <section class="col col-md-12" id="PantallaPrincipal">
-      <!-- FORM PRINCIPAL -->
-      <form action="" method="post" id="formAsistenciaPorNomina" name="formAsistenciaPorNomina" role="form" enctype="multipart/form-data">
-        <input type="hidden" name="CodigoPersonal" id="CodigoPersonal" value="{{ codigo_personal}}" title="CodigoPersonal">
-        <input type="hidden" name="CodigoPerfil" id="CodigoPerfil" value="{{ codigo_perfil}}" title="CodigoPerfil">
-        <input type="hidden" name="CodigoRuta" id="CodigoRuta" value="Ninguno" title="CodigoRuta">
-        <input type="hidden" id="CodigoDepartamentoEmpresa" name="CodigoDepartamentoEmpresa" value = "{{ CodigoDepartamentoEmpresa }}" aria-label="CodigoDepartamentoEmpresa">
-              <div class="card m-auto">
-                <div class="card-header bg-gradient-navy">
-                  <div class="card-tools">
-                    
-                  </div>        
-                    <div class="row">
-                      <div class="col-md-12 col-lg-12 col-xl-12">
-                        <h4 class="card-title"><i class="fad fa-clipboard-list-check"></i> Punteo (Asistencia) | Por Nómina</h4>
-                      </div>
+    <section class="content">
+      <div class="container-fluid pb-5">
+        
+        <form action="" method="post" id="formAsistenciaPorNomina" name="formAsistenciaPorNomina">
+            <input type="hidden" name="CodigoPersonal" id="CodigoPersonal" value="{{ codigo_personal}}" title="CodigoPersonal">
+            <input type="hidden" name="CodigoPerfil" id="CodigoPerfil" value="{{ codigo_perfil}}" title="CodigoPerfil">
+            <input type="hidden" name="CodigoRuta" id="CodigoRuta" value="Ninguno" title="CodigoRuta">
+            <input type="hidden" id="CodigoDepartamentoEmpresa" name="CodigoDepartamentoEmpresa" value = "{{ CodigoDepartamentoEmpresa }}">
+
+            <div class="card main-card mb-4">
+                
+                <div class="card-header-custom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0"><i class="fad fa-list-alt mr-2"></i> Listado de Personal</h5>
                     </div>
-                  <!-- /.card-tools -->
-                </div>
-                <!-- /.card-header -->
-                <div class="card-body">
-                  <div class="form-group row d-flex justify-content-center m-0 p-0">
-                        <div class="col col-md-12">
-                          <label for="LblRuta"> <label class="text-primary text-bold" id="LblDescripcion"></label></label>
+                    </div>
+
+                <div class="card-body bg-light">
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-8 mb-3 mb-md-0">
+                            <div class="alert alert-white border shadow-sm d-flex align-items-center mb-0 h-100" role="alert">
+                                <div class="mr-3">
+                                    <span class="fa-stack fa-lg">
+                                      <i class="fas fa-circle fa-stack-2x text-info"></i>
+                                      <i class="fas fa-map-marker-alt fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h6 class="alert-heading font-weight-bold mb-0 text-primary" id="LblDescripcion">Cargando ubicación...</h6>
+                                    <small class="text-muted">Verifique que la ruta o departamento sea el correcto.</small>
+                                </div>
+                            </div>
                         </div>
-                  </div>
-                  <div class="input-group row d-flex justify-content-center m-0 p-0">
-                        <div class="col col-md-6">
-                          <label class="form-control">Fecha:</label>
+
+                        <div class="col-md-4">
+                            <div class="bg-white p-2 rounded border shadow-sm h-100 d-flex flex-column justify-content-center">
+                                <label class="small text-muted font-weight-bold text-uppercase mb-1 ml-1">Fecha de Asistencia:</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-transparent border-0"><i class="far fa-calendar-alt text-primary"></i></span>
+                                    </div>
+                                    <input type="date" class="form-control date-control border-0 bg-light" 
+                                           name="FechaListadoEmpleados" id="FechaListadoEmpleados" 
+                                           onkeydown="return false" onkeyup="return false">
+                                </div>
+                            </div>
                         </div>
-                        <div class="col col-md-6">
-                          <input class="form-control" type="date" name="FechaListadoEmpleados" id="FechaListadoEmpleados" title="Fecha" onkeydown="return false" onkeyup="return false">
+                    </div>
+
+                    <div class="alert alert-warning border-warning shadow-sm" id="MostrarMensajes" style="display: none;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-circle fa-2x mr-3"></i>
+                            <label for="LblMensaje" class="mb-0 font-weight-bold"></label>
                         </div>
-                  </div>
-                  <div class="border border-info bg-cyan text text-blue" id="MostrarMensajes" style="display: none;">
-                    <label for="LblMensaje"></label>
-                  </div>
-                  <div class="form-group row d-flex justify-content-center">
-                        <table id="listadoEmpleados" class="table table-sm table-striped display responsive nowrap">
-                            <thead>
-                                <tr class="text-center bg-black">
-                                  <th>Empleado</th>
-                                  <th>Datos</th>
-                                  <th>Jornada</th>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="listadoEmpleados" class="table">
+                            <thead class="thead-light">
+                                <tr>
+                                  <th class="text-center" style="width: 100px;">FOTO</th>
+                                  <th>INFORMACIÓN DEL EMPLEADO</th>
+                                  <th class="text-right">ESTADO</th>
                                 </tr>                
                             </thead>
-                              <tbody id="listadoEmpleadosNomina">
-                                
-                              </tbody>
-                              <tfoot>
-
-                              </tfoot>
-                          </table>
-                  </div>
-              </div> <!-- /.card-body -->
-                  <!-- /.CARD  footer -->
-                    <div class="card-footer bg-gradient-cyan p-0 d-flex justify-content-center">
-                      <!-- Botón Buscar Personal -->
-                      
+                            <tbody id="listadoEmpleadosNomina">
+                                </tbody>
+                        </table>
                     </div>
-              </div>      <!-- /.card -->
-      </form>
-    </section>
-</div> <!-- /.content-Wrapper, Contains page content. -->
 
-<!-- plantilla loading-screen . -->
+                </div> <div class="card-footer bg-white text-muted text-center small py-3">
+                    <i class="fas fa-info-circle mr-1"></i> Toque sobre la imagen del estado (derecha) para editar la asistencia.
+                </div>
+
+            </div> </form>
+      </div>
+    </section>
+</div>
+
 <div id="loading-screen" style="display:none">
-  <img src="img/spinning-circles.svg">
+  <img src="img/spinning-circles.svg" alt="Cargando">
   <h3>
-    <label for="LblDescripcion" class="bg-gradiente-gray" id="LblDescripcionMensaje">Por Favor Espere...</label>
+    <label class="bg-gradiente-gray" id="LblDescripcionMensaje">Por Favor Espere...</label>
   </h3>
 </div>
 
-<!-- plantilla que contiene el . -->
 {% include 'Asistencia/VentanaPunteo.html' %}
 
-{% endblock %}
-
-{% block loginUser %}
-<!--	{% include 'layout-login-user.html' %} -->
 {% endblock %}
