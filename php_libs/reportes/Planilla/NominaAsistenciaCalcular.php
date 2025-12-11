@@ -280,224 +280,95 @@ function calcularSeptimoDia($dblink, $codigo_personal, $codigo_depto, $fecha_per
     return $dinero_descontado_por_septimos;
 }
 
+
 function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
     // --- 1. CONFIGURACIÓN BASE ---
-    $borde_color = [50, 50, 200];     // Azul
-    $relleno_color = [255, 255, 255]; // Blanco
+    $borde_color = [50, 50, 200];     // Azul Borde
+    $relleno_color = [255, 255, 255]; // Blanco Fondo
     
-    // Configuración Central
+    // Configuración Central por defecto
     $fuente_actual = 'ZapfDingbats'; 
     $simbolo_central = 'l';           // Punto
     $texto_color = [0, 0, 0];         // Negro
-    $tamano_fuente_central = 5;       // Ojo: ¿5? Normalmente es 12 para el punto. Revisa si querías 5 o 12.
+    $tamano_fuente_central = 6;      // Tamaño estándar para el punto
     $ajuste_y_simbolo = 1;            
 
     // Configuración Esquinas
-    $tamano_fuente_esquinas = 6.5;    // Tamaño por defecto (pequeño)
+    $tamano_fuente_esquinas = 6.5;    
     $texto_sup_der = ''; 
     $texto_inf_der = ''; 
     $texto_inf_izq = ''; 
 
-    // --- 2. ANÁLISIS DEL CÓDIGO ---
+    // --- 2. ANÁLISIS DEL CÓDIGO (SWITCH MAESTRO) ---
 
     switch ($codigo) {
         // ---------------------------------------------------------
-        // GRUPO: CELDAS VACÍAS
+        // GRUPO 1: CELDAS VACÍAS O ERRORES
         // ---------------------------------------------------------
-        case '':
-        case null:
-        case 'VACIO':
-            $fuente_actual = 'Arial'; 
-            $simbolo_central = ''; 
-            $relleno_color = [255, 255, 255]; 
+        case '': case null: case 'VACIO': 
+        case '4144444': case '21444440': // Sin Jornada (Gris)
+            $fuente_actual = 'Arial'; $simbolo_central = '0H'; 
+            $relleno_color = [225, 225, 225]; // Gris Suave
+            $tamano_fuente_central = 10; $ajuste_y_simbolo = 2;
             break;
 
         // ---------------------------------------------------------
-        // GRUPO: FALTAS (F) Y CASTIGOS (C) - ROJO
+        // GRUPO 2: FALTAS Y CASTIGOS (ROJO)
         // ---------------------------------------------------------
         case '4444444': case 'FALTA': case 'FALTA_GENERICA':
-        case '41044444': 
-            $fuente_actual = 'Arial'; 
-            $simbolo_central = ($codigo == '41044444') ? 'C' : 'F';
+            $fuente_actual = 'Arial'; $simbolo_central = 'F';
             $texto_color = [200, 0, 0]; 
             $tamano_fuente_central = 10; $ajuste_y_simbolo = 3;
             break;
-        // =========================================================
-        // GRUPO: UNA TANDA Y MEDIA (1.5T)
-        // =========================================================
-        // Representa: 1.5 Tandas (Jornada extendida)
-        
-        case '3144444': // Una Tanda y Media (Normal)
-            case '3144445': // Una Tanda y Media + Nocturnidad
-                $fuente_actual = 'Arial';
-                $simbolo_central = '1.5T';
+            
+        case '41044444': // Castigo
+            $fuente_actual = 'Arial'; $simbolo_central = 'C';
+            $texto_color = [200, 0, 0]; 
+            $tamano_fuente_central = 10; $ajuste_y_simbolo = 3;
+            break;
+
+        // ---------------------------------------------------------
+        // GRUPO 3: DESCANSOS (VERDE)
+        // ---------------------------------------------------------
+        case '41344444': // Descanso Puro
+             $fuente_actual = 'Arial'; $simbolo_central = 'D';
+             $texto_color = [0, 128, 0]; 
+             $tamano_fuente_central = 10; $ajuste_y_simbolo = 3;
+             break;
+
+        case '41444144': // TD 4H
+        case '41444244': // TD 1T
+        case '41444344': // TD 1.5T
+        // --- NUEVOS: TRABAJO DESCANSO CON NOCTURNIDAD ---
+        case '41444145': // TD 4H + N
+        case '41444245': // TD 1T + N
+        case '41444345': // TD 1.5T + N
+                $fuente_actual = 'Arial'; $simbolo_central = 'TD';
+                $texto_color = [0, 128, 0]; 
+                $tamano_fuente_central = 10; $ajuste_y_simbolo = 3;
                 
-                // Colores: Fondo Blanco, Texto Negro
-                $relleno_color = [255, 255, 255]; 
-                $texto_color = [0, 0, 0];     
-                
-                $tamano_fuente_central = 9; 
-                $ajuste_y_simbolo = 3;
-    
-                // Si es el código con nocturnidad (termina en 5), 
-                // la lógica genérica al final de la función se encargará de poner la "N".
-                // Pero si quieres asegurarte o ponerla en otro lado, puedes hacerlo aquí:
-                if ($codigo == '3144445') {
-                    $texto_inf_der = 'N'; 
+                // Cantidades a la derecha
+                if ($codigo == '41444144' || $codigo == '41444145') $texto_inf_der = '4H';
+                elseif ($codigo == '41444244' || $codigo == '41444245') $texto_inf_der = '1T';
+                elseif ($codigo == '41444344' || $codigo == '41444345') $texto_inf_der = '1.5T';
+
+                // Nocturnidad a la izquierda (Solo para los terminados en 5)
+                if (in_array($codigo, ['41444145', '41444245', '41444345'])) {
+                    $texto_inf_izq = 'N';
                 }
                 break;
-        // ---------------------------------------------------------
-        // GRUPO: DESCANSOS (D) Y VACACIONES (V) - VERDE
-        // ---------------------------------------------------------
-        // =========================================================
-        // GRUPO: DESCANSO (D) Y TRABAJO DESCANSO (TD)
-        // =========================================================
-        // Estilo: Fondo Blanco, Texto Verde
-        
-        case '41344444': // Descanso Normal
-            $fuente_actual = 'Arial';
-            $simbolo_central = 'D';
-            
-            // Colores: Fondo Blanco, Texto Verde Oscuro
-            $relleno_color = [255, 255, 255]; 
-            $texto_color = [0, 128, 0]; 
-            
-            $tamano_fuente_central = 10; 
-            $ajuste_y_simbolo = 3; // Ajuste para la 'D'
+
+        case '41744444': // Descanso Asueto (DA) - AMARILLO
+            $fuente_actual = 'Arial'; $simbolo_central = 'DA';
+            $relleno_color = [255, 255, 0]; $texto_color = [0, 128, 0]; 
+            $tamano_fuente_central = 10; $ajuste_y_simbolo = 1;
             break;
 
-        case '41444144': // Trabajo Descanso Media Tanda (4H)
-        case '41444244': // Trabajo Descanso Una Tanda (1T)
-        case '41444344': // Trabajo Descanso Tanda y Media (1.5T)
-            $fuente_actual = 'Arial';
-            $simbolo_central = 'TD';
-            
-            // Colores: Fondo Blanco, Texto Verde Oscuro
-            $relleno_color = [255, 255, 255]; 
-            $texto_color = [0, 128, 0]; 
-            
-            $tamano_fuente_central = 10; 
-            $ajuste_y_simbolo = 3;
-
-            // Cantidades en la esquina inferior derecha
-            if ($codigo == '41444144') {
-                $texto_inf_der = '4H';   // Media Tanda
-            } elseif ($codigo == '41444244') {
-                $texto_inf_der = '1T';   // Una Tanda
-            } elseif ($codigo == '41444344') {
-                $texto_inf_der = '1.5T'; // Tanda y Media
-            }
-            break;
-// =========================================================
-        // GRUPO: VACACIONES (V) - FONDO BLANCO / TEXTO VERDE
-        // =========================================================
-        case '41144444': // Vacación Normal
-            $fuente_actual = 'Arial';
-            $simbolo_central = 'V';
-            // Colores: Fondo Blanco, Texto Verde
-            $relleno_color = [255, 255, 255]; 
-            $texto_color = [0, 180, 60]; // Verde "Vacación"
-            $tamano_fuente_central = 12; 
-            $ajuste_y_simbolo = 3;
-            break;
-
-        // =========================================================
-        // GRUPO: TRABAJO VACACIÓN (TV) - FONDO BLANCO / TEXTO VERDE
-        // =========================================================
-        // Representa: TV (Trabajo en Vacación) + Cantidad (4H, 1T, etc)
-        
-        case '41241444': // TV Media Tanda (4H)
-        case '41242444': // TV Una Tanda (1T)
-        case '41243444': // TV Tanda y Media (1.5T)
-        case '41242445': // TV Una Tanda + Nocturnidad (TV + 1T + N)
-        case '41243445': // TV Media Tanda + Nocturnidad (TV + 4H + N) (Revisa si es media o tanda completa)
-            $fuente_actual = 'Arial';
-            $simbolo_central = 'TV';
-            
-            // Colores: Fondo Blanco, Texto Verde
-            $relleno_color = [255, 255, 255]; 
-            $texto_color = [0, 180, 60]; 
-            
-            $tamano_fuente_central = 10; 
-            $ajuste_y_simbolo = 2;
-
-            // Cantidades en la esquina derecha
-            if ($codigo == '41241444') $texto_inf_der = '4H';
-            elseif ($codigo == '41242444' || $codigo == '41242445') $texto_inf_der = '1T';
-            elseif ($codigo == '41243444') $texto_inf_der = '1.5T';
-            elseif ($codigo == '41243445') $texto_inf_der = '4H'; // Asumiendo media tanda por el nombre
-
-            // Nocturnidad a la izquierda
-            if (in_array($codigo, ['41242445', '41243445'])) {
-                $texto_inf_izq = 'N';
-            }
-            break;
-
-        // =========================================================
-        // GRUPO: VACACIÓN DESCANSO ASUETO (VDA) - FONDO AMARILLO
-        // =========================================================
-        // Estilo: Fondo Amarillo, Texto "VDA" Rojo (Para máxima alerta)
-        
-        case '41944444': // Vacación Descanso Asueto
-            $fuente_actual = 'Arial';
-            $simbolo_central = 'VDA';
-            
-            // Colores: Fondo Amarillo Brillante
-            $relleno_color = [255, 255, 0]; 
-            // Texto Rojo (destaca sobre amarillo y alerta del asueto)
-            $texto_color = [200, 0, 0];      
-            
-            $tamano_fuente_central = 9; // Letra un poco más pequeña para que quepa VDA
-            $ajuste_y_simbolo = 2;
-            break;
-
-        // ---------------------------------------------------------
-        // GRUPO: ISSS y PERMISOS (PP) - AZUL
-        // ---------------------------------------------------------
-        case '4244444': // ISSS
-        case '4344444': // Permiso
-            $fuente_actual = 'Arial';
-            $texto_color = [0, 0, 200]; 
-            if ($codigo == '4244444') {
-                $simbolo_central = 'ISSS';
-                $tamano_fuente_central = 6; $ajuste_y_simbolo = 1.5;
-            } else {
-                $simbolo_central = 'PP';
-                $tamano_fuente_central = 9; $ajuste_y_simbolo = 3;
-            }
-            break;
-
-        // ---------------------------------------------------------
-        // GRUPO: TRABAJO ASUETO (TA) - AMARILLO / ROJO
-        // ---------------------------------------------------------
-        case '41614444': // TA Media
-        case '41624444': // TA Una
-        case '41634444': // TA Una y Media
-        case '41944445': // TA + N
-        case '41924445': // TA + N + 1T
-            $fuente_actual = 'Arial';
-            $simbolo_central = 'TA';
-            $relleno_color = [255, 255, 0]; // Amarillo
-            $texto_color = [200, 0, 0];     // Rojo
-            $tamano_fuente_central = 9; $ajuste_y_simbolo = 2;
-
-            // Textos específicos
-            if ($codigo == '41614444') $texto_inf_der = '4H';
-            elseif ($codigo == '41624444' || $codigo == '41924445') $texto_inf_der = '1T';
-            elseif ($codigo == '41634444') $texto_inf_der = '1.5T';
-            
-            // Nocturnidad a la izquierda para este grupo
-            if (in_array($codigo, ['41944445', '41924445'])) {
-                $texto_inf_izq = 'N';
-            }
-            break;
-
-        // ---------------------------------------------------------
-        // GRUPO: TRABAJO DESCANSO ASUETO (TDA) - AMARILLO / ROJO
-        // ---------------------------------------------------------
-        case '41544444': case '41514444': case '41524444': case '41534444':
-            $fuente_actual = 'Arial';
-            $simbolo_central = 'TDA';
+        case '41544444': // TDA Genérico
+        case '41514444': // TDA 4H
+        case '41524444': // TDA 1T
+        case '41534444': // TDA 1.5T
+            $fuente_actual = 'Arial'; $simbolo_central = 'TDA';
             $relleno_color = [255, 255, 0]; $texto_color = [200, 0, 0]; 
             $tamano_fuente_central = 9; $ajuste_y_simbolo = 1;
 
@@ -507,135 +378,184 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
             break;
 
         // ---------------------------------------------------------
-        // GRUPO: OTROS ASUETOS
+        // GRUPO 4: VACACIONES (VERDE)
         // ---------------------------------------------------------
-        case '41644444': // Asueto Normal
-        case 'AS':
+        case '41144444': // V Puro
+            $fuente_actual = 'Arial'; $simbolo_central = 'V';
+            $texto_color = [0, 180, 60]; 
+            $tamano_fuente_central = 10; $ajuste_y_simbolo = 3;
+            break;
+
+        case '41241444': // TV 4H
+        case '41242444': // TV 1T
+        case '41243444': // TV 1.5T
+        case '41242445': // TV 1T + N
+        case '41243445': // TV 4H + N
+             $fuente_actual = 'Arial'; $simbolo_central = 'TV';
+             $texto_color = [0, 180, 60];
+             $tamano_fuente_central = 10; $ajuste_y_simbolo = 3;
+
+             if ($codigo == '41241444' || $codigo == '41243445') $texto_inf_der = '4H';
+             elseif ($codigo == '41242444' || $codigo == '41242445') $texto_inf_der = '1T';
+             elseif ($codigo == '41243444') $texto_inf_der = '1.5T';
+             
+             // Nocturnidad explícita
+             if (in_array($codigo, ['41242445', '41243445'])) $texto_inf_izq = 'N';
+             break;
+
+        case '41944444': // Vacación Descanso Asueto (VDA)
+            $fuente_actual = 'Arial'; $simbolo_central = 'VDA';
+            $relleno_color = [255, 255, 0]; $texto_color = [200, 0, 0]; 
+            $tamano_fuente_central = 8; $ajuste_y_simbolo = 1;
+            break;
+
+        // ---------------------------------------------------------
+        // GRUPO 5: ASUETOS (AMARILLO)
+        // ---------------------------------------------------------
+        case '41644444': // Asueto Puro
             $fuente_actual = 'Arial'; $simbolo_central = 'A';
             $relleno_color = [255, 255, 0]; $texto_color = [200, 0, 0]; 
             $tamano_fuente_central = 10; $ajuste_y_simbolo = 3;
             break;
 
-        case '41744444': // Descanso Asueto (DA) - AMARILLO / VERDE
-            $fuente_actual = 'Arial'; $simbolo_central = 'DA';
-            $relleno_color = [255, 255, 0]; $texto_color = [0, 128, 0]; 
-            $tamano_fuente_central = 10; $ajuste_y_simbolo = 1;
-            break;
+            case '41614444': // TA 4H
+                case '41624444': // TA 1T
+                case '41634444': // TA 1.5T
+                case '41944445': // TA 4H + N (Formato antiguo 19)
+                case '41924445': // TA 1T + N (Formato antiguo 19)
+                case '41934445': // TA 1.5T + N (Formato antiguo 19)
+                // --- NUEVOS: ASUETO NOCTURNIDAD CON CÓDIGO 416 ---
+                case '41614445': // TA 4H + N
+                case '41624445': // TA 1T + N
+                case '41634445': // TA 1.5T + N
+                case '41644445': // TA + N (Sin duración específica)
+                    $fuente_actual = 'Arial'; $simbolo_central = 'TA';
+                    $relleno_color = [255, 255, 0]; // Amarillo
+                    $texto_color = [200, 0, 0];     // Rojo
+                    $tamano_fuente_central = 9; $ajuste_y_simbolo = 2; // Ajustado para que quepa bien
+        
+                    // Lógica de texto Derecho (Duración)
+                    if (in_array($codigo, ['41614444', '41944445', '41614445'])) $texto_inf_der = '4H';
+                    elseif (in_array($codigo, ['41624444', '41924445', '41624445'])) $texto_inf_der = '1T';
+                    elseif (in_array($codigo, ['41634444', '41934445', '41634445'])) $texto_inf_der = '1.5T';
+                    
+                    // Lógica de texto Izquierdo (Nocturnidad)
+                    if (in_array($codigo, ['41944445', '41924445', '41934445', '41614445', '41624445', '41634445', '41644445'])) {
+                        $texto_inf_izq = 'N';
+                    }
+                    break;
 
         // ---------------------------------------------------------
-        // GRUPO: MEDIAS TANDAS (4H)
+        // GRUPO 6: PERMISOS (AZUL)
         // ---------------------------------------------------------
-        case '1144444': 
-            $fuente_actual = 'Arial'; $simbolo_central = '4H';
+        case '4244444': // ISSS
+            $fuente_actual = 'Arial'; $simbolo_central = 'ISSS';
+            $texto_color = [0, 0, 200]; 
+            $tamano_fuente_central = 6; $ajuste_y_simbolo = 1.5;
+            break;
+        case '4344444': // Permiso
+            $fuente_actual = 'Arial'; $simbolo_central = 'PP';
+            $texto_color = [0, 0, 200]; 
             $tamano_fuente_central = 9; $ajuste_y_simbolo = 3;
             break;
 
         // ---------------------------------------------------------
-        // GRUPO: PUNTO + HORAS EXTRAS (HE)
+        // GRUPO 7: MEDIA TANDA Y COMPLEJOS (BLANCO)
         // ---------------------------------------------------------
-        case '21444444': $texto_sup_der = '4 HE'; break;
-        case '21444443': $texto_sup_der = '3 HE'; break;
-        case '21444442': $texto_sup_der = '2 HE'; break;
-        case '21444441': $texto_sup_der = '1 HE'; break;
+        case '1144444':  // 4H sola
+        case '1144424':  // 4H + 1T (Sin Noche)
+        case '1144425':  // 4H + 1T + NOCHE (El difícil)
+        case '11444344': // 4H + 1.5T
+        case '11444144': // 4H + 4HE
+        case '11444244': // 4H + 1T + 4HE
+        case '11444243': // 4H + 1T + 3HE
+        case '11444242': // 4H + 1T + 2HE
+        case '11444241': // 4H + 1T + 1HE
+            
+            $fuente_actual = 'Arial'; 
+            $simbolo_central = '4H';
+            $tamano_fuente_central = 9; 
+            $ajuste_y_simbolo = 2; 
 
-        // ---------------------------------------------------------
-        // GRUPO: SIN JORNADA (0H)
-        // ---------------------------------------------------------
-        case '4144444': 
-            $fuente_actual = 'Arial'; $simbolo_central = '0H';
-            $relleno_color = [225, 225, 225]; // Gris
-            $tamano_fuente_central = 10; $ajuste_y_simbolo = 2;
+            // Tanda Extra (Abajo Derecha)
+            if ($codigo == '11444344') $texto_inf_der = '1.5T';
+            elseif (in_array($codigo, ['1144424', '1144425', '11444244', '11444243', '11444242', '11444241'])) {
+                $texto_inf_der = '1T';
+            }
+
+            // Horas Extras (Arriba Derecha)
+            if ($codigo == '11444244' || $codigo == '11444144') $texto_sup_der = '4 HE';
+            elseif ($codigo == '11444243') $texto_sup_der = '3 HE';
+            elseif ($codigo == '11444242') $texto_sup_der = '2 HE';
+            elseif ($codigo == '11444241') $texto_sup_der = '1 HE';
+
+            // Nocturnidad especial (Abajo Izquierda)
+            if ($codigo == '1144425') $texto_inf_izq = 'N';
             break;
-        // =========================================================
-        // GRUPO: MEDIA TANDA CON EXTRAS (Complejos)
-        // =========================================================
-        // Estilo: Fondo Blanco, Centro "4H"
-        // Esquema: 4H (Centro) + Tanda Extra (Abajo Der) + HE (Arriba Der)
-        
-        case '1144424':  // Media Tanda + 1 Tanda Extra
-        case '11444344': // Media Tanda + 1.5 Tandas Extra
-        case '11444144': // Media Tanda + 4 HE (Sin tanda extra)
-        
-        // Variantes con 1 Tanda Extra + Horas Extras
-        case '11444244': // ... + 1T + 4HE
-        case '11444243': // ... + 1T + 3HE
-        case '11444242': // ... + 1T + 2HE
-        case '11444241': // ... + 1T + 1HE
-                
-                $fuente_actual = 'Arial';
-                $simbolo_central = '4H';
-                
-                // Colores: Fondo Blanco, Texto Negro
-                $relleno_color = [255, 255, 255]; 
-                $texto_color = [0, 0, 0]; 
-                
-                $tamano_fuente_central = 9; 
-                $ajuste_y_simbolo = 2;
-    
-                // --- LÓGICA DE TANDA EXTRA (Abajo Derecha) ---
-                // ID 9, ID 35 y los del ID 45 al 48
-                if ($codigo == '11444344') {
-                    $texto_inf_der = '1.5T';
-                } 
-                elseif ($codigo == '1144424' || in_array($codigo, ['11444244','11444243','11444242','11444241'])) {
-                    $texto_inf_der = '1T';
-                }
-    
-                // --- LÓGICA DE HORAS EXTRAS (Arriba Derecha) ---
-                // ID 14 (Solo HE) y los del ID 45 al 48 (Tanda + HE)
-                if ($codigo == '11444244' || $codigo == '11444144') {
-                    $texto_sup_der = '4 HE';
-                } elseif ($codigo == '11444243') {
-                    $texto_sup_der = '3 HE';
-                } elseif ($codigo == '11444242') {
-                    $texto_sup_der = '2 HE';
-                } elseif ($codigo == '11444241') {
-                    $texto_sup_der = '1 HE';
-                }
-                break;
-        default: break;
+
+        // --- UNA TANDA Y MEDIA (1.5T) ---
+        case '3144444': 
+        case '3144445': // Con Noche
+            $fuente_actual = 'Arial'; $simbolo_central = '1.5T';
+            $tamano_fuente_central = 9; $ajuste_y_simbolo = 2;
+            if ($codigo == '3144445') $texto_inf_izq = 'N';
+            break;
+
+        // --- PUNTO / UNA TANDA (1T) ---
+        case '21444444': // 4 HE
+             $texto_sup_der = '4 HE'; break;
+        case '21444443': 
+             $texto_sup_der = '3 HE'; break;
+        case '21444442': 
+             $texto_sup_der = '2 HE'; break;
+        case '21444441': 
+             $texto_sup_der = '1 HE'; break;
+        case '2144445': // 1T + Noche
+             $texto_inf_izq = 'N'; break;
+
+        default: break; // Punto por defecto (2144444)
     }
 
-    // --- 3. LÓGICA ESPECÍFICA ---
+    // --- 3. LÓGICA FINAL Y DIBUJO ---
     
-    // HE Genérico
+    // Si viene HE dinámico del array (_HE)
     if (strpos($codigo, '_HE') !== false) {
         $partes = explode('_HE', $codigo);
         $texto_sup_der = end($partes) . " HE";
-    } 
-    // Caso Especial: 4H + N + 1T
-    elseif ($codigo == '1144425') {
-         $fuente_actual = 'Arial'; $simbolo_central = '4H';
-         $tamano_fuente_central = 9;
-         $ajuste_y_simbolo = 2; 
-         $texto_inf_izq = 'N';  // Izquierda
-         $texto_inf_der = '1T'; // Derecha
-         $tamano_fuente_esquinas = 6; 
     }
-    
-    // Nocturnidad Genérica (Para todos los demás códigos que terminan en 5)
-    // Excluimos los que ya configuramos manualmente arriba
-    $excepciones_nocturnidad = ['1144425', '41944445', '41924445', '41242445', '41243445', '3144445'];
+
+    // Nocturnidad Genérica para cualquier otro código terminado en 5
+    // que NO esté en la lista de los que ya manejamos manualmente
+    // Agrega los nuevos códigos a este array:
+    $excepciones_nocturnidad = [
+        '1144425', '41944445', '41924445', '41242445', '41243445', '3144445', '2144445', '41934445',
+        // --- NUEVOS AGREGADOS ---
+        '41444145', '41444245', '41444345', // TD Nocturnos
+        '41614445', '41624445', '41634445', '41644445' // TA Nocturnos
+    ];
 
     if (substr($codigo, -1) == '5' && !in_array($codigo, $excepciones_nocturnidad)) {
-        // CORRECCIÓN: La N genérica suele ir a la DERECHA ("... N")
-        $texto_inf_izq = trim($texto_inf_izq . " N");
+        // Si no tiene texto a la izquierda, ponemos la N ahí
+        if(empty($texto_inf_izq)) $texto_inf_izq = 'N';
+        // Si ya tiene texto a la izquierda, la ponemos a la derecha
+        else $texto_inf_der = trim($texto_inf_der . " N");
     }
 
-    // --- 4. DIBUJO FINAL ---
+    // --- 4. DIBUJO FINAL (RENDERIZADO) ---
 
-    // Fondo
+    // Fondo y Borde
     $pdf->SetFillColor($relleno_color[0], $relleno_color[1], $relleno_color[2]);
     $pdf->SetDrawColor($borde_color[0], $borde_color[1], $borde_color[2]);
     $pdf->SetLineWidth(0.3);
     $pdf->Rect($x, $y, $w, $h, 'DF'); 
 
-    // Símbolo Central
+    // Símbolo Central (TA, TD, etc.)
     if (!empty($simbolo_central)) {
         $pdf->SetTextColor($texto_color[0], $texto_color[1], $texto_color[2]);
         $style = ($fuente_actual == 'Arial') ? 'B' : '';
         $pdf->SetFont($fuente_actual, $style, $tamano_fuente_central);
         
+        // Calculamos centro vertical
         $pos_y_centro = $y + ($h / 2) - ($tamano_fuente_central / 4) + $ajuste_y_simbolo;
         if ($fuente_actual == 'ZapfDingbats') $pos_y_centro += 1; 
 
@@ -643,41 +563,41 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
         $pdf->Cell($w, 0, ($simbolo_central), 0, 0, 'C');
     }
 
-    // --- TEXTOS DE ESQUINAS (Configuración única y márgenes) ---
-    $pdf->SetTextColor(0, 0, 0); 
-    $pdf->SetFont('Arial', 'B', $tamano_fuente_esquinas); // Usamos la variable
+    // =========================================================
+    // CONTROL DE ESQUINAS (Aquí está la magia de la posición)
+    // =========================================================
+    $pdf->SetTextColor(0, 0, 0); // Texto negro para detalles
+    $pdf->SetFont('Arial', 'B', 6); // FUENTE PEQUEÑA (5.5 es ideal para que quepan ambos)
 
-    $margen_lateral = 0.2; // Margen muy pegado
+    // Márgenes de seguridad (Padding interno)
+    $margen_lateral = 0.1;  // Espacio desde los lados (Izq/Der)
+    $margen_inferior = 1.0; // Espacio desde abajo (para que no toque la línea inferior)
+    $margen_superior = 1.8; // Espacio desde arriba (para HE)
 
-    // Sup Derecha
+    // 1. Esquina SUPERIOR DERECHA (HE)
     if (!empty($texto_sup_der)) {
-        $pdf->SetXY($x, $y + 1.5); 
+        $pdf->SetXY($x, $y + $margen_superior); 
+        // Alineación 'R' (Right) pega el texto a la derecha
         $pdf->Cell($w - $margen_lateral, 0, $texto_sup_der, 0, 0, 'R'); 
     }
 
-    // --- CONFIGURACIÓN VERTICAL INFERIOR ---
-    // Cuanto mayor sea este número, más ARRIBA quedará el texto.
-    // 1.0 = Estándar
-    // 0.5 = Muy pegado al borde de abajo
-    // 2.0 = Bastante subido
-    $margen_inferior = 1.5; 
-    // --------------------------------------
-
-    // Esquina Inferior Derecha
+    // 2. Esquina INFERIOR DERECHA (Duración: 1T, 4H, 1.5T)
     if (!empty($texto_inf_der)) {
-        // Aquí se aplica la resta
         $pdf->SetXY($x, $y + $h - $margen_inferior); 
+        // Alineación 'R' asegura que se quede a la derecha
         $pdf->Cell($w - $margen_lateral, 0, $texto_inf_der, 0, 0, 'R');
     }
 
-    // Esquina Inferior Izquierda
+    // 3. Esquina INFERIOR IZQUIERDA (Nocturnidad: N)
     if (!empty($texto_inf_izq)) {
-        // Aquí también se aplica para que queden alineados
+        // Movemos el cursor X un poquito a la derecha para dar margen
         $pdf->SetXY($x + $margen_lateral, $y + $h - $margen_inferior); 
-        $pdf->Cell($w - $margen_lateral, 0, $texto_inf_izq, 0, 0, 'L'); 
-    }
+        // Alineación 'L' asegura que se quede a la izquierda
+        // Importante: Usamos Cell($w...) pero como alineamos a la izquierda, no se monta sobre el otro.
+        $pdf->Cell($w - ($margen_lateral*2), 0, $texto_inf_izq, 0, 0, 'L'); 
+   }
 }
-// --- FUNCIÓN AUXILIAR ---
+
 function buscarCodigoDeAsistencia($dblink, $codigo_personal, $fecha_str, &$datos_precargados) {
     if (isset($datos_precargados[$codigo_personal][$fecha_str])) {
         $asistencia_dia = $datos_precargados[$codigo_personal][$fecha_str];
@@ -787,6 +707,39 @@ if (!empty($codigos_personal_a_consultar)) {
     }
 }
 
+// =========================================================
+// OPTIMIZACIÓN: CARGA MASIVA DE ARRASTRE (15 días atrás)
+// =========================================================
+$asistencia_historica = [];
+if (!empty($codigos_personal_a_consultar)) {
+    // Calculamos 15 días antes del inicio para cubrir cualquier "semana anterior"
+    $fecha_inicio_carry = date('Y-m-d', strtotime($fecha_periodo_inicio . ' -15 days'));
+    
+    // Reutilizamos la lista de códigos
+    $codigos_personal_str = "'" . implode("','", $codigos_personal_a_consultar) . "'";
+    
+    $stmt_carry = $dblink->prepare("
+        SELECT codigo_personal, fecha, codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto 
+        FROM personal_asistencia 
+        WHERE codigo_personal IN ($codigos_personal_str)
+        AND fecha BETWEEN :fecha_carry AND :fecha_inicio_menos_1
+    ");
+    
+    $fecha_fin_carry = date('Y-m-d', strtotime($fecha_periodo_inicio . ' -1 day'));
+    
+    $stmt_carry->bindParam(':fecha_carry', $fecha_inicio_carry);
+    $stmt_carry->bindParam(':fecha_inicio_menos_1', $fecha_fin_carry);
+    $stmt_carry->execute();
+    
+    while ($row_h = $stmt_carry->fetch(PDO::FETCH_ASSOC)) {
+        $cp = $row_h['codigo_personal'];
+        $f = $row_h['fecha'];
+        // Guardamos el código combinado que es lo que nos interesa para detectar faltas
+        $asistencia_historica[$cp][$f] = trim($row_h['codigo_jornada']) . trim($row_h['codigo_tipo_licencia']) . trim($row_h['codigo_jornada_asueto']);
+    }
+}
+// =========================================================
+
 $NombresCodigoLicenciaPermiso = [];
 $consultaLic = $dblink->query("SELECT id_, descripcion, horas FROM catalogo_tipo_licencia_o_permiso");
 while ($row = $consultaLic->fetch(PDO::FETCH_ASSOC)) {
@@ -846,20 +799,45 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
 
     $non_contributory_codes_display_only = ['4344444'];
     $deduction_codes = ['41044444', '4444444', '4144444']; 
-    $asueto_worked_codes = ['41614444' => $salario_diario / 2, '41624444' => $salario_diario, '41634444' => $salario_diario + ($salario_diario / 2)];
+    $asueto_worked_codes = ['41614444' => $salario_diario / 2, '41624444' => $salario_diario, '41634444' => $salario_diario + ($salario_diario / 2),
+        // --- NUEVOS: TRABAJO ASUETO CON NOCTURNIDAD ---
+        '41614445' => $salario_diario / 2, // TA 4H + N
+        '41624445' => $salario_diario,     // TA 1T + N
+        '41634445' => $salario_diario + ($salario_diario / 2), // TA 1.5T + N
+        '41644445' => $salario_diario      // TA + N (Sin duración definida, asumimos 1T)
+        ];
     $trabajo_descanso_codes = ['41444144' => $salario_diario / 2, '41444244' => $salario_diario, '41444344' => $salario_diario + ($salario_diario / 2),
-        '11444144' => $salario_diario * 2 
+        '11444144' => $salario_diario * 2, 
+        // --- NUEVOS: TRABAJO DESCANSO CON NOCTURNIDAD ---
+        // Se paga igual que el descanso normal, la nocturnidad se suma aparte
+        '41444145' => $salario_diario / 2, // TD 4H + N
+        '41444245' => $salario_diario,     // TD 1T + N
+        '41444345' => $salario_diario + ($salario_diario / 2) // TD 1.5T + N
     ];
     $trabajo_vacacion_codes = ['41241444' => $salario_diario / 2, '41242444' => $salario_diario, '41243444' => $salario_diario + ($salario_diario / 2)];
     $trabajo_descanso_asueto_codes = [
         '41744444' => $salario_diario, '41514444' => $salario_diario / 2, '41524444' => $salario_diario, '41534444' => $salario_diario + ($salario_diario / 2)];
     $nocturnidad_base_value = 0.57;
     $nocturnidad_codes_specific = [
-        '2144445' => true, '1144445' => true, '1144425' => true, '11444450' => true, '2124445' => true, '41242445' => true, '41241445' => true
+        '2144445' => true, '1144445' => true, '1144425' => true, '11444450' => true, '2124445' => true, '41242445' => true, '41241445' => true,
+        // --- NUEVOS: TRABAJO DESCANSO NOCTURNO ---
+        '41444145' => true, // TD 4H N
+        '41444245' => true, // TD 1T N
+        '41444345' => true, // TD 1.5T N
+        
+        // --- NUEVOS: TRABAJO ASUETO NOCTURNO ---
+        '41614445' => true, // TA 4H N
+        '41624445' => true, // TA 1T N
+        '41634445' => true, // TA 1.5T N
+        '41644445' => true, // TA N Genérico
+        '41944445' => true, // TA N (Código antiguo 19)
+        '41924445' => true, // TA N 1T (Código antiguo 19)
+        '41934445' => true  // TA N 1.5T (Código antiguo 19)
     ];
     $fixed_extra_codes = [
         '1144424' => $salario_diario, '3144444' => $salario_diario / 2,
-        '1144425' => $salario_diario       // NUEVO: Agrega 1 Tanda (8H) a Extras
+        '1144425' => $salario_diario,       // NUEVO: Agrega 1 Tanda (8H) a Extras
+        // El caso complejo: Media Tanda + 1 Tanda Extra + Noche
     ];
     $weekly_four_h_count = [];
 
@@ -1239,41 +1217,40 @@ foreach ($datos_empleado_principal as $row_empleado) {
     
     $nombre_completo = trim(($nombres_empleado . ' ' . $apellidos_empleado));
 
-    // --- 1. CÁLCULO DE ARRASTRE (CARRY OVER) - UNA SOLA VEZ ---
-    $deductible_events_carry_over = [];
-    $fecha_inicio_dt = new DateTime($fecha_periodo_inicio);
-    $day_of_week_num = (int)$fecha_inicio_dt->format('N'); 
+   // --- 1. CÁLCULO DE ARRASTRE (CARRY OVER) - OPTIMIZADO ---
+   $deductible_events_carry_over = [];
+   $fecha_inicio_dt = new DateTime($fecha_periodo_inicio);
+   $day_of_week_num = (int)$fecha_inicio_dt->format('N'); 
 
-    if ($day_of_week_num > 1) {
-        $week_start_dt = (clone $fecha_inicio_dt)->modify('last monday');
-        $week_start_str = $week_start_dt->format('Y-m-d');
-        $check_date_dt = (clone $fecha_inicio_dt)->modify('-1 day');
+   if ($day_of_week_num > 1) {
+       $week_start_dt = (clone $fecha_inicio_dt)->modify('last monday');
+       $week_start_str = $week_start_dt->format('Y-m-d');
+       $check_date_dt = (clone $fecha_inicio_dt)->modify('-1 day');
 
-         while ($check_date_dt >= $week_start_dt) {
-            $fecha_str = $check_date_dt->format('Y-m-d');
-            
-            // Consulta optimizada
-            $stmt_check = $dblink->prepare("SELECT codigo_jornada, codigo_tipo_licencia, codigo_jornada_asueto FROM personal_asistencia WHERE codigo_personal = :codigo AND fecha = :fecha");
-            $stmt_check->bindParam(':codigo', $codigo_personal);
-            $stmt_check->bindParam(':fecha', $fecha_str);
-            $stmt_check->execute();
-            $asistencia_anterior = $stmt_check->fetch(PDO::FETCH_ASSOC);
+        while ($check_date_dt >= $week_start_dt) {
+           $fecha_str = $check_date_dt->format('Y-m-d');
+           
+           // --- CAMBIO: BÚSQUEDA EN ARRAY (MEMORIA) EN VEZ DE SQL ---
+           $codigo_anterior_combinado = '';
+           
+           // Verificamos si existe en nuestro array precargado
+           if (isset($asistencia_historica[$codigo_personal][$fecha_str])) {
+               $codigo_anterior_combinado = $asistencia_historica[$codigo_personal][$fecha_str];
+           }
+           // ---------------------------------------------------------
 
-            $codigo_anterior_combinado = '';
-            if ($asistencia_anterior) {
-                $codigo_anterior_combinado = trim($asistencia_anterior['codigo_jornada'] ?? '') . trim($asistencia_anterior['codigo_tipo_licencia'] ?? '') . trim($asistencia_anterior['codigo_jornada_asueto'] ?? '');
-            }
-
-            $deductible_codes_check = ['41044444', '4444444'];
-            if (in_array(trim($codigo_anterior_combinado), $deductible_codes_check)) {
-                $deductible_events_carry_over[$week_start_str] = [
-                    'has_deductible_event' => true
-                ];
-                break; 
-            }
-            $check_date_dt->modify('-1 day');
-        }
-    }
+           $deductible_codes_check = ['41044444', '4444444'];
+           if (in_array(trim($codigo_anterior_combinado), $deductible_codes_check)) {
+               $deductible_events_carry_over[$week_start_str] = [
+                   'has_deductible_event' => true,
+                   'has_descanso' => false, // (Simplificado para el ejemplo)
+                   'deducted_7mo' => false
+               ];
+               break; 
+           }
+           $check_date_dt->modify('-1 day');
+       }
+   }
 
     // AGREGAR ESTO: Necesitamos el salario para el debug
     $salario_mensual_debug = (float)$row_empleado['salario']; 

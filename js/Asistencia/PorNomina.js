@@ -395,7 +395,7 @@ function calcularYActualizar() {
                 CTL = '16'; // Por defecto
                 
                 // Lógica de Asueto Nocturno (Mantiene CTL 19)
-                if(estadoUI.nocturnidad && estadoUI.duracion !== '') CTL = '19';
+                if(estadoUI.nocturnidad && estadoUI.duracion !== '') CTL = '16';
 
                 if(estadoUI.duracion === '') {
                     CJA = '4'; urlImagen = "../acomtus/img/Catalogo Jornada/Asueto.jpg";
@@ -412,8 +412,13 @@ function calcularYActualizar() {
                 
                 // Imagen nocturnidad
                 if(estadoUI.nocturnidad && estadoUI.duracion !== '') {
-                    if(estadoUI.duracion === '1T') urlImagen = "../acomtus/img/Catalogo Jornada/AsuetoTandaYNocturnidad.jpg";
-                    else urlImagen = "../acomtus/img/Catalogo Jornada/AsuetoYNocturnidad.jpg";
+                    if(estadoUI.duracion === '1T'){
+                        urlImagen = "../acomtus/img/Catalogo Jornada/AsuetoTandaYNocturnidad.jpg";
+                    }else if(estadoUI.duracion === '4H'){
+                        urlImagen = "../acomtus/img/Catalogo Jornada/AsuetoMediaTandaNocturnidad.jpg";
+                    }else if(estadoUI.duracion === '1.5T'){
+                        urlImagen = "../acomtus/img/Catalogo Jornada/AsuetoUnaTandaYMediaNocturnidad.jpg";
+                    }
                 }
             }
             break;

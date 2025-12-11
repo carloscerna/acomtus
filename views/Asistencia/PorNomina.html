@@ -53,19 +53,24 @@
       letter-spacing: 1px;
       padding: 15px;
   }
+/* EFECTO CEBRA (VERDE TIERNO Y BLANCO) */
+#listadoEmpleados tbody tr:nth-of-type(odd) {
+  background-color: #ffffff; /* Blanco para impares */
+}
 
-  #listadoEmpleados tbody tr {
-      background-color: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-      transition: transform 0.2s;
-  }
+#listadoEmpleados tbody tr:nth-of-type(even) {
+  background-color: #e8f5e9; /* Verde Tierno para pares */
+}
 
-  #listadoEmpleados tbody tr:hover {
-      transform: scale(1.01);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-      z-index: 10;
-      position: relative;
-  }
+/* Mantener el efecto Hover (al pasar el mouse) */
+#listadoEmpleados tbody tr:hover {
+  transform: scale(1.01);
+  background-color: #dcedc8 !important; /* Un verde un poco más fuerte al tocar */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  z-index: 10;
+  position: relative;
+  cursor: pointer;
+}
 
   #listadoEmpleados td {
       border: none;
