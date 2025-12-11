@@ -281,7 +281,7 @@ function calcularSeptimoDia($dblink, $codigo_personal, $codigo_depto, $fecha_per
 }
 
 
-function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
+function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo, $link = '') {
     // --- 1. CONFIGURACIÓN BASE ---
     $borde_color = [50, 50, 200];     // Azul Borde
     $relleno_color = [255, 255, 255]; // Blanco Fondo
@@ -393,7 +393,7 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
         case '41243445': // TV 4H + N
              $fuente_actual = 'Arial'; $simbolo_central = 'TV';
              $texto_color = [0, 180, 60];
-             $tamano_fuente_central = 10; $ajuste_y_simbolo = 3;
+             $tamano_fuente_central = 10; $ajuste_y_simbolo = 2;
 
              if ($codigo == '41241444' || $codigo == '41243445') $texto_inf_der = '4H';
              elseif ($codigo == '41242444' || $codigo == '41242445') $texto_inf_der = '1T';
@@ -541,7 +541,7 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
         else $texto_inf_der = trim($texto_inf_der . " N");
     }
 
-    // --- 4. DIBUJO FINAL (RENDERIZADO) ---
+  // --- 4. DIBUJO FINAL (RENDERIZADO) ---
 
     // Fondo y Borde
     $pdf->SetFillColor($relleno_color[0], $relleno_color[1], $relleno_color[2]);
@@ -549,13 +549,12 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
     $pdf->SetLineWidth(0.3);
     $pdf->Rect($x, $y, $w, $h, 'DF'); 
 
-    // Símbolo Central (TA, TD, etc.)
+    // Símbolo Central
     if (!empty($simbolo_central)) {
         $pdf->SetTextColor($texto_color[0], $texto_color[1], $texto_color[2]);
         $style = ($fuente_actual == 'Arial') ? 'B' : '';
         $pdf->SetFont($fuente_actual, $style, $tamano_fuente_central);
         
-        // Calculamos centro vertical
         $pos_y_centro = $y + ($h / 2) - ($tamano_fuente_central / 4) + $ajuste_y_simbolo;
         if ($fuente_actual == 'ZapfDingbats') $pos_y_centro += 1; 
 
@@ -564,39 +563,109 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo) {
     }
 
     // =========================================================
-    // CONTROL DE ESQUINAS (Aquí está la magia de la posición)
+    // CONTROL DE ESQUINAS (PRECISIÓN MILIMÉTRICA)
     // =========================================================
-    $pdf->SetTextColor(0, 0, 0); // Texto negro para detalles
-    $pdf->SetFont('Arial', 'B', 6); // FUENTE PEQUEÑA (5.5 es ideal para que quepan ambos)
+    $pdf->SetTextColor(0, 0, 0); 
+    
+    // Usamos fuente 5 para que "1.5T" y "N" quepan sin tocarse
+    $pdf->SetFont('Arial', 'B', 6); 
 
-    // Márgenes de seguridad (Padding interno)
-    $margen_lateral = 0.1;  // Espacio desde los lados (Izq/Der)
-    $margen_inferior = 1.0; // Espacio desde abajo (para que no toque la línea inferior)
-    $margen_superior = 1.8; // Espacio desde arriba (para HE)
+    // Márgenes internos
+    $margen_x = -0.3; // Separación del borde lateral
+    $pos_y_inf = $y + $h - 1; // Altura desde abajo (0.8mm del fondo)
+    $pos_y_sup = $y + 2;        // Altura desde arriba
 
     // 1. Esquina SUPERIOR DERECHA (HE)
     if (!empty($texto_sup_der)) {
-        $pdf->SetXY($x, $y + $margen_superior); 
-        // Alineación 'R' (Right) pega el texto a la derecha
-        $pdf->Cell($w - $margen_lateral, 0, $texto_sup_der, 0, 0, 'R'); 
+        $pdf->SetXY($x, $pos_y_sup); 
+        $pdf->Cell($w - $margen_x, 0, $texto_sup_der, 0, 0, 'R'); 
     }
 
     // 2. Esquina INFERIOR DERECHA (Duración: 1T, 4H, 1.5T)
     if (!empty($texto_inf_der)) {
-        $pdf->SetXY($x, $y + $h - $margen_inferior); 
-        // Alineación 'R' asegura que se quede a la derecha
-        $pdf->Cell($w - $margen_lateral, 0, $texto_inf_der, 0, 0, 'R');
+        // Establecemos X al inicio de la celda
+        // Usamos Cell con ancho completo y align 'R' para pegar a la derecha
+        $pdf->SetXY($x, $pos_y_inf); 
+        $pdf->Cell($w - $margen_x, 0, $texto_inf_der, 0, 0, 'R');
     }
 
     // 3. Esquina INFERIOR IZQUIERDA (Nocturnidad: N)
     if (!empty($texto_inf_izq)) {
-        // Movemos el cursor X un poquito a la derecha para dar margen
-        $pdf->SetXY($x + $margen_lateral, $y + $h - $margen_inferior); 
-        // Alineación 'L' asegura que se quede a la izquierda
-        // Importante: Usamos Cell($w...) pero como alineamos a la izquierda, no se monta sobre el otro.
-        $pdf->Cell($w - ($margen_lateral*2), 0, $texto_inf_izq, 0, 0, 'L'); 
-   }
+        // Establecemos X con un pequeño margen izquierdo
+        $pdf->SetXY($x + $margen_x, $pos_y_inf); 
+        // Usamos align 'L'
+        $pdf->Cell($w, 0, $texto_inf_izq, 0, 0, 'L'); 
+    }
+
+    // 4. LINK TRANSPARENTE FINAL (CAPA SUPERIOR)
+    // Esto crea una celda invisible encima de todo el dibujo que contiene el link.
+    // Así garantizamos que TODO el recuadro sea clicable, sin tapar el dibujo.
+    if (!empty($link)) {
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, '', 0, 0, '', false, $link);
+    }
 }
+
+function VerificarControl($fecha, $codigo_personal)
+{
+    global $pdf, $dblink, $fillFecha, $codigo_produccion;
+
+    // Inicializamos variables
+    $codigo_produccion = 0;
+    $codigo_cargo = "";
+
+    // 1. BUSCAR EN PRODUCCIÓN
+    // Solo traemos el ID para ser más rápidos
+    $query_busqueda = "SELECT id_ FROM produccion WHERE fecha = '$fecha' AND codigo_personal = '$codigo_personal' LIMIT 1";
+    $consulta_ = $dblink->query($query_busqueda);
+
+    if ($consulta_->rowCount() > 0) {
+        // --- CASO: SÍ TIENE CONTROL ---
+        $registro = $consulta_->fetch(PDO::FETCH_ASSOC);
+        $codigo_produccion = $registro["id_"];
+
+        // Fondo Blanco (o transparente si prefieres false)
+        $pdf->SetFillColor(255, 255, 255); 
+        $fillFecha = true; // Pintamos blanco para limpiar cualquier fondo previo
+    } else {
+        // --- CASO: NO TIENE CONTROL (ALERTA) ---
+        
+        // Busamos el cargo del empleado
+        // (Nota: Si ya tienes el codigo_cargo en la consulta principal del reporte, 
+        //  sería mejor pasarlo como parámetro para evitar esta segunda consulta y hacer el reporte más rápido)
+        $query_busqueda_p = "SELECT codigo_cargo FROM personal WHERE codigo = '$codigo_personal' LIMIT 1";
+        $consulta_p = $dblink->query($query_busqueda_p);
+        
+        if ($row_p = $consulta_p->fetch(PDO::FETCH_ASSOC)) {
+            $codigo_cargo = $row_p["codigo_cargo"];
+        }
+
+        // ASIGNACIÓN DE COLORES SUAVES (PASTEL)
+        switch ($codigo_cargo) {
+            case "32": // Motorista - ROJO SUAVE (Alerta principal)
+                $pdf->SetFillColor(255, 204, 204); // Un rojo muy suave, no agresivo
+                break;
+            
+            case "28": // Jefe de Línea - AZUL/TURQUESA SUAVE
+                $pdf->SetFillColor(224, 242, 241); // Turquesa muy pálido
+                break;
+            
+            case "17": // Despacho - VERDE SUAVE
+                $pdf->SetFillColor(220, 255, 220); // Verde menta suave
+                break;
+            
+            default:
+                // Si es otro cargo sin control, fondo gris muy claro o blanco
+                $pdf->SetFillColor(245, 245, 245); 
+                break;
+        }
+
+        // Activamos el pintado de la celda para que se vea el color de alerta
+        $fillFecha = true; 
+        $codigo_produccion = 0;
+    }
+}
+
 
 function buscarCodigoDeAsistencia($dblink, $codigo_personal, $fecha_str, &$datos_precargados) {
     if (isset($datos_precargados[$codigo_personal][$fecha_str])) {
@@ -666,7 +735,7 @@ foreach ($period as $date) {
 $image_base_path = $_SERVER['DOCUMENT_ROOT'] . "/acomtus/img/Catalogo Jornada/";
 $asistencia_por_empleado_y_fecha = [];
 
-$query = "SELECT p.codigo, p.nombres, p.apellidos, p.salario, p.codigo_ruta, p.codigo_departamento_empresa, cc.descripcion as cargo_descripcion ";
+$query = "SELECT p.codigo, p.nombres, p.apellidos, p.salario, p.codigo_ruta, p.codigo_departamento_empresa, p.codigo_cargo, cc.descripcion as cargo_descripcion ";
 $query .= "FROM personal p ";
 $query .= "LEFT JOIN catalogo_cargo cc ON cc.codigo = p.codigo_cargo ";
 $query .= "WHERE 1=1 AND p.codigo_estatus = '01'";
@@ -1406,57 +1475,97 @@ foreach ($datos_empleado_principal as $row_empleado) {
     $pdf->SetFont('Arial', '', 7); 
     // ----------------------------------------------
     $pdf->Cell($w_initial_fixed[2], $h_fila, $nombre_completo, 1, 0, 'L', true); 
-
-    foreach ($rango_fechas as $fecha_actual) {
-        // Necesitamos recuperar el código del día para saber qué dibujar
-        // Como 'daily_details' solo guardaba la imagen, recuperamos el código nuevamente
-        // O mejor aún, guarda el código en $daily_attendance_details cuando lo procesas arriba.
-
-        // OPCIÓN RÁPIDA: Recalcularlo aquí (o usa la variable si la guardaste)
-        $codigo_dia_actual = buscarCodigoDeAsistencia($dblink, $codigo_personal, $fecha_actual, $asistencia_por_empleado_y_fecha);
-        if (empty($codigo_dia_actual) && !isset($FechaDescripcionAsueto[$fecha_actual])) {
-             $codigo_dia_actual = ''; // O vacío
-        }
-
-        // =========================================================
-        // INYECCIÓN VISUAL DE HORAS EXTRA (Solo para Dept 02 y 03)
-        // =========================================================
-        // Verificamos si es Motorista (02) o Revisador (03)
-        if ($codigo_departamento_empleado == '02' || $codigo_departamento_empleado == '03') {
-            
-            // Buscamos el dato crudo en el array de asistencia
-            $dato_asistencia = $asistencia_por_empleado_y_fecha[$codigo_personal][$fecha_actual] ?? null;
-            
-            if ($dato_asistencia) {
-                $horas_extra = (float)($dato_asistencia['hora_extra'] ?? 0);
-                
-                // Si tiene horas extra, modificamos el código SOLO PARA EL DIBUJO
-                // Le agregamos el sufijo "_HE" + la cantidad.
-                // Ejemplo: si el código era "2144444" y tiene 4 horas, se convierte en "2144444_HE4"
-                if ($horas_extra > 0) {
-                    $codigo_dia_actual .= '_HE' . $horas_extra;
-                }
-            }
-        }
-        // =========================================================
-
-        // Guardamos posición actual
+foreach ($rango_fechas as $fecha_actual) {
+        // -----------------------------------------------------------
+        // PASO 1: OBTENER DATOS Y POSICIÓN
+        // -----------------------------------------------------------
+        // Guardamos la posición exacta antes de hacer nada
         $x_actual = $pdf->GetX();
         $y_actual = $pdf->GetY();
-        
-        // 1. Dibujamos la celda de fondo (blanca o gris si es fin de semana)
-        $pdf->Cell($daily_col_width, $h_fila, '', 0, 0, 'C', true);
-        
-        // 2. Llamamos a nuestra función de dibujo vectorial sobre la celda
-        // Solo dibujamos si hay código y no es un día vacío futuro
-        if (!empty($codigo_dia_actual)) {
-                dibujarCeldaAsistencia($pdf, $x_actual, $y_actual, $daily_col_width, $h_fila, $codigo_dia_actual);
-            } else {
-                $pdf->SetDrawColor(0,0,0);
-                $pdf->Rect($x_actual, $y_actual, $daily_col_width, $h_fila);
-            }
 
-        // Movemos el cursor para la siguiente celda manualmente porque usamos Rect y SetXY
+        // Buscamos el código de asistencia para el dibujo
+        $codigo_dia_actual = buscarCodigoDeAsistencia($dblink, $codigo_personal, $fecha_actual, $asistencia_por_empleado_y_fecha);
+        if (empty($codigo_dia_actual) && !isset($FechaDescripcionAsueto[$fecha_actual])) {
+             $codigo_dia_actual = ''; 
+        }
+
+        // Lógica de Sufijo HE (Horas Extras visuales)
+        if ($codigo_departamento_empleado == '02' || $codigo_departamento_empleado == '03') {
+            $dato_asistencia = $asistencia_por_empleado_y_fecha[$codigo_personal][$fecha_actual] ?? null;
+            if ($dato_asistencia) {
+                $horas_extra = (float)($dato_asistencia['hora_extra'] ?? 0);
+                if ($horas_extra > 0) $codigo_dia_actual .= '_HE' . $horas_extra;
+            }
+        }
+
+        // -----------------------------------------------------------
+        // PASO 2: DEFINIR EL COLOR DE FONDO BASE (Estándar)
+        // -----------------------------------------------------------
+        // Primero aplicamos el color "normal" (Fin de semana o fila alterna)
+        $english_day = date('D', strtotime($fecha_actual));
+        if ($english_day == 'Sat' || $english_day == 'Sun') {
+            $pdf->SetFillColor(180, 200, 230); // Azulito fin de semana
+        } else {
+            $pdf->SetFillColor($current_row_fill_color[0], $current_row_fill_color[1], $current_row_fill_color[2]); // Color Cebra
+        }
+        $fill_cell = true; // Por defecto pintamos
+
+        // -----------------------------------------------------------
+        // PASO 3: APLICAR LÓGICA DE CONTROL (SOBREESCRIBE COLOR)
+        // -----------------------------------------------------------
+        // Aquí llamamos a tu función. Si detecta algo, CAMBIARÁ el SetFillColor 
+        // que acabamos de poner arriba.
+        
+        // Variables globales que usa tu función
+        global $fillFecha, $codigo_produccion; 
+        
+        // Llamada a la función (Esta función modifica el color del PDF internamente)
+        VerificarControl($fecha_actual, $codigo_personal);
+        
+        // Lógica del Link y Validación de Departamento
+        $link = "";
+        
+        // Solo aplicamos la lógica visual de "Alerta/Link" si es MOTORISTA
+        if ($DepartamentoEmpresa == '02') { // Asegúrate que '02' es el código correcto de Motorista
+            if ($codigo_produccion > 0) {
+                // Sí tiene control: Link al detalle
+                $link = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=" . $codigo_produccion;
+            } 
+            // Si NO tiene control ($codigo_produccion == 0), tu función VerificarControl 
+            // YA puso el color rojo/pastel en el PDF, así que no hacemos nada extra aquí.
+        } else {
+            // Si NO es motorista, restauramos el color "base" que calculamos en el Paso 2
+            // Porque VerificarControl puede haber pintado algo por defecto.
+            if ($english_day == 'Sat' || $english_day == 'Sun') {
+                $pdf->SetFillColor(180, 200, 230);
+            } else {
+                $pdf->SetFillColor($current_row_fill_color[0], $current_row_fill_color[1], $current_row_fill_color[2]);
+            }
+        }
+
+        // -----------------------------------------------------------
+        // PASO 4: DIBUJAR LA CELDA DE FONDO (CAPA 1)
+        // -----------------------------------------------------------
+        // Dibujamos una celda vacía PERO con el color de fondo y el link definidos.
+        // Esto crea el "piso" de color.
+        $pdf->Cell($daily_col_width, $h_fila, '', 0, 0, 'C', true, $link);
+
+        // -----------------------------------------------------------
+        // PASO 5: DIBUJAR LOS SÍMBOLOS (CAPA 2)
+        // -----------------------------------------------------------
+        // Ahora dibujamos los vectores (letras, puntos) ENCIMA del fondo anterior.
+        // Usamos las coordenadas guardadas ($x_actual, $y_actual) para caer exacto.
+        
+        if (!empty($codigo_dia_actual)) {
+            // IMPORTANTE: Pasamos el objeto $pdf para que dibuje
+            dibujarCeldaAsistencia($pdf, $x_actual, $y_actual, $daily_col_width, $h_fila, $codigo_dia_actual);
+        } else {
+            // Si está vacío, solo aseguramos el borde (el fondo ya lo pintó el Cell de arriba)
+            $pdf->SetDrawColor(0,0,0);
+            $pdf->Rect($x_actual, $y_actual, $daily_col_width, $h_fila);
+        }
+
+        // Movemos el cursor para la siguiente vuelta
         $pdf->SetXY($x_actual + $daily_col_width, $y_actual);
     }
 
