@@ -596,76 +596,30 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo, $link = '') {
         // Usamos align 'L'
         $pdf->Cell($w, 0, $texto_inf_izq, 0, 0, 'L'); 
     }
+// 4. INDICADOR VISUAL (PESTAÑA NARANJA)
+    // Lógica: Solo mostramos la pestaña si el link apunta a un control REAL (id > 0).
+    // Si el link termina en "=0", es un link de "crear/alerta", no de "ver", así que no ponemos triángulo.
+    
+    $tiene_control_real = (!empty($link) && strpos($link, 'codigo_produccion=0') === false);
 
-    // 4. LINK TRANSPARENTE FINAL (CAPA SUPERIOR)
-    // Esto crea una celda invisible encima de todo el dibujo que contiene el link.
-    // Así garantizamos que TODO el recuadro sea clicable, sin tapar el dibujo.
+    if ($tiene_control_real) {
+        $pdf->SetFillColor(255, 140, 0); // Naranja "Safety"
+        
+        // DIBUJAR TRIÁNGULO (Usando Polygon si agregaste la función, o Rect si no)
+        // Opción A: Si agregaste la función Polygon a la clase PDF:
+        $puntos = [$x, $y, $x + 2.0, $y, $x, $y + 2.0];
+        $pdf->Polygon($puntos, 'F');
+        
+        // Opción B (Si prefieres el cuadrito seguro):
+        // $pdf->Rect($x, $y, 2.5, 2.5, 'F'); 
+    }
+
+    // 5. LINK TOTAL (CAPA FINAL INVISIBLE)
+    // El link sigue funcionando siempre que la variable no esté vacía
     if (!empty($link)) {
-        $pdf->SetXY($x, $y);
-        $pdf->Cell($w, $h, '', 0, 0, '', false, $link);
+        $pdf->Link($x, $y, $w, $h, $link);
     }
 }
-
-function VerificarControl($fecha, $codigo_personal)
-{
-    global $pdf, $dblink, $fillFecha, $codigo_produccion;
-
-    // Inicializamos variables
-    $codigo_produccion = 0;
-    $codigo_cargo = "";
-
-    // 1. BUSCAR EN PRODUCCIÓN
-    // Solo traemos el ID para ser más rápidos
-    $query_busqueda = "SELECT id_ FROM produccion WHERE fecha = '$fecha' AND codigo_personal = '$codigo_personal' LIMIT 1";
-    $consulta_ = $dblink->query($query_busqueda);
-
-    if ($consulta_->rowCount() > 0) {
-        // --- CASO: SÍ TIENE CONTROL ---
-        $registro = $consulta_->fetch(PDO::FETCH_ASSOC);
-        $codigo_produccion = $registro["id_"];
-
-        // Fondo Blanco (o transparente si prefieres false)
-        $pdf->SetFillColor(255, 255, 255); 
-        $fillFecha = true; // Pintamos blanco para limpiar cualquier fondo previo
-    } else {
-        // --- CASO: NO TIENE CONTROL (ALERTA) ---
-        
-        // Busamos el cargo del empleado
-        // (Nota: Si ya tienes el codigo_cargo en la consulta principal del reporte, 
-        //  sería mejor pasarlo como parámetro para evitar esta segunda consulta y hacer el reporte más rápido)
-        $query_busqueda_p = "SELECT codigo_cargo FROM personal WHERE codigo = '$codigo_personal' LIMIT 1";
-        $consulta_p = $dblink->query($query_busqueda_p);
-        
-        if ($row_p = $consulta_p->fetch(PDO::FETCH_ASSOC)) {
-            $codigo_cargo = $row_p["codigo_cargo"];
-        }
-
-        // ASIGNACIÓN DE COLORES SUAVES (PASTEL)
-        switch ($codigo_cargo) {
-            case "32": // Motorista - ROJO SUAVE (Alerta principal)
-                $pdf->SetFillColor(255, 204, 204); // Un rojo muy suave, no agresivo
-                break;
-            
-            case "28": // Jefe de Línea - AZUL/TURQUESA SUAVE
-                $pdf->SetFillColor(224, 242, 241); // Turquesa muy pálido
-                break;
-            
-            case "17": // Despacho - VERDE SUAVE
-                $pdf->SetFillColor(220, 255, 220); // Verde menta suave
-                break;
-            
-            default:
-                // Si es otro cargo sin control, fondo gris muy claro o blanco
-                $pdf->SetFillColor(245, 245, 245); 
-                break;
-        }
-
-        // Activamos el pintado de la celda para que se vea el color de alerta
-        $fillFecha = true; 
-        $codigo_produccion = 0;
-    }
-}
-
 
 function buscarCodigoDeAsistencia($dblink, $codigo_personal, $fecha_str, &$datos_precargados) {
     if (isset($datos_precargados[$codigo_personal][$fecha_str])) {
@@ -773,6 +727,29 @@ if (!empty($codigos_personal_a_consultar)) {
         $codigo_p = $row_asistencia['codigo_personal'];
         $fecha_a = $row_asistencia['fecha'];
         $asistencia_por_empleado_y_fecha[$codigo_p][$fecha_a] = $row_asistencia;
+    }
+}
+
+// =========================================================================
+// PRE-CARGA DE PRODUCCIÓN (OPTIMIZADA Y NORMALIZADA)
+// =========================================================================
+$produccion_registrada = []; 
+
+if ($DepartamentoEmpresa == '02' && !empty($codigos_personal_a_consultar)) {
+    $codigos_str = "'" . implode("','", $codigos_personal_a_consultar) . "'";
+    
+    $sql_prod = "SELECT codigo_personal, fecha, id_ FROM produccion 
+                 WHERE codigo_personal IN ($codigos_str) 
+                 AND fecha BETWEEN '$fecha_periodo_inicio' AND '$fecha_periodo_fin'";
+                 
+    $stmt_prod = $dblink->query($sql_prod);
+    while ($row = $stmt_prod->fetch(PDO::FETCH_ASSOC)) {
+        // TRUCO: Convertimos a entero (intval) para quitar ceros a la izquierda (00924 -> 924)
+        // Esto asegura que coincida sin importar cómo esté guardado.
+        $codigo_limpio = intval($row['codigo_personal']); 
+        $fecha_limpia = trim($row['fecha']);
+        
+        $produccion_registrada[$codigo_limpio][$fecha_limpia] = $row['id_'];
     }
 }
 
@@ -1116,6 +1093,24 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
 
 class PDF extends FPDF
 {
+
+// --- AGREGAR ESTA FUNCIÓN PARA PODER DIBUJAR TRIÁNGULOS ---
+    function Polygon($points, $style='D') {
+        if($style=='F') $op='f'; elseif($style=='FD' || $style=='DF') $op='b'; else $op='s';
+        $h = $this->h;
+        $k = $this->k;
+        $points_string = '';
+        for($i=0; $i<count($points); $i+=2){
+            $points_string .= sprintf('%.2F %.2F', $points[$i]*$k, ($h-$points[$i+1])*$k);
+            if($i==0) $points_string .= ' m '; else $points_string .= ' l ';
+        }
+        $this->_out($points_string . ' h ' . $op);
+    }
+    // -----------------------------------------------------------
+
+
+
+    
     private $day_names_spanish = [
         'Sun' => 'Dom', 'Mon' => 'Lun', 'Tue' => 'Mar', 'Wed' => 'Mié', 'Thu' => 'Jue', 'Fri' => 'Vie', 'Sat' => 'Sáb'
     ];
@@ -1124,44 +1119,68 @@ class PDF extends FPDF
         global $fecha_periodo_inicio, $fecha_periodo_fin, $departamentoEmpresaTexto, $RutaText, $quincena, $rango_fechas, $DepartamentoEmpresa;
         global $_SESSION, $persona_responsable; 
 
+// 1. LOGO Y TÍTULOS (IZQUIERDA)
         $img = $_SERVER['DOCUMENT_ROOT'].'/acomtus/img/'.$_SESSION['logo_uno'];
         if (file_exists($img)) {
             $this->Image($img,5,4,24,24);
-        } else {
-            $this->SetXY(5,4);
-            $this->Cell(24,24,'[LOGO]',1,0,'C');
         }
         
         $this->SetFont('Arial','B',14);
         $this->SetXY(30,5);
         $this->Cell(100,7,mb_convert_encoding($_SESSION["nombre_institucion"],"ISO-8859-1"),0,1,"L",false);
         
-        $reporte_trabajo_display = ('Reporte de trabajo correspondiente a la quincena del ');
-        $reporte_trabajo_display .= date('d', strtotime($fecha_periodo_inicio)) . ' al ' . date('d', strtotime($fecha_periodo_fin)) . ' de ' . (strftime('%B', strtotime($fecha_periodo_inicio))) . ' de ' . date('Y', strtotime($fecha_periodo_inicio));
-        
-        $reporte_ruta_display = ($departamentoEmpresaTexto);
-        if (!empty($RutaText) && $RutaText != '00' && $RutaText != 'Seleccionar...' && $departamentoEmpresaTexto == 'Motorista') { 
-            $reporte_ruta_display .= (' (Ruta: ') . ($RutaText) . (')');
-        }else{
-            $reporte_ruta_display = $departamentoEmpresaTexto;
-        }
-
         $this->SetFont('Arial','B',11);
         $this->SetX(30);
-        $this->Cell(100,6, $reporte_trabajo_display,0,1,"L",false);
+        $this->Cell(100,6, 'Reporte del ' . date('d/m/Y', strtotime($fecha_periodo_inicio)) . ' al ' . date('d/m/Y', strtotime($fecha_periodo_fin)),0,1,"L",false);
         
         $this->SetX(30);
-        $this->Cell(100,6, $reporte_ruta_display,0,1,"L",false);
+        $texto_ruta = $departamentoEmpresaTexto . (!empty($RutaText) && $RutaText!='00' ? " (Ruta: $RutaText)" : "");
+        $this->Cell(100,6, $texto_ruta,0,1,"L",false);
         
         $this->SetFont('Arial','B',9);
         $this->SetX(30);
-        $this->Cell(130,6,mb_convert_encoding("Responsable del Punteo: " . ($persona_responsable ?? 'N/A'),"ISO-8859-1"),0,0,"L",false);
-        $this->Cell(4,6,"",0,0,"L",false); 
-        $this->Ln(5); 
+        $this->Cell(130,6,mb_convert_encoding("Responsable: " . ($persona_responsable ?? 'N/A'),"ISO-8859-1"),0,0,"L",false);
 
+        // --- 2. LEYENDA (MOVIDA A LA DERECHA) ---
+        // Guardamos la posición Y actual para no perder el flujo, pero dibujamos a la derecha
+        $y_actual = $this->GetY();
+        
+        // Nos movemos a la derecha (X=200) y subimos un poco (Y=15) para que quede alineado bonito
+        $this->SetXY(200, 15); 
+        $this->SetFont('Arial','',7);
+        
+        // A. Responsable (Azul)
+        $this->SetFillColor(0, 50, 150); 
+        $this->Cell(4,4,'',0,0,'C'); 
+        $x_tri = $this->GetX() - 4; $y_tri = $this->GetY();
+        $this->Polygon([$x_tri, $y_tri, $x_tri+3, $y_tri, $x_tri, $y_tri+3], 'F');
+        $this->Cell(18,4,' Responsable',0,0,'L');
+        
+        // B. Revisador y Ticket (Solo Motoristas)
+        if ($DepartamentoEmpresa == '02') {
+            // Salto de línea manual a la derecha
+            $this->SetXY(200, 20); 
+            
+            $this->SetFillColor(0, 100, 0); // Verde
+            $this->Cell(4,4,'',0,0,'C');
+            $x_tri = $this->GetX() - 4; $y_tri = $this->GetY();
+            $this->Polygon([$x_tri, $y_tri, $x_tri+3, $y_tri, $x_tri, $y_tri+3], 'F');
+            $this->Cell(18,4,' Revisador',0,0,'L');
+            
+            // Ticket (Rojo)
+            $this->SetXY(200, 25);
+            $this->SetFillColor(255, 204, 204); 
+            $this->Cell(4,4,'',1,0,'C',true); 
+            $this->Cell(18,4,' Sin Ticket',0,0,'L');
+        }
+
+        // Regresamos el cursor abajo para dibujar la tabla correctamente
+        $this->SetXY(10, $y_actual + 10); 
+
+        // --- 3. ENCABEZADOS DE TABLA ---
         $this->SetFont('Arial', 'B', 7);
         $this->SetFillColor(200, 220, 255);
-        $this->SetDrawColor(0,0,0); 
+        $this->SetDrawColor(0,0,0);
 
         $w_initial_fixed = [7, 15, 50]; 
         $daily_col_width = 7.0; 
@@ -1464,7 +1483,43 @@ foreach ($datos_empleado_principal as $row_empleado) {
 
     // Define la altura antes del bucle (puedes probar con 8, 9 o 10)
         $h_fila = 9;    
-    $pdf->Cell($w_initial_fixed[0], $h_fila, $i, 1, 0, 'C', true); 
+// 1. OBTENER CARGO (Asegúrate que tu consulta SQL traiga 'codigo_cargo')
+    $codigo_cargo = trim($row_empleado['codigo_cargo']); 
+
+    // 2. DIBUJAR LA CELDA "No." (Blanca por defecto)
+    $pdf->SetFillColor(255, 255, 255); 
+    $pdf->Cell($w_initial_fixed[0], 9, $i, 1, 0, 'C', true);
+    
+    // 3. DIBUJAR TRIÁNGULO IDENTIFICADOR (ENCIMA DE LA CELDA)
+    $x_num = $pdf->GetX() - $w_initial_fixed[0]; // Regresamos X a la esquina de la celda
+    $y_num = $pdf->GetY();
+    
+    if ($codigo_cargo == '28') { 
+        // JEFE DE LINEA (RESPONSABLE) -> AZUL
+        $pdf->SetFillColor(0, 50, 150); 
+        // Triángulo en esquina superior izquierda
+        $pdf->Polygon([$x_num, $y_num, $x_num+3, $y_num, $x_num, $y_num+3], 'F');
+    } 
+    elseif ($codigo_cargo == '17' && $DepartamentoEmpresa == '02') { 
+        // DESPACHO (REVISADOR) -> VERDE (Solo en reporte de Motoristas)
+        $pdf->SetFillColor(0, 100, 0); 
+        $pdf->Polygon([$x_num, $y_num, $x_num+3, $y_num, $x_num, $y_num+3], 'F');
+    }
+    
+    // Luego dibujamos el triangulo identificador si corresponde
+    $x_num = $pdf->GetX() - $w_initial_fixed[0]; 
+    $y_num = $pdf->GetY();
+    
+    if ($codigo_cargo == '28') { // JEFE DE LINEA (RESPONSABLE)
+        $pdf->SetFillColor(($i%2==0)?248:255, ($i%2==0)?250:255, ($i%2==0)?252:255);
+        $pdf->Polygon([$x_num, $y_num, $x_num+3, $y_num, $x_num, $y_num+3], 'F');
+    } 
+    elseif ($codigo_cargo == '17' && $DepartamentoEmpresa == '02') { // DESPACHO (REVISADOR) - Solo en Motoristas
+        $pdf->SetFillColor(0, 100, 0); // Verde Oscuro
+        $pdf->Polygon([$x_num, $y_num, $x_num+3, $y_num, $x_num, $y_num+3], 'F');
+    }
+
+
     // --- CAMBIO AQUÍ: AUMENTAR TAMAÑO DE FUENTE ---
     // Cambiamos de tamaño 7 a tamaño 9 (o 10 si cabe) solo para los montos
     $pdf->SetFont('Arial', '', 8); 
@@ -1475,6 +1530,8 @@ foreach ($datos_empleado_principal as $row_empleado) {
     $pdf->SetFont('Arial', '', 7); 
     // ----------------------------------------------
     $pdf->Cell($w_initial_fixed[2], $h_fila, $nombre_completo, 1, 0, 'L', true); 
+
+
 foreach ($rango_fechas as $fecha_actual) {
         // -----------------------------------------------------------
         // PASO 1: OBTENER DATOS Y POSICIÓN
@@ -1497,76 +1554,81 @@ foreach ($rango_fechas as $fecha_actual) {
                 if ($horas_extra > 0) $codigo_dia_actual .= '_HE' . $horas_extra;
             }
         }
+            // --- INICIO MODIFICACIÓN: ALERTA DE PRODUCCIÓN ---
+                
+                // 1. Definir Color Base (Fin de semana o Fila Normal)
+                $english_day = date('D', strtotime($fecha_actual));
+                if ($english_day == 'Sat' || $english_day == 'Sun') {
+                    $pdf->SetFillColor(180, 200, 230); // Azul fin de semana
+                } else {
+                    // Usamos el color de la fila actual (Cebra)
+                    $pdf->SetFillColor($current_row_fill_color[0], $current_row_fill_color[1], $current_row_fill_color[2]);
+                }
 
-        // -----------------------------------------------------------
-        // PASO 2: DEFINIR EL COLOR DE FONDO BASE (Estándar)
-        // -----------------------------------------------------------
-        // Primero aplicamos el color "normal" (Fin de semana o fila alterna)
-        $english_day = date('D', strtotime($fecha_actual));
-        if ($english_day == 'Sat' || $english_day == 'Sun') {
-            $pdf->SetFillColor(180, 200, 230); // Azulito fin de semana
-        } else {
-            $pdf->SetFillColor($current_row_fill_color[0], $current_row_fill_color[1], $current_row_fill_color[2]); // Color Cebra
-        }
-        $fill_cell = true; // Por defecto pintamos
+        // 2. Lógica de Link y Alerta Roja
+        $link = ""; 
+        $fondo_alerta = false;
 
-        // -----------------------------------------------------------
-        // PASO 3: APLICAR LÓGICA DE CONTROL (SOBREESCRIBE COLOR)
-        // -----------------------------------------------------------
-        // Aquí llamamos a tu función. Si detecta algo, CAMBIARÁ el SetFillColor 
-        // que acabamos de poner arriba.
-        
-        // Variables globales que usa tu función
-        global $fillFecha, $codigo_produccion; 
-        
-        // Llamada a la función (Esta función modifica el color del PDF internamente)
-        VerificarControl($fecha_actual, $codigo_personal);
-        
-        // Lógica del Link y Validación de Departamento
-        $link = "";
-        
-        // Solo aplicamos la lógica visual de "Alerta/Link" si es MOTORISTA
-        if ($DepartamentoEmpresa == '02') { // Asegúrate que '02' es el código correcto de Motorista
-            if ($codigo_produccion > 0) {
-                // Sí tiene control: Link al detalle
-                $link = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=" . $codigo_produccion;
-            } 
-            // Si NO tiene control ($codigo_produccion == 0), tu función VerificarControl 
-            // YA puso el color rojo/pastel en el PDF, así que no hacemos nada extra aquí.
-        } else {
-            // Si NO es motorista, restauramos el color "base" que calculamos en el Paso 2
-            // Porque VerificarControl puede haber pintado algo por defecto.
-            if ($english_day == 'Sat' || $english_day == 'Sun') {
-                $pdf->SetFillColor(180, 200, 230);
-            } else {
-                $pdf->SetFillColor($current_row_fill_color[0], $current_row_fill_color[1], $current_row_fill_color[2]);
+        if ($DepartamentoEmpresa == '02') { 
+            // Convertir a entero para asegurar coincidencia
+            $codigo_key = intval($codigo_personal);
+            $id_prod = $produccion_registrada[$codigo_key][$fecha_actual] ?? 0;
+            
+            // Generamos el link
+            $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http");
+            $host = $_SERVER['HTTP_HOST'];
+            $link = "$protocol://$host/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=" . $id_prod;
+            
+            // --- LISTA DE CÓDIGOS QUE NO REQUIEREN PRODUCCIÓN ---
+            $codigos_exentos = [
+                '4144444',  // Sin Punteo (Neutro)
+                '4444444',  // Falta (F)
+                '41044444', // Castigo (C)
+                '4244444',  // Incapacidad (ISSS)
+                '4344444',  // Permiso (PP)
+                '41344444', // Descanso Puro (D)
+                '41644444', // Asueto Puro (A)
+                '41744444', // Descanso Asueto (DA)
+                '41944444', // Vacación Descanso Asueto (VDA)
+                '41144444'  // Vacación Pura (V)
+            ];
+            
+            // REGLA 1: SI TIENE CONTROL (>0), TODO BIEN.
+            // REGLA 2: SI NO TIENE CONTROL (0), SOLO ALERTAR SI ES DÍA LABORAL.
+            if ($id_prod == 0) {
+                if (!in_array($codigo_dia_actual, $codigos_exentos)) {
+                    // Es un día de trabajo (1T, 4H, TD, TA, etc.) y falta el control -> ALERTA
+                    $pdf->SetFillColor(255, 204, 204); // Rojo Pastel
+                    $fondo_alerta = true;
+                } else {
+                    // Es día libre o falta, no necesita control -> QUITAMOS EL LINK PARA NO CONFUNDIR
+                    $link = ""; 
+                }
             }
         }
 
-        // -----------------------------------------------------------
-        // PASO 4: DIBUJAR LA CELDA DE FONDO (CAPA 1)
-        // -----------------------------------------------------------
-        // Dibujamos una celda vacía PERO con el color de fondo y el link definidos.
-        // Esto crea el "piso" de color.
-        $pdf->Cell($daily_col_width, $h_fila, '', 0, 0, 'C', true, $link);
+                // 3. Dibujar Fondo (Capa 1)
+                $pdf->Cell($daily_col_width, $h_fila, '', 0, 0, 'C', true); 
 
-        // -----------------------------------------------------------
-        // PASO 5: DIBUJAR LOS SÍMBOLOS (CAPA 2)
-        // -----------------------------------------------------------
-        // Ahora dibujamos los vectores (letras, puntos) ENCIMA del fondo anterior.
-        // Usamos las coordenadas guardadas ($x_actual, $y_actual) para caer exacto.
-        
-        if (!empty($codigo_dia_actual)) {
-            // IMPORTANTE: Pasamos el objeto $pdf para que dibuje
-            dibujarCeldaAsistencia($pdf, $x_actual, $y_actual, $daily_col_width, $h_fila, $codigo_dia_actual);
-        } else {
-            // Si está vacío, solo aseguramos el borde (el fondo ya lo pintó el Cell de arriba)
-            $pdf->SetDrawColor(0,0,0);
-            $pdf->Rect($x_actual, $y_actual, $daily_col_width, $h_fila);
-        }
+                // 4. Dibujar Símbolos (Capa 2)
+                if (!empty($codigo_dia_actual)) {
+                    // Pasamos el link a tu función de dibujo actualizada
+                    dibujarCeldaAsistencia($pdf, $x_actual, $y_actual, $daily_col_width, $h_fila, $codigo_dia_actual, $link);
+                } else {
+                    // Si está vacía, ponemos el link transparente manualmente
+                    if (!empty($link)) {
+                        $pdf->SetXY($x_actual, $y_actual);
+                        $pdf->Cell($daily_col_width, $h_fila, '', 0, 0, '', false, $link);
+                    }
+                    // Restaurar borde si estaba vacía
+                    $pdf->SetDrawColor(0,0,0);
+                    $pdf->Rect($x_actual, $y_actual, $daily_col_width, $h_fila);
+                }
 
-        // Movemos el cursor para la siguiente vuelta
-        $pdf->SetXY($x_actual + $daily_col_width, $y_actual);
+                // Mover cursor para la siguiente fecha
+                $pdf->SetXY($x_actual + $daily_col_width, $y_actual);
+                
+                // --- FIN MODIFICACIÓN ---
     }
 
     $pdf->SetFillColor($current_row_fill_color[0], $current_row_fill_color[1], $current_row_fill_color[2]); 
