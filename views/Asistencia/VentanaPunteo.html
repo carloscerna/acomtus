@@ -233,36 +233,42 @@
                     </div>
                 </div>
 
-            <div class="row" id="bloque-extras">
-                <label class="col-12 text-secondary font-weight-bold small text-uppercase mb-2">
-                    <i class="fas fa-plus-circle"></i> 3. Adicionales
-                </label>
-                
-                <div class="col-6 pr-1" id="bloque-nocturnidad">
-                    <button type="button" class="btn btn-block btn-lg btn-outline-dark" id="btn-nocturnidad" onclick="toggleNocturnidad()">
-                        <i class="fas fa-moon"></i> Nocturnidad
-                    </button>
-                </div>
-
-                <div class="col-6 pl-1" id="bloque-tanda-extra">
-                    <button type="button" class="btn btn-block btn-lg btn-outline-primary" id="btn-tanda-extra" onclick="toggleTandaExtra()" style="display:none;">
-                        +1 Tanda
-                    </button>
-                </div>
-
-                <div class="col-12 mt-3" id="bloque-horas-extras">
-                    <div class="d-flex align-items-center justify-content-between bg-light rounded p-1 border">
-                        <span class="font-weight-bold text-muted mr-2 pl-2">Horas Extra:</span>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-secondary active" onclick="setHE(0)" data-he="0">0</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="setHE(1)" data-he="1">1</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="setHE(2)" data-he="2">2</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="setHE(3)" data-he="3">3</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="setHE(4)" data-he="4">4</button>
+                <div class="row" id="bloque-extras">
+                    <label class="col-12 text-secondary font-weight-bold small text-uppercase mb-2">
+                        <i class="fas fa-plus-circle"></i> 3. Adicionales
+                    </label>
+                    
+                    <div class="col-4 pr-1" id="bloque-nocturnidad">
+                        <button type="button" class="btn btn-block btn-outline-dark" id="btn-nocturnidad" onclick="toggleNocturnidad()">
+                            <i class="fas fa-moon"></i> Nocturnidad
+                        </button>
+                    </div>
+    
+                    <div class="col-4 px-1" id="bloque-tanda-extra">
+                        <button type="button" class="btn btn-block btn-outline-primary font-weight-bold" id="btn-tanda-extra" onclick="toggleTandaExtra()" style="display:none;">
+                            +1 T
+                        </button>
+                    </div>
+    
+                    <div class="col-4 pl-1" id="bloque-tanda-extra-15">
+                        <button type="button" class="btn btn-block btn-outline-primary font-weight-bold" id="btn-tanda-extra-15" onclick="toggleTandaExtra15()" style="display:none;">
+                            +1.5 T
+                        </button>
+                    </div>
+                    
+                    <div class="col-12 mt-3" id="bloque-horas-extras">
+                        <div class="d-flex align-items-center justify-content-between bg-light rounded p-1 border">
+                            <span class="font-weight-bold text-muted mr-2 pl-2">Horas Extra:</span>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-secondary active" onclick="setHE(0)" data-he="0">0</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="setHE(1)" data-he="1">1</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="setHE(2)" data-he="2">2</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="setHE(3)" data-he="3">3</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="setHE(4)" data-he="4">4</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
 
                     <div class="mt-3 p-2 alert alert-secondary text-center small" style="border: 1px dashed #999;">

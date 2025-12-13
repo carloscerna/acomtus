@@ -211,6 +211,11 @@ function seleccionarTipo(tipo) {
     if(tipo !== 'laborado' && tipo !== 'asueto') { // Asueto (TDA) puede tener extras
         estadoUI.tandaExtra = false;
         $("#btn-tanda-extra").hide();
+        $("#btn-tanda-extra-15").hide();
+
+        // LIMPIEZA PROFUNDA: Ocultar y quitar clases de activo
+        $("#btn-tanda-extra").hide().removeClass("active btn-primary text-white").addClass("btn-outline-primary");
+        $("#btn-tanda-extra-15").hide().removeClass("active btn-primary text-white").addClass("btn-outline-primary");
     }
 
     calcularYActualizar();
@@ -252,16 +257,21 @@ function seleccionarSubTipo(id) {
 function setDuracion(val) {
     estadoUI.duracion = val;
     
-    // UI Botones Duración
+    // UI Botones Duración (Visual)
     $("[data-dur]").removeClass("active btn-secondary").addClass("btn-outline-secondary");
     $(`[data-dur='${val}']`).addClass("active btn-secondary").removeClass("btn-outline-secondary");
     
-    // Botón Tanda Extra solo en 4H Laborado
+    // LÓGICA DE VISIBILIDAD DE EXTRAS
+    // Solo mostramos las tandas extras si es "Laborado" y dura "4H" (Media Tanda)
     if(estadoUI.tipo === 'laborado' && val === '4H') {
-        $("#btn-tanda-extra").fadeIn();
+        $("#btn-tanda-extra").fadeIn();      // Mostrar +1 Tanda
+        $("#btn-tanda-extra-15").fadeIn();   // Mostrar +1.5 Tanda (NUEVO)
     } else {
+        // Si no es 4H, ocultamos y reseteamos ambos
         estadoUI.tandaExtra = false;
-        $("#btn-tanda-extra").hide().removeClass("active");
+        
+        $("#btn-tanda-extra").hide().removeClass("active btn-primary text-white").addClass("btn-outline-primary");
+        $("#btn-tanda-extra-15").hide().removeClass("active btn-primary text-white").addClass("btn-outline-primary");
     }
     
     calcularYActualizar();
@@ -274,12 +284,45 @@ function toggleNocturnidad() {
     calcularYActualizar();
 }
 
+// --- ACTUALIZAR ESTA FUNCIÓN EXISTENTE ---
 function toggleTandaExtra() {
-    estadoUI.tandaExtra = !estadoUI.tandaExtra;
-    if(estadoUI.tandaExtra) $("#btn-tanda-extra").addClass("active btn-primary text-white").removeClass("btn-outline-primary");
-    else $("#btn-tanda-extra").removeClass("active btn-primary text-white").addClass("btn-outline-primary");
+    // Verificamos si está activo como booleano (true) o string ('1T')
+    if(estadoUI.tandaExtra === true || estadoUI.tandaExtra === '1T') {
+        estadoUI.tandaExtra = false;
+        $("#btn-tanda-extra").removeClass("active btn-primary text-white").addClass("btn-outline-primary");
+    } else {
+        estadoUI.tandaExtra = true; // Equivale a 1 Tanda extra normal
+        $("#btn-tanda-extra").addClass("active btn-primary text-white").removeClass("btn-outline-primary");
+        
+        // APAGAR EL BOTÓN DE 1.5 SI ESTABA ENCENDIDO
+        $("#btn-tanda-extra-15").removeClass("active btn-primary text-white").addClass("btn-outline-primary");
+    }
     calcularYActualizar();
 }
+
+// =========================================================
+// FUNCIÓN FALTANTE: CONTROL DE TANDA 1.5
+// =========================================================
+function toggleTandaExtra15() {
+    // Si ya está activo 1.5T, lo apagamos
+    if(estadoUI.tandaExtra === '1.5T') {
+        estadoUI.tandaExtra = false;
+        // CORREGIDO: Usar btn-primary en vez de bg-primary
+        $("#btn-tanda-extra-15").removeClass("active btn-primary text-white").addClass("btn-outline-primary");
+    } else {
+        // Activamos 1.5T
+        estadoUI.tandaExtra = '1.5T';
+        
+        // Apagamos la Tanda Extra normal (+1T)
+        $("#btn-tanda-extra").removeClass("active btn-primary text-white").addClass("btn-outline-primary");
+        
+        // Encendemos el botón nuevo (+1.5T)
+        // CORREGIDO: Usar btn-primary en vez de bg-primary
+        $("#btn-tanda-extra-15").addClass("active btn-primary text-white").removeClass("btn-outline-primary");
+    }
+    calcularYActualizar();
+}
+
 
 function setHE(num) {
     estadoUI.horasExtras = parseInt(num);
@@ -328,39 +371,48 @@ function calcularYActualizar() {
                     urlImagen = "../acomtus/img/Catalogo Jornada/UnaTandaYMediaYNocturnidad.jpg"; // 3144445
                 }
             }
-            // --- C. MEDIA TANDA (4H) - AQUÍ ESTÁ EL 1144425 ---
-            else if(estadoUI.duracion === '4H') {
-                CJ = '1'; // Base: 1144444
-                urlImagen = "../acomtus/img/Catalogo Jornada/MediaTanda.jpg";
+           // --- C. MEDIA TANDA (4H) ---
+           else if(estadoUI.duracion === '4H') {
+            CJ = '1'; // Base: 1144444
+            urlImagen = "../acomtus/img/Catalogo Jornada/MediaTanda.jpg";
+            
+            // 1. Caso: ALGUNA TANDA EXTRA ACTIVADA
+            if(estadoUI.tandaExtra) {
                 
-                // 1. Caso: Media Tanda + Tanda Extra (El más complejo)
-                if(estadoUI.tandaExtra) {
-                    CJE4H = '2'; // Activa Tanda Extra
+                // CASO NUEVO: 1.5 TANDAS EXTRA (CJE4H = 3) -> CÓDIGO: 11444344
+                if (estadoUI.tandaExtra === '1.5T') {
+                    CJE4H = '3'; 
+                    urlImagen = "../acomtus/img/Catalogo Jornada/MediaTandaExtraUnaTandaYMedia.jpg";
                     
+                    // Si hubiera nocturnidad con 1.5 extra:
                     if(estadoUI.nocturnidad) {
-                        // CÓDIGO: 1144425 (Media + Extra + Noche)
+                        // urlImagen = "...Nocturnidad.jpg"; (Si existe la imagen)
+                    }
+                }
+                // CASO NORMAL: 1 TANDA EXTRA (CJE4H = 2)
+                else {
+                    CJE4H = '2'; 
+                    if(estadoUI.nocturnidad) {
+                        // CÓDIGO: 1144425
                         urlImagen = "../acomtus/img/Catalogo Jornada/MediaTandaExtraUnaTandaYNocturnidad.jpg"; 
                     } 
                     else if(estadoUI.horasExtras == 4) {
-                        // CÓDIGO: 11444244
                         urlImagen = "../acomtus/img/Catalogo Jornada/MediaTandaExtraUnaTanda4HE.jpg";
                     }
                     else {
-                        // CÓDIGO: 1144424 (Solo Media + Extra)
                         urlImagen = "../acomtus/img/Catalogo Jornada/MediaTandaExtraUnaTanda.jpg";
                     }
-                } 
-                // 2. Caso: Media Tanda + Nocturnidad (Sin Tanda Extra)
-                else if(estadoUI.nocturnidad) {
-                    // CÓDIGO: 1144445
-                    urlImagen = "../acomtus/img/Catalogo Jornada/MediaTandaYNocturnidad.jpg";
                 }
-                // 3. Caso: Media Tanda + HE
-                else if(estadoUI.horasExtras > 0) {
-                    // CÓDIGO: 11444144 (Ejemplo)
-                    urlImagen = "../acomtus/img/Catalogo Jornada/MediaTanda" + estadoUI.horasExtras + "HE.jpg"; 
-                }
+            } 
+            // 2. Caso: Media Tanda + Nocturnidad (Sin Tanda Extra)
+            else if(estadoUI.nocturnidad) {
+                urlImagen = "../acomtus/img/Catalogo Jornada/MediaTandaYNocturnidad.jpg";
             }
+            // 3. Caso: Media Tanda + HE
+            else if(estadoUI.horasExtras > 0) {
+                urlImagen = "../acomtus/img/Catalogo Jornada/MediaTanda" + estadoUI.horasExtras + "HE.jpg"; 
+            }
+        }
             break;
 
     // ------------------------------------------------------------------
@@ -708,17 +760,31 @@ function mapearEstadoDesdeBD(codigos) {
         $("#btn-nocturnidad").removeClass("active btn-dark text-white").addClass("btn-outline-dark");
     }
 
-    // D. Recuperar TANDA EXTRA (CJE4H=2)
-    // Esto es VITAL para el código 1144425. Si CJE4H es 2, encendemos el botón.
+    // D. Recuperar TANDA EXTRA (CJE4H=2 para 1T, CJE4H=3 para 1.5T)
     if(cje4h == '2') { 
         estadoUI.tandaExtra = true;
-        // Forzamos mostrar el botón aunque la lógica visual a veces lo oculte
         $("#btn-tanda-extra").show().addClass("active btn-primary text-white").removeClass("btn-outline-primary");
-    } else {
+        $("#btn-tanda-extra-15").removeClass("active bg-primary text-white"); // Apagar el 1.5
+    } 
+    else if(cje4h == '3') { 
+        // --- DETECTA EL CÓDIGO 11444344 ---
+        estadoUI.tandaExtra = '1.5T';
+        $("#btn-tanda-extra-15").show().addClass("active bg-primary text-white").removeClass("btn-outline-primary");
+        $("#btn-tanda-extra").removeClass("active bg-primary text-white"); // Apagar el normal
+    }
+    else {
         estadoUI.tandaExtra = false;
         $("#btn-tanda-extra").removeClass("active btn-primary text-white").addClass("btn-outline-primary");
-        // Solo lo ocultamos si no estamos en 4H Laborado (para mantener limpieza visual)
-        if(estadoUI.duracion !== '4H') $("#btn-tanda-extra").hide();
+        $("#btn-tanda-extra-15").removeClass("active bg-primary text-white").addClass("btn-outline-primary");
+        
+        // Solo mostrar los botones si estamos en 4H Laborado
+        if(estadoUI.tipo === 'laborado' && estadoUI.duracion === '4H') {
+             $("#btn-tanda-extra").show();
+             $("#btn-tanda-extra-15").show();
+        } else {
+             $("#btn-tanda-extra").hide();
+             $("#btn-tanda-extra-15").hide();
+        }
     }
 
     // E. Recuperar Horas Extras
