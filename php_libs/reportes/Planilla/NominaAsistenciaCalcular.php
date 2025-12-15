@@ -1145,7 +1145,7 @@ class PDF extends FPDF
         $this->Cell(100,6, 'Reporte del ' . date('d/m/Y', strtotime($fecha_periodo_inicio)) . ' al ' . date('d/m/Y', strtotime($fecha_periodo_fin)),0,1,"L",false);
         
         $this->SetX(30);
-        $texto_ruta = $departamentoEmpresaTexto . (!empty($RutaText) && $RutaText!='00' ? " (Ruta: $RutaText)" : "");
+        $texto_ruta = $departamentoEmpresaTexto . (!empty($RutaText) && $RutaText!='Seleccionar...' ? " (Ruta: $RutaText)" : "");
         $this->Cell(100,6, $texto_ruta,0,1,"L",false);
         
         $this->SetFont('Arial','B',9);
