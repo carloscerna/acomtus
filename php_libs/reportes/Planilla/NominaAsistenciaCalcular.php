@@ -1669,10 +1669,27 @@ foreach ($rango_fechas as $fecha_actual) {
         // Nada
     }
 
+// --- CORRECCIÓN INTEGRAL: OMITIR EXTRAS PARA VIGILANCIA (08) ---
+    // Si es Vigilancia, eliminamos las Horas Extras visualmente Y financieramente
+    if ($DepartamentoEmpresa == '08') {
+        // 1. Guardamos el monto de dinero que se calculó (para restarlo)
+        $dinero_he_a_quitar = $total_monto_horas_extra_a_mostrar;
+
+        // 2. Corregimos los Totales Generales (Restamos el dinero)
+        // Esto arregla la columna "Total" (Extra) y "Liquido"
+        $total_extra_general_a_mostrar -= $dinero_he_a_quitar;
+        $salario_liquido_final_a_mostrar -= $dinero_he_a_quitar;
+
+        // 3. Finalmente, ponemos en CERO la columna específica de Horas Extras
+        $total_horas_extra_cantidad_a_mostrar = 0;
+        $total_monto_horas_extra_a_mostrar = 0;
+    }
+    // ----------------------------------------------------------------
+    
     $he_display_string_C = $format_num($total_horas_extra_cantidad_a_mostrar, 0); 
     $he_display_string_V = $format_num($total_monto_horas_extra_a_mostrar, 2); 
     $pdf->Cell($w_financial_fixed[4]/2, $h_fila, $he_display_string_C, 1, 0, 'C', true); 
-    $pdf->Cell($w_financial_fixed[4]/2, $h_fila, $he_display_string_V, 1, 0, 'C', true); 
+    $pdf->Cell($w_financial_fixed[4]/2, $h_fila, $he_display_string_V, 1, 0, 'C', true);
     $pdf->SetFont('Arial', '', 8); 
     $pdf->Cell($w_financial_fixed[5], $h_fila, $format_num($total_extra_general_a_mostrar, 2), 1, 0, 'R', true); 
     $pdf->Cell($w_financial_fixed[6], $h_fila, $format_num($salario_liquido_final_a_mostrar, 2), 1, 1, 'R', true); 
