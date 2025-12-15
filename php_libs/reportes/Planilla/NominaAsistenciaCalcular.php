@@ -661,6 +661,17 @@ $DepartamentoEmpresa = $_REQUEST["DepartamentoEmpresa"];
 $departamentoEmpresaTexto = $_REQUEST["DepartamentoText"];
 $persona_responsable = $_REQUEST["persona_responsable"] ?? 'No Definido';
 
+
+// --- NUEVO: EXTRAER CÓDIGO DEL RESPONSABLE (Para resaltar en el reporte) ---
+// Formato esperado: "11600-JULIO ERNESTO..."
+$codigo_responsable_target = 0;
+if (!empty($persona_responsable) && strpos($persona_responsable, '-') !== false) {
+    $partes_resp = explode('-', $persona_responsable);
+    // Tomamos la primera parte (11600) y la convertimos a entero para quitar ceros extras
+    $codigo_responsable_target = intval($partes_resp[0]); 
+}
+// --------------------------------------------------------------------------
+
 if (!isset($fecha_mes) || !isset($quincena)) {
     die("Faltan parámetros de fecha o quincena.");
 }
@@ -1161,7 +1172,8 @@ class PDF extends FPDF
             // Salto de línea manual a la derecha
             $this->SetXY(200, 20); 
             
-            $this->SetFillColor(0, 100, 0); // Verde
+            $this->SetFillColor(204, 255, 204); // Verde pastel
+
             $this->Cell(4,4,'',0,0,'C');
             $x_tri = $this->GetX() - 4; $y_tri = $this->GetY();
             $this->Polygon([$x_tri, $y_tri, $x_tri+3, $y_tri, $x_tri, $y_tri+3], 'F');
@@ -1303,9 +1315,7 @@ foreach ($datos_empleado_principal as $row_empleado) {
     $salario_mensual = (float)$row_empleado['salario'];
     $codigo_departamento_empleado = TRIM($row_empleado['codigo_departamento_empresa']);
     
-    $nombre_completo = trim(($nombres_empleado . ' ' . $apellidos_empleado));
-
-   // --- 1. CÁLCULO DE ARRASTRE (CARRY OVER) - OPTIMIZADO ---
+       // --- 1. CÁLCULO DE ARRASTRE (CARRY OVER) - OPTIMIZADO ---
    $deductible_events_carry_over = [];
    $fecha_inicio_dt = new DateTime($fecha_periodo_inicio);
    $day_of_week_num = (int)$fecha_inicio_dt->format('N'); 
@@ -1482,55 +1492,59 @@ foreach ($datos_empleado_principal as $row_empleado) {
     $pdf->SetX(10); 
 
     // Define la altura antes del bucle (puedes probar con 8, 9 o 10)
-        $h_fila = 9;    
-// 1. OBTENER CARGO (Asegúrate que tu consulta SQL traiga 'codigo_cargo')
-    $codigo_cargo = trim($row_empleado['codigo_cargo']); 
+        $h_fila = 9;   
+        $nombre_completo = trim(($nombres_empleado . ' ' . $apellidos_empleado));
 
-    // 2. DIBUJAR LA CELDA "No." (Blanca por defecto)
-    $pdf->SetFillColor(255, 255, 255); 
-    $pdf->Cell($w_initial_fixed[0], 9, $i, 1, 0, 'C', true);
+        $codigo_personal_int = intval($codigo_personal); // Convertimos a entero para comparar (11600 == 0011600)
+        $codigo_cargo = trim($row_empleado['codigo_cargo']); 
     
-    // 3. DIBUJAR TRIÁNGULO IDENTIFICADOR (ENCIMA DE LA CELDA)
-    $x_num = $pdf->GetX() - $w_initial_fixed[0]; // Regresamos X a la esquina de la celda
-    $y_num = $pdf->GetY();
+        // 1. DETERMINAR SI ES RESPONSABLE O REVISADOR
+        // Es Responsable si su código coincide con el seleccionado en el menú anterior
+        $es_responsable = ($codigo_responsable_target > 0 && $codigo_personal_int == $codigo_responsable_target);
+        
+        // Es Revisador si es cargo 17 (Despacho) y estamos en Motoristas (02)
+        $es_revisador = ($codigo_cargo == '17' && $DepartamentoEmpresa == '02');
     
-    if ($codigo_cargo == '28') { 
-        // JEFE DE LINEA (RESPONSABLE) -> AZUL
-        $pdf->SetFillColor(0, 50, 150); 
-        // Triángulo en esquina superior izquierda
-        $pdf->Polygon([$x_num, $y_num, $x_num+3, $y_num, $x_num, $y_num+3], 'F');
-    } 
-    elseif ($codigo_cargo == '17' && $DepartamentoEmpresa == '02') { 
-        // DESPACHO (REVISADOR) -> VERDE (Solo en reporte de Motoristas)
-        $pdf->SetFillColor(0, 100, 0); 
-        $pdf->Polygon([$x_num, $y_num, $x_num+3, $y_num, $x_num, $y_num+3], 'F');
-    }
+        // 2. DEFINIR COLOR DE FONDO DE LA FILA (NOMBRE/CÓDIGO)
+        if ($es_responsable) {
+            // AZUL SUAVE (Highlight para el Responsable)
+            $pdf->SetFillColor(225, 240, 255); 
+        } elseif ($es_revisador) {
+            // VERDE SUAVE (Opcional, para el revisador, o lo dejas blanco)
+            $pdf->SetFillColor(240, 255, 240); 
+        } else {
+            // COLOR CEBRA NORMAL (Blanco Humo / Blanco)
+            $pdf->SetFillColor(($i%2==0)?248:255, ($i%2==0)?250:255, ($i%2==0)?252:255);
+        }
     
-    // Luego dibujamos el triangulo identificador si corresponde
-    $x_num = $pdf->GetX() - $w_initial_fixed[0]; 
-    $y_num = $pdf->GetY();
+        // 3. DIBUJAR COLUMNA "No."
+        // Dibujamos la celda con el color de fondo definido arriba
+        $pdf->Cell($w_initial_fixed[0], 9, $i, 1, 0, 'C', true);
+        
+        // Guardamos posición para el triángulo
+        $x_num = $pdf->GetX() - $w_initial_fixed[0]; 
+        $y_num = $pdf->GetY();
+        
+        // 4. DIBUJAR TRIÁNGULOS IDENTIFICADORES (ENCIMA)
+        if ($es_responsable) { 
+            // TRIÁNGULO AZUL OSCURO (Responsable)
+            $pdf->SetFillColor(0, 50, 150); 
+            $pdf->Polygon([$x_num, $y_num, $x_num+3, $y_num, $x_num, $y_num+3], 'F');
+            // Restauramos el color de fondo suave para las siguientes celdas
+            $pdf->SetFillColor(225, 240, 255); 
+        } 
+        elseif ($es_revisador) { 
+            // TRIÁNGULO VERDE OSCURO (Revisador)
+            $pdf->SetFillColor(0, 100, 0); 
+            $pdf->Polygon([$x_num, $y_num, $x_num+3, $y_num, $x_num, $y_num+3], 'F');
+            // Restauramos color (si definiste uno especial para revisador, sino usa el cebra)
+            if($es_revisador) $pdf->SetFillColor(240, 255, 240); 
+            else $pdf->SetFillColor(($i%2==0)?248:255, ($i%2==0)?250:255, ($i%2==0)?252:255);
+        }
     
-    if ($codigo_cargo == '28') { // JEFE DE LINEA (RESPONSABLE)
-        $pdf->SetFillColor(($i%2==0)?248:255, ($i%2==0)?250:255, ($i%2==0)?252:255);
-        $pdf->Polygon([$x_num, $y_num, $x_num+3, $y_num, $x_num, $y_num+3], 'F');
-    } 
-    elseif ($codigo_cargo == '17' && $DepartamentoEmpresa == '02') { // DESPACHO (REVISADOR) - Solo en Motoristas
-        $pdf->SetFillColor(0, 100, 0); // Verde Oscuro
-        $pdf->Polygon([$x_num, $y_num, $x_num+3, $y_num, $x_num, $y_num+3], 'F');
-    }
-
-
-    // --- CAMBIO AQUÍ: AUMENTAR TAMAÑO DE FUENTE ---
-    // Cambiamos de tamaño 7 a tamaño 9 (o 10 si cabe) solo para los montos
-    $pdf->SetFont('Arial', '', 8); 
-    // ----------------------------------------------
-    $pdf->Cell($w_initial_fixed[1], $h_fila, $codigo_personal, 1, 0, 'L', true); 
-    // --- CAMBIO AQUÍ: AUMENTAR TAMAÑO DE FUENTE ---
-    // Cambiamos de tamaño 7 a tamaño 9 (o 10 si cabe) solo para los montos
-    $pdf->SetFont('Arial', '', 7); 
-    // ----------------------------------------------
-    $pdf->Cell($w_initial_fixed[2], $h_fila, $nombre_completo, 1, 0, 'L', true); 
-
+        // 5. DIBUJAR CÓDIGO Y NOMBRE (Con el color de fondo activo)
+        $pdf->Cell($w_initial_fixed[1], 9, $codigo_personal, 1, 0, 'L', true);
+        $pdf->Cell($w_initial_fixed[2], 9, $nombre_completo, 1, 0, 'L', true);
 
 foreach ($rango_fechas as $fecha_actual) {
         // -----------------------------------------------------------
