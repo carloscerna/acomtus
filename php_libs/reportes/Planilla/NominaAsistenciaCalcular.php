@@ -153,7 +153,7 @@ function debugCalculoSeptimoDia($dblink, $codigo_personal, $codigo_depto, $fecha
         // CALCULO DEL SÉPTIMO
         if ($falta_en_la_semana) {
             if (new DateTime($semana['end']) <= new DateTime($fecha_periodo_fin)) {
-                $deptos_con_descuento_7mo = ['02', '03', '06'];
+                $deptos_con_descuento_7mo = ['01','02', '03', '04', '05',' 06','07', '08','09'];
                 if (in_array($codigo_depto, $deptos_con_descuento_7mo)) {
                     $dinero_descontado_por_septimos += $salario_diario_real; // Sumamos $$$
                     echo "&nbsp;&nbsp;<strong style='background:#ffcccc; color:red'>[7mo] ¡PERDIDA DE SÉPTIMO! Se descuenta adicional: $" . number_format($salario_diario_real, 2) . "</strong><br>";
@@ -268,7 +268,7 @@ function calcularSeptimoDia($dblink, $codigo_personal, $codigo_depto, $fecha_per
 
         if ($falta_en_la_semana) {
             if (new DateTime($semana['end']) <= new DateTime($fecha_periodo_fin)) {
-                $deptos_con_descuento_7mo = ['02', '03', '06'];
+                $deptos_con_descuento_7mo = ['02', '03', '06','09'];
                 if (in_array($codigo_depto, $deptos_con_descuento_7mo)) {
                     $dinero_descontado_por_septimos += $salario_diario_real; 
                 }
@@ -299,9 +299,18 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo, $link = '') {
     $texto_inf_der = ''; 
     $texto_inf_izq = ''; 
 
+
+// --- 1. LIMPIEZA Y SEPARACIÓN (LA SOLUCIÓN) ---
+$codigo_completo = trim($codigo); // Guardamos el original (ej: 1144424_HE4)
+    
+// Separamos por el guion bajo "_"
+// Si es "1144424_HE4", $codigo_base será "1144424"
+$partes = explode('_', $codigo_completo);
+$codigo_base = $partes[0];
+
     // --- 2. ANÁLISIS DEL CÓDIGO (SWITCH MAESTRO) ---
 
-    switch ($codigo) {
+    switch (trim($codigo_base)) {
         // ---------------------------------------------------------
         // GRUPO 1: CELDAS VACÍAS O ERRORES
         // ---------------------------------------------------------
@@ -458,7 +467,6 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo, $link = '') {
             $texto_color = [0, 0, 200]; 
             $tamano_fuente_central = 9; $ajuste_y_simbolo = 3;
             break;
-
         // ---------------------------------------------------------
         // GRUPO 7: MEDIA TANDA Y COMPLEJOS (BLANCO)
         // ---------------------------------------------------------
@@ -467,7 +475,14 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo, $link = '') {
         case '1144425':  // 4H + 1T + NOCHE (El difícil)
         case '11444344': // 4H + 1.5T
         case '11444144': // 4H + 4HE
-        case '11444244': // 4H + 1T + 4HE
+            // Ahora sí va a encontrar este caso, porque le quitamos el "_HE4"
+            case '11444244': // Por si acaso llega el de 8 dígitos limpio
+                $fuente_actual = 'Arial'; 
+                $simbolo_central = '4H';
+                $tamano_fuente_central = 9; 
+                $ajuste_y_simbolo = 2; 
+                $texto_inf_der = '1T'; // <--- ¡AQUÍ ESTÁ TU 1T!
+                break;
         case '11444243': // 4H + 1T + 3HE
         case '11444242': // 4H + 1T + 2HE
         case '11444241': // 4H + 1T + 1HE
@@ -477,11 +492,18 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo, $link = '') {
             $tamano_fuente_central = 9; 
             $ajuste_y_simbolo = 2; 
 
-            // Tanda Extra (Abajo Derecha)
-            if ($codigo == '11444344') $texto_inf_der = '1.5T';
-            elseif (in_array($codigo, ['1144424', '1144425', '11444244', '11444243', '11444242', '11444241'])) {
-                $texto_inf_der = '1T';
-            }
+           // Tanda Extra (Abajo Derecha)
+           if ($codigo == '11444344') {
+            $texto_inf_der = '1.5T';
+        }
+        // --- AGREGAMOS ESTA LÍNEA ESPECÍFICA PARA TU CÓDIGO ---
+        elseif ($codigo == '11444244') {
+            $texto_inf_der = '1T'; 
+        }
+        // -------------------------------------------------------
+        elseif (in_array($codigo, ['1144424', '1144425', '11444243', '11444242', '11444241'])) {
+            $texto_inf_der = '1T';
+        }
 
             // Horas Extras (Arriba Derecha)
             if ($codigo == '11444244' || $codigo == '11444144') $texto_sup_der = '4 HE';
@@ -518,12 +540,12 @@ function dibujarCeldaAsistencia($pdf, $x, $y, $w, $h, $codigo, $link = '') {
 
     // --- 3. LÓGICA FINAL Y DIBUJO ---
     
-    // Si viene HE dinámico del array (_HE)
-    if (strpos($codigo, '_HE') !== false) {
-        $partes = explode('_HE', $codigo);
-        $texto_sup_der = end($partes) . " HE";
+// --- 4. LÓGICA DE HORAS EXTRAS (USANDO EL ORIGINAL) ---
+    // Aquí usamos $codigo_completo para ver si traía la cola "_HE"
+    if (strpos($codigo_completo, '_HE') !== false) {
+        $partes_he = explode('_HE', $codigo_completo);
+        $texto_sup_der = end($partes_he) . " HE"; // Esto pondrá "4 HE"
     }
-
     // Nocturnidad Genérica para cualquier otro código terminado en 5
     // que NO esté en la lista de los que ya manejamos manualmente
     // Agrega los nuevos códigos a este array:
@@ -895,6 +917,9 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         '1144424' => $salario_diario, '3144444' => $salario_diario / 2,
         '1144425' => $salario_diario,       // NUEVO: Agrega 1 Tanda (8H) a Extras
         // El caso complejo: Media Tanda + 1 Tanda Extra + Noche
+        // --- AGREGAR ESTA LÍNEA ---
+        '11444244' => $salario_diario, // 4H + 1T + 4HE (Agrega el pago de la tanda extra)
+        '1144444' => $salario_diario, // 4H Base + 1T Extra
     ];
     $weekly_four_h_count = [];
 
@@ -1703,4 +1728,15 @@ foreach ($rango_fechas as $fecha_actual) {
 $modo = "I"; 
 $print_nombre = mb_convert_encoding("Planilla: $departamentoEmpresaTexto - $quincena - $mes.pdf","ISO-8859-1");
 $pdf->Output($print_nombre,$modo);
+
+
+// --- FUNCIÓN DE RASTREO DE ERRORES (LOG) ---
+function generarLogDebug($mensaje) {
+    // Esto creará un archivo "log_debug.txt" en la misma carpeta del reporte
+    $archivo = fopen("log_debug.txt", "a"); 
+    $hora = date("H:i:s");
+    fwrite($archivo, "[$hora] $mensaje" . PHP_EOL);
+    fclose($archivo);
+}
+
 ?> 
