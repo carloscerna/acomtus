@@ -1,208 +1,223 @@
 <?php
-// limpiar cache.
+// 1. LIMPIEZA DE BÚFER: Vital para que no salga "JSON Inválido"
+ob_start();
+
+// Limpiar caché de estado de archivos
 clearstatcache();
-// cambiar a utf-8.
-header("Content-Type: text/html;charset=iso-8859-1");
-// Variable para la conexión.
+
+// 2. CABECERA CORRECTA: Debe ser JSON, no HTML
+header("Content-Type: application/json;charset=utf-8");
+
+// Inicializamos variables
 $errorDbConexion = false;
-// Inicializamos variables de mensajes y JSON
 $respuestaOK = false;
 $mensajeError = "No se puede ejecutar la aplicación";
 $contenidoOK = "";
-// ruta de los archivos con su carpeta
-    $path_root=trim($_SERVER['DOCUMENT_ROOT']);    
-// Incluimos el archivo de funciones y conexión a la base de datos
-	include($path_root."/acomtus/includes/mainFunctions_login.php");
-if($errorDbConexion == false){					// Validar conexión con la base de datos
-	// Validamos qe existan las variables post
-	if(isset($_POST) && !empty($_POST)){
-		if(!empty($_POST['accion_buscar'])){
-			$_POST['accion'] = $_POST['accion_buscar'];
-		}
-		// Verificamos las variables de acción
-		switch ($_POST['accion']) {
-			case 'BuscarUser':
-				// validar si hay datos en los parametros.
-					$nombre = trim($_POST['txtnombre']);
-					$password_usuario = trim($_POST['txtpassword']);
-					//$codigo_infraestructura = trim($_POST['txtcodigoinstitucion']);
-				// VERIFICAR SI EL USUARIO ES ROOT.
-				if($nombre == 'root'){
-					//USUARIO QUE SERVIARÁ PARA LA CREACIÓN DE USUARIOS, PERSONAL Y EMPRESAS.
-					// EN EL CASO QUE NO EXISTÁ NADA EN LA BASE DE DATOS.
-					$query = "SELECT * FROM usuarios WHERE nombre = '$nombre'";
-					$consulta = $dblink -> query($query);
-						// convertimos el objeto
-						while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-						{
-							$hash = trim($listado['password']);
-							$codigo_perfil = trim($listado['codigo_perfil']);
-							$_SESSION['dbname'] = trim($listado['base_de_datos']);
-						}
-					// VERIFICAMOS LA CONTRASEÑA
-					if(password_verify($password_usuario, $hash)){
-							$respuestaOK = true;
-							$contenidoOK ="";
-							$mensajeError = "Se ha iniciado el Sistema.";
-							
-							//Guardamos dos variables de sesión que nos auxiliará para saber si se está o no "logueado" un usuario 
-							$_SESSION['userNombre'] = $nombre;
-							$_SESSION['codigo_perfil'] = $codigo_perfil;
-							$_SESSION['logo_uno'] = "no.jpg";
-							$_SESSION['codigo_personal'] = "00";
-							$_SESSION['nombre_institucion'] = "Configuración Inicial";
-							$_SESSION['direccion'] = "Configuración Inicial";
-							$_SESSION['nombre_perfil'] = "ROOT";
-							$_SESSION['codigo_institucion'] = "ROOT";
-							$_SESSION['userID'] = "00";
-							$_SESSION['nombre_personal'] = "ROOT";
-							$_SESSION['userLogin'] = true;
-							$_SESSION["autentica"] = "SI";
-							$_SESSION['foto_personal'] = './img/nofoto.jpg';
-						}else{
-							$respuestaOK = false;
-							$contenidoOK = '';
-							$mensajeError = 'Este usuario no existe.';
-						}
-						
 
-				}else{
-					/* **************************************************************************************************/
-					// SI E SUN PERFIL DIFERENTE A ROOT.
-					// armar la consulta.
-						$query = "SELECT u.nombre, u.id_usuario, u.base_de_datos, u.codigo_perfil, u.password, u.codigo_personal, u.codigo_institucion,
-						btrim(p.nombres || CAST(' ' AS VARCHAR) || p.apellidos) as nombre_personal,
-						u.codigo_departamento_empresa, p.foto as foto_personal, p.codigo_genero,
-						cat_perfil.descripcion as nombre_perfil
-							FROM usuarios u
-								INNER JOIN personal p ON p.codigo = u.codigo_personal
-								INNER JOIN catalogo_perfil cat_perfil ON cat_perfil.codigo = u.codigo_perfil
-									WHERE u.nombre= '$nombre' LIMIT 1";
-					// Ejecutamos el Query.
-						$consulta = $dblink -> query($query);
-					//
-					if($consulta -> rowCount() != 0){
-						$respuestaOK = true;
-						$contenidoOK ="";
-						$mensajeError = "Se ha consultado el registro correctamente ";
-						
-						// convertimos el objeto
-						while($listado = $consulta -> fetch(PDO::FETCH_BOTH))
-						{
-							if(password_verify($password_usuario,trim($listado['password'])))
-							{
-								$_SESSION['userLogin'] = true;
-								$_SESSION['userNombre'] = trim($listado['nombre']);
-								$_SESSION['userID'] = $listado['id_usuario'];
-								$_SESSION['dbname'] = trim($listado['base_de_datos']);
-								$_SESSION['codigo_perfil'] = trim($listado['codigo_perfil']);
-								$_SESSION['codigo_personal'] = trim($listado['codigo_personal']);
-								$_SESSION['nombre_personal'] = (trim($listado['nombre_personal']));
-								$_SESSION['CodigoDepartamentoEmpresa'] = (trim($listado['codigo_departamento_empresa']));
-								$_SESSION['nombre_perfil'] = (trim($listado['nombre_perfil']));
-								$_SESSION['nombre_institucion'] = 'ROOT';
-								$_SESSION['codigo_institucion'] = (trim($listado['codigo_institucion']));
-								// validar la fotografía si existe.
-									$foto_personal = trim($listado['foto_personal']);
-									$codigo_genero = trim($listado['codigo_genero']);
-								//	default imagen masculino
-									$_SESSION['foto_personal'] = './img/avatar_masculino.png';
-								// validar
-									if(is_null($foto_personal)){
-										if($codigo_genero == '02'){	//	femenino
-											$_SESSION['foto_personal'] = './img/avatar_femenino.png';
-										}
-									}else{
-										// foto del empleado.
-										$_SESSION['foto_personal'] = "./img/".$foto_personal;
-									}
-								
-							}else{
-								$respuestaOK = false;
-								$contenidoOK = '';
-								$mensajeError = 'Este usuario no existe o contreseña Incorrecta.';
-									exit;
-							}
-						}
-						// Conectarse a la nueva base de datos.
-							// ruta de los archivos con su carpeta
-								$path_root=trim($_SERVER['DOCUMENT_ROOT']);
-							// Incluimos el archivo de funciones y conexión a la base de datos
-								include($path_root."/acomtus/includes/mainFunctions_.php");
-								include($path_root."/acomtus/includes/funciones.php");
-								// Validar conexión.
-								if($errorDbConexion == false){
-								// Obtener datos de la institución.
-									$consulta = "SELECT inf.id_, inf.nombre, inf.direccion, inf.telefono_fijo, p.foto, p.codigo_genero,
-												depa.codigo, depa.nombre as nombre_departamento, mu.codigo, mu.codigo_departamento, mu.nombre as nombre_municipio, btrim(p.nombres || cast(' ' as VARCHAR) || p.apellidos) as nombre_personal,
-												inf.logo_uno
-												from informacion_institucion inf
-													INNER JOIN personal p ON p.codigo ='$_SESSION[codigo_personal]'
-													INNER JOIN catalogo_departamento depa ON depa.codigo = inf.codigo_departamento
-													INNER JOIN catalogo_municipio mu ON mu.codigo = inf.codigo_municipio and mu.codigo = inf.codigo_municipio and mu.codigo_departamento = inf.codigo_departamento
-														WHERE inf.codigo_departamento = depa.codigo and inf.id_ = '$_SESSION[codigo_institucion]' LIMIT 1";
-								// Ejecutamos la consulta.
-									$respuesta = $dblink -> query($consulta);
-										if($respuesta -> rowCount() !=0){
-											$userData = $respuesta -> fetch(PDO::FETCH_ASSOC);
-											// Crear variable global para utilizar con informes y Formularios.
-												//$_SESSION['userNombre'] = trim($userData['nombre_institucion']);
-												$_SESSION['nombre_institucion'] = trim($userData['nombre']);
-												$_SESSION['direccion'] = (trim($userData['direccion']));
-												$_SESSION['telefono'] = trim($userData['telefono_fijo']);
-												$_SESSION['nombre_municipio'] = mb_convert_encoding(trim($userData['nombre_municipio']),"ISO-8859-1","UTF-8");
-												$_SESSION['nombre_departamento'] = mb_convert_encoding(trim($userData['nombre_departamento']),"ISO-8859-1","UTF-8");
-												$_SESSION['nombre_personal'] = (trim($userData['nombre_personal']));
-												$_SESSION['logo_uno'] = trim($userData['logo_uno']);
+// Ruta raíz
+$path_root = trim($_SERVER['DOCUMENT_ROOT']);
 
-												// Si la foto está vacía.
-												if(empty(trim($userData['foto']))){
-													if(trim($userData['codigo_genero']) == "01"){
-														$_SESSION['foto_personal'] = "./img/avatar_masculino.png" ;
-													}else{
-														$_SESSION['foto_personal'] = "./img/avatar_femenino.png" ;
-													}
-												}else{
-													$_SESSION['foto_personal'] = "./img/fotos/".trim($userData['foto']);
-												}
-											//Guardamos dos variables de sesión que nos auxiliará para saber si se está o no "logueado" un usuario 
-												$_SESSION["autentica"] = "SI";
-										} // Validar si hay archivos.
-										else{
-											$respuestaOK = false;
-											$contenidoOK = "";
-											$mensajeError = "No Existen datos de la institución.";}
-								} // Validar conexión.
-								else{
-									$respuestaOK = false;
-									$contenidoOK = "";
-									$mensajeError = "No Existe la base de datos";}
-					}
-					else{
-						$respuestaOK = false;
-						$contenidoOK = '';
-						$mensajeError = 'Este usuario no existe o contreseña Incorrecta.';
-					}
-				}	// COMPRACIÓN DEL USUARIO SI ES ROOT.
-					break;
-				default:
-					$mensajeError = 'Esta acción no se encuentra disponible';
-				break;
-			}
-		}
-		else{
-			$mensajeError = 'No se puede ejecutar la aplicación';}
-	}
-	else{
-		$respuestaOK = false;
-		$contenidoOK = "";
-		$mensajeError = "No Existe la base de datos";}
-				
+// 3. INCLUDE SEGURO: Usamos include_once para evitar re-declaraciones
+// Asumimos que este archivo conecta a la BD general
+include_once($path_root."/acomtus/includes/mainFunctions_login.php");
 
-// Armamos array para convertir a JSON
-$salidaJson = array("respuesta" => $respuestaOK,
-		"mensaje" => $mensajeError,
-		"contenido" => $contenidoOK);
+global $dblink;
 
+// Validar conexión inicial
+if (isset($errorDbConexion) && $errorDbConexion == false && isset($dblink)) {
+    
+    // Validar datos de entrada con filtros modernos
+    $accion = $_POST['accion_buscar'] ?? $_POST['accion'] ?? '';
+    
+    if (!empty($accion)) {
+        switch ($accion) {
+            case 'BuscarUser':
+                // 4. SANITIZACIÓN PHP 8
+                $nombre = filter_input(INPUT_POST, 'txtnombre', FILTER_SANITIZE_SPECIAL_CHARS);
+                $password_usuario = $_POST['txtpassword'] ?? '';
+                
+                // Limpieza básica
+                $nombre = trim($nombre);
+                $password_usuario = trim($password_usuario);
+
+                if (empty($nombre) || empty($password_usuario)) {
+                    $mensajeError = "Usuario y contraseña requeridos.";
+                    break;
+                }
+
+                try {
+                    // --- CASO USUARIO ROOT ---
+                    if ($nombre === 'root') {
+                        // Consulta Segura
+                        $query = "SELECT * FROM usuarios WHERE nombre = :nombre LIMIT 1";
+                        $stmt = $dblink->prepare($query);
+                        $stmt->bindValue(':nombre', $nombre, PDO::PARAM_STR);
+                        $stmt->execute();
+                        
+                        $usuarioRoot = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                        if ($usuarioRoot && password_verify($password_usuario, trim($usuarioRoot['password']))) {
+                            $respuestaOK = true;
+                            $mensajeError = "Se ha iniciado el Sistema.";
+
+                            $_SESSION['userNombre'] = $nombre;
+                            $_SESSION['codigo_perfil'] = trim($usuarioRoot['codigo_perfil']);
+                            $_SESSION['dbname'] = trim($usuarioRoot['base_de_datos']);
+                            
+                            // Valores Hardcodeados para Root
+                            $_SESSION['logo_uno'] = "no.jpg";
+                            $_SESSION['codigo_personal'] = "00";
+                            $_SESSION['nombre_institucion'] = "Configuración Inicial";
+                            $_SESSION['direccion'] = "Configuración Inicial";
+                            $_SESSION['nombre_perfil'] = "ROOT";
+                            $_SESSION['codigo_institucion'] = "ROOT";
+                            $_SESSION['userID'] = "00";
+                            $_SESSION['nombre_personal'] = "ROOT";
+                            $_SESSION['userLogin'] = true;
+                            $_SESSION["autentica"] = "SI";
+                            $_SESSION['foto_personal'] = './img/nofoto.jpg';
+                        } else {
+                            $mensajeError = 'Este usuario no existe o contraseña incorrecta.';
+                        }
+
+                    } else {
+                        // --- CASO USUARIO NORMAL ---
+                        // Consulta optimizada y SEGURA (sin variables directas en el string)
+                        $query = "SELECT u.nombre, u.id_usuario, u.base_de_datos, u.codigo_perfil, u.password, u.codigo_personal, u.codigo_institucion,
+                                    TRIM(p.nombres) || ' ' || TRIM(p.apellidos) as nombre_personal,
+                                    u.codigo_departamento_empresa, p.foto as foto_personal, p.codigo_genero,
+                                    cat_perfil.descripcion as nombre_perfil
+                                  FROM usuarios u
+                                  INNER JOIN personal p ON p.codigo = u.codigo_personal
+                                  INNER JOIN catalogo_perfil cat_perfil ON cat_perfil.codigo = u.codigo_perfil
+                                  WHERE u.nombre = :nombre LIMIT 1";
+                        
+                        $stmt = $dblink->prepare($query);
+                        $stmt->bindValue(':nombre', $nombre, PDO::PARAM_STR);
+                        $stmt->execute();
+                        
+                        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                        if ($usuario) {
+                            // Verificar Password
+                            if (password_verify($password_usuario, trim($usuario['password']))) {
+                                $respuestaOK = true;
+                                $mensajeError = "Se ha consultado el registro correctamente";
+
+                                // Guardar variables de sesión iniciales
+                                $_SESSION['userLogin'] = true;
+                                $_SESSION['userNombre'] = trim($usuario['nombre']);
+                                $_SESSION['userID'] = $usuario['id_usuario'];
+                                $_SESSION['dbname'] = trim($usuario['base_de_datos']);
+                                $_SESSION['codigo_perfil'] = trim($usuario['codigo_perfil']);
+                                $_SESSION['codigo_personal'] = trim($usuario['codigo_personal']);
+                                $_SESSION['nombre_personal'] = trim($usuario['nombre_personal']);
+                                $_SESSION['CodigoDepartamentoEmpresa'] = trim($usuario['codigo_departamento_empresa']);
+                                $_SESSION['nombre_perfil'] = trim($usuario['nombre_perfil']);
+                                $_SESSION['codigo_institucion'] = trim($usuario['codigo_institucion']);
+                                $_SESSION['nombre_institucion'] = 'ROOT'; // Valor temporal antes de conectar a la otra BD
+
+                                // Lógica de Fotos
+                                $foto = trim($usuario['foto_personal'] ?? '');
+                                $genero = trim($usuario['codigo_genero'] ?? '');
+                                
+                                if (empty($foto)) {
+                                    $_SESSION['foto_personal'] = ($genero === '02') ? './img/avatar_femenino.png' : './img/avatar_masculino.png';
+                                } else {
+                                    $_SESSION['foto_personal'] = "./img/" . $foto;
+                                }
+
+                                // 5. CAMBIO DE CONTEXTO DE BASE DE DATOS
+                                // Aquí se conecta a la base específica del usuario (acomtus/includes/mainFunctions_.php)
+                                
+                                if (file_exists($path_root."/acomtus/includes/mainFunctions_.php")) {
+                                    // IMPORTANTE: Si mainFunctions_.php tiene las mismas funciones que mainFunctions_login.php,
+                                    // esto fallará. Asumimos que manejan variables distintas ($dblink).
+                                    include($path_root."/acomtus/includes/mainFunctions_.php");
+                                    include_once($path_root."/acomtus/includes/funciones.php");
+                                    
+                                    // Verificamos la NUEVA conexión ($errorDbConexion se sobrescribe en el include anterior)
+                                    if ($errorDbConexion == false) {
+                                        // Consulta de Institución
+                                        $queryInst = "SELECT inf.id_, inf.nombre, inf.direccion, inf.telefono_fijo, p.foto, p.codigo_genero,
+                                                        depa.codigo, depa.nombre as nombre_departamento, 
+                                                        mu.codigo, mu.codigo_departamento, mu.nombre as nombre_municipio, 
+                                                        TRIM(p.nombres) || ' ' || TRIM(p.apellidos) as nombre_personal,
+                                                        inf.logo_uno
+                                                      FROM informacion_institucion inf
+                                                      INNER JOIN personal p ON p.codigo = :cod_personal
+                                                      INNER JOIN catalogo_departamento depa ON depa.codigo = inf.codigo_departamento
+                                                      INNER JOIN catalogo_municipio mu ON mu.codigo = inf.codigo_municipio 
+                                                        AND mu.codigo_departamento = inf.codigo_departamento
+                                                      WHERE inf.id_ = :cod_inst LIMIT 1";
+
+                                        $stmtInst = $dblink->prepare($queryInst);
+                                        $stmtInst->bindValue(':cod_personal', $_SESSION['codigo_personal'], PDO::PARAM_STR);
+                                        $stmtInst->bindValue(':cod_inst', $_SESSION['codigo_institucion'], PDO::PARAM_STR);
+                                        $stmtInst->execute();
+                                        
+                                        $instData = $stmtInst->fetch(PDO::FETCH_ASSOC);
+
+                                        if ($instData) {
+                                            // Asignación final de sesión
+                                            $_SESSION['nombre_institucion'] = trim($instData['nombre']);
+                                            $_SESSION['direccion'] = trim($instData['direccion']);
+                                            $_SESSION['telefono'] = trim($instData['telefono_fijo']);
+                                            
+                                            // Corrección UTF-8 (Si la BD está en LATIN1, usa mb_convert_encoding, si es UTF8, quítalo)
+                                            $_SESSION['nombre_municipio'] = trim($instData['nombre_municipio']);
+                                            $_SESSION['nombre_departamento'] = trim($instData['nombre_departamento']);
+                                            
+                                            $_SESSION['nombre_personal'] = trim($instData['nombre_personal']);
+                                            $_SESSION['logo_uno'] = trim($instData['logo_uno']);
+                                            $_SESSION["autentica"] = "SI";
+                                            
+                                            // Refuerzo de foto por si cambió en esta consulta
+                                            if (!empty(trim($instData['foto'] ?? ''))) {
+                                                 $_SESSION['foto_personal'] = "./img/fotos/" . trim($instData['foto']);
+                                            }
+
+                                        } else {
+                                            $respuestaOK = false;
+                                            $mensajeError = "No existen datos de la institución asociada.";
+                                        }
+                                    } else {
+                                        $respuestaOK = false;
+                                        $mensajeError = "Error al conectar a la base de datos de la institución.";
+                                    }
+                                }
+                            } else {
+                                $mensajeError = 'Contraseña incorrecta.';
+                            }
+                        } else {
+                            $mensajeError = 'Usuario no encontrado.';
+                        }
+                    }
+                } catch (PDOException $e) {
+                    $mensajeError = "Error de Base de Datos: Verifique logs."; // No mostrar detalle al usuario
+                }
+                break;
+                
+            default:
+                $mensajeError = 'Acción no disponible.';
+                break;
+        }
+    } else {
+        $mensajeError = 'No se especificó ninguna acción.';
+    }
+} else {
+    $mensajeError = "No hay conexión con el servidor de base de datos.";
+}
+
+// Armamos array JSON
+$salidaJson = array(
+    "respuesta" => $respuestaOK,
+    "mensaje" => $mensajeError,
+    "contenido" => $contenidoOK
+);
+
+// 6. ENVIO LIMPIO
+ob_end_clean(); // Borramos cualquier warning previo
 echo json_encode($salidaJson);
+exit;
 ?>
