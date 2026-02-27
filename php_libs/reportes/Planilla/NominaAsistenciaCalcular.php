@@ -471,8 +471,16 @@ $codigo_base = $partes[0];
         // GRUPO 7: MEDIA TANDA Y COMPLEJOS (BLANCO)
         // ---------------------------------------------------------
         case '1144444':  // 4H sola
+            $fuente_actual = 'Arial'; 
+            $simbolo_central = '4H';
+            $tamano_fuente_central = 9; 
+            $ajuste_y_simbolo = 2; 
+            // NO definimos $texto_inf_der ni nada más.
+            // Al poner break aquí, evitamos que se mezcle con los de abajo.
+            break;
         case '1144424':  // 4H + 1T (Sin Noche)
         case '1144425':  // 4H + 1T + NOCHE (El difícil)
+        case '11444250':  // 4H + 1T + NOCHE (El difícil)
         case '11444344': // 4H + 1.5T
         case '11444144': // 4H + 4HE
             // Ahora sí va a encontrar este caso, porque le quitamos el "_HE4"
@@ -512,7 +520,7 @@ $codigo_base = $partes[0];
             elseif ($codigo == '11444241') $texto_sup_der = '1 HE';
 
             // Nocturnidad especial (Abajo Izquierda)
-            if ($codigo == '1144425') $texto_inf_izq = 'N';
+            if ($codigo == '1144425' || $codigo == '11444250') $texto_inf_izq = 'N';
             break;
 
         // --- UNA TANDA Y MEDIA (1.5T) ---
@@ -914,12 +922,13 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         '41934445' => true  // TA N 1.5T (Código antiguo 19)
     ];
     $fixed_extra_codes = [
-        '1144424' => $salario_diario, '3144444' => $salario_diario / 2,
+        '1144424' => $salario_diario, 
+        '3144444' => $salario_diario / 2,
         '1144425' => $salario_diario,       // NUEVO: Agrega 1 Tanda (8H) a Extras
         // El caso complejo: Media Tanda + 1 Tanda Extra + Noche
         // --- AGREGAR ESTA LÍNEA ---
-        '11444244' => $salario_diario, // 4H + 1T + 4HE (Agrega el pago de la tanda extra)
-        '1144444' => $salario_diario, // 4H Base + 1T Extra
+        '11444244' => $salario_diario // 4H + 1T + 4HE (Agrega el pago de la tanda extra)
+        //'1144444' => $salario_diario, // 4H Base + 1T Extra
     ];
     $weekly_four_h_count = [];
 
