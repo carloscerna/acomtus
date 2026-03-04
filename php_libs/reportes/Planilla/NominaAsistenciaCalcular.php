@@ -532,7 +532,13 @@ $codigo_base = $partes[0];
             // Nocturnidad especial (Abajo Izquierda)
           //  if ($codigo == '1144425' || $codigo == '11444250') $texto_inf_izq = 'N';
             break;
-
+        case '1144434': 
+            $fuente_actual = 'Arial'; 
+            $simbolo_central = '4H';
+            $tamano_fuente_central = 9; 
+            $ajuste_y_simbolo = 2; 
+            $texto_inf_der = '1.5T'; // El '3' en la posición 6 significa 1.5T
+            break;
         // --- UNA TANDA Y MEDIA (1.5T) ---
         case '3144444': 
         case '3144445': // Con Noche

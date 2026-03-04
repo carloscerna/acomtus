@@ -1,5 +1,5 @@
 <?php
-// Script optimizado con Inicialización Masiva
+// Script optimizado con Inicialización Masiva - Compatible con PHP 8.x
 header("Content-Type: text/html;charset=utf-8");
 
 date_default_timezone_set('America/El_Salvador');
@@ -32,19 +32,18 @@ while($row = $resultado_j_img->fetch(PDO::FETCH_ASSOC)) {
 
 if($errorDbConexion == false){
     if(isset($_POST) && !empty($_POST)){
-        if(!empty($_POST['accion_buscar'])){
-            $_POST['accion'] = $_POST['accion_buscar'];
-        }
+        
+        $accion = trim($_POST['accion_buscar'] ?? $_POST['accion'] ?? '');
 
-        switch ($_POST['accion']) {
+        switch ($accion) {
             
             // ---------------------------------------------------------------------
             // CASO 1: BUSCAR EMPLEADO INDIVIDUAL
             // ---------------------------------------------------------------------
             case 'BuscarPersonalCodigo':
-                $codigo_personal = trim($_POST['codigo_personal']);
-                $fecha = trim($_POST['fecha']);
-                $CodigoDepartamentoEmpresa = trim($_POST['codigo_departamento_empresa']);
+                $codigo_personal = trim($_POST['codigo_personal'] ?? '');
+                $fecha = trim($_POST['fecha'] ?? '');
+                $CodigoDepartamentoEmpresa = trim($_POST['codigo_departamento_empresa'] ?? '');
                 
                 // Buscar Datos Personales
                 $query = "SELECT p.id_personal, p.codigo, TRIM(p.nombres) as nombre, TRIM(p.apellidos) as apellido, 
@@ -61,12 +60,12 @@ if($errorDbConexion == false){
                 if($stmt->rowCount() != 0){
                     $respuestaOK = true;
                     while($listado = $stmt->fetch(PDO::FETCH_ASSOC)){
-                        $datos[$fila_array]["id_"] = trim($listado['id_personal']);
-                        $datos[$fila_array]["codigo"] = trim($listado['codigo']);
-                        $datos[$fila_array]["codigo_departamento_empresa"] = trim($listado['codigo_departamento_empresa']);
-                        $datos[$fila_array]["nombre_empleado"] = trim($listado['nombre_empleado']);
-                        $datos[$fila_array]["url_foto"] = trim($listado['foto']);
-                        $datos[$fila_array]["codigo_genero"] = trim($listado['codigo_genero']);
+                        $datos[$fila_array]["id_"] = trim((string)$listado['id_personal']);
+                        $datos[$fila_array]["codigo"] = trim((string)$listado['codigo']);
+                        $datos[$fila_array]["codigo_departamento_empresa"] = trim((string)$listado['codigo_departamento_empresa']);
+                        $datos[$fila_array]["nombre_empleado"] = trim((string)$listado['nombre_empleado']);
+                        $datos[$fila_array]["url_foto"] = trim((string)$listado['foto']);
+                        $datos[$fila_array]["codigo_genero"] = trim((string)$listado['codigo_genero']);
                     }
                     $datos[$fila_array]["mensajeError"] = 'Código Encontrado.';
                     $datos[$fila_array]["respuestaOK"] = true;
@@ -89,7 +88,7 @@ if($errorDbConexion == false){
                     $datos[$fila_array]["mensajeError"] = 'Código No Existe o No Pertenece a este Departamento.';
                 }
 
-                // Buscar Asistencia (Si no existe, devolvemos vacío para que JS lo maneje o el INSERT lo cree)
+                // Buscar Asistencia
                 $query_asis = "SELECT * FROM personal_asistencia WHERE codigo_personal = :cod AND fecha = :fecha";
                 $stmtAsis = $dblink->prepare($query_asis);
                 $stmtAsis->bindParam(':cod', $codigo_personal);
@@ -98,17 +97,17 @@ if($errorDbConexion == false){
 
                 $imgJornada = "#";
                 $HoraExtra = 0;
-                $IdAsistencia = 0; // Importante para el JS
+                $IdAsistencia = 0;
 
                 if($stmtAsis->rowCount() > 0){
                     $row = $stmtAsis->fetch(PDO::FETCH_ASSOC);
-                    $HoraExtra = trim($row['hora_extra']);
-                    $IdAsistencia = trim($row['id_']);
+                    $HoraExtra = trim((string)$row['hora_extra']);
+                    $IdAsistencia = trim((string)$row['id_']);
                     
-                    $CodigoJornadaTodas = trim($row['codigo_jornada']) . trim($row['codigo_tipo_licencia']) . 
-                                          trim($row['codigo_jornada_asueto']) . trim($row['codigo_jornada_vacaciones']) . 
-                                          trim($row['codigo_jornada_descanso']) . trim($row['codigo_jornada_e_4h']) . 
-                                          trim($row['codigo_jornada_nocturna']);
+                    $CodigoJornadaTodas = trim((string)$row['codigo_jornada']) . trim((string)$row['codigo_tipo_licencia']) . 
+                                          trim((string)$row['codigo_jornada_asueto']) . trim((string)$row['codigo_jornada_vacaciones']) . 
+                                          trim((string)$row['codigo_jornada_descanso']) . trim((string)$row['codigo_jornada_e_4h']) . 
+                                          trim((string)$row['codigo_jornada_nocturna']);
                     if($HoraExtra != 0) $CodigoJornadaTodas .= $HoraExtra;
 
                     if(isset($imagenesMap[$CodigoJornadaTodas])){
@@ -119,15 +118,14 @@ if($errorDbConexion == false){
                 $fila_array++;
                 $datos[$fila_array]["imgJornada"] = $imgJornada;
                 $datos[$fila_array]["HoraExtra"] = $HoraExtra;
-                // $datos[$fila_array]["Id_"] = $IdAsistencia; // Se podría enviar aquí si se requiere
                 break;
 
             // ---------------------------------------------------------------------
             // CASO 2: INFO RUTA
             // ---------------------------------------------------------------------
             case "BuscarPersonalRutaCodigo":
-                $codigo_personal = trim($_POST['codigo_personal']);
-                $CodigoDepartamentoEmpresa = trim($_POST['codigo_departamento_empresa']);
+                $codigo_personal = trim($_POST['codigo_personal'] ?? '');
+                $CodigoDepartamentoEmpresa = trim($_POST['codigo_departamento_empresa'] ?? '');
                 
                 if($CodigoDepartamentoEmpresa == "02"){
                     $query = "SELECT u.codigo_ruta as codigo, cat_ruta.descripcion 
@@ -145,8 +143,8 @@ if($errorDbConexion == false){
 
                 if($consulta->rowCount() != 0){
                     $listado = $consulta->fetch(PDO::FETCH_ASSOC);
-                    $CodigoUbicacion = trim($listado['codigo']);
-                    $datos[$fila_array]["Descripcion"] = trim($listado['descripcion']);
+                    $CodigoUbicacion = trim((string)$listado['codigo']);
+                    $datos[$fila_array]["Descripcion"] = trim((string)$listado['descripcion']);
                     $datos[$fila_array]["Codigo"] = $CodigoUbicacion;
                     $datos[$fila_array]["mensajeError"] = 'Código Encontrado.';
                     $datos[$fila_array]["respuestaOK"] = true;
@@ -163,19 +161,18 @@ if($errorDbConexion == false){
                 break;
 
             // ---------------------------------------------------------------------
-            // CASO 3: LISTADO DE EMPLEADOS (CON INICIALIZACIÓN MASIVA)
+            // CASO 3: LISTADO DE EMPLEADOS
             // ---------------------------------------------------------------------
             case "BuscarEmpleadosPorRuta":
-                $codigo_ruta = trim($_POST['CodigoRuta']);
-                $CodigoDepartamentoEmpresa = trim($_POST['CodigoDepartamentoEmpresa']);
-                $fecha = trim($_POST['fecha']);
-                $codigo_personal_encargado = trim($_POST['codigo_personal_encargado']);
+                $codigo_ruta = trim($_POST['CodigoRuta'] ?? '');
+                $CodigoDepartamentoEmpresa = trim($_POST['CodigoDepartamentoEmpresa'] ?? '');
+                $fecha = trim($_POST['fecha'] ?? '');
+                $codigo_personal_encargado = trim($_POST['codigo_personal_encargado'] ?? '');
                 
-                // A. Verificar Asueto (Para definir valor por defecto)
                 $MensajeAsueto = "";
                 $esAsueto = false;
-                $def_CTL = '1'; // Licencia por defecto: 1 (Normal/Presente)
-                $def_CJA = '4'; // Asueto por defecto: 4 (Nada)
+                $def_CTL = '1'; 
+                $def_CJA = '4'; 
 
                 $query_asueto = "SELECT descripcion FROM asuetos WHERE fecha = '$fecha' LIMIT 1";
                 $resAsueto = $dblink->query($query_asueto);
@@ -183,17 +180,10 @@ if($errorDbConexion == false){
                     $filaA = $resAsueto->fetch(PDO::FETCH_ASSOC);
                     $MensajeAsueto = $filaA['descripcion'];
                     $esAsueto = true;
-                    // Si es Asueto, los registros nacen con Licencia 16 (o la que uses para Asueto Puro)
-                    // Buscamos el ID de la licencia 'A' si es dinámico, o usamos fijo '16'.
-                    // Por consistencia con tu JS, usaremos '16' para Asueto Puro.
                     $def_CTL = '16'; 
                     $def_CJA = '4'; 
                 }
 
-                // B. INICIALIZACIÓN MASIVA (Crear registros faltantes)
-                // Esto inserta TODOS los empleados de la ruta que no tengan registro hoy.
-                // Es MUCHO más rápido que hacerlo uno por uno en un bucle.
-                
                 $filtroInsert = ($CodigoDepartamentoEmpresa == "02") 
                                 ? "codigo_ruta = '$codigo_ruta'" 
                                 : "codigo_departamento_empresa = '$CodigoDepartamentoEmpresa'";
@@ -217,11 +207,8 @@ if($errorDbConexion == false){
                           WHERE pa.codigo_personal = p.codigo AND pa.fecha = '$fecha'
                       )
                 ";
-                // Ejecutamos la creación masiva
                 $dblink->query($queryInsertMasivo);
 
-
-                // C. CONSULTA PRINCIPAL (Ahora todos tendrán asistencia)
                 $filtroSelect = ($CodigoDepartamentoEmpresa == "02") 
                                 ? "p.codigo_ruta = '$codigo_ruta'" 
                                 : "p.codigo_departamento_empresa = '$CodigoDepartamentoEmpresa'";
@@ -244,37 +231,31 @@ if($errorDbConexion == false){
                     $mensajeError = "Registros Encontrados...";
                     
                     while($row = $consulta->fetch(PDO::FETCH_ASSOC)){
-                        $codigo_personal = trim($row['codigo_emp']);
-                        $nombre_completo = trim($row['nombres']) . " " . trim($row['apellidos']);
-                        $foto = trim($row['foto']);
+                        $codigo_personal = trim((string)$row['codigo_emp']);
+                        $nombre_completo = trim((string)$row['nombres']) . " " . trim((string)$row['apellidos']);
+                        $foto = trim((string)$row['foto']);
                         $rutaFoto = empty($foto) ? $url_sin_foto . 'avatar_masculino.png' : $url_fotos . $foto;
 
-                        // Datos Asistencia
-                        $id_asistencia = $row['id_asistencia']; // Ahora siempre debería tener valor
-                        $CJ = trim($row['codigo_jornada']);
-                        $CTL = trim($row['codigo_tipo_licencia']);
-                        $CJA = trim($row['codigo_jornada_asueto']);
-                        $CJV = trim($row['codigo_jornada_vacaciones']);
-                        $CJD = trim($row['codigo_jornada_descanso']);
-                        $CJE4H = trim($row['codigo_jornada_e_4h']);
-                        $CJN = trim($row['codigo_jornada_nocturna']);
-                        $HE = trim($row['hora_extra']);
+                        $id_asistencia = $row['id_asistencia']; 
+                        $CJ = trim((string)$row['codigo_jornada']);
+                        $CTL = trim((string)$row['codigo_tipo_licencia']);
+                        $CJA = trim((string)$row['codigo_jornada_asueto']);
+                        $CJV = trim((string)$row['codigo_jornada_vacaciones']);
+                        $CJD = trim((string)$row['codigo_jornada_descanso']);
+                        $CJE4H = trim((string)$row['codigo_jornada_e_4h']);
+                        $CJN = trim((string)$row['codigo_jornada_nocturna']);
+                        $HE = trim((string)$row['hora_extra']);
 
-                        // Construir Código para Imagen
                         $CodigoJornadaTodas = $CJ . $CTL . $CJA . $CJV . $CJD . $CJE4H . $CJN;
                         if($HE != 0) $CodigoJornadaTodas .= $HE;
 
-                        // Buscar imagen
                         if(isset($imagenesMap[$CodigoJornadaTodas])){
                             $imgJornada = $url_cat_img . $imagenesMap[$CodigoJornadaTodas];
                         } else {
                             $imgJornada = $url_cat_img . "SinJornada.jpg";
                         }
 
-                        // Construir Código Separador para JS
                         $CodigoJornadaTodasSeparador = "$CJ.$CTL.$CJA.$CJV.$CJD.$CJE4H.$CJN.$HE";
-
-                        // Generar Fila HTML
                         $datos_codificados = "$rutaFoto#$imgJornada#$id_asistencia#$codigo_personal#$nombre_completo#$CodigoJornadaTodas#$CodigoJornadaTodasSeparador";
                         
                         $contenidoOK .= "<tr>
@@ -299,10 +280,10 @@ if($errorDbConexion == false){
                 break;
 
             // ---------------------------------------------------------------------
-            // CASO 4: PROCESAR DATOS PARA EDITAR (EL QUE FALTABA ANTES)
+            // CASO 4: PROCESAR DATOS PARA EDITAR
             // ---------------------------------------------------------------------
             case 'EditarJornada':
-                $Todos = $_POST['Id_'];
+                $Todos = $_POST['Id_'] ?? '';
                 $VariablesTabla = explode("#", $Todos);
                 if(count($VariablesTabla) >= 7) {
                     $datos[$fila_array]["Foto"] = $VariablesTabla[0];
@@ -323,10 +304,7 @@ if($errorDbConexion == false){
             // CASO 5: GUARDAR / ACTUALIZAR / ELIMINAR
             // ---------------------------------------------------------------------
             case 'EliminarAsistencia':
-                // Nota: Ahora "Eliminar" en realidad sería "Resetear a Default", 
-                // porque con la inicialización masiva siempre debe haber registro.
-                // Pero si lo borras, al recargar la página se volverá a crear.
-                $id_asistencia = trim($_POST['id_asistencia']);
+                $id_asistencia = trim($_POST['id_asistencia'] ?? '');
                 if(!empty($id_asistencia)){
                     $query = "DELETE FROM personal_asistencia WHERE id_ = :id";
                     $stmt = $dblink->prepare($query);
@@ -342,19 +320,20 @@ if($errorDbConexion == false){
 
             case 'GuardarAsistencia':
             case 'ActualizarJornada':
-                $id_ = trim($_POST["Id_"] ?? 0);
-                $codigo_personal = trim($_POST["CodigoPersonal"]);
+                // Aplicamos el operador ?? '' para evitar el error de PHP 8.x
+                $id_ = trim($_POST["Id_"] ?? '0');
+                $codigo_personal = trim($_POST["CodigoPersonal"] ?? '');
                 $fecha = trim($_POST['FechaAsistencia'] ?? date("Y-m-d"));
                 $codigo_personal_encargado = trim($_POST['CodigoPersonal'] ?? '');
 
-                $CJ = trim($_POST["CJ"]);
-                $CTL = trim($_POST["CTL"]);
-                $CJA = trim($_POST["CJA"]);
-                $CJV = trim($_POST["CJV"]);
-                $CJD = trim($_POST["CJD"]);
-                $CJE4H = trim($_POST["CJE4H"]);
-                $CJN = trim($_POST["CJN"]);
-                $HE = trim($_POST["lstHoraExtra"] ?? 0);
+                $CJ = trim($_POST["CJ"] ?? '');
+                $CTL = trim($_POST["CTL"] ?? '');
+                $CJA = trim($_POST["CJA"] ?? '');
+                $CJV = trim($_POST["CJV"] ?? '');
+                $CJD = trim($_POST["CJD"] ?? '');
+                $CJE4H = trim($_POST["CJE4H"] ?? '');
+                $CJN = trim($_POST["CJN"] ?? '');
+                $HE = trim($_POST["lstHoraExtra"] ?? '0');
 
                 // VALIDACIÓN
                 $CodigoValidar = $CJ . $CTL . $CJA . $CJV . $CJD . $CJE4H . $CJN;
@@ -400,7 +379,9 @@ if($errorDbConexion == false){
     $mensajeError = 'Sin conexión BD';
 }
 
-if(isset($_POST['accion']) && ($_POST['accion'] == 'BuscarPersonalCodigo' || $_POST['accion'] == 'BuscarPersonalRutaCodigo' || $_POST['accion'] == 'EditarJornada')) {
+$accion_final = trim($_POST['accion_buscar'] ?? $_POST['accion'] ?? '');
+
+if($accion_final == 'BuscarPersonalCodigo' || $accion_final == 'BuscarPersonalRutaCodigo' || $accion_final == 'EditarJornada') {
     echo json_encode($datos);
 } else {
     $salidaJson = array(
