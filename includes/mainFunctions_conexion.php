@@ -19,4 +19,3 @@ session_start();
     $dblink = new PDO($dsn, $username, $password);
 // Variable que indica el status de la conexión a la base de datos
 	$errorDbConexion = false;
-?>
