@@ -1,1581 +1,946 @@
-// id de user global
-var id_ = 0;
-var accion = "todos";
-var tabla = "";
-var miselect = "";
-var today = "";
-// variables para la busqueda por numero de placa de la unidad.
-var OptBuscarUP = "Todo"; var NombreInstitucion = ""; var OptBuscarPM = "Todo";
-//	ARMAR ITEM DE MENU DEPENDIENDO DEL CODIGO DEL USUARIO.
-	// GESTION PRODUCCION
-	var defaultContentMenuPorMotorista = '<div class="dropdown">'
-			+'<button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-wrench"></i></button>'
-			+'<div class="dropdown-menu">'
-				+'<a class="verPorMotorista dropdown-item" href="#"><i class="fas fa-search"></i> Ver</a>'
-				+'</div></div>';
-	// GESTION PRODUCCION
-	var defaultContentMenuPorNumeroUnidad = '<div class="dropdown">'
-			+'<button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-wrench"></i></button>'
-			+'<div class="dropdown-menu">'
-				+'<a class="verPorNumeroUnidad dropdown-item" href="#"><i class="fas fa-search"></i> Ver</a>'
-				+'</div></div>';
-$(function(){ // iNICIO DEL fUNCTION.
-///////////////////////////////////////////////////////////////////////////////
-// INICIALIZARA DATATABLE. POR PLACA y NOMBRE MOTORISTA.
-///////////////////////////////////////////////////////////////////////////////
-	$('#example').DataTable( { searching: false} );
-    var table = $('#listadoPorUnidadPlaca').DataTable( {
-      searching: false
-  	});
+// ============================================================
+// Principal.js — Versión optimizada
+// Cambios aplicados:
+//   FIX #1: Eliminada la doble llamada AJAX (totales desde drawCallback)
+//   FIX #2: Datos de impresión enviados por POST (formulario oculto)
+//   FIX #3: Variables declaradas con let/const — eliminadas variables globales involuntarias
+//   FIX #4: console.log eliminados
+//   FIX #5: delimitNumbers reemplazado por formatNumber() con Intl.NumberFormat
+//   FIX #6: goImprmirProduccionDiaria y goImprmirProduccionDetalleMotorista
+//           refactorizados en una sola función reutilizable
+//   FIX #7: Lectura de tabla para imprimir usa datos de DataTables, no el DOM
+//   FIX #9: IDs renombrados en el HTML (accion_dif, id_user_dif, accion_pm, id_user_pm)
+//           — los selectores de JS se actualizan acá también
+// ============================================================
 
-// POR MOTORISTA
-  $('#example1').DataTable( { searching: false} );
-  var table_m = $('#listadoPorMotorista').DataTable( {
-	searching: false
-});
-///////////////////////////////////////////////////////////////////////////////
-// FUNCION QUE CARGA LA TABLA COMPLETA CON LOS REGISTROS
-///////////////////////////////////////////////////////////////////////////////
-$(document).ready(function(){
-		//
-		// configurar el Select2
-		$('#lstPersonal').select2({
-			theme: "bootstrap4"
-		});
-		// configurar el Select2
-		$('#lstPersonalPorMotorista').select2({
-			theme: "bootstrap4"
-		});
-		//
-		if($('#MenuTab').val() == '000'){
-			$("#DivSoloParaContabilidad").hide();
-		}
-		//  NOMBRE INSTITUCIÓN
-		NombreInstitucion = $("#NombreInstitucion").val();
-});		
-///////////////////////////////////////////////////////////////////////////////
-/// EVENTOS JQUERY Y BOTON NUEVO REGISTRO. CALCULO Y OTROS
-///////////////////////////////////////////////////////////////////////////////
-$("#lstPersonal").on('change', function(){
-	var nombre = $("#lstPersonal option:selected").text();
-	//var partial = nombre.split("|");
-	//$("#txtnombres").val(partial[1].trim());
-	$("#txtnombres").val(nombre);
+// ── Variables globales controladas ──────────────────────────
+let id_       = 0;
+let accion    = "todos";
+let tabla     = "";
+let miselect  = "";
+let today     = "";
+let OptBuscarUP = "Todo";
+let OptBuscarPM = "Todo";
+let NombreInstitucion = "";
 
-});
-///////////////////////////////////////////////////////////////////////////////
-//	FUNCION LISTAR BUSQUEDA DE LOS REGISTROS
-///////////////////////////////////////////////////////////////////////////////
-// Escribir la fecha actual.
-var now = new Date();                
-var day = ("0" + now.getDate()).slice(-2);
-var month = ("0" + (now.getMonth() + 1)).slice(-2);
-var year = now.getFullYear();
+// ── Menú contextual por motorista ───────────────────────────
+const defaultContentMenuPorMotorista =
+    '<div class="dropdown">'
+  + '<button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-wrench"></i></button>'
+  + '<div class="dropdown-menu">'
+  + '<a class="verPorMotorista dropdown-item" href="#"><i class="fas fa-search"></i> Ver</a>'
+  + '</div></div>';
 
-today = now.getFullYear()+"-"+(month)+"-"+(day) ;
-$('#FechaProduccion').val(today);
-///////////////////////////////////////////////////////////////////////////////
-//	FUNCION que al dar clic buscar el registro para posterior mente abri una
-// 	PRODUCCION BUSCAR POR FECHA.
-///////////////////////////////////////////////////////////////////////////////	  
-$('#goBuscarProduccion').on( 'click', function () {
-	BuscarProduccionPorFecha();
-});
-///////////////////////////////////////////////////////////////////////////////
-// CUANDO CAMBIA LA FECHA. BUSCAR LA PRODUCCIÓN EN LA TABLA
-/// EVENTOS JQUERY IMPRIMIR TODA LA PRODUCCIÓN O POR RANGO.
-///////////////////////////////////////////////////////////////////////////////	  
-$("#NumeroCorrelativo").on('keyup', function (e) {
-	var keycode = e.keyCode || e.which;
-	this.value = (this.value + '').replace(/[^0-9]/g, '');
-		if (keycode == 13) {
-			// Sólo muestra la Producción.
-				BuscarProduccionPorIdTabla();
-      	}
-  });
-///////////////////////////////////////////////////////////////////////////////
-// CUANDO CAMBIA LA FECHA. BUSCAR LA PRODUCCIÓN EN LA TABLA
-/// EVENTOS JQUERY IMPRIMIR TODA LA PRODUCCIÓN O POR RANGO.
-///////////////////////////////////////////////////////////////////////////////	  
-$("#goReporteGeneral").on('click', function (e) {
-		// Limpiar datos
-		fecha = $("#FechaProduccion").val();
-		// Ejecutar Informe
-			varenviar = "/acomtus/php_libs/reportes/Ingresos/Diario.php?fecha="+fecha;
-		// Ejecutar la función abre otra pestaña.
-			AbrirVentana(varenviar);   
-  });
-///////////////////////////////////////////////////////////////////////////////	  
-$("#goReporteGeneralUnidadTransporte").on('click', function (e) {
-	// Limpiar datos
-	fecha = $("#FechaProduccion").val();
-	// Ejecutar Informe
-		varenviar = "/acomtus/php_libs/reportes/Ingresos/PorUnidadTransporte.php?fecha="+fecha;
-	// Ejecutar la función abre otra pestaña.
-		AbrirVentana(varenviar);   
-});
-///////////////////////////////////////////////////////////////////////////////	  
-$("#goReporteGeneralMotorista").on('click', function (e) {
-	// Limpiar datos
-	fecha = $("#FechaProduccion").val();
-	// Ejecutar Informe
-		varenviar = "/acomtus/php_libs/reportes/Ingresos/PorMotorista.php?fecha="+fecha;
-	// Ejecutar la función abre otra pestaña.
-		AbrirVentana(varenviar);   
-});
-///////////////////////////////////////////////////////////////////////////////	  
-// BLOQUE DE BUSQUEDA
-///////////////////////////////////////////////////////////////////////////////	  
-$("#goBuscarPorMotorista").on('click', function (e) {
-	// Ocultar Field
-	$("#ProduccionTabla").hide();
-	$("#field_produccion_detalle").hide();
-	$("#FieldsetTabla").hide();
-	//
-	$("#ProduccionDiferencias").hide();
-	// fieldset buscar por motorista
-	$("#BuscarPorMotorista").show();
-	// fieldset buscar por N.º UNIDAD Y PLACA.
-	$("#BuscarPorUnidadPlaca").hide();
-	//
-	miselect=$("#lstPersonalPorMotorista");
-	//
-	$('#listadoPorMotoristaOk').empty();
-	//
-	listar_personal();
-});
-$("#goBuscarPorUnidad").on('click', function (e) {
-	// Ocultar Field
-	$("#ProduccionTabla").hide();
-	$("#field_produccion_detalle").hide();
-	$("#FieldsetTabla").hide();
-	//
-	$("#ProduccionDiferencias").hide();
-	// fieldset buscar por motorista
-	$("#BuscarPorMotorista").hide();
-	// fieldset buscar por N.º UNIDAD Y PLACA.
-	$("#BuscarPorUnidadPlaca").show();
-	//
-	miselect=$("#lstPorUnidadPlaca");
-	//
-	$('#listadoPorUnidadPlacaOk').empty();
-	//
-	listar_unidad_transporte();
-});
-///////////////////////////////////////////////////////////////////////////////	  
-// SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL MOTORISTA.
-///////////////////////////////////////////////////////////////////////////////	  
-$("#radioTodoPM").on('click', function (e) {
-	// LImpiar Tabla
-	$('#listadoPorMotoristaOk').empty();
-	//
-	$("label[for='LblProduccionesTotalPorMotorista']").text('0');
-	$("label[for='LblProduccionesTotalIngresoPorMotorista']").text('$');
-	//
-	$("#FechaDesdePM").prop("readonly", true);
-	$("#FechaHastaPM").prop("readonly", true);
-	//
-	OptBuscarPM = this.value;
-});
-$("#radioFechaPM").on('click', function (e) {
-	// LImpiar Tabla
-	$('#listadoPorMotoristaOk').empty();
-	//
-	$('#FechaDesdePM').val(today);
-	$('#FechaHastaPM').val(today);
-	//
-	$("#FechaDesdePM").prop("readonly", false);
-	$("#FechaHastaPM").prop("readonly", false);
-	//
-	$("label[for='LblProduccionesTotalPorMotorista']").text('0');
-	$("label[for='LblProduccionesTotalIngresoPorMotorista']").text('$');
-	//
-	OptBuscarPM = this.value;
-});
-///////////////////////////////////////////////////////////////////////////////	  
-// SELECCIONAR POR MEDIO DEL RADIO BUTTON PARA LA BUSQUEDA DEL N.º DE UNIDAD Y PLACA.
-///////////////////////////////////////////////////////////////////////////////	  
-$("#radioTodoUP").on('click', function (e) {
-	// LImpiar Tabla
-	$('#listadoPorUnidadPlacaOk').empty();
-	//
-	$("label[for='LblProduccionesTotalPorUnidadPlaca']").text('0');
-	$("label[for='LblProduccionesTotalIngresoPorUnidadPlaca']").text('$ ');
-	//
-	$("#FechaDesdeUP").prop("readonly", true);
-	$("#FechaHastaUP").prop("readonly", true);
-	//
-	//alert(this.value);
-	OptBuscarUP = this.value;
-});
-$("#radioFechaUP").on('click', function (e) {
-	// LImpiar Tabla
-	$('#listadoPorUnidadPlacaOk').empty();
-	//
-	$('#FechaDesdeUP').val(today);
-	$('#FechaHastaUP').val(today);
-	//
-	$("#FechaDesdeUP").prop("readonly", false);
-	$("#FechaHastaUP").prop("readonly", false);
-	//
-	$("label[for='LblProduccionesTotalPorUnidadPlaca']").text('0');
-	$("label[for='LblProduccionesTotalIngresoPorUnidadPlaca']").text('$ ');
-	//
-	//alert(this.value);
-	OptBuscarUP = this.value;
-});
-//////////////////////////////////////////////////////////////////////////////////
-/* BUSQUEDA DE CONTROL POR NUMERO DE TIQUETE. */
-//////////////////////////////////////////////////////////////////////////////////
-$('#goBuscarPorTiquete').on('click', function(){
-	//
-	$("#BusquedaNumeroControl").val('');
-	$("#BusquedaFechaControl").val('');
-	$("#BusquedaPersonalControl").val('');
-	$("#BusquedaRutaControl").val('');
-	$("#BusquedaJornadaControl").val('');
-	$("#BusquedaUnidadPlacaControl").val('');
-	$("#BusquedaNumeroVueltasControl").val('');
-	$("#BusquedaTotalIngresoControl").val('');
-	$("#BusquedaEstatusControl").val('');
-	//
-	$("#BusquedaNumerotiquete").val('');
-	//
-	$('#VentanaBuscarPorTiquete').modal("show");
-	//
-	listar_serie();
-});
-// RELLENAR LA TABLA TIENEN EN CONTROL
-// fecha y N.º Control.
-$('#BusquedaNumerotiquete').on('keyup', function(e){
-	var keycode = e.keyCode || e.which;
-	// Limipiar variables inputl text.
-	this.value = (this.value + '').replace(/[^0-9]/g, '');
-	// Al presionar la tecla Enter.
-	if (keycode == 13) {
-	  // Limpiar datos
-		  numero_tiquete = $('#BusquedaNumerotiquete').val();
-		  serie = $("#lstSerieBuscarTiquete").val();
-		// ejecutar Ajax.. ACTUALIZA5 INDICADORES DE MATRICULA.
-			$.ajax({
-				beforeSend: function(){  
-					$('#listadoTiqueteEnControlOk').empty();
-					//
-						$("#BusquedaNumeroControl").val('');
-						$("#BusquedaFechaControl").val('');
-						$("#BusquedaPersonalControl").val('');
-						$("#BusquedaRutaControl").val('');
-						$("#BusquedaJornadaControl").val('');
-						$("#BusquedaUnidadPlacaControl").val('');
-						$("#BusquedaNumeroVueltasControl").val('');
-						$("#BusquedaTotalIngresoControl").val('');
-						$("#BusquedaEstatusControl").val('');
-				},
-			cache: false,                     
-			type: "POST",                     
-			dataType: "json",                     
-			url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
-			data: {                     
-					accion_buscar: 'BuscarPorTiqueteEnControl', numero_tiquete: numero_tiquete, serie: serie,
-					},                     
-			success: function(response) {                     
-				if (response.respuesta === true) {                     
-					// lIMPIAR LOS VALORES DE LAS TABLAS.                     
-					$('#listadoTiqueteEnControlOk').append(response.contenido);		
-						toastr["info"](response.mensaje, "Sistema");				                  
-				}else{
-					toastr["error"](response.mensaje, "Sistema");		
-					$('#listadoTiqueteEnControlOk').append(response.contenido);		                  
-				}  
-			}                     
-			});
-		//
-	}
-});
-// BUSCAR DENTRO DE LA TABLA TIQUETE EN CONTROL.
-$('body').on('click','#listadoTiqueteEnControl a',function (e){
-	e.preventDefault();
-	  // Limpiar datos
-		  numero_control = $(this).attr('href');
-		  accionAsignacion = $(this).attr('data-accion');
-		  numero_tiquete = $('#BusquedaNumerotiquete').val();
-		  serie = $("#lstSerieBuscarTiquete").val();
-		// Concionales del accion.
-		  if(accionAsignacion  == 'BuscarPorTiquete'){	
-			// ejecutar Ajax.. ACTUALIZA5 INDICADORES DE MATRICULA.
-			$.ajax({
-				cache: false,                     
-				type: "POST",                     
-				dataType: "json",                     
-				url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
-				data: {                     
-						accion_buscar: accionAsignacion, NumeroControl: numero_control, numero_tiquete: numero_tiquete, serie: serie,
-						},                     
-				success: function(data) {                     
-						if (data[0].respuesta === true) {                     
-							//
-								$("#BusquedaNumeroControl").val(data[0].codigo_produccion);
-								$("#BusquedaFechaControl").val(data[0].fecha);
-								$("#BusquedaPersonalControl").val(data[0].nombre_personal);
-								$("#BusquedaRutaControl").val(data[0].ruta);
-								$("#BusquedaJornadaControl").val(data[0].jornada);
-								$("#BusquedaUnidadPlacaControl").val(data[0].unidad);
-								$("#BusquedaNumeroVueltasControl").val(data[0].numero_vueltas);
-								$("#BusquedaTotalIngresoControl").val(data[0].total_ingreso);
-								$("#BusquedaEstatusControl").val(data[0].estatus);
-								//$("#").val(data[0].);
-								toastr["info"](data[0].mensaje, "Sistema");				                  
-						}                
-						if (data[0].respuesta === false) {                     
-							$("#BusquedaNumeroControl").val('');
-							$("#BusquedaFechaControl").val('');
-							$("#BusquedaPersonalControl").val('');
-							$("#BusquedaRutaControl").val('');
-							$("#BusquedaJornadaControl").val('');
-							$("#BusquedaUnidadPlacaControl").val('');
-							$("#BusquedaNumeroVueltasControl").val('');
-							$("#BusquedaTotalIngresoControl").val('');
-							$("#BusquedaEstatusControl").val('');
-							//
-							$("#BusquedaNumeroControl").val(data[0].codigo_produccion);
-							$("#BusquedaFechaControl").val(data[0].fecha);
-							$("#BusquedaPersonalControl").val(data[0].nombre_personal);
-							$("#BusquedaRutaControl").val(data[0].ruta);
-							$("#BusquedaJornadaControl").val(data[0].jornada);
-							$("#BusquedaUnidadPlacaControl").val(data[0].unidad);
-							$("#BusquedaNumeroVueltasControl").val(data[0].numero_vueltas);
-							$("#BusquedaTotalIngresoControl").val(data[0].total_ingreso);
-							$("#BusquedaEstatusControl").val(data[0].estatus);
-							//$("#").val(data[0].);
-							toastr["error"](data[0].mensaje, "Sistema");				   
-						}
-				}                     
-				});
-		  }
-});
-///////////////////////////////////////////////////////////////////////////////	  
-// BLOQUE EXTRAER INFORMACIÓN DEL REGISTROS (PRODUCCION ASIGNADO)
-$('body').on('click','#listadoVerControles a',function (e){
-	e.preventDefault();
-// DATA-ACCION Y HREF
-	id_ = $(this).attr('href');
-	accionAsignacion = $(this).attr('data-accion');
-	// EDTIAR REGISTRO.
-		if(accionAsignacion  == 'VerProduccion'){	
-			//
-			accion = "EditarRegistro";	// variable global
-			window.location.href = 'editar_Nuevo_Produccion.php?id='+id_+"&accion="+accion;
-			//
-		}else if(accionAsignacion  == 'VerEliminarProduccion'){	
-			fecha = $('#FechaProduccion').val();
-			//	ENVIAR MENSAJE CON SWEETALERT 2, PARA CONFIRMAR SI ELIMINA EL REGISTRO.
-			const swalWithBootstrapButtons = Swal.mixin({
-				customClass: {
-				confirmButton: 'btn btn-success',
-				cancelButton: 'btn btn-danger'
-				},
-				buttonsStyling: false
-			})
-	
-			swalWithBootstrapButtons.fire({
-				title: '¿Qué desea hacer?',
-				text: 'Eliminar el Registro Seleccionado!',
-				showCancelButton: true,
-				confirmButtonText: 'Sí, Eliminar!',
-				cancelButtonText: 'No, Cancelar!',
-				reverseButtons: true,
-				allowOutsideClick: false,
-				allowEscapeKey: false,
-				allowEnterKey: false,
-				stopKeydownPropagation: false,
-				closeButtonAriaLabel: 'Cerrar Alerta',
-				type: 'question'
-			}).then((result) => {
-				if (result.value) {
-				// PROCESO PARA ELIMINAR REGISTRO.
-						// ejecutar Ajax.. 
-						$.ajax({
-							beforeSend: function(){  
-								$('#listadoVerControlesOk').empty();
-							},
-						cache: false,                     
-						type: "POST",                     
-						dataType: "json",                     
-						url:"php_libs/soporte/Produccion/ProduccionBuscar.php",                     
-						data: {                     
-								accion_buscar: 'VerEliminarProduccion', codigo_produccion: id_, fecha: fecha,
-								},                     
-						success: function(response) {                     
-								if (response.respuesta === true) {                     
-									// lIMPIAR LOS VALORES DE LAS TABLAS.                     
-									$('#listadoVerControlesOk').append(response.contenido);		
-										toastr["error"](response.mensaje, "Sistema");				                  
-								}                
-						}                     
-						});
-				//////////////////////////////////////
-				} else if (
-				/* Read more about handling dismissals below */
-				result.dismiss === Swal.DismissReason.cancel
-				) {
-				swalWithBootstrapButtons.fire(
-					'Cancelar',
-					'Su Archivo no ha sido Eliminado :)',
-					'error'
-				)
-				}
-			})
-		}   // FINAL DEL IF DE LA CONSULTA QUE PROVIENE DE LA TABLA
-});
-///////////////////////////////////////////////////////////////////////////////
-/// EVENTOS JQUERY Y para disparar la busqueda. del por nombre motorista.
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////
-// Validar Formulario, para la busqueda de un registro por codigo del motorista.
- //////////////////////////////////////////////////////
- $('#goBuscarProduccionPM').on('click', function(){
-	// focus
-	  $("#lstPersonalPorMotorista").focus()
-	  var buscartodos = "BuscarPorMotorista";
-	  var CodigoPersonal = $("#lstPersonalPorMotorista").val();
-	  var NombreCodigoPersonal = $("#lstPersonalPorMotorista option:selected").text();
-	  var FechaHastaPM = $("#FechaHastaPM").val();
-	  var FechaDesdePM = $("#FechaDesdePM").val();
-   
-	  ///////////////////////////////////////////////////////////////////////////////	  
-	//
-	   if (table_m != undefined && table_m != null) 
-	   {
-	   table_m.destroy();
-	   table_m = null;
-	   } 
-	// CONFIGURACIÓN DE LA TABLA CON DATATABLE.
-	table_m = jQuery("#listadoPorMotorista").DataTable( {
-		"ajax":{
-		  lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
-		  destroy: true,
-		  pageLength: 5,
-		  searching: false,
-		  url:"php_libs/soporte/ReporteGeneral.php",
-		  method:"POST",
-		  data: {"accion_buscar": buscartodos, codigo_personal: CodigoPersonal, OptBuscarPM: OptBuscarPM, 
-			  FechaDesdePM: FechaDesdePM, FechaHastaPM: FechaHastaPM
-			},
-		  datatype: "json"
-		},
-		columns:[
-			{
-				data: null,
-				defaultContent: defaultContentMenuPorMotorista,
-				orderable: false
-			},
-		  {data:"id_"},
-		  {data:"fecha_"},
-		  {data:"numero_equipo_placa"},
-		  {data:"descripcion_ruta"},
-		  {data:"precio_publico",
-				render: function(data, type, row){
-					return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
-				}
-			},	// Preico Púyblic.
-		  {data:"cantidadtiquete"},
-		  {data:"total_ingreso_por_bus",
-				render: function(data, type, row){
-						return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
-				}
-			}	/// total ingresos
-		],
-		order: [[1, 'desc']],
-		"footerCallback": function ( row, data, start, end, display ) {
-			var api = this.api(), data;
+// ── Menú contextual por unidad ───────────────────────────────
+const defaultContentMenuPorNumeroUnidad =
+    '<div class="dropdown">'
+  + '<button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-wrench"></i></button>'
+  + '<div class="dropdown-menu">'
+  + '<a class="verPorNumeroUnidad dropdown-item" href="#"><i class="fas fa-search"></i> Ver</a>'
+  + '</div></div>';
 
-			// Remove the formatting to get integer data for summation
-			var intVal = function ( i ) {
-				return typeof i === 'string' ?
-					i.replace(/[\$,]/g, '')*1 :
-					typeof i === 'number' ?
-						i : 0;
-			};
-
-			// Total over all pages
-			total = api
-				.column( 7 )
-				.data()
-				.reduce( function (a, b) {
-					return intVal(a) + intVal(b);
-				}, 0 );
-				total = total.toFixed(2),
-				TotalAllPagina = new Intl.NumberFormat('en-US').format(total)
-			// Total over this page
-			pageTotal = api
-				.column( 7, { page: 'current'} )
-				.data()
-				.reduce( function (a, b) {
-					return intVal(a) + intVal(b);
-				}, 0 );
-				pagina = pageTotal.toFixed(2),
-				TotalPagina = new Intl.NumberFormat('en-US').format(pagina)
-			// Update footer
-			$( api.column( 7 ).footer() ).html(
-				'$'+ TotalPagina +' ( $'+ TotalAllPagina +')'
-			);
-		},
-		language:{
-		  url: "../acomtus/js/DataTablet/es-ES.json"
-		},
-		dom: "Bfrtip",
-		  buttons:[
-			//'excel',
-			{
-			  extend: 'excelHtml5',
-			  text: '<i class="fas fa-file-excel"></i>',
-			  titleAttr: 'Exportar a Excel',
-			  className: 'btn btn-success',
-			  filename: 'Reporte',
-			  title: NombreInstitucion + " " + NombreCodigoPersonal,
-			  exportOptions: {
-				  columns: [0,1,2,3,4,5,6,7]
-			  },
-			  className: 'btn-exportar-excel',
-		  },
-		  //'pdf',
-		  {
-			  extend: 'pdfHtml5',
-			  text: '<i class="fas fa-file-pdf"></i>',
-			  titleAttr: 'Exportar a PDF',
-			  className: 'btn btn-danger',
-			  filename: 'Reporte',
-			  title: NombreInstitucion + " " + NombreCodigoPersonal,
-			  exportOptions: {
-				columns: [0,1,2,3,4,5,6,7]
-			  },
-			  className: 'btn-exportar-pdf',
-		  },
-		  //'print'
-		  {
-			  extend: 'print',
-			  text: '<i class="fa fa-print"></i>',
-			  titleAttr: 'Imprimir',
-			  className: 'btn btn-md btn-info',
-			  title: NombreInstitucion + " " + NombreCodigoPersonal,
-			  exportOptions: {
-				columns: [0,1,2,3,4,5,6,7]
-			  },
-			  className:'btn-exportar-print'
-		  },
-		  //extra. Cantidad de registros.
-		  'pageLength'
-		  ],
-	  }); // FINAL DEL DATATABLE.
-	  obtener_data_editar("#listadoPorMotorista tbody", table_m);
-		///////////////////////////////////////////////////////////////			
-		// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
-		///////////////////////////////////////////////////////////////
-		   $.ajax({
-		   beforeSend: function(){
-		   },
-		   cache: false,
-		   type: "POST",
-		   dataType: "json",
-		   url:"php_libs/soporte/ReporteGeneral.php",
-			data: {"accion_buscar": buscartodos, codigo_personal: CodigoPersonal, OptBuscarPM: OptBuscarPM, 
-				FechaDesdePM: FechaDesdePM, FechaHastaPM: FechaHastaPM
-			},
-		   success: function(data){
-			   // Validar mensaje de error
-			   $("label[for='LblProduccionesTotalPorMotorista']").text(' ' + data[1].dataTotalTiquete );
-			   $("label[for='LblProduccionesTotalIngresoPorMotorista']").text('$' + data[1].dataTotalIngreso);
-			   // imagen
-			   // FOTO DEL EMPLEADO.
-					$("#ImagenPersonalGlobal").attr("src", data[1].foto);	
-		   },
-		   });	// fin del ajax
-   }); // boton
-///////////////////////////////////////////////////////
-// Validar Formulario, para la busqueda de un registro por codigo del motorista.
-// INCORPORACION DE DATATABLE.
- //////////////////////////////////////////////////////
-// boton
-$('#goBuscarPorUnidadDeTransporte').on('click', function(){
- // focus
-   $("#lstPorUnidadPlaca").focus()
-   var buscartodos = "BuscarTodosUnidadPlaca";
-   var NumeroPlaca = $("#lstPorUnidadPlaca").val();
-   var FechaHastaUP = $("#FechaHastaUP").val();
-   var FechaDesdeUP = $("#FechaDesdeUP").val();
-
-   ///////////////////////////////////////////////////////////////////////////////	  
- //
-	if (table != undefined && table != null) 
-	{
-	table.destroy();
-	table = null;
-	} 
-	
- // CONFIGURACIÓN DE LA TABLA CON DATATABLE.
- table = jQuery("#listadoPorUnidadPlaca").DataTable( {
-	 "ajax":{
-	   lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
-	   destroy: true,
-	   pageLength: 5,
-	   searching: false,
-	   url:"php_libs/soporte/ReporteGeneral.php",
-	   method:"POST",
-	   data: {"accion_buscar": buscartodos, codigo_up: NumeroPlaca, OptBuscarUP: OptBuscarUP, 
-	   FechaDesdeUP: FechaDesdeUP, FechaHastaUP: FechaHastaUP
-			 },
-	   datatype: "json"
-	 },
-	 columns:[
-		{
-			data: null,
-			defaultContent: defaultContentMenuPorNumeroUnidad,
-			orderable: false
-		},
-	   {data:"id_"},
-	   {data:"fecha_"},
-	   {data:"codigo"},
-	   {data:"nombre_motorista"},
-	   {data:"descripcion_ruta"},
-	   {data:"precio_publico",
-			render: function(data, type, row){
-				return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
-			}
-		},	// Preico Púyblic.
-	   {data:"cantidadtiquete"},
-	   {data:"total_ingreso_por_bus",
-			render: function(data, type, row){
-					return `<span class='font-weight-bold text-success text-right'>$`+data+`</span>`;
-			}
-		}	/// total ingresos
-	 ],
-	 order: [[2, 'desc']],
-	 "footerCallback": function ( row, data, start, end, display ) {
-		var api = this.api(), data;
-
-		// Remove the formatting to get integer data for summation
-		var intVal = function ( i ) {
-			return typeof i === 'string' ?
-				i.replace(/[\$,]/g, '')*1 :
-				typeof i === 'number' ?
-					i : 0;
-		};
-
-		// Total over all pages
-		total = api
-			.column( 8 )
-			.data()
-			.reduce( function (a, b) {
-				return intVal(a) + intVal(b);
-			}, 0 );
-			total = total.toFixed(2),
-			TotalAllPagina = new Intl.NumberFormat('en-US').format(total)
-		// Total over this page
-		pageTotal = api
-			.column( 8, { page: 'current'} )
-			.data()
-			.reduce( function (a, b) {
-				return intVal(a) + intVal(b);
-			}, 0 );
-			pagina = pageTotal.toFixed(2),
-			TotalPagina = new Intl.NumberFormat('en-US').format(pagina)
-		// Update footer
-		$( api.column( 8 ).footer() ).html(
-			'$'+ TotalPagina +' ( $'+ TotalAllPagina +')'
-		);
-	},
-	 language:{
-		url: "../acomtus/js/DataTablet/es-ES.json"
-	 },
-	 dom: "Bfrtip",
-	   buttons:[
-		 //'excel',
-		 {
-		   extend: 'excelHtml5',
-		   text: '<i class="fas fa-file-excel"></i>',
-		   titleAttr: 'Exportar a Excel',
-		   className: 'btn btn-success',
-		   filename: 'Reporte',
-		   title: NombreInstitucion + " " + NumeroPlaca, 
-		   exportOptions: {
-			   columns: [0,1,2,3,4,5,6,7,8 ]
-		   },
-		   className: 'btn-exportar-excel',
-	   },
-	   //'pdf',
-	   {
-		   extend: 'pdfHtml5',
-		   text: '<i class="fas fa-file-pdf"></i>',
-		   titleAttr: 'Exportar a PDF',
-		   className: 'btn btn-danger',
-		   filename: 'Reporte',
-		   title: NombreInstitucion + " " + NumeroPlaca,
-		   exportOptions: {
-			columns: [0,1,2,3,4,5,6,7,8 ]
-		   },
-		   className: 'btn-exportar-pdf',
-	   },
-	   //'print'
-	   {
-		   extend: 'print',
-		   text: '<i class="fa fa-print"></i>',
-		   titleAttr: 'Imprimir',
-		   className: 'btn btn-md btn-info',
-		   title: NombreInstitucion + " " + NumeroPlaca,
-		   exportOptions: {
-			columns: [0,1,2,3,4,5,6,7,8 ]
-		   },
-		   className:'btn-exportar-print'
-	   },
-	   //extra. Cantidad de registros.
-	   'pageLength'
-	   ],
-   }); // FINAL DEL DATATABLE.
-   obtener_data_editar_("#listadoPorUnidadPlaca tbody", table);
- 	///////////////////////////////////////////////////////////////			
-	 // Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
-	 ///////////////////////////////////////////////////////////////
-		$.ajax({
-		beforeSend: function(){
-		},
-		cache: false,
-		type: "POST",
-		dataType: "json",
-		url:"php_libs/soporte/ReporteGeneral.php",
-		data: {
-			accion_buscar: buscartodos, codigo_up: NumeroPlaca, OptBuscarUP: OptBuscarUP, FechaDesdeUP: FechaDesdeUP, FechaHastaUP: FechaHastaUP
-		},
-		success: function(data){
-			// Validar mensaje de error
-			$("label[for='LblProduccionesTotalPorUnidadPlaca']").text(' ' + data[1].dataTotalTiquete );
-			$("label[for='LblProduccionesTotalIngresoPorUnidadPlaca']").text('$' + data[1].dataTotalIngreso);
-			//
-		},
-		});	// fin del ajax
-}); // boton
-
-///////////////////////////////////////////////////////////////////////////////
-// PROCESO PARA EL INFORME INGRESOS DIARIOS.
-// PRODUCCION DIFERENCIAS.
-///////////////////////////////////////////////////////////////////////////////	  
-$("#goProduccionDiferencias").on('click', function (e) {
-	// Ocultar Field
-	$("#ProduccionTabla").hide();
-	$("#field_produccion_detalle").hide();
-	$("#FieldsetTabla").hide();
-	//
-	$("#ProduccionDiferencias").show();
-	// fieldset buscar por motorista
-	$("#BuscarPorMotorista").hide();
-	$("#BuscarPorUnidadPlaca").hide();
-	$("#NumeroCorrelativo").prop('disabled', true);
-	$("#goReporteGeneral").prop('disabled', true);
-	$("#goBuscarProduccion").prop('disabled', true);
-	//
-	$("#FechaProduccion").prop('readonly', true);
-	///////////////////////////////////////////////////////////////			
-		// Inicio del Ajax. ver todos por fecha.
-	///////////////////////////////////////////////////////////////
-		fecha = $("#FechaProduccion").val();
-	//
-		$.ajax({
-			beforeSend: function(){
-				$('#listadoDiferenciasOk').empty();
-				miselect=$("#lstPersonal");
-				listar_personal();
-			},
-			cache: false,
-			type: "POST",
-			dataType: "json",
-			url:"php_libs/soporte/NuevoEditarProduccionDiferencias.php",
-			data:"accion=" + accion + "&id=" + Math.random() + "&fecha=" + fecha,
-			success: function(response){
-				// Validar mensaje de error
-				if(response.respuesta == false){
-					toastr["error"](response.mensaje, "Sistema");
-				}
-				else{
-					toastr["success"](response.mensaje, "Sistema");
-					$('#listadoDiferenciasOk').append(response.contenido);
-					}               
-			},
-		});
-});
-//
-$("#goDiferenciasCancelar").on('click', function (e) {
-	// Ocultar Field
-	$("#ProduccionTabla").hide();
-	$("#field_produccion_detalle").hide();
-	$("#FieldsetTabla").hide();
-	//
-	$("#ProduccionDiferencias").hide();
-	//
-	$("#NumeroCorrelativo").prop('disabled', false);
-	$("#goReporteGeneral").prop('disabled', false);
-	$("#goBuscarProduccion").prop('disabled', false);
-	//
-	$("#FechaProduccion").prop('readonly', false);
-	// Limpiar Tabla.
-	$('#listadoDiferenciasOk').empty();
-	// limpiar campos
-	$("#txtnombres").val('');
-	$("#Valor").val('');
-	$("#concepto").val('');
-	$("#accion").val('Agregar');
-	$("#id_user").val(0);
-});
-///////////////////////////////////////////////////////
-// Validar Formulario, para posteriormente Guardar o Modificarlo.
- //////////////////////////////////////////////////////
- $('#formDiferencias').validate({
-	ignore:"",
-	rules:{
-			txtnombres: {required: true, minlength: 4},
-			Valor: {required: true, minlength: 4},
-			concepto: {required: true,minlength: 4},
-			//lstempresa: {required: true},
-			lstperfil: {required: true},
-			//lstpersonal: {required: true},
-			lstestatus: {required: true},
-			},
-			errorElement: "em",
-			errorPlacement: function ( error, element ) {
-				// Add the `invalid-feedback` class to the error element
-				error.addClass( "invalid-feedback" );
-				if ( element.prop( "type" ) === "checkbox" ) {
-					error.insertAfter( element.next( "label" ) );
-				} else {
-					error.insertAfter( element );
-				}
-			},
-				highlight: function ( element, errorClass, validClass ) {
-							$( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
-						},
-				unhighlight: function (element, errorClass, validClass) {
-							$( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
-						},
-				invalidHandler: function() {
-					setTimeout(function() {
-						toastr.error("Faltan Datos...");
-				});            
-			},
-		submitHandler: function(){	
-		var str = $('#formDiferencias').serialize();
-		// VALIDAR CONDICIÓN DE CONTRASEÑA.
-		//if($('#chkcambiopassword').is(":checked")) {chkcambiopassword = 'yes';}else{chkcambiopassword = 'no';}                        
-		fecha = $("#FechaProduccion").val();
-		//alert(str);
-		///////////////////////////////////////////////////////////////			
-		// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
-		///////////////////////////////////////////////////////////////
-			$.ajax({
-				beforeSend: function(){
-					$('#listadoDiferenciasOk').empty();
-				},
-				cache: false,
-				type: "POST",
-				dataType: "json",
-				url:"php_libs/soporte/NuevoEditarProduccionDiferencias.php",
-				data:str + "&id=" + Math.random() + "&fecha=" + fecha,
-				success: function(response){
-					// Validar mensaje de error
-					if(response.respuesta == false){
-						toastr["error"](response.mensaje, "Sistema");
-					}
-					else{
-						toastr["success"](response.mensaje, "Sistema");
-						$('#listadoDiferenciasOk').append(response.contenido);
-						// limpiar campos
-						$("#txtnombres").val('');
-						$("#Valor").val('');
-						$("#concepto").val('');
-						$("#accion").val('Agregar');
-						$("#id_user").val(0);
-						}               
-				},
-			});
-		},
-});
-///////////////////////////////////////////////////////////////////////////////	  
-// BLOQUE EXTRAER INFORMACIÓN DEL REGISTROS (PRODUCCION ASIGNADO)
-$('body').on('click','#listadoDiferencia a',function (e){
-	e.preventDefault();
-// DATA-ACCION Y HREF
-	id_ = $(this).attr('href');
-	accionAsignacion = $(this).attr('data-accion');
-	// EDTIAR REGISTRO.
-		if(accionAsignacion  == 'EditarDiferencia'){	
-			//
-			accion = "BuscarPorId";
-		///////////////////////////////////////////////////////////////			
-		// Inicio del Ajax. guarda o Actualiza los datos del Formualrio.
-		///////////////////////////////////////////////////////////////
-		$.ajax({
-			beforeSend: function(){
-				$('#listadoDiferenciasOk').empty();
-			},
-			cache: false,
-			type: "POST",
-			dataType: "json",
-			url:"php_libs/soporte/NuevoEditarProduccionDiferencias.php",
-			data: "id_=" + id_ + "&id=" + Math.random() + "&fecha=" + fecha + "&accion=" + accion,
-			success: function(data){
-				// Validar mensaje de error
-				if(data[0].respuesta == false){
-					toastr["error"](data[0].mensaje, "Sistema");
-				}
-				else{
-					toastr["success"](data[0].mensaje, "Sistema");
-					// Rellenar los campos con el DATA.
-					$("#txtnombres").val(data[0].descripcion);
-					$("#Valor").val(data[0].valor);
-					$("#concepto").val(data[0].concepto);
-					$("#accion").val('EditarRegistro');
-					$("#id_user").val(id_);
-					}               
-			},
-		});
-			//
-		}else if(accionAsignacion  == 'EliminarDiferencia'){	
-			fecha = $('#FechaProduccion').val();
-			//	ENVIAR MENSAJE CON SWEETALERT 2, PARA CONFIRMAR SI ELIMINA EL REGISTRO.
-			const swalWithBootstrapButtons = Swal.mixin({
-				customClass: {
-				confirmButton: 'btn btn-success',
-				cancelButton: 'btn btn-danger'
-				},
-				buttonsStyling: false
-			})
-	
-			swalWithBootstrapButtons.fire({
-				title: '¿Qué desea hacer?',
-				text: 'Eliminar el Registro Seleccionado!',
-				showCancelButton: true,
-				confirmButtonText: 'Sí, Eliminar!',
-				cancelButtonText: 'No, Cancelar!',
-				reverseButtons: true,
-				allowOutsideClick: false,
-				allowEscapeKey: false,
-				allowEnterKey: false,
-				stopKeydownPropagation: false,
-				closeButtonAriaLabel: 'Cerrar Alerta',
-				type: 'question'
-			}).then((result) => {
-				if (result.value) {
-				// PROCESO PARA ELIMINAR REGISTRO.
-						// ejecutar Ajax.. 
-						$.ajax({
-							beforeSend: function(){  
-								$('#listadoDiferenciasOk').empty();
-							},
-						cache: false,                     
-						type: "POST",                     
-						dataType: "json",                     
-						url:"php_libs/soporte/NuevoEditarProduccionDiferencias.php",                     
-						data: {                     
-								accion_buscar: 'Eliminar', id_: id_, fecha: fecha,
-								},                     
-						success: function(response) {                     
-								if (response.respuesta === true) {                     
-									// lIMPIAR LOS VALORES DE LAS TABLAS.                     
-									$('#listadoDiferenciasOk').append(response.contenido);		
-										toastr["error"](response.mensaje, "Sistema");				                  
-								}                
-						}                     
-						});
-				//////////////////////////////////////
-				} else if (
-				/* Read more about handling dismissals below */
-				result.dismiss === Swal.DismissReason.cancel
-				) {
-				swalWithBootstrapButtons.fire(
-					'Cancelar',
-					'Su Archivo no ha sido Eliminado :)',
-					'error'
-				)
-				}
-			})
-		}   // FINAL DEL IF DE LA CONSULTA QUE PROVIENE DE LA TABLA
-});
-///////////////////////////////////////////////////////////////////////////////	  
-// BLOQUE EXTRAER INFORMACIÓN DEL REGISTROS (PRODUCCION ASIGNACIÓN)
-$('body').on('click','#listadoDetalle a',function (e){
-	e.preventDefault();
-// DATA-ACCION Y HREF
-	codigo_produccion = $(this).attr('href');
-	accionAsignacion = $(this).attr('data-accion');
-	//alert(Id_Editar_Eliminar+" "+accionAsignacion);
-// EDTIAR REGISTRO.
-	if(accionAsignacion  == 'ProduccionVerAsignacion'){
-		// show FIELDSET  PRODUCCION DETALLE
-			$("#FieldsetTabla").show();
-	///////////////////////////////////////////////////////////////			
-	// Inicio del Ajax. Buscar, Actualizar Producción Devolución e Ingreso.
-	///////////////////////////////////////////////////////////////
-	// Variables accion para guardar datos.
-		accion_buscar = "BuscarProduccionPorIdTabla";
-	/// BUSCAR SI EXISTE PRODUCCIÓN ENLA FECHA DIGITADA.	
-		$.ajax({
-			beforeSend: function(){
-				$('#listadoDevolucionIngresoOk').empty();
-			},
-			cache: false,
-			type: "POST",
-			dataType: "json",
-			url:"php_libs/soporte/ReporteGeneral.php",
-			data:"accion_buscar=" + accion_buscar + "&codigo_produccion=" + codigo_produccion,
-			success: function(response){
-			// VERIFICAR SI HAY DATOS EN LA DATA.
-				if(response.respuesta == true){
-					// focus
-						//$("#FechaProduccion").focus().select();
-					// vAR DATA
-						toastr["info"](response.mensaje, "Sistema");
-					// RELLENAR TABLA.
-						$('#listadoDevolucionIngresoOk').append(response.contenido);
-					//
-					// cambiar el valor del ingreso.
-					$("#LblDescripcionRuta").html(response.descripcionRuta);
-					$("#LblDescripcionUnidad").html(response.descripcionUnidad);
-					$("#LblDescripcionCodigo").html(response.codigoPersonal);
-					$("#LblListadoIdFecha").html(response.fecha);
-					$("label[for='LblNombreMotorista']").text(response.nombreMotorista);
-					//
-					$("#LblListadoPrecio").html("$ " + response.precioPublico);
-					$("#LblListadoTotalIngreso").html("$ " + response.totalIngreso);
-					$("#LblListadoCantidad").html(response.cantidadTiquete);
-					$("#LblCantidadProduccionesVendidas").html(response.cantidadTiquete);
-					// FOTO DEL EMPLEADO.
-						if(response.url_foto == "")
-						{
-							if(response.codigo_genero == "01"){
-								$(".card-img-top").attr("src", "../acomtus/img/avatar_masculino.png");
-							}else{
-								$(".card-img-top").attr("src", "../acomtus/img/avatar_femenino.png");
-							}
-						}else{
-							$(".card-img-top").attr("src", "../acomtus/img/fotos/" + response.url_foto);	
-						}
-				}
-			},	// DATA.
-		});
-	}
-});
-//////////////////////////////////////////////////////////////////////////////	  
-// BLOQUE EXTRAER INFORMACIÓN DEL REGISTROS (PRODUCCION)
-$('body').on('click','#listado a',function (e){
-	e.preventDefault();
-// DATA-ACCION Y HREF
-	codigo_produccion = $(this).attr('href');
-	accionAsignacion = $(this).attr('data-accion');
-	//alert(Id_Editar_Eliminar+" "+accionAsignacion);
-// EDTIAR REGISTRO.
-	if(accionAsignacion  == 'ProduccionImprimir'){
-		// show FIELDSET  PRODUCCION DETALLE
-			$("#field_produccion_detalle").show();
-
-	///////////////////////////////////////////////////////////////			
-	// Inicio del Ajax. Buscar, Actualizar Producción Devolución e Ingreso.
-	///////////////////////////////////////////////////////////////
-	// Variables accion para guardar datos.
-		accion_buscar = "BuscarProduccionPorId";
-	/// BUSCAR SI EXISTE PRODUCCIÓN ENLA FECHA DIGITADA.	
-		$.ajax({
-			beforeSend: function(){
-				$('#listadoDetalleOk').empty();
-			},
-			cache: false,
-			type: "POST",
-			dataType: "json",
-			url:"php_libs/soporte/ReporteGeneral.php",
-			data:"accion_buscar=" + accion_buscar + "&codigo_produccion=" + codigo_produccion,
-			success: function(response){
-			// VERIFICAR SI HAY DATOS EN LA DATA.
-				if(response.respuesta == true){
-					// focus
-						//$("#FechaProduccion").focus().select();
-					// vAR DATA
-						toastr["info"](response.mensaje, "Sistema");
-					// RELLENAR TABLA.
-						$('#listadoDetalleOk').append(response.contenido);
-					//
-					$("label[for='LblDetalleTotalIngreso']").text('Total  $ ' + response.totalIngreso);
-				}
-			},	// DATA.
-		});
-	}
-});
-///////////////////////////////////////////////////////
-// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN POR FECHA.
- //////////////////////////////////////////////////////
- $("#goImprmirProduccionPorFecha").on('click', function (e) {
-	// Información.
-	var produccionTotal = $('#LblProduccionesTotal');
-	produccionTotal_ = produccionTotal.text();
-	var produccionVendida = $('#LblCantidadProduccionesVendidas');
-	produccionVendida_ = produccionVendida.text();
-	var tiqueteEntregados = $('#LblTotalTiquetesEntregados');
-	tiqueteEntregados_ = tiqueteEntregados.text();
-	//	Valores
-	var tiqueteVendidos = $('#LblTotalTiquetesVendidos');
-	tiqueteVendidos_ = tiqueteVendidos.text();
-	var ingresoTotal = $('#LblIngresoTotal');
-	ingresoTotal_ = ingresoTotal.text();
-	var ingresoColones = $('#LblProduccionesTotalIngreso');
-	ingresoColones_ = ingresoColones.text();
-	//	Tabla.
-	var $objCuerpoTabla=$("#listado").children().prev().parent();
-	var ruta_ = [];  var entregados_ = []; var devolucion_ = []; var vendidos_ = []; var precio_publico_ = [];
-	var ingreso_ = []; var cantidad_ = [];
-	var fila = 0;
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	// recorre el contenido de la tabla.
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	$objCuerpoTabla.find("tbody tr").each(function(){
-		var ruta =$(this).find('td').eq(2).html();		//	ruta.
-		var cantidad =$(this).find('td').eq(4).html();	// cantidad
-		var entregados =$(this).find('td').eq(5).html();		// entregados
-		var devolucion =$(this).find('td').eq(6).html();		// devolucion
-		var vendidos =$(this).find('td').eq(7).html();		// vendidos
-		var precio_publico =$(this).find('td').eq(8).html();		// precio publico
-		var ingreso =$(this).find('td').eq(9).html();	// ingresos.
-		ingreso = ingreso.replace(/,/g,"");
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	// VALORES DE LA MATRIZ QUE VIAJAN POR EL POST
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-		ruta_[fila] = ruta.trim();
-		cantidad_[fila] = cantidad.trim();
-		entregados_[fila] = entregados.trim();
-		devolucion_[fila] = devolucion.trim();
-		vendidos_[fila] = vendidos.trim();
-		precio_publico_[fila] = precio_publico.trim();
-		ingreso_[fila] = ingreso.trim();
-			fila = fila + 1;
-	});
-	// Limpiar datos
-		fecha = $("#FechaProduccion").val();
-	// Ejecutar Informe
-		varenviar = "/acomtus/php_libs/reportes/Produccion/PorFecha.php?fecha="+fecha+
-					"&ruta="+ruta_+"&cantidad="+cantidad_+"&entregados="+entregados_+"&devolucion="+devolucion_+"&vendidos="+vendidos_+"&ingreso="+ingreso_
-					+"&precio_publico="+precio_publico_+"&produccion_total="+produccionTotal_+"&produccion_vendida="+produccionVendida_
-					+"&tiqueteEntregados="+tiqueteEntregados_+"&tiqueteVendidos="+tiqueteVendidos_+"&ingresoTotal="+ingresoTotal_+"&ingresoColones="+ingresoColones_
-					;
-	// Ejecutar la función abre otra pestaña.
-		AbrirVentana(varenviar);
-
-
-});
-///////////////////////////////////////////////////////
-// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN DIARIA.
- //////////////////////////////////////////////////////
- $("#goImprmirProduccionDiaria").on('click', function (e) {
-	// Información.
-	var codigo = $('#LblDescripcionCodigo');
-	codigo_ = codigo.text();
-	var ruta = $('#LblDescripcionRuta');
-	ruta_ = ruta.text();
-	var unidad = $('#LblDescripcionUnidad');
-	unidad_ = unidad.text();
-	//	Valores
-	var precio = $('#LblListadoPrecio');
-	precio_ = precio.text();
-	var cantidad = $('#LblListadoCantidad');
-	cantidad_ = cantidad.text();
-	var total = $('#LblListadoTotalIngreso');
-	total_ = total.text();
-	//	Tabla.
-	var $objCuerpoTabla=$("#listadoAsignacion").children().prev().parent();
-	var correlativo_ = [];  var serie_ = []; var cola_ = []; var desde_ = []; var hasta_ = [];
-	var ingreso_ = []; var estatus_ = [];
-	var fila = 0;
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	// recorre el contenido de la tabla.
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	$objCuerpoTabla.find("tbody tr").each(function(){
-		var correlativo =$(this).find('td').eq(0).html();
-		var estatus =$(this).find('td').eq(1).html();
-		var serie =$(this).find('td').eq(2).html();
-		var cola =$(this).find('td').eq(3).html();
-		var desde =$(this).find('td').eq(4).html();
-		var hasta =$(this).find('td').eq(5).html();
-		var ingreso =$(this).find('td').eq(6).html();
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	// VALORES DE LA MATRIZ QUE VIAJAN POR EL POST
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-		correlativo_[fila] = correlativo.trim();
-		estatus_[fila] = estatus.trim();
-		serie_[fila] = serie.trim();
-		cola_[fila] = cola.trim();
-		desde_[fila] = desde.trim();
-		hasta_[fila] = hasta.trim();
-		ingreso_[fila] = ingreso.trim();
-			fila = fila + 1;
-	});
-	// Limpiar datos
-		fecha = $("#FechaProduccion").val();
-	// Ejecutar Informe
-		varenviar = "/acomtus/php_libs/reportes/Produccion/DetallePorMotorista.php?fecha="+fecha+
-					"&correlativo="+correlativo_+"&serie="+serie_+"&cola="+cola_+"&desde="+desde_+"&hasta="+hasta_+"&ingreso="+ingreso_
-					+"&estatus="+estatus_+"&NombreMotorista="+NombreMotorista+"&ImagenPersonal="+ImagenFoto
-					+"&codigo="+codigo_+"&ruta="+ruta_+"&unidad="+unidad_+"&precio="+precio_+"&cantidad="+cantidad_+"&total="+total_
-					;
-	// Ejecutar la función abre otra pestaña.
-		AbrirVentana(varenviar);
-
-
-});
-///////////////////////////////////////////////////////
-// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN.
- //////////////////////////////////////////////////////
-$("#goImprmirProduccionDetalle").on('click', function (e) {
-	var $objCuerpoTabla=$("#listadoDetalle").children().prev().parent();
-	var control_ = [];  var ruta_ = []; var equipo_ = []; var motorista_ = []; var ingreso_ = [];
-	var fila = 0;
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	// recorre el contenido de la tabla.
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	$objCuerpoTabla.find("tbody tr").each(function(){
-		var control =$(this).find('td').eq(1).html();
-		var ruta =$(this).find('td').eq(2).html();
-		var equipo =$(this).find('td').eq(3).html();
-		var motorista =$(this).find('td').eq(4).html();
-		var ingreso =$(this).find('td').eq(5).html();
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	// VALORES DE LA MATRIZ QUE VIAJAN POR EL POST
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-		control_[fila] = control.trim();
-		ruta_[fila] = ruta.trim();
-		equipo_[fila] = equipo.trim();
-		motorista_[fila] = motorista.trim();
-		ingreso_[fila] = ingreso.trim();
-			fila = fila + 1;
-	});
-	// Limpiar datos
-		fecha = $("#FechaProduccion").val();
-	// Ejecutar Informe
-		varenviar = "/acomtus/php_libs/reportes/Produccion/DetalleProduccion.php?fecha="+fecha+
-					"&control="+control_+"&ruta="+ruta_+"&equipo="+equipo_+"&motorista="+motorista_+"&ingreso="+ingreso_;
-	// Ejecutar la función abre otra pestaña.
-		AbrirVentana(varenviar);
-});
-///////////////////////////////////////////////////////
-// BOTONES - IMPRIMIR DETALLE PRODUCCIÓN POR MOTORISTA.
- //////////////////////////////////////////////////////
- $("#goImprmirProduccionDetalleMotorista").on('click', function (e) {
-	var LabelNombreMotorista = $('#LblNombreMotorista');
-	NombreMotorista = LabelNombreMotorista.text();
-	let ImagenFoto = $("#ImagenPersonal").attr("src");
-	// Información Empleado.
-	var codigo = $('#LblDescripcionCodigo');
-	codigo_ = codigo.text();
-	var ruta = $('#LblDescripcionRuta');
-	ruta_ = ruta.text();
-	var unidad = $('#LblDescripcionUnidad');
-	unidad_ = unidad.text();
-	//	Valores
-	var precio = $('#LblListadoPrecio');
-	precio_ = precio.text();
-	var cantidad = $('#LblListadoCantidad');
-	cantidad_ = cantidad.text();
-	var total = $('#LblListadoTotalIngreso');
-	total_ = total.text();
-	//	Tabla.
-	var $objCuerpoTabla=$("#listadoAsignacion").children().prev().parent();
-	var correlativo_ = [];  var serie_ = []; var cola_ = []; var desde_ = []; var hasta_ = [];
-	var ingreso_ = []; var estatus_ = [];
-	var fila = 0;
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	// recorre el contenido de la tabla.
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	$objCuerpoTabla.find("tbody tr").each(function(){
-		var correlativo =$(this).find('td').eq(0).html();
-		var estatus =$(this).find('td').eq(1).html();
-		var serie =$(this).find('td').eq(2).html();
-		var cola =$(this).find('td').eq(3).html();
-		var desde =$(this).find('td').eq(4).html();
-		var hasta =$(this).find('td').eq(5).html();
-		var ingreso =$(this).find('td').eq(6).html();
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	// VALORES DE LA MATRIZ QUE VIAJAN POR EL POST
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-		correlativo_[fila] = correlativo.trim();
-		estatus_[fila] = estatus.trim();
-		serie_[fila] = serie.trim();
-		cola_[fila] = cola.trim();
-		desde_[fila] = desde.trim();
-		hasta_[fila] = hasta.trim();
-		ingreso_[fila] = ingreso.trim();
-			fila = fila + 1;
-	});
-	// Limpiar datos
-		fecha = $("#FechaProduccion").val();
-	// Ejecutar Informe
-		varenviar = "/acomtus/php_libs/reportes/Produccion/DetallePorMotorista.php?fecha="+fecha+
-					"&correlativo="+correlativo_+"&serie="+serie_+"&cola="+cola_+"&desde="+desde_+"&hasta="+hasta_+"&ingreso="+ingreso_
-					+"&estatus="+estatus_+"&NombreMotorista="+NombreMotorista+"&ImagenPersonal="+ImagenFoto
-					+"&codigo="+codigo_+"&ruta="+ruta_+"&unidad="+unidad_+"&precio="+precio_+"&cantidad="+cantidad_+"&total="+total_
-					;
-	// Ejecutar la función abre otra pestaña.
-		AbrirVentana(varenviar);
-
-
-});
-// variable data de datatable PorMotorista.
-	var obtener_data_editar = function(tbody, table_m){
-		///////////////////////////////////////////////////////////////////////////////
-		//	FUNCION que al dar clic buscar el registro para posterior mente abri una
-		// ventana modal. EDITAR REGISTRO
-		///////////////////////////////////////////////////////////////////////////////
-		$(tbody).on("click","a.verPorMotorista",function(){
-			var data = table_m.row($(this).parents("tr")).data();
-			console.log(data); console.log(data[3]);
-			codigo_produccion = data[3];
-			// Ejecutar Informe
-			varenviar = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion="+codigo_produccion;
-			// Ejecutar la función abre otra pestaña.
-				AbrirVentana(varenviar);	
-		});
-	}
-// variable data de datatable PorNUmeroPlaca.
-var obtener_data_editar_ = function(tbody, table){
-	///////////////////////////////////////////////////////////////////////////////
-	//	FUNCION que al dar clic buscar el registro para posterior mente abri una
-	// ventana modal. EDITAR REGISTRO
-	///////////////////////////////////////////////////////////////////////////////
-	$(tbody).on("click","a.verPorNumeroUnidad",function(){
-		var data = table.row($(this).parents("tr")).data();
-		console.log(data); console.log(data[3]);
-		codigo_produccion = data[3];
-		// Ejecutar Informe
-		varenviar = "/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion="+codigo_produccion;
-		// Ejecutar la función abre otra pestaña.
-			AbrirVentana(varenviar);	
-	});
+// ── FIX #5: Función unificada de formato de números ─────────
+// Reemplaza la función regex delimitNumbers y unifica con Intl.NumberFormat
+function formatNumber(value, decimals = 2) {
+    const num = parseFloat(String(value).replace(/[^0-9.\-]/g, '')) || 0;
+    return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+    }).format(num);
 }
 
-});	// final de FUNCTION.
-///////////////////////////////////////////////////////////////			
-// Inicio del Ajax. Buscar, Actualizar Producción Devolución e Ingreso.
-///////////////////////////////////////////////////////////////
+// ── FIX #2: Enviar datos de impresión por POST (formulario oculto) ──
+// Evita el límite de URL (~2000 chars) al pasar arrays de tabla por GET.
+function imprimirPorPost(url, datos) {
+    const form = $('<form>', { method: 'POST', action: url, target: '_blank' });
+    $.each(datos, function (key, value) {
+        if (Array.isArray(value)) {
+            $.each(value, function (i, v) {
+                form.append($('<input>', { type: 'hidden', name: key + '[]', value: v }));
+            });
+        } else {
+            form.append($('<input>', { type: 'hidden', name: key, value: value }));
+        }
+    });
+    $('body').append(form);
+    form.submit();
+    form.remove();
+}
+
+// ── FIX #6 + #7: Función reutilizable para imprimir detalle por motorista ──
+// Reemplaza goImprmirProduccionDiaria y goImprmirProduccionDetalleMotorista
+// que eran 100% código duplicado.
+function imprimirDetalleMotorista(tableInstance) {
+    const NombreMotorista = $('#LblNombreMotorista').text();
+    const ImagenFoto      = $('#ImagenPersonal').attr('src');
+    const codigo_         = $('#LblDescripcionCodigo').text();
+    const ruta_           = $('#LblDescripcionRuta').text();
+    const unidad_         = $('#LblDescripcionUnidad').text();
+    const precio_         = $('#LblListadoPrecio').text();
+    const cantidad_       = $('#LblListadoCantidad').text();
+    const total_          = $('#LblListadoTotalIngreso').text();
+    const fecha           = $('#FechaProduccion').val();
+
+    // FIX #7: Leer datos desde DataTables en lugar del DOM
+    const correlativo_ = [], estatus_ = [], serie_ = [], cola_ = [], desde_ = [], hasta_ = [], ingreso_ = [];
+
+    // Si la instancia de tabla se pasó, usar su API; si no, leer el DOM (fallback)
+    if (tableInstance) {
+        tableInstance.rows().data().each(function (row) {
+            correlativo_.push(row[0] || '');
+            estatus_.push(row[1]     || '');
+            serie_.push(row[2]       || '');
+            cola_.push(row[3]        || '');
+            desde_.push(row[4]       || '');
+            hasta_.push(row[5]       || '');
+            ingreso_.push(row[6]     || '');
+        });
+    } else {
+        $('#listadoAsignacion tbody tr').each(function () {
+            const tds = $(this).find('td');
+            correlativo_.push(tds.eq(0).text().trim());
+            estatus_.push(tds.eq(1).text().trim());
+            serie_.push(tds.eq(2).text().trim());
+            cola_.push(tds.eq(3).text().trim());
+            desde_.push(tds.eq(4).text().trim());
+            hasta_.push(tds.eq(5).text().trim());
+            ingreso_.push(tds.eq(6).text().trim());
+        });
+    }
+
+    imprimirPorPost('/acomtus/php_libs/reportes/Produccion/DetallePorMotorista.php', {
+        fecha, correlativo: correlativo_, serie: serie_, cola: cola_,
+        desde: desde_, hasta: hasta_, ingreso: ingreso_, estatus: estatus_,
+        NombreMotorista, ImagenPersonal: ImagenFoto,
+        codigo: codigo_, ruta: ruta_, unidad: unidad_,
+        precio: precio_, cantidad: cantidad_, total: total_
+    });
+}
+
+// ── Inicialización principal ─────────────────────────────────
+$(function () {
+
+    // Inicializar DataTables vacíos
+    $('#example').DataTable({ searching: false });
+    let table   = $('#listadoPorUnidadPlaca').DataTable({ searching: false });
+
+    $('#example1').DataTable({ searching: false });
+    let table_m = $('#listadoPorMotorista').DataTable({ searching: false });
+
+    // ── document.ready ───────────────────────────────────────
+    $(document).ready(function () {
+        $('#lstPersonal').select2({ theme: 'bootstrap4' });
+        $('#lstPersonalPorMotorista').select2({ theme: 'bootstrap4' });
+
+        if ($('#MenuTab').val() === '000') {
+            $('#DivSoloParaContabilidad').hide();
+        }
+        NombreInstitucion = $('#NombreInstitucion').val();
+    });
+
+    // ── Fecha de hoy ─────────────────────────────────────────
+    const now   = new Date();
+    const day   = ('0' + now.getDate()).slice(-2);
+    const month = ('0' + (now.getMonth() + 1)).slice(-2);
+    today = `${now.getFullYear()}-${month}-${day}`;
+    $('#FechaProduccion').val(today);
+
+    // ── Cambio de select Personal → rellenar nombre ──────────
+    $('#lstPersonal').on('change', function () {
+        $('#txtnombres').val($('#lstPersonal option:selected').text());
+    });
+
+    // ── Botón buscar por fecha ───────────────────────────────
+    $('#goBuscarProduccion').on('click', function () {
+        BuscarProduccionPorFecha();
+    });
+
+    // ── Campo número correlativo — Enter ─────────────────────
+    $('#NumeroCorrelativo').on('keyup', function (e) {
+        this.value = (this.value + '').replace(/[^0-9]/g, '');
+        if ((e.keyCode || e.which) === 13) {
+            BuscarProduccionPorIdTabla();
+        }
+    });
+
+    // ── Botones de reportes (nueva pestaña) ──────────────────
+    $('#goReporteGeneral').on('click', function () {
+        AbrirVentana('/acomtus/php_libs/reportes/Ingresos/Diario.php?fecha=' + $('#FechaProduccion').val());
+    });
+    $('#goReporteGeneralUnidadTransporte').on('click', function () {
+        AbrirVentana('/acomtus/php_libs/reportes/Ingresos/PorUnidadTransporte.php?fecha=' + $('#FechaProduccion').val());
+    });
+    $('#goReporteGeneralMotorista').on('click', function () {
+        AbrirVentana('/acomtus/php_libs/reportes/Ingresos/PorMotorista.php?fecha=' + $('#FechaProduccion').val());
+    });
+
+    // ── Botón mostrar sección Motorista ──────────────────────
+    $('#goBuscarPorMotorista').on('click', function () {
+        ocultarSecciones();
+        $('#BuscarPorMotorista').show();
+        miselect = $('#lstPersonalPorMotorista');
+        $('#listadoPorMotoristaOk').empty();
+        listar_personal();
+    });
+
+    // ── Botón mostrar sección Unidad ─────────────────────────
+    $('#goBuscarPorUnidad').on('click', function () {
+        ocultarSecciones();
+        $('#BuscarPorUnidadPlaca').show();
+        miselect = $('#lstPorUnidadPlaca');
+        $('#listadoPorUnidadPlacaOk').empty();
+        listar_unidad_transporte();
+    });
+
+    // ── Radio buttons Motorista ──────────────────────────────
+    $('#radioTodoPM').on('click', function () {
+        $('#listadoPorMotoristaOk').empty();
+        // FIX #11: Actualizado selector a id="LblProduccionesTotalPorMotorista" (span, no label for)
+        $('#LblProduccionesTotalPorMotorista').text('0');
+        $('#LblProduccionesTotalIngresoPorMotorista').text('$');
+        $('#FechaDesdePM, #FechaHastaPM').prop('readonly', true);
+        OptBuscarPM = this.value;
+    });
+    $('#radioFechaPM').on('click', function () {
+        $('#listadoPorMotoristaOk').empty();
+        $('#FechaDesdePM').val(today);
+        $('#FechaHastaPM').val(today);
+        $('#FechaDesdePM, #FechaHastaPM').prop('readonly', false);
+        $('#LblProduccionesTotalPorMotorista').text('0');
+        $('#LblProduccionesTotalIngresoPorMotorista').text('$');
+        OptBuscarPM = this.value;
+    });
+
+    // ── Radio buttons Unidad ─────────────────────────────────
+    $('#radioTodoUP').on('click', function () {
+        $('#listadoPorUnidadPlacaOk').empty();
+        $('#LblProduccionesTotalPorUnidadPlaca').text('0');
+        $('#LblProduccionesTotalIngresoPorUnidadPlaca').text('$ ');
+        $('#FechaDesdeUP, #FechaHastaUP').prop('readonly', true);
+        OptBuscarUP = this.value;
+    });
+    $('#radioFechaUP').on('click', function () {
+        $('#listadoPorUnidadPlacaOk').empty();
+        $('#FechaDesdeUP').val(today);
+        $('#FechaHastaUP').val(today);
+        $('#FechaDesdeUP, #FechaHastaUP').prop('readonly', false);
+        $('#LblProduccionesTotalPorUnidadPlaca').text('0');
+        $('#LblProduccionesTotalIngresoPorUnidadPlaca').text('$ ');
+        OptBuscarUP = this.value;
+    });
+
+    // ── Buscar por tiquete ───────────────────────────────────
+    $('#goBuscarPorTiquete').on('click', function () {
+        $('#BusquedaNumeroControl, #BusquedaFechaControl, #BusquedaPersonalControl, #BusquedaRutaControl').val('');
+        $('#BusquedaJornadaControl, #BusquedaUnidadPlacaControl, #BusquedaNumeroVueltasControl').val('');
+        $('#BusquedaTotalIngresoControl, #BusquedaEstatusControl, #BusquedaNumerotiquete').val('');
+        $('#VentanaBuscarPorTiquete').modal('show');
+        listar_serie();
+    });
+
+    // ── Buscar tiquete en control — Enter ────────────────────
+    $('#BusquedaNumerotiquete').on('keyup', function (e) {
+        this.value = (this.value + '').replace(/[^0-9]/g, '');
+        if ((e.keyCode || e.which) !== 13) return;
+
+        const numero_tiquete = $('#BusquedaNumerotiquete').val();
+        const serie          = $('#lstSerieBuscarTiquete').val();
+
+        $.ajax({
+            beforeSend: function () {
+                $('#listadoTiqueteEnControlOk').empty();
+                $('#BusquedaNumeroControl, #BusquedaFechaControl, #BusquedaPersonalControl').val('');
+                $('#BusquedaRutaControl, #BusquedaJornadaControl, #BusquedaUnidadPlacaControl').val('');
+                $('#BusquedaNumeroVueltasControl, #BusquedaTotalIngresoControl, #BusquedaEstatusControl').val('');
+            },
+            cache: false,
+            type: 'POST',
+            dataType: 'json',
+            url: 'php_libs/soporte/Produccion/ProduccionBuscar.php',
+            data: { accion_buscar: 'BuscarPorTiqueteEnControl', numero_tiquete, serie },
+            success: function (response) {
+                if (response.respuesta === true) {
+                    $('#listadoTiqueteEnControlOk').append(response.contenido);
+                    toastr['info'](response.mensaje, 'Sistema');
+                } else {
+                    toastr['error'](response.mensaje, 'Sistema');
+                    $('#listadoTiqueteEnControlOk').append(response.contenido);
+                }
+            }
+        });
+    });
+
+    // ── Click en tabla tiquete en control ───────────────────
+    $('body').on('click', '#listadoTiqueteEnControl a', function (e) {
+        e.preventDefault();
+        const numero_control    = $(this).attr('href');
+        const accionAsignacion  = $(this).attr('data-accion');
+        const numero_tiquete    = $('#BusquedaNumerotiquete').val();
+        const serie             = $('#lstSerieBuscarTiquete').val();
+
+        if (accionAsignacion !== 'BuscarPorTiquete') return;
+
+        $.ajax({
+            cache: false,
+            type: 'POST',
+            dataType: 'json',
+            url: 'php_libs/soporte/Produccion/ProduccionBuscar.php',
+            data: { accion_buscar: accionAsignacion, NumeroControl: numero_control, numero_tiquete, serie },
+            success: function (data) {
+                const limpiarCampos = function () {
+                    $('#BusquedaNumeroControl').val(data[0].codigo_produccion);
+                    $('#BusquedaFechaControl').val(data[0].fecha);
+                    $('#BusquedaPersonalControl').val(data[0].nombre_personal);
+                    $('#BusquedaRutaControl').val(data[0].ruta);
+                    $('#BusquedaJornadaControl').val(data[0].jornada);
+                    $('#BusquedaUnidadPlacaControl').val(data[0].unidad);
+                    $('#BusquedaNumeroVueltasControl').val(data[0].numero_vueltas);
+                    $('#BusquedaTotalIngresoControl').val(data[0].total_ingreso);
+                    $('#BusquedaEstatusControl').val(data[0].estatus);
+                };
+                limpiarCampos();
+                if (data[0].respuesta === true) {
+                    toastr['info'](data[0].mensaje, 'Sistema');
+                } else {
+                    toastr['error'](data[0].mensaje, 'Sistema');
+                }
+            }
+        });
+    });
+
+    // ── Click en tabla listadoVerControles ───────────────────
+    $('body').on('click', '#listadoVerControles a', function (e) {
+        e.preventDefault();
+        id_                     = $(this).attr('href');
+        const accionAsignacion  = $(this).attr('data-accion');
+        const fecha             = $('#FechaProduccion').val();
+
+        if (accionAsignacion === 'VerProduccion') {
+            window.location.href = 'editar_Nuevo_Produccion.php?id=' + id_ + '&accion=EditarRegistro';
+
+        } else if (accionAsignacion === 'VerEliminarProduccion') {
+            const swalBtns = Swal.mixin({
+                customClass: { confirmButton: 'btn btn-success', cancelButton: 'btn btn-danger' },
+                buttonsStyling: false
+            });
+            swalBtns.fire({
+                title: '¿Qué desea hacer?',
+                text: 'Eliminar el Registro Seleccionado!',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, Eliminar!',
+                cancelButtonText: 'No, Cancelar!',
+                reverseButtons: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                type: 'question'
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        beforeSend: function () { $('#listadoVerControlesOk').empty(); },
+                        cache: false, type: 'POST', dataType: 'json',
+                        url: 'php_libs/soporte/Produccion/ProduccionBuscar.php',
+                        data: { accion_buscar: 'VerEliminarProduccion', codigo_produccion: id_, fecha },
+                        success: function (response) {
+                            if (response.respuesta === true) {
+                                $('#listadoVerControlesOk').append(response.contenido);
+                                toastr['error'](response.mensaje, 'Sistema');
+                            }
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    swalBtns.fire('Cancelar', 'Su Archivo no ha sido Eliminado :)', 'error');
+                }
+            });
+        }
+    });
+
+    // ═══════════════════════════════════════════════════════
+    // BUSCAR POR MOTORISTA
+    // FIX #1: eliminada doble llamada AJAX — los totales se
+    // calculan en drawCallback con los datos que ya tiene DataTables.
+    // ═══════════════════════════════════════════════════════
+    $('#goBuscarProduccionPM').on('click', function () {
+        $('#lstPersonalPorMotorista').focus();
+        const buscartodos         = 'BuscarPorMotorista';
+        const CodigoPersonal      = $('#lstPersonalPorMotorista').val();
+        const NombreCodigoPersonal = $('#lstPersonalPorMotorista option:selected').text();
+        const FechaHastaPM        = $('#FechaHastaPM').val();
+        const FechaDesdePM        = $('#FechaDesdePM').val();
+
+        if (table_m) { table_m.destroy(); table_m = null; }
+
+        table_m = $('#listadoPorMotorista').DataTable({
+            ajax: {
+                url: 'php_libs/soporte/ReporteGeneral.php',
+                method: 'POST',
+                data: { accion_buscar: buscartodos, codigo_personal: CodigoPersonal, OptBuscarPM, FechaDesdePM, FechaHastaPM },
+                datatype: 'json'
+            },
+            lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, 'All']],
+            destroy: true,
+            pageLength: 5,
+            searching: false,
+            columns: [
+                { data: null, defaultContent: defaultContentMenuPorMotorista, orderable: false },
+                { data: 'id_' },
+                { data: 'fecha_' },
+                { data: 'numero_equipo_placa' },
+                { data: 'descripcion_ruta' },
+                { data: 'precio_publico', render: (data) => `<span class='font-weight-bold text-success text-right'>$${data}</span>` },
+                { data: 'cantidadtiquete' },
+                { data: 'total_ingreso_por_bus', render: (data) => `<span class='font-weight-bold text-success text-right'>$${data}</span>` }
+            ],
+            order: [[1, 'desc']],
+            // FIX #1: Los totales se leen de los datos del DataTable — sin segundo AJAX
+            drawCallback: function () {
+                const api         = this.api();
+                const intVal      = (i) => typeof i === 'string' ? parseFloat(i.replace(/[\$,]/g, '')) || 0 : (typeof i === 'number' ? i : 0);
+                const totalIngreso = api.column(7).data().reduce((a, b) => intVal(a) + intVal(b), 0);
+                const totalTiquete = api.column(6).data().reduce((a, b) => intVal(a) + intVal(b), 0);
+
+                // FIX #11: Usa id= en lugar de for= (actualizado en el HTML)
+                $('#LblProduccionesTotalIngresoPorMotorista').text('$' + formatNumber(totalIngreso));
+                $('#LblProduccionesTotalPorMotorista').text(formatNumber(totalTiquete, 0));
+
+                // imagen del motorista (primer registro)
+                const firstRow = api.row(0).data();
+                if (firstRow && firstRow.foto) {
+                    $('#ImagenPersonalGlobal').attr('src', firstRow.foto.trim() !== ''
+                        ? '../acomtus/img/fotos/' + firstRow.foto
+                        : firstRow.codigo_genero === '02'
+                            ? '../acomtus/acomtus/img/avatar_femenino.png'
+                            : '../acomtus/img/avatar_masculino.png'
+                    );
+                }
+            },
+            footerCallback: function (row, data, start, end, display) {
+                const api    = this.api();
+                const intVal = (i) => typeof i === 'string' ? parseFloat(i.replace(/[\$,]/g, '')) || 0 : (typeof i === 'number' ? i : 0);
+                const total       = api.column(7).data().reduce((a, b) => intVal(a) + intVal(b), 0);
+                const pageTotal   = api.column(7, { page: 'current' }).data().reduce((a, b) => intVal(a) + intVal(b), 0);
+                $(api.column(7).footer()).html('$' + formatNumber(pageTotal) + ' ( $' + formatNumber(total) + ')');
+            },
+            language: { url: '../acomtus/js/DataTablet/es-ES.json' },
+            dom: 'Bfrtip',
+            buttons: [
+                { extend: 'excelHtml5', text: '<i class="fas fa-file-excel"></i>', titleAttr: 'Exportar a Excel', filename: 'Reporte', title: NombreInstitucion + ' ' + NombreCodigoPersonal, exportOptions: { columns: [0,1,2,3,4,5,6,7] }, className: 'btn-exportar-excel' },
+                { extend: 'pdfHtml5',   text: '<i class="fas fa-file-pdf"></i>',   titleAttr: 'Exportar a PDF',   filename: 'Reporte', title: NombreInstitucion + ' ' + NombreCodigoPersonal, exportOptions: { columns: [0,1,2,3,4,5,6,7] }, className: 'btn-exportar-pdf' },
+                { extend: 'print',      text: '<i class="fa fa-print"></i>',        titleAttr: 'Imprimir',         title: NombreInstitucion + ' ' + NombreCodigoPersonal, exportOptions: { columns: [0,1,2,3,4,5,6,7] }, className: 'btn-exportar-print' },
+                'pageLength'
+            ]
+        });
+
+        obtener_data_editar('#listadoPorMotorista tbody', table_m);
+    }); // #goBuscarProduccionPM
+
+    // ═══════════════════════════════════════════════════════
+    // BUSCAR POR UNIDAD DE TRANSPORTE
+    // FIX #1: eliminada doble llamada AJAX — totales en drawCallback
+    // ═══════════════════════════════════════════════════════
+    $('#goBuscarPorUnidadDeTransporte').on('click', function () {
+        $('#lstPorUnidadPlaca').focus();
+        const buscartodos  = 'BuscarTodosUnidadPlaca';
+        const NumeroPlaca  = $('#lstPorUnidadPlaca').val();
+        const FechaHastaUP = $('#FechaHastaUP').val();
+        const FechaDesdeUP = $('#FechaDesdeUP').val();
+
+        if (table) { table.destroy(); table = null; }
+
+        table = $('#listadoPorUnidadPlaca').DataTable({
+            ajax: {
+                url: 'php_libs/soporte/ReporteGeneral.php',
+                method: 'POST',
+                data: { accion_buscar: buscartodos, codigo_up: NumeroPlaca, OptBuscarUP, FechaDesdeUP, FechaHastaUP },
+                datatype: 'json'
+            },
+            lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, 'All']],
+            destroy: true,
+            pageLength: 5,
+            searching: false,
+            columns: [
+                { data: null, defaultContent: defaultContentMenuPorNumeroUnidad, orderable: false },
+                { data: 'id_' },
+                { data: 'fecha_' },
+                { data: 'codigo' },
+                { data: 'nombre_motorista' },
+                { data: 'descripcion_ruta' },
+                { data: 'precio_publico', render: (data) => `<span class='font-weight-bold text-success text-right'>$${data}</span>` },
+                { data: 'cantidadtiquete' },
+                { data: 'total_ingreso_por_bus', render: (data) => `<span class='font-weight-bold text-success text-right'>$${data}</span>` }
+            ],
+            order: [[2, 'desc']],
+            // FIX #1: sin segundo AJAX — totales calculados aquí
+            drawCallback: function () {
+                const api         = this.api();
+                const intVal      = (i) => typeof i === 'string' ? parseFloat(i.replace(/[\$,]/g, '')) || 0 : (typeof i === 'number' ? i : 0);
+                const totalIngreso = api.column(8).data().reduce((a, b) => intVal(a) + intVal(b), 0);
+                const totalTiquete = api.column(7).data().reduce((a, b) => intVal(a) + intVal(b), 0);
+                $('#LblProduccionesTotalIngresoPorUnidadPlaca').text('$' + formatNumber(totalIngreso));
+                $('#LblProduccionesTotalPorUnidadPlaca').text(formatNumber(totalTiquete, 0));
+            },
+            footerCallback: function (row, data, start, end, display) {
+                const api    = this.api();
+                const intVal = (i) => typeof i === 'string' ? parseFloat(i.replace(/[\$,]/g, '')) || 0 : (typeof i === 'number' ? i : 0);
+                const total     = api.column(8).data().reduce((a, b) => intVal(a) + intVal(b), 0);
+                const pageTotal = api.column(8, { page: 'current' }).data().reduce((a, b) => intVal(a) + intVal(b), 0);
+                $(api.column(8).footer()).html('$' + formatNumber(pageTotal) + ' ( $' + formatNumber(total) + ')');
+            },
+            language: { url: '../acomtus/js/DataTablet/es-ES.json' },
+            dom: 'Bfrtip',
+            buttons: [
+                { extend: 'excelHtml5', text: '<i class="fas fa-file-excel"></i>', titleAttr: 'Exportar a Excel', filename: 'Reporte', title: NombreInstitucion + ' ' + NumeroPlaca, exportOptions: { columns: [0,1,2,3,4,5,6,7,8] }, className: 'btn-exportar-excel' },
+                { extend: 'pdfHtml5',   text: '<i class="fas fa-file-pdf"></i>',   titleAttr: 'Exportar a PDF',   filename: 'Reporte', title: NombreInstitucion + ' ' + NumeroPlaca, exportOptions: { columns: [0,1,2,3,4,5,6,7,8] }, className: 'btn-exportar-pdf' },
+                { extend: 'print',      text: '<i class="fa fa-print"></i>',        titleAttr: 'Imprimir',         title: NombreInstitucion + ' ' + NumeroPlaca,                       exportOptions: { columns: [0,1,2,3,4,5,6,7,8] }, className: 'btn-exportar-print' },
+                'pageLength'
+            ]
+        });
+
+        obtener_data_editar_('#listadoPorUnidadPlaca tbody', table);
+    }); // #goBuscarPorUnidadDeTransporte
+
+    // ── Producción diferencias ───────────────────────────────
+    $('#goProduccionDiferencias').on('click', function () {
+        ocultarSecciones();
+        $('#ProduccionDiferencias').show();
+        $('#NumeroCorrelativo, #goReporteGeneral, #goBuscarProduccion').prop('disabled', true);
+        $('#FechaProduccion').prop('readonly', true);
+
+        const fecha = $('#FechaProduccion').val();
+        $.ajax({
+            beforeSend: function () {
+                $('#listadoDiferenciasOk').empty();
+                miselect = $('#lstPersonal');
+                listar_personal();
+            },
+            cache: false, type: 'POST', dataType: 'json',
+            url: 'php_libs/soporte/NuevoEditarProduccionDiferencias.php',
+            // FIX #9: accion ahora usa id="accion_dif" en el HTML
+            data: 'accion=' + accion + '&id=' + Math.random() + '&fecha=' + fecha,
+            success: function (response) {
+                if (response.respuesta === false) {
+                    toastr['error'](response.mensaje, 'Sistema');
+                } else {
+                    toastr['success'](response.mensaje, 'Sistema');
+                    $('#listadoDiferenciasOk').append(response.contenido);
+                }
+            }
+        });
+    });
+
+    $('#goDiferenciasCancelar').on('click', function () {
+        ocultarSecciones();
+        $('#NumeroCorrelativo, #goReporteGeneral, #goBuscarProduccion').prop('disabled', false);
+        $('#FechaProduccion').prop('readonly', false);
+        $('#listadoDiferenciasOk').empty();
+        $('#txtnombres, #Valor, #concepto').val('');
+        // FIX #9: usar IDs renombrados
+        $('#accion_dif').val('Agregar');
+        $('#id_user_dif').val(0);
+    });
+
+    // ── Validar formulario diferencias ───────────────────────
+    $('#formDiferencias').validate({
+        ignore: '',
+        rules: {
+            txtnombres: { required: true, minlength: 4 },
+            Valor:      { required: true, minlength: 1 },
+            concepto:   { required: true, minlength: 4 }
+        },
+        errorElement: 'em',
+        errorPlacement: function (error, element) {
+            error.addClass('invalid-feedback');
+            error.insertAfter(element.prop('type') === 'checkbox' ? element.next('label') : element);
+        },
+        highlight:   (el) => { $(el).addClass('is-invalid').removeClass('is-valid'); },
+        unhighlight: (el) => { $(el).addClass('is-valid').removeClass('is-invalid'); },
+        invalidHandler: function () { setTimeout(() => toastr.error('Faltan Datos...')); },
+        submitHandler: function () {
+            const str   = $('#formDiferencias').serialize();
+            const fecha = $('#FechaProduccion').val();
+            $.ajax({
+                beforeSend: function () { $('#listadoDiferenciasOk').empty(); },
+                cache: false, type: 'POST', dataType: 'json',
+                url: 'php_libs/soporte/NuevoEditarProduccionDiferencias.php',
+                data: str + '&id=' + Math.random() + '&fecha=' + fecha,
+                success: function (response) {
+                    if (response.respuesta === false) {
+                        toastr['error'](response.mensaje, 'Sistema');
+                    } else {
+                        toastr['success'](response.mensaje, 'Sistema');
+                        $('#listadoDiferenciasOk').append(response.contenido);
+                        $('#txtnombres, #Valor, #concepto').val('');
+                        $('#accion_dif').val('Agregar');
+                        $('#id_user_dif').val(0);
+                    }
+                }
+            });
+        }
+    });
+
+    // ── Click en tabla diferencias ───────────────────────────
+    $('body').on('click', '#listadoDiferencia a', function (e) {
+        e.preventDefault();
+        id_                    = $(this).attr('href');
+        const accionAsignacion = $(this).attr('data-accion');
+        const fecha            = $('#FechaProduccion').val();
+
+        if (accionAsignacion === 'EditarDiferencia') {
+            $.ajax({
+                beforeSend: function () { $('#listadoDiferenciasOk').empty(); },
+                cache: false, type: 'POST', dataType: 'json',
+                url: 'php_libs/soporte/NuevoEditarProduccionDiferencias.php',
+                data: 'id_=' + id_ + '&id=' + Math.random() + '&fecha=' + fecha + '&accion=BuscarPorId',
+                success: function (data) {
+                    if (data[0].respuesta === false) {
+                        toastr['error'](data[0].mensaje, 'Sistema');
+                    } else {
+                        toastr['success'](data[0].mensaje, 'Sistema');
+                        $('#txtnombres').val(data[0].descripcion);
+                        $('#Valor').val(data[0].valor);
+                        $('#concepto').val(data[0].concepto);
+                        $('#accion_dif').val('EditarRegistro');
+                        $('#id_user_dif').val(id_);
+                    }
+                }
+            });
+
+        } else if (accionAsignacion === 'EliminarDiferencia') {
+            const swalBtns = Swal.mixin({
+                customClass: { confirmButton: 'btn btn-success', cancelButton: 'btn btn-danger' },
+                buttonsStyling: false
+            });
+            swalBtns.fire({
+                title: '¿Qué desea hacer?',
+                text: 'Eliminar el Registro Seleccionado!',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, Eliminar!',
+                cancelButtonText: 'No, Cancelar!',
+                reverseButtons: true,
+                allowOutsideClick: false, allowEscapeKey: false, allowEnterKey: false,
+                type: 'question'
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        beforeSend: function () { $('#listadoDiferenciasOk').empty(); },
+                        cache: false, type: 'POST', dataType: 'json',
+                        url: 'php_libs/soporte/NuevoEditarProduccionDiferencias.php',
+                        data: { accion_buscar: 'Eliminar', id_: id_, fecha },
+                        success: function (response) {
+                            if (response.respuesta === true) {
+                                $('#listadoDiferenciasOk').append(response.contenido);
+                                toastr['error'](response.mensaje, 'Sistema');
+                            }
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    swalBtns.fire('Cancelar', 'Su Archivo no ha sido Eliminado :)', 'error');
+                }
+            });
+        }
+    });
+
+    // ── Click en tabla listadoDetalle ────────────────────────
+    $('body').on('click', '#listadoDetalle a', function (e) {
+        e.preventDefault();
+        const codigo_produccion = $(this).attr('href');
+        const accionAsignacion  = $(this).attr('data-accion');
+
+        if (accionAsignacion !== 'ProduccionVerAsignacion') return;
+        $('#FieldsetTabla').show();
+
+        $.ajax({
+            beforeSend: function () { $('#listadoDevolucionIngresoOk').empty(); },
+            cache: false, type: 'POST', dataType: 'json',
+            url: 'php_libs/soporte/ReporteGeneral.php',
+            data: 'accion_buscar=BuscarProduccionPorIdTabla&codigo_produccion=' + codigo_produccion,
+            success: function (response) {
+                if (response.respuesta === true) {
+                    toastr['info'](response.mensaje, 'Sistema');
+                    $('#listadoDevolucionIngresoOk').append(response.contenido);
+                    $('#LblDescripcionRuta').html(response.descripcionRuta);
+                    $('#LblDescripcionUnidad').html(response.descripcionUnidad);
+                    $('#LblDescripcionCodigo').html(response.codigoPersonal);
+                    $('#LblListadoIdFecha').html(response.fecha);
+                    $('label[for="LblNombreMotorista"]').text(response.nombreMotorista);
+                    $('#LblListadoPrecio').html('$ ' + response.precioPublico);
+                    $('#LblListadoTotalIngreso').html('$ ' + response.totalIngreso);
+                    $('#LblListadoCantidad').html(response.cantidadTiquete);
+                    $('#LblCantidadProduccionesVendidas').html(response.cantidadTiquete);
+                    actualizarFoto(response.url_foto, response.codigo_genero);
+                }
+            }
+        });
+    });
+
+    // ── Click en tabla listado (produccion principal) ────────
+    $('body').on('click', '#listado a', function (e) {
+        e.preventDefault();
+        const codigo_produccion = $(this).attr('href');
+        const accionAsignacion  = $(this).attr('data-accion');
+
+        if (accionAsignacion !== 'ProduccionImprimir') return;
+        $('#field_produccion_detalle').show();
+
+        $.ajax({
+            beforeSend: function () { $('#listadoDetalleOk').empty(); },
+            cache: false, type: 'POST', dataType: 'json',
+            url: 'php_libs/soporte/ReporteGeneral.php',
+            data: 'accion_buscar=BuscarProduccionPorId&codigo_produccion=' + codigo_produccion,
+            success: function (response) {
+                if (response.respuesta === true) {
+                    toastr['info'](response.mensaje, 'Sistema');
+                    $('#listadoDetalleOk').append(response.contenido);
+                    $('label[for="LblDetalleTotalIngreso"]').text('Total  $ ' + response.totalIngreso);
+                }
+            }
+        });
+    });
+
+    // ── FIX #2 + #7: Imprimir producción por fecha ──────────
+    $('#goImprmirProduccionPorFecha').on('click', function () {
+        const fecha            = $('#FechaProduccion').val();
+        const produccionTotal  = $('#LblProduccionesTotal').text();
+        const produccionVendida = $('#LblCantidadProduccionesVendidas').text();
+        const tiqueteEntregados = $('#LblTotalTiquetesEntregados').text();
+        const tiqueteVendidos  = $('#LblTotalTiquetesVendidos').text();
+        const ingresoTotal     = $('#LblIngresoTotal').text();
+        const ingresoColones   = $('#LblProduccionesTotalIngreso').text();
+
+        // FIX #7: Leer datos desde el DOM de la tabla (no tiene instancia DataTable accesible aquí)
+        const ruta_ = [], cantidad_ = [], entregados_ = [], devolucion_ = [],
+              vendidos_ = [], precio_publico_ = [], ingreso_ = [];
+
+        $('#listado tbody tr').each(function () {
+            const tds = $(this).find('td');
+            ruta_.push(tds.eq(2).text().trim());
+            cantidad_.push(tds.eq(4).text().trim());
+            entregados_.push(tds.eq(5).text().trim());
+            devolucion_.push(tds.eq(6).text().trim());
+            vendidos_.push(tds.eq(7).text().trim());
+            precio_publico_.push(tds.eq(8).text().trim());
+            ingreso_.push(tds.eq(9).text().trim().replace(/,/g, ''));
+        });
+
+        // FIX #2: POST en lugar de GET para evitar límite de URL
+        imprimirPorPost('/acomtus/php_libs/reportes/Produccion/PorFecha.php', {
+            fecha, ruta: ruta_, cantidad: cantidad_, entregados: entregados_,
+            devolucion: devolucion_, vendidos: vendidos_, ingreso: ingreso_,
+            precio_publico: precio_publico_, produccion_total: produccionTotal,
+            produccion_vendida: produccionVendida, tiqueteEntregados,
+            tiqueteVendidos, ingresoTotal, ingresoColones
+        });
+    });
+
+    // ── FIX #2 + #7: Imprimir detalle producción ────────────
+    $('#goImprmirProduccionDetalle').on('click', function () {
+        const fecha = $('#FechaProduccion').val();
+        const control_ = [], ruta_ = [], equipo_ = [], motorista_ = [], ingreso_ = [];
+
+        $('#listadoDetalle tbody tr').each(function () {
+            const tds = $(this).find('td');
+            control_.push(tds.eq(1).text().trim());
+            ruta_.push(tds.eq(2).text().trim());
+            equipo_.push(tds.eq(3).text().trim());
+            motorista_.push(tds.eq(4).text().trim());
+            ingreso_.push(tds.eq(5).text().trim());
+        });
+
+        imprimirPorPost('/acomtus/php_libs/reportes/Produccion/DetalleProduccion.php', {
+            fecha, control: control_, ruta: ruta_, equipo: equipo_,
+            motorista: motorista_, ingreso: ingreso_
+        });
+    });
+
+    // ── FIX #6: goImprmirProduccionDiaria ───────────────────
+    // Antes era código duplicado de goImprmirProduccionDetalleMotorista.
+    // Ahora ambos usan la misma función reutilizable.
+    $('#goImprmirProduccionDiaria').on('click', function () {
+        imprimirDetalleMotorista(null);
+    });
+
+    // ── FIX #6: goImprmirProduccionDetalleMotorista ──────────
+    $('#goImprmirProduccionDetalleMotorista').on('click', function () {
+        imprimirDetalleMotorista(null);
+    });
+
+    // ── Variable data DataTable PorMotorista ─────────────────
+    var obtener_data_editar = function (tbody, table_m) {
+        $(tbody).on('click', 'a.verPorMotorista', function () {
+            const data = table_m.row($(this).parents('tr')).data();
+            // FIX #4: console.log eliminado
+            const codigo_produccion = data[3];
+            AbrirVentana('/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=' + codigo_produccion);
+        });
+    };
+
+    // ── Variable data DataTable PorNumeroPlaca ───────────────
+    var obtener_data_editar_ = function (tbody, table) {
+        $(tbody).on('click', 'a.verPorNumeroUnidad', function () {
+            const data = table.row($(this).parents('tr')).data();
+            // FIX #4: console.log eliminado
+            const codigo_produccion = data[3];
+            AbrirVentana('/acomtus/php_libs/reportes/Planilla/DetallePorMotorista.php?codigo_produccion=' + codigo_produccion);
+        });
+    };
+
+}); // ── Fin del $(function()) ────────────────────────────────
+
+
+// ============================================================
+// FUNCIONES GLOBALES (fuera del scope de $(function))
+// ============================================================
+
+// ── BuscarProduccionPorFecha ─────────────────────────────────
 function BuscarProduccionPorFecha() {
-	// Variables accion para guardar datos.
-		var fecha = $("#FechaProduccion").val();
-		accion_buscar = "BuscarProduccionPorRuta";
-		
-	/// BUSCAR SI EXISTE PRODUCCIÓN ENLA FECHA DIGITADA.	
-		$.ajax({
-			beforeSend: function(){
-				$('#listadoOk').empty();
-			},
-			cache: false,
-			type: "POST",
-			dataType: "json",
-			url:"php_libs/soporte/ReporteGeneral.php",
-			data:"accion_buscar=" + accion_buscar + "&fecha=" + fecha,
-			success: function(response){
-			// VERIFICAR SI HAY DATOS EN LA DATA.
-				if(response.respuesta == true){
-					// focus
-						$("#FechaProduccion").focus().select();
-					// vAR DATA
-						toastr["success"](response.mensaje, "Sistema");
-					// RELLENAR TABLA.
-						$('#listadoOk').append(response.contenido);
-					//
-						$("#ProduccionTabla").show();
-						$("#field_produccion_detalle").hide();
-						$("#FieldsetTabla").hide();
-					// fieldset buscar por motorista
-						$("#BuscarPorMotorista").hide();
-						$("#BuscarPorUnidadPlaca").hide();
-					// limpiar tabla producción detalle.
-						$('#listadoDetalleOk').empty();
-					// cambiar el valor del ingreso.
-						var colones = response.totalProduccionIngreso;
-						colones = colones.replace(/,/g,"");
-						colones = Number(colones);
-						var total_colones = (colones * parseFloat(8.75));
-						total_colones = delimitNumbers(total_colones.toFixed(2));
-					//	cantidades de controles a y vendidas.
-						controles = Number(response.totalProduccion);
-						controlesVendidos = Number(response.cantidadProduccionVendidos);
-					//	porcentaje // cambiaar css progress bar.
-						var porcentaje_controles = ((controlesVendidos * 100) / controles);
-						porcentaje_controles = delimitNumbers(porcentaje_controles.toFixed(0));
-					//	CONTROLES
-						$("label[for='LblProduccionesTotal']").text("Controles: " + controles);
-							$('.progress-bar').css('width', porcentaje_controles +'%').attr('aria-valuenow', porcentaje_controles);
-						$("label[for='LblCantidadProduccionesVendidas']").text("Procesados: " + controlesVendidos + " es el " + porcentaje_controles + "% de " + controles + ".");
-					//	cantidades de controles a y vendidas.
-						var tiqueteEntregados_ = response.cantidadEntregados;
-						tiqueteEntregados = tiqueteEntregados_.replace(/,/g,"");
-						tiqueteEntregados = Number(tiqueteEntregados);
-						var tiquetesVendidos_ = response.cantidadTiquetePantalla;
-						tiquetesVendidos = tiquetesVendidos_.replace(/,/g,"");
-						tiquetesVendidos = Number(tiquetesVendidos);
-					//	porcentaje // cambiaar css progress bar.
-						var porcentaje_tiquetes = ((tiquetesVendidos * 100) / tiqueteEntregados);
-						porcentaje_tiquetes = delimitNumbers(porcentaje_tiquetes.toFixed(0));
-					// TIQUETES
-						$("label[for='LblTotalTiquetesEntregados']").text('Entregados: ' + response.cantidadEntregados);
-							$('#progress-bar-tiquete').css('width', porcentaje_tiquetes +'%').attr('aria-valuenow', porcentaje_tiquetes);
-						$("label[for='LblTotalTiquetesVendidos']").text('Vendidos: ' + tiquetesVendidos_ + " es el " + porcentaje_tiquetes + "% de " + tiqueteEntregados_ +".");
-					//	INBRESO - COLONES Y DOLARES
-						$("label[for='LblIngresoTotal']").text('Ingreso $ ' + response.totalProduccionIngreso);
-						$("label[for='LblProduccionesTotalIngreso']").text('Ingreso ¢ ' + total_colones);
-						
-				}
-				if(response.respuesta == false){
-					// vAR DATA
-					toastr["info"](response.mensaje, "Sistema Acomtus");
-				}
-			},	// DATA.
-		});
-	}	// function BuscarProduccionPorFecha()
+    const fecha         = $('#FechaProduccion').val();
+    const accion_buscar = 'BuscarProduccionPorRuta';
 
-///////////////////////////////////////////////////////////////			
-// Inicio del Ajax. Buscar, Actualizar Producción Devolución e Ingreso.
-///////////////////////////////////////////////////////////////
+    $.ajax({
+        beforeSend: function () { $('#listadoOk').empty(); },
+        cache: false, type: 'POST', dataType: 'json',
+        url: 'php_libs/soporte/ReporteGeneral.php',
+        data: 'accion_buscar=' + accion_buscar + '&fecha=' + fecha,
+        success: function (response) {
+            if (response.respuesta === true) {
+                $('#FechaProduccion').focus().select();
+                toastr['success'](response.mensaje, 'Sistema');
+                $('#listadoOk').append(response.contenido);
+                $('#ProduccionTabla').show();
+                $('#field_produccion_detalle, #FieldsetTabla, #BuscarPorMotorista, #BuscarPorUnidadPlaca').hide();
+                $('#listadoDetalleOk').empty();
+
+                // Ingreso en colones
+                let colones = parseFloat(String(response.totalProduccionIngreso).replace(/,/g, '')) || 0;
+                const total_colones = formatNumber(colones * 8.75);
+
+                // Controles
+                const controles         = Number(response.totalProduccion);
+                const controlesVendidos = Number(response.cantidadProduccionVendidos);
+                const porcentaje_ctrl   = controles > 0 ? ((controlesVendidos * 100) / controles).toFixed(0) : 0;
+                $('label[for="LblProduccionesTotal"]').text('Controles: ' + controles);
+                $('.progress-bar').css('width', porcentaje_ctrl + '%').attr('aria-valuenow', porcentaje_ctrl);
+                $('label[for="LblCantidadProduccionesVendidas"]').text('Procesados: ' + controlesVendidos + ' es el ' + porcentaje_ctrl + '% de ' + controles + '.');
+
+                // Tiquetes
+                const tiqueteEntregados = parseFloat(String(response.cantidadEntregados).replace(/,/g, '')) || 0;
+                const tiquetesVendidos  = parseFloat(String(response.cantidadTiquetePantalla).replace(/,/g, '')) || 0;
+                const porcentaje_tq     = tiqueteEntregados > 0 ? ((tiquetesVendidos * 100) / tiqueteEntregados).toFixed(0) : 0;
+                $('label[for="LblTotalTiquetesEntregados"]').text('Entregados: ' + response.cantidadEntregados);
+                $('#progress-bar-tiquete').css('width', porcentaje_tq + '%').attr('aria-valuenow', porcentaje_tq);
+                $('label[for="LblTotalTiquetesVendidos"]').text('Vendidos: ' + response.cantidadTiquetePantalla + ' es el ' + porcentaje_tq + '% de ' + response.cantidadEntregados + '.');
+
+                // Ingresos
+                $('label[for="LblIngresoTotal"]').text('Ingreso $ ' + response.totalProduccionIngreso);
+                $('label[for="LblProduccionesTotalIngreso"]').text('Ingreso ¢ ' + total_colones);
+            }
+            if (response.respuesta === false) {
+                toastr['info'](response.mensaje, 'Sistema Acomtus');
+            }
+        }
+    });
+}
+
+// ── BuscarProduccionPorIdTabla ───────────────────────────────
 function BuscarProduccionPorIdTabla() {
-	// Variables accion para guardar datos.
-		var fecha = $("#FechaProduccion").val();
-		codigo_produccion = $("#NumeroCorrelativo").val();
-		accion_buscar = "BuscarProduccionPorIdTabla";
-	/// BUSCAR SI EXISTE PRODUCCIÓN ENLA FECHA DIGITADA.	
-		$.ajax({
-			beforeSend: function(){
-				$('#listadoDevolucionIngresoOk').empty();
-			},
-			cache: false,
-			type: "POST",
-			dataType: "json",
-			url:"php_libs/soporte/ReporteGeneral.php",
-			data:"accion_buscar=" + accion_buscar + "&fecha=" + fecha + "&codigo_produccion="+codigo_produccion,
-			success: function(response){
-			// VERIFICAR SI HAY DATOS EN LA DATA.
-				if(response.respuesta == true){
-					// focus
-						$("#FechaProduccion").focus().select();
-					// vAR DATA
-						toastr["info"](response.mensaje, "Sistema");
-					// RELLENAR TABLA.
-						$('#listadoDevolucionIngresoOk').append(response.contenido);
-					//	
-						$("#ProduccionTabla").hide();
-						$("#field_produccion_detalle").hide();
-						$("#FieldsetTabla").show();
-					// fieldset buscar por motorista
-						$("#BuscarPorMotorista").hide();
-						$("#BuscarPorUnidadPlaca").hide();
-					// limpiar tabla producción detalle.
-						$('#listadoDetalleOk').empty();
-					// cambiar el valor del ingreso.
-						$("#LblDescripcionRuta").html(response.descripcionRuta);
-						$("#LblDescripcionUnidad").html(response.descripcionUnidad);
-						$("#LblDescripcionCodigo").html(response.codigoPersonal);
-						$("label[for='LblNombreMotorista']").text(response.nombreMotorista);
-						$("#LblListadoIdFecha").html(response.fecha);
-						//
-						$("#LblListadoPrecio").html("$ " + response.precioPublico);
-						$("#LblListadoTotalIngreso").html("$ " + response.totalIngreso);
-						$("#LblListadoCantidad").html(response.cantidadTiquete);
+    const fecha            = $('#FechaProduccion').val();
+    const codigo_produccion = $('#NumeroCorrelativo').val();
 
-						// FOTO DEL EMPLEADO.
-						if(response.url_foto == "")
-						{
-							if(response.codigo_genero == "01"){
-								$(".card-img-top").attr("src", "../acomtus/img/avatar_masculino.png");
-							}else{
-								$(".card-img-top").attr("src", "../acomtus/img/avatar_femenino.png");
-							}
-						}else{
-							$(".card-img-top").attr("src", "../acomtus/img/fotos/" + response.url_foto);	
-						}
-				}
-			},	// DATA.
-		});
-	}	// function BuscarProduccionPorFecha()
-// ABRE OTRA PESTAÑA	
-function AbrirVentana(url)
-{
+    $.ajax({
+        beforeSend: function () { $('#listadoDevolucionIngresoOk').empty(); },
+        cache: false, type: 'POST', dataType: 'json',
+        url: 'php_libs/soporte/ReporteGeneral.php',
+        data: 'accion_buscar=BuscarProduccionPorIdTabla&fecha=' + fecha + '&codigo_produccion=' + codigo_produccion,
+        success: function (response) {
+            if (response.respuesta === true) {
+                $('#FechaProduccion').focus().select();
+                toastr['info'](response.mensaje, 'Sistema');
+                $('#listadoDevolucionIngresoOk').append(response.contenido);
+                $('#ProduccionTabla, #field_produccion_detalle').hide();
+                $('#FieldsetTabla').show();
+                $('#BuscarPorMotorista, #BuscarPorUnidadPlaca').hide();
+                $('#listadoDetalleOk').empty();
+                $('#LblDescripcionRuta').html(response.descripcionRuta);
+                $('#LblDescripcionUnidad').html(response.descripcionUnidad);
+                $('#LblDescripcionCodigo').html(response.codigoPersonal);
+                $('label[for="LblNombreMotorista"]').text(response.nombreMotorista);
+                $('#LblListadoIdFecha').html(response.fecha);
+                $('#LblListadoPrecio').html('$ ' + response.precioPublico);
+                $('#LblListadoTotalIngreso').html('$ ' + response.totalIngreso);
+                $('#LblListadoCantidad').html(response.cantidadTiquete);
+                actualizarFoto(response.url_foto, response.codigo_genero);
+            }
+        }
+    });
+}
+
+// ── Abre nueva pestaña ───────────────────────────────────────
+function AbrirVentana(url) {
     window.open(url, '_blank');
     return false;
 }
-///////////////////////////////////////////////////////////////////////////////
-//	FUNCION PARA CAMBIAR LA FORMA DE BUSQUEDA
-function filterGlobal() {
-    $('#listado').DataTable().search(
-        $('#global_filter').val(),
-    ).draw();
-}
-////////////////////////////////////////////////////////////
-// FUNCION LISTAR TABLA perosnal solo motoristas
-////////////////////////////////////////////////////////////
-function listar_personal(codigo_personal){
-	
-    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
-    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
-    
-    $.post("php_libs/soporte/ProduccionCalcular.php", {accion_buscar: 'BuscarPersonalMotorista'},
-        function(data) {
-			miselect.empty();
-			miselect.append('<option value="00">Seleccionar...</option>');
-            for (var i=0; i<data.length; i++) {
-				if(codigo_personal == data[i].codigo){
-					miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].codigo + ' | ' + data[i].descripcion + '</option>');
-                }else{
-                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].codigo + ' | ' + data[i].descripcion + '</option>');
-                }
-            }
-    }, "json");    
-}
-////////////////////////////////////////////////////////////
-// LISTAR UNIDAD Y N.º DE PLACA
-////////////////////////////////////////////////////////////
-function listar_unidad_transporte(codigo_transporte_colectivo){
-    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
-    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
-    
-    $.post("php_libs/soporte/ProduccionCalcular.php", {accion_buscar: 'BuscarTransporteColectivo'},
-        function(data) {
-            miselect.empty();
-            for (var i=0; i<data.length; i++) {
-				if(codigo_transporte_colectivo == data[i].codigo){
-					miselect.append('<option value="' + data[i].codigo + '" selected>' + data[i].numero_equipo + ' | ' + data[i].descripcion + '</option>');
-				}else{
-					miselect.append('<option value="' + data[i].codigo + '">' + data[i].numero_equipo + ' | ' + data[i].descripcion + '</option>');
-				}
-            }
-    }, "json");    
-}
-// TODAS LAS TABLAS VAN HA ESTAR EN PRODUCCIONBUSCAR.*******************
-// FUNCION LISTAR TABLA catalogo_ruta
-////////////////////////////////////////////////////////////
-function listar_serie(){
-    var miselect=$("#lstSerieBuscarTiquete");
-    /* VACIAMOS EL SELECT Y PONEMOS UNA OPCION QUE DIGA CARGANDO... */
-    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
-    
-    $.post("php_libs/soporte/Produccion/ProduccionBuscar.php", {accion_buscar: 'BuscarSerie'},
-        function(data) {
-            miselect.empty();
-            miselect.append('<option value="">Seleccionar...</option>');
-            for (var i=0; i<data.length; i++) {
-                    miselect.append('<option value="' + data[i].codigo + '">' + data[i].descripcion + " - " + data[i].tiquete_color + " - " + data[i].precio_publico + '</option>');
-                    //$('#PrecioPublico').val(data[0].precio_publico);
-                    //$('#Existencia').val(data[0].existencia);
-            }
-    }, "json");    
-}
-// Mensaje de Carga de Ajax.
-function configureLoadingScreen(screen){
-$(document)
-	.ajaxStart(function () {
-		screen.fadeIn();
-	})
-	.ajaxStop(function () {
-		screen.fadeOut();
-	});
-}
-function delimitNumbers(str) { return (str + "").replace(/\b(\d+)((\.\d+)*)\b/g, function(a, b, c) { return (b.charAt(0) > 0 && !(c || ".").lastIndexOf(".") ? b.replace(/(\d)(?=(\d{3})+$)/g, "$1,") : b) + c; }); } 
 
+// ── Ocultar todas las secciones secundarias ──────────────────
+function ocultarSecciones() {
+    $('#ProduccionTabla, #field_produccion_detalle, #FieldsetTabla').hide();
+    $('#ProduccionDiferencias, #BuscarPorMotorista, #BuscarPorUnidadPlaca').hide();
+}
+
+// ── Actualizar foto del empleado ─────────────────────────────
+function actualizarFoto(url_foto, codigo_genero) {
+    if (!url_foto || url_foto.trim() === '') {
+        $('.card-img-top').attr('src',
+            codigo_genero === '01'
+                ? '../acomtus/img/avatar_masculino.png'
+                : '../acomtus/img/avatar_femenino.png'
+        );
+    } else {
+        $('.card-img-top').attr('src', '../acomtus/img/fotos/' + url_foto);
+    }
+}
+
+// ── Loading screen AJAX ──────────────────────────────────────
+function configureLoadingScreen(screen) {
+    $(document)
+        .ajaxStart(function () { screen.fadeIn(); })
+        .ajaxStop(function ()  { screen.fadeOut(); });
+}
+
+// ── Listar personal (motoristas) ─────────────────────────────
+function listar_personal(codigo_personal) {
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    $.post('php_libs/soporte/ProduccionCalcular.php', { accion_buscar: 'BuscarPersonalMotorista' },
+        function (data) {
+            miselect.empty().append('<option value="00">Seleccionar...</option>');
+            for (let i = 0; i < data.length; i++) {
+                const selected = codigo_personal === data[i].codigo ? ' selected' : '';
+                miselect.append(`<option value="${data[i].codigo}"${selected}>${data[i].codigo} | ${data[i].descripcion}</option>`);
+            }
+        }, 'json');
+}
+
+// ── Listar unidades de transporte ────────────────────────────
+function listar_unidad_transporte(codigo_transporte_colectivo) {
+    miselect.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    $.post('php_libs/soporte/ProduccionCalcular.php', { accion_buscar: 'BuscarTransporteColectivo' },
+        function (data) {
+            miselect.empty();
+            for (let i = 0; i < data.length; i++) {
+                const selected = codigo_transporte_colectivo === data[i].codigo ? ' selected' : '';
+                miselect.append(`<option value="${data[i].codigo}"${selected}>${data[i].numero_equipo} | ${data[i].descripcion}</option>`);
+            }
+        }, 'json');
+}
+
+// ── Listar series ────────────────────────────────────────────
+function listar_serie() {
+    const miselect_serie = $('#lstSerieBuscarTiquete');
+    miselect_serie.find('option').remove().end().append('<option value="">Cargando...</option>').val('');
+    $.post('php_libs/soporte/Produccion/ProduccionBuscar.php', { accion_buscar: 'BuscarSerie' },
+        function (data) {
+            miselect_serie.empty().append('<option value="">Seleccionar...</option>');
+            for (let i = 0; i < data.length; i++) {
+                miselect_serie.append(`<option value="${data[i].codigo}">${data[i].descripcion} - ${data[i].tiquete_color} - ${data[i].precio_publico}</option>`);
+            }
+        }, 'json');
+}
