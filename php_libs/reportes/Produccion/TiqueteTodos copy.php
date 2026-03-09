@@ -23,17 +23,19 @@
     $saldos = 0; $print_sumas = 0; $print_no_header = 0;
 
 //  imprimir datos del bachillerato.
-// --- CORRECCIÓN DE FECHA PARA PHP 8 ---
-date_default_timezone_set('America/El_Salvador');
-$fecha_solicitada = $_REQUEST['fecha'] ?? date('Y-m-d');
-$timestamp = strtotime($fecha_solicitada);
+           //
+	    // Establecer formato para la fecha.
+	    // 
+		date_default_timezone_set('America/El_Salvador');
+		setlocale(LC_TIME,'es_SV');
+	    //
 		//$dias = array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sábado");
                 $meses = array("enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre");
                 //Salida: Viernes 24 de Febrero del 2012		
-// Reemplazo de strftime()
-$dia = date("d", $timestamp);
-$mes = $meses[(int)date("m", $timestamp)];
-$año = date("Y", $timestamp);
+		//Crear una línea. Fecha.
+		$dia = strftime("%d");		// El Día.
+        $mes = $meses[date('n')-1];     // El Mes.
+		$año = strftime("%Y");		// El Año.
 
 		setlocale(LC_MONETARY,"es_ES");
 
