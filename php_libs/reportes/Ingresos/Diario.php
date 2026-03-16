@@ -36,10 +36,19 @@ function utf8_to_latin1(string $str): string {
  * Evita el error: "Passing null to parameter #1 ($haystack) of type string"
  * que FPDF lanza internamente cuando recibe null en Cell().
  */
-function cstr(mixed $val, string $default = ''): string {
-    return ($val === null) ? $default : (string)$val;
+// En PHP 7.4 eliminamos el tipo "mixed" para evitar el Fatal Error
+// En PHP 8.x funcionará perfectamente sin el tipo declarado o usando mixed (pero para compatibilidad dual es mejor así)
+function cstr($val, $default = '') {
+    // Si es null o no está definido, devolvemos el default
+    if (!isset($val) || $val === null) {
+        return $default;
+    }
+    // Si es string, limpiamos espacios
+    if (is_string($val)) {
+        return trim($val);
+    }
+    return $val;
 }
-
 // variables y consulta a la tabla.
     // VALORES DEL POST (Con fusión null para PHP 8)
         $fecha          = trim($_REQUEST['fecha'] ?? '');

@@ -478,7 +478,12 @@ $codigo_base = $partes[0];
             // NO definimos $texto_inf_der ni nada más.
             // Al poner break aquí, evitamos que se mezcle con los de abajo.
             break;
-        
+        case '1144445':  // <--- AGREGA ESTA LÍNEA (4H + Nocturnidad)
+            $fuente_actual = 'Arial'; 
+            $simbolo_central = '4H';
+            $tamano_fuente_central = 9; 
+            $ajuste_y_simbolo = 2; 
+            break;        
             // --- GRUPO ESPECIAL: MEDIA TANDA NOCTURNA + 1T ---
             case '1144425':
             case '11444250':
@@ -922,7 +927,9 @@ function processEmployeeAttendanceData($rango_fechas, $codigo_personal, $salario
         '41744444' => $salario_diario, '41514444' => $salario_diario / 2, '41524444' => $salario_diario, '41534444' => $salario_diario + ($salario_diario / 2)];
     $nocturnidad_base_value = 0.57;
     $nocturnidad_codes_specific = [
-        '2144445' => true, '1144445' => true, '1144425' => true, '11444250' => true, '11444450' => true, '2124445' => true, '41242445' => true, '41241445' => true,
+        '2144445' => true, 
+        '1144445' => true, 
+        '1144425' => true, '11444250' => true, '11444450' => true, '2124445' => true, '41242445' => true, '41241445' => true,
         // --- NUEVOS: TRABAJO DESCANSO NOCTURNO ---
         '41444145' => true, // TD 4H N
         '41444245' => true, // TD 1T N
