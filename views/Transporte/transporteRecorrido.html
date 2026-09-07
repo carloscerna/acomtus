@@ -1,0 +1,584 @@
+{# Heredando la plantilla principal #}
+{% extends 'default_layout.html' %}
+
+{% block contenidos %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h4 class="m-0"><i class="fas fa-bus text-primary mr-2"></i>Monitoreo y Recorrido Mensual de Unidades</h4>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="index.php">Home</a></li>
+              <li class="breadcrumb-item text-capitalize">Transporte</li>
+              <li class="breadcrumb-item active">Recorrido Mensual</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        
+        <!-- Tarjeta de Filtros -->
+        <div class="card card-primary card-outline shadow-sm mb-4">
+          <div class="card-header">
+            <h3 class="card-title font-weight-bold">
+              <i class="fas fa-filter mr-1"></i> Filtros de Búsqueda de Trabajo / Producción
+            </h3>
+          </div>
+          <div class="card-body">
+            <form id="formFiltroRecorrido" class="row align-items-end">
+              <div class="col-md-3">
+                <label for="selectMes" class="font-weight-bold">
+                  <i class="far fa-calendar-alt text-primary mr-1"></i> Seleccionar Mes / Año:
+                </label>
+                <input type="month" class="form-control" id="selectMes" name="periodo" required>
+              </div>
+
+              <div class="col-md-4">
+                <label for="selectUnidad" class="font-weight-bold">
+                  <i class="fas fa-shuttle-van text-primary mr-1"></i> Unidad de Transporte:
+                </label>
+                <select class="form-control" id="selectUnidad" name="id_transporte">
+                  <option value="TODAS">-- Cargar Unidades... --</option>
+                </select>
+              </div>
+
+              <div class="col-md-2">
+                <label for="numMeta" class="font-weight-bold">
+                  <i class="fas fa-flag-checkered text-primary mr-1"></i> Meta Vueltas:
+                </label>
+                <input type="number" class="form-control" id="numMeta" value="84" min="1" required>
+              </div>
+
+              <div class="col-md-3">
+                <button type="submit" class="btn btn-primary btn-block font-weight-bold">
+                  <i class="fas fa-search mr-1"></i> Consultar Recorrido
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      <!-- TARJETAS DE RESUMEN INFORMATIVAS (4 CARDS) -->
+<div class="row mb-3">
+  <!-- 1. Card Total Unidades (Celeste / Info) -->
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-info shadow-sm">
+      <div class="inner">
+        <h3 id="lblTotalUnidades">0</h3>
+        <p>Total de Unidades Registradas</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-bus"></i>
+      </div>
+      <a href="#" class="small-box-footer" id="btnVerTodas">
+        Ver flotilla completa <i class="fas fa-arrow-circle-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- 2. Card Cumplieron Días (Verde / Success: >= 21 días) -->
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-success shadow-sm">
+      <div class="inner">
+        <h3 id="lblTotalOptimas">0</h3>
+        <p>Trabajaron ≥ 21 Días</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-check-double"></i>
+      </div>
+      <a href="#" class="small-box-footer" id="btnVerOptimas">
+        Ver unidades regulares <i class="fas fa-arrow-circle-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- 3. Card Advertencia Días (Amarillo / Warning: < 21 días y > 0 vueltas) -->
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-warning shadow-sm">
+      <div class="inner">
+        <h3 id="lblTotalRiesgo">0</h3>
+        <p>Trabajaron < 21 Días</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <a href="#" class="small-box-footer" id="btnVerRiesgo" style="color: #1f2d3d !important;">
+        Ver unidades irregulares <i class="fas fa-arrow-circle-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- 4. Card Sin Trabajo (Rojo / Danger: 0 vueltas) -->
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-danger shadow-sm">
+      <div class="inner">
+        <h3 id="lblTotalInactivas">0</h3>
+        <p>Sin Trabajo (0 Vueltas)</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-ban"></i>
+      </div>
+      <a href="#" class="small-box-footer" id="btnVerInactivas">
+        Ver unidades inactivas <i class="fas fa-arrow-circle-right"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Unidades Irregulares (< 21 Días) -->
+<div class="modal fade" id="modalRiesgo" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title font-weight-bold"><i class="fas fa-exclamation-circle mr-2"></i>Unidades con Menos de 21 Días Trabajados</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body p-0">
+        <table class="table table-striped mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th>N° Equipo</th>
+              <th>Número Placa</th>
+              <th>Marca/Modelo</th>
+              <th class="text-center">Días Trab.</th>
+              <th class="text-center">Vueltas Mes</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyModalRiesgo"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Flotilla Completa (Total) -->
+<div class="modal fade" id="modalTodas" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title font-weight-bold"><i class="fas fa-bus mr-2"></i>Resumen General de la Flotilla</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body p-0">
+        <table class="table table-striped mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th>N° Equipo</th>
+              <th>Placa</th>
+              <th class="text-center">Días Trab.</th>
+              <th class="text-center">Vueltas Mes</th>
+              <th class="text-center">Estado Asistencia</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyModalTodas"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Unidades Regulares / Óptimas (≥ 21 Días) -->
+<div class="modal fade" id="modalOptimas" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title font-weight-bold"><i class="fas fa-check-double mr-2"></i>Unidades con 21 o Más Días Trabajados</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body p-0">
+        <table class="table table-striped mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th>N° Equipo</th>
+              <th>Número Placa</th>
+              <th>Marca/Modelo</th>
+              <th class="text-center">Días Trab.</th>
+              <th class="text-center">Vueltas Mes</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyModalOptimas"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Unidades Sin Trabajo (0 Vueltas) -->
+<div class="modal fade" id="modalInactivas" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title font-weight-bold"><i class="fas fa-ban mr-2"></i>Unidades Sin Producción en el Mes (0 Vueltas)</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body p-0">
+        <table class="table table-striped mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th>N° Equipo</th>
+              <th>Número Placa</th>
+              <th>Marca/Modelo</th>
+              <th class="text-center">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyModalInactivas"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+        <!-- Tabla de Resultados -->
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2">
+            <h5 class="card-title mb-0 fs-6">
+              <i class="fas fa-chart-line mr-2"></i> Avance de Trabajo y Faltante por Unidad
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover table-striped align-middle mb-0" id="tablaRecorrido">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>Unidad / Placa</th>
+                    <th>Marca y Modelo</th>
+                    <th class="text-center">Días Trab.</th>
+                    <th class="text-center">Vueltas Mes</th>
+                    <th class="text-center">Faltan para Meta</th>
+                    <th style="width: 28%;">Progreso %</th>
+                    <th class="text-center">Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyRecorrido">
+                  <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                      <i class="fas fa-info-circle mr-1"></i> Seleccione un mes y presione "Consultar Recorrido".
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+$(document).ready(function () {
+// Arreglos globales para categorización exacta
+    let unidadesTodasGlobal = [];
+    let unidadesOptimasGlobal = [];     // >= 21 días
+    let unidadesRiesgoGlobal = [];      // < 21 días y > 0 vueltas
+    let unidadesInactivasGlobal = [];   // 0 vueltas / 0 días
+
+    const hoy = new Date();
+    const mesActual = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0');
+    $('#selectMes').val(mesActual);
+
+    cargarUnidades();
+
+    $('#formFiltroRecorrido').on('submit', function (e) {
+        e.preventDefault();
+        consultarRecorrido();
+    });
+
+    // Abrir modal de unidades activas
+    $('#btnVerActivas').on('click', function (e) {
+        e.preventDefault();
+        let html = '';
+        if(unidadesActivasGlobal.length === 0){
+            html = '<tr><td colspan="4" class="text-center text-muted p-3">No hay unidades activas registradas.</td></tr>';
+        } else {
+            unidadesActivasGlobal.forEach(function(item){
+                html += `<tr>
+                    <td><span class="badge bg-dark">Equipo ${item.numero_equipo}</span></td>
+                    <td><strong>${item.numero_placa}</strong></td>
+                    <td>${item.marca || ''} ${item.modelo || ''}</td>
+                    <td class="text-center text-success font-weight-bold">${item.total_vueltas_mes} vueltas</td>
+                </tr>`;
+            });
+        }
+        $('#tbodyModalActivas').html(html);
+        $('#modalActivas').modal('show');
+    });
+
+    // Abrir modal de unidades inactivas
+    $('#btnVerInactivas').on('click', function (e) {
+        e.preventDefault();
+        let html = '';
+        if(unidadesInactivasGlobal.length === 0){
+            html = '<tr><td colspan="4" class="text-center text-muted p-3">Todas las unidades han registrado trabajo.</td></tr>';
+        } else {
+            unidadesInactivasGlobal.forEach(function(item){
+                html += `<tr>
+                    <td><span class="badge bg-secondary">Equipo ${item.numero_equipo}</span></td>
+                    <td><strong class="text-danger">${item.numero_placa}</strong></td>
+                    <td>${item.marca || ''} ${item.modelo || ''}</td>
+                    <td class="text-center"><span class="badge bg-danger">0 Vueltas</span></td>
+                </tr>`;
+            });
+        }
+        $('#tbodyModalInactivas').html(html);
+        $('#modalInactivas').modal('show');
+    });
+
+    function cargarUnidades() {
+        $.ajax({
+            url: 'php_libs/soporte/Transporte/crud_transporteRecorrido.php',
+            type: 'POST',
+            dataType: 'json',
+            data: { accion: 'obtener_unidades' },
+            success: function (res) {
+                if (res.respuesta === true) {
+                    let options = '<option value="TODAS">-- Todas las Unidades --</option>';
+                    res.contenido.forEach(function (u) {
+                        options += `<option value="${u.id_}">Equipo N° ${u.numero_equipo} (Placa: ${u.numero_placa})</option>`;
+                    });
+                    $('#selectUnidad').html(options);
+                    consultarRecorrido();
+                } else {
+                    Swal.fire('Atención', res.mensaje, 'warning');
+                }
+            }
+        });
+    }
+
+
+// Evento Click: Card Celeste (Total)
+    $('#btnVerTodas').on('click', function (e) {
+        e.preventDefault();
+        let html = '';
+        if(unidadesTodasGlobal.length === 0){
+            html = '<tr><td colspan="5" class="text-center text-muted p-3">No hay unidades para mostrar.</td></tr>';
+        } else {
+            unidadesTodasGlobal.forEach(function(item){
+                let badgeEstado = '';
+                let dias = parseInt(item.dias_trabajados);
+                
+                if (parseFloat(item.total_vueltas_mes) === 0) {
+                    badgeEstado = '<span class="badge bg-danger">Sin Trabajo</span>';
+                } else if (dias < 21) {
+                    badgeEstado = '<span class="badge bg-warning text-dark">Baja Asistencia</span>';
+                } else {
+                    badgeEstado = '<span class="badge bg-success">Asistencia Óptima</span>';
+                }
+
+                html += `<tr>
+                    <td><span class="badge bg-dark">Equipo ${item.numero_equipo}</span></td>
+                    <td><strong>${item.numero_placa}</strong></td>
+                    <td class="text-center font-weight-bold">${item.dias_trabajados} días</td>
+                    <td class="text-center">${item.total_vueltas_mes} vueltas</td>
+                    <td class="text-center">${badgeEstado}</td>
+                </tr>`;
+            });
+        }
+        $('#tbodyModalTodas').html(html);
+        $('#modalTodas').modal('show');
+    });
+
+    // Evento Click: Card Amarilla (< 21 Días Trabajados)
+    $('#btnVerRiesgo').on('click', function (e) {
+        e.preventDefault();
+        let html = '';
+        if(unidadesRiesgoGlobal.length === 0){
+            html = '<tr><td colspan="5" class="text-center text-muted p-3">Todas las unidades activas alcanzaron o superaron los 21 días trabajados.</td></tr>';
+        } else {
+            unidadesRiesgoGlobal.forEach(function(item){
+                html += `<tr>
+                    <td><span class="badge bg-warning text-dark">Equipo ${item.numero_equipo}</span></td>
+                    <td><strong>${item.numero_placa}</strong></td>
+                    <td>${item.marca || ''} ${item.modelo || ''}</td>
+                    <td class="text-center text-danger font-weight-bold">${item.dias_trabajados} días</td>
+                    <td class="text-center font-weight-bold">${item.total_vueltas_mes} vueltas</td>
+                </tr>`;
+            });
+        }
+        $('#tbodyModalRiesgo').html(html);
+        $('#modalRiesgo').modal('show');
+    });
+
+// 1. Evento Click: Card Verde (Trabajaron >= 21 Días)
+$('#btnVerOptimas').on('click', function (e) {
+    e.preventDefault();
+    let html = '';
+    if (unidadesOptimasGlobal.length === 0) {
+        html = '<tr><td colspan="5" class="text-center text-muted p-3">Ninguna unidad alcanzó los 21 días trabajados en este periodo.</td></tr>';
+    } else {
+        unidadesOptimasGlobal.forEach(function (item) {
+            html += `<tr>
+                <td><span class="badge bg-success">Equipo ${item.numero_equipo}</span></td>
+                <td><strong>${item.numero_placa}</strong></td>
+                <td>${item.marca || ''} ${item.modelo || ''}</td>
+                <td class="text-center text-success font-weight-bold">${item.dias_trabajados} días</td>
+                <td class="text-center font-weight-bold">${item.total_vueltas_mes} vueltas</td>
+            </tr>`;
+        });
+    }
+    $('#tbodyModalOptimas').html(html);
+    $('#modalOptimas').modal('show');
+});
+
+// 2. Evento Click: Card Roja (Sin Trabajo / 0 Vueltas)
+$('#btnVerInactivas').on('click', function (e) {
+    e.preventDefault();
+    let html = '';
+    if (unidadesInactivasGlobal.length === 0) {
+        html = '<tr><td colspan="4" class="text-center text-muted p-3">Todas las unidades de la flota registraron trabajo en este periodo.</td></tr>';
+    } else {
+        unidadesInactivasGlobal.forEach(function (item) {
+            html += `<tr>
+                <td><span class="badge bg-danger">Equipo ${item.numero_equipo}</span></td>
+                <td><strong class="text-danger">${item.numero_placa}</strong></td>
+                <td>${item.marca || ''} ${item.modelo || ''}</td>
+                <td class="text-center"><span class="badge bg-danger">0 Vueltas / 0 Días</span></td>
+            </tr>`;
+        });
+    }
+    $('#tbodyModalInactivas').html(html);
+    $('#modalInactivas').modal('show');
+});
+
+
+// Modificar el éxito del AJAX dentro de consultarRecorrido()
+    function consultarRecorrido() {
+        let periodo = $('#selectMes').val();
+        let id_transporte = $('#selectUnidad').val();
+        let meta_vueltas = $('#numMeta').val();
+
+        Swal.fire({
+            title: 'Procesando consulta...',
+            text: 'Cruzando datos de transporte y producción...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        $.ajax({
+            url: 'php_libs/soporte/Transporte/crud_transporteRecorrido.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                accion: 'consultar_recorrido',
+                periodo: periodo,
+                id_transporte: id_transporte,
+                meta_vueltas: meta_vueltas
+            },
+            success: function (res) {
+                Swal.close();
+                if (res.respuesta === true) {
+                    unidadesTodasGlobal = res.contenido;
+
+                    // Clasificación para garantizar coincidencia de totales
+                    unidadesInactivasGlobal = res.contenido.filter(u => parseFloat(u.total_vueltas_mes) === 0);
+                    unidadesRiesgoGlobal = res.contenido.filter(u => parseFloat(u.total_vueltas_mes) > 0 && parseInt(u.dias_trabajados) < 21);
+                    unidadesOptimasGlobal = res.contenido.filter(u => parseFloat(u.total_vueltas_mes) > 0 && parseInt(u.dias_trabajados) >= 21);
+
+                    // Renderizar los valores exactos en los 4 Cards
+                    $('#lblTotalUnidades').text(unidadesTodasGlobal.length);
+                    $('#lblTotalOptimas').text(unidadesOptimasGlobal.length);
+                    $('#lblTotalRiesgo').text(unidadesRiesgoGlobal.length);
+                    $('#lblTotalInactivas').text(unidadesInactivasGlobal.length);
+
+                    renderTabla(res.contenido);
+                } else {
+                    Swal.fire('Información', res.mensaje, 'info');
+                }
+            },
+            error: function () {
+                Swal.fire('Error', 'Ocurrió un error en la comunicación con el servidor', 'error');
+            }
+        });
+    }
+
+    function renderTabla(datos) {
+        let html = '';
+
+        if (datos.length === 0) {
+            html = `<tr>
+                <td colspan="7" class="text-center text-warning font-weight-bold py-4">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i><br>
+                    No se registraron datos para los criterios seleccionados.
+                </td>
+            </tr>`;
+        } else {
+            datos.forEach(function (item) {
+                let colorBarra = 'bg-primary';
+                let insignia = '<span class="badge bg-warning text-dark"><i class="fas fa-clock mr-1"></i> En Proceso</span>';
+
+                if (parseFloat(item.porcentaje) >= 100) {
+                    colorBarra = 'bg-success';
+                    insignia = '<span class="badge bg-success"><i class="fas fa-check-circle mr-1"></i> Meta Alcanzada</span>';
+                } else if (parseFloat(item.porcentaje) < 50) {
+                    colorBarra = 'bg-danger';
+                }
+
+                html += `
+                    <tr>
+                        <td>
+                            <span class="badge bg-secondary mb-1"><i class="fas fa-bus mr-1"></i> Equipo ${item.numero_equipo}</span><br>
+                            <small class="font-weight-bold text-muted"><i class="fas fa-id-card mr-1"></i> Placa: ${item.numero_placa}</small>
+                        </td>
+                        <td>${item.marca || ''} ${item.modelo || ''}</td>
+                        <td class="text-center font-weight-bold text-secondary">${item.dias_trabajados} días</td>
+                        <td class="text-center font-weight-bold text-primary">${item.total_vueltas_mes} vueltas</td>
+                        <td class="text-center">
+                            <span class="font-weight-bold text-danger">${item.faltante_vueltas} vueltas</span><br>
+                            <small class="text-muted">(${item.faltante_porcentaje}% pendiente)</small>
+                        </td>
+                        <td>
+                            <div class="progress" style="height: 20px; border-radius: 10px; font-weight: bold;">
+                              <div class="progress-bar ${colorBarra} progress-bar-striped progress-bar-animated" 
+                                   role="progressbar" 
+                                   style="width: ${item.porcentaje > 100 ? 100 : item.porcentaje}%" 
+                                   aria-valuenow="${item.porcentaje}" 
+                                   aria-valuemin="0" 
+                                   aria-valuemax="100">
+                                ${item.porcentaje}%
+                              </div>
+                            </div>
+                        </td>
+                        <td class="text-center">${insignia}</td>
+                    </tr>
+                `;
+            });
+        }
+        $('#tbodyRecorrido').html(html);
+    }
+});
+</script>
+{% endblock %}
